@@ -160,6 +160,8 @@ This downloads three models from HuggingFace:
 | BGE-Reranker | `BAAI/bge-reranker-base` | `models/reranker/bge-reranker-base` | Cross-encoder reranking |
 | stsb-RoBERTa-large | `sentence-transformers/stsb-roberta-large` | `models/router/stsb-roberta-large` | Router query encoding |
 
+> **Note**: Model download requires internet access to HuggingFace and needs about 3.5 GB of disk space. If your network is restricted, you may need a proxy or mirror.
+
 ### 4. Configure API Keys
 
 Create a `.env` file in the project root:
@@ -167,10 +169,14 @@ Create a `.env` file in the project root:
 ```env
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 
-# For LLM evaluation (optional)
+# Required for evaluation with MiniMax
 OPENAI_API_KEY=your_minimax_api_key_here
 OPENAI_BASE_URL=https://api.minimaxi.com/v1
 ```
+
+> **Note**:
+> - `DEEPSEEK_API_KEY` is required for web/CLI question answering.
+> - If you want to run the evaluation pipeline, you also need to configure the MiniMax API credentials above.
 
 ### 5. Build Index (if starting from parsed PDFs)
 
@@ -180,9 +186,17 @@ python rebuild_index.py
 
 This processes `parsed_pdf/*.json` → multi-granularity chunking → BGE-M3 embedding → FAISS index.
 
+> **Note**: Building the FAISS index usually takes about 5-10 minutes depending on your hardware.
+
 ---
 
 ## Quick Start
+
+Before running the system, make sure you have:
+- Python 3.10+
+- Internet access for model download
+- A DeepSeek API key in `.env`
+- A CUDA-compatible GPU for better performance (CPU-only is supported but slower)
 
 ```bash
 # Start the web interface
@@ -190,6 +204,8 @@ python web_app.py
 
 # Open http://127.0.0.1:5000 in your browser
 ```
+
+> **Note**: The first run may take longer because models and indexes need to be loaded into memory.
 
 ---
 
@@ -219,6 +235,13 @@ python final_pipeline.py
 Interactive CLI with step-by-step pipeline logging. Type your question and press Enter. Type `q` to exit.
 
 ### Evaluation Pipeline
+
+If you want to run evaluation, make sure your `.env` file includes the MiniMax API configuration:
+
+```env
+OPENAI_API_KEY=your_minimax_api_key_here
+OPENAI_BASE_URL=https://api.minimaxi.com/v1
+```
 
 Run the full 4-step evaluation:
 
