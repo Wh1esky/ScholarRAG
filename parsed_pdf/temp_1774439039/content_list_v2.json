@@ -1,0 +1,3366 @@
+[
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                176,
+                109,
+                795,
+                131
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Peter Humphreys 1 David Raposo 1 Toby Pohlen 1 Gregory Thornton 1 Rachita Chhaparia 1 Alistair Muldal 1 Josh Abramson 1 Petko Georgiev 1 Adam Santoro 1 Timothy Lillicrap 1 "
+                    }
+                ]
+            },
+            "bbox": [
+                91,
+                176,
+                875,
+                209
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Abstract "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                241,
+                234,
+                320,
+                250
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "It would be useful for machines to use computers as humans do so that they can aid us in everyday tasks. This is a setting in which there is also the potential to leverage large-scale expert demonstrations and human judgements of interactive behaviour, which are two ingredients that have driven much recent success in AI. Here we investigate the setting of computer control using keyboard and mouse, with goals specified via natural language. Instead of focusing on hand-designed curricula and specialized action spaces, we focus on developing a scalable method centered on reinforcement learning combined with behavioural priors informed by actual human-computer interactions. We achieve state-of-the-art and humanlevel mean performance across all tasks within the MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "benchmark, a challenging suite of computer control problems, and find strong evidence of cross-task transfer. These results demonstrate the usefulness of a unified human-agent interface when training machines to use computers. Altogether our results suggest a formula for achieving competency beyond "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b ^ { + + } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and towards controlling computers, in general, as a human would. "
+                    }
+                ]
+            },
+            "bbox": [
+                117,
+                261,
+                444,
+                638
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1. Introduction "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                86,
+                672,
+                217,
+                686
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Recent work on natural language (Brown et al., 2020; Rae et al., 2021), code production (Chen et al., 2021), and multimodal interactive behaviour in 3D simulated worlds (Deep-Mind Interactive Agents Team, 2021) has produced models with remarkable expressivity, context awareness, and general knowledge. This research is a striking demonstration of the power of two ingredients: a rich, compositional output space that is congruent between machines and humans, "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                698,
+                475,
+                819
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "1DeepMind, London, United Kingdom. Correspondence to: Peter Humphreys <peterhumphreys@deepmind.com "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": ">"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", Timothy Lillicrap <countzero@deepmind.com>. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                828,
+                475,
+                868
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "and large amounts of human data and judgements to inform machine behaviour. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                236,
+                885,
+                266
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "One domain that has these two ingredients but has received relatively less attention is digital device control (Shi et al., 2017; Liu et al., 2018; Nakano et al., 2021; Chen et al., 2021; Shvo et al., 2021; Li et al., 2020; Toyama et al., 2021; Gur et al., 2021), which comprises the use of digital devices to accomplish a myriad of inherently useful tasks. Because of its near exclusive use of digital information, this domain scales well in regards to data acquisition and parallelization of control (compared to, say, robotics or fusion reactors). It also combines diverse, multimodal inputs with expressive, composable, and human-compatible affordances. In this work we focus on computer control using keyboard and mouse, with pixel and Document Object Model (DOM) observations. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                273,
+                887,
+                484
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "A useful benchmark for initial investigations of computer control is the MiniWob++ task suite (Shi et al., 2017; Liu et al., 2018), which comprises a set of instruction following tasks that require clicking, typing, form-filling, and other such basic computer interactions (Fig. 1b). MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "further provides programmatically defined rewards. These tasks are a first step towards more open-ended human-agent interactions in which a human specifies a task using natural language and provides subsequent judgement about performance (Li et al., 2016; Ammanabrolu et al., 2020; DeepMind Interactive Agents Team, 2021). "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                492,
+                888,
+                659
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We focus on training agents to solve these tasks using methods that can in principle apply to any task one hopes to perform on a digital device, and that have desirable data- and compute-scaling properties. We therefore turn to a straightforward combination of reinforcement learning (RL) (Sutton and Barto, 2018) and behavioural cloning (BC) (Pomerleau, 1989), the latter of which is aided by an alignment between human and agent action spaces (i.e. keyboard and mouse). This is a combination that was proposed at MiniWob’s conception (Shi et al., 2017), but was not found at the time to produce high-scoring agents. Subsequent work consequently attempted to improve performance by giving agents access to DOM-specific actions (Liu et al., 2018; Gur et al., 2018; Jia et al., 2019), curricula (Gur et al., 2018), and through constrained exploration techniques that reduce the "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                666,
+                888,
+                893
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "arXiv:2202.08137v2 [cs.LG] 11 Nov 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                22,
+                258,
+                57,
+                705
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "number of actions available at each step using curated guidance (Liu et al., 2018). Revisiting the simple and scalable combination of imitation and reinforcement learning, we find that the primary missing factor in achieving high performance is simply the size of the human trajectory dataset used for behavioural cloning. Performance increases reliably with increasing amounts of human data, with continuing improvements observed for datasets of up to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "4 0 0 \\times"
+                    },
+                    {
+                        "type": "text",
+                        "content": "the size of those used in previous studies. Our results using this data surpass previous state-of-the-art performance by a wide margin, and are even able to achieve human-level mean performance across the task suite. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                85,
+                475,
+                265
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2. Methods "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                285,
+                184,
+                301
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.1. MiniWob++ "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                311,
+                205,
+                324
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is a suite of web-browser based tasks introduced in Liu et al. (2018) (an extension of the earlier Mini-Wob task suite (Shi et al., 2017)). Tasks range from simple button clicking to complex form-filling, for example, to book a flight when given particular instructions (Fig. 1a). Programmatic rewards are available for each task, permitting standard reinforcement learning techniques. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                334,
+                475,
+                441
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Previous work on MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "has considered architectures that have access to DOM-specific actions (Liu et al., 2018; Gur et al., 2018; Jia et al., 2019), allowing agents to directly interact with a DOM element (even if it is not actually visible) as opposed to needing to use a mouse or keyboard to navigate to it. We choose instead to use only mouse and keyboard based actions. This simplifies the use of human behavioural data, and we further hypothesise that this interface will better transfer to computer control tasks without a compact DOM to interact with (and non web-browser based tasks). Finally, many "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { M i n i W o b { + + } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "tasks require clicking or dragging actions that cannot be achieved with DOMelement based actions (see examples in Fig. 1b). "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                448,
+                477,
+                645
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In common with previous "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "studies (Liu et al., 2018; Gur et al., 2018; Jia et al., 2019), we give our agent access to an environment-provided dictionary of text strings that must be inputted to a given task’s input fields (see Appendix Fig. 9 for an example). This helps to avoid the exploration problem of learning a generative text model from only sparse RL inputs. Interestingly, as we discuss in Sec. 3.4, the agent is able to achieve state-of-the-art performance even without this input. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                652,
+                475,
+                787
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The MiniWob environment is realtime, which introduces technical and algorithmic complications. For example, there are no guarantees about how actions lead to observations temporally – observations may be influenced by lag due to competition over a computer’s resources. For the human participants providing demonstration data, we ensure sufficient resources on the server running the environment to "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                795,
+                475,
+                901
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2f93741a7c47677d195962f93ba4c010bbceebd02c18ac9b610134733089d3ee.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                506,
+                82,
+                861,
+                429
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/09ecd39cf9ad3d2aa3eb72cdb844385c9cdce9287f600d6d64cbe1734b8568e0.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 1. Computer Control Environment running Mini-"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { W o b + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Both humans and agents control computers using a keyboard and mouse, with humans providing demonstrative behaviour used for behavioural cloning, and agents trained to mimic this behaviour or to behave in pursuit of reward. Humans and agents attempt to solve the "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b ^ { + + } }"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "task suite, which comprises instruction-following tasks requiring clicking, typing, dragging, form-filling, and other such basic interactions (depicted is the “book-flight” task). b) Examples of MiniWob tasks requiring different forms of interaction. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                506,
+                431,
+                872,
+                578
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "minimize temporal jitter on the local machine, on which we sync observations and actions at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 0 \\mathrm { H z }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". For agents, any temporal jitter is sure to be different than that experienced by humans. Nevertheless, most MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "tasks are relatively time insensitive, and our results demonstrate that the mismatch is not problematic in practice. Moreover, we found that actively manipulating the demonstration data to remove steps without actions (an operation that will only serve to exaggerate the differences in timings) gave the best results. As in previous studies, our human and agent scores "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                753,
+                887,
+                905
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "are not discounted by time to completion. "
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                85,
+                359,
+                99
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.2. Environment Interface "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                88,
+                117,
+                277,
+                130
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Agents need a suitable interface for transmitting and receiving observations and actions if they are to use computers as humans do. The original MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "task suite is supplied with a Selenium-based interface (Liu et al., 2018). We decided to implement an alternative environment stack designed to flexibly support any task that can be achieved in a web browser. This interface is optimised from the ground up for security, features, and performance (Fig. 1a). "
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                141,
+                473,
+                260
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Security. We run the web browser (Google Chrome in our case) in a Sandbox2 (GitHub Repository) container, which provides a chroot jail and restricts access to any system calls that could be used to compromise the host system. We further reroute all network traffic to a local host-side socket using a TCP proxy server. This gives us precise control over the content that can be accessed from within the browser. Not only are these security features important for safe agent-environment interactions, they also simplify recording demonstration data on publicly available systems such as Amazon Mechanical Turk, because neither humans nor agents should be able to use the browser itself to attack the host system or any network resources. "
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                277,
+                473,
+                472
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The original MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "environment implementation accesses the internal browser state and issues control commands via Selenium. We instead interface directly with the Chrome DevTools Protocol (CDP) to retrieve browserinternal information such as the DOM tree and execute developer-provided JavaScript code on a page. We access the CDP via file descriptors that are passed to the browser at start-up time. We do this to minimize the attack surface and follow the security recommendations provided by the web driver authors (ChromeDriver Security Considerations). "
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                481,
+                473,
+                631
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Features. We want our agents to be able to interact with a standard web browser via the same controls used by human desktop users. To achieve this, our environment connects directly to an X11 server to input mouse and keyboard controls as well as retrieve the current frame buffer. This minimises domain shift between human and agent environment interactions, which is a challenge for the original Selenium interface. For example, mouse dragging actions are difficult to implement in Selenium. "
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                648,
+                473,
+                784
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Working with X11 has other key advantages: (1) agents can potentially interact with the full browser (including tabs and the address bar), (2) recording first-person demonstration data at scale is easy due to close human and agent environment equivalence, and (3) we can render the contextsensitive system mouse cursor. "
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                792,
+                473,
+                881
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We implemented our entire environment stack in "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { C } { + } { + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "to en-"
+                    }
+                ]
+            },
+            "bbox": [
+                88,
+                890,
+                473,
+                904
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "able low latency interactions. This is particularly important when recording demonstrations, as accurate mouse cursor movements are difficult if the total input-latency is too high. "
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                85,
+                885,
+                128
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.3. Agent Architecture "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                501,
+                147,
+                663,
+                161
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Ultimately we found it to be unnecessary to implement specialised DOM-processing architectures based on, for example, graph nets (Jia et al., 2019). Instead, motivated by recent work on multimodal architectures, we applied minimal modality-specific processing, primarily relying on a multimodal transformer to flexibly attend to relevant information, as described below and in Fig. 2. "
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                170,
+                885,
+                275
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Perception. The agent receives visual inputs "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( 1 6 5 \\mathrm { x } 2 2 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "RGB pixels) and language inputs (an example input is shown in Appendix Fig. 9). The pixel inputs pass through a series of four ResNet blocks, with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 \\times 3"
+                    },
+                    {
+                        "type": "text",
+                        "content": "kernels, strides of 2, 2, 2, 2, and an increasing number of output channels (32, 128, 256, 512). This results in "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 4 \\times 1 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "feature vectors, which we flatten into a list of 154 tokens. "
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                296,
+                885,
+                401
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The three types of language inputs – task instruction, DOM, and task fields (the last only used for the policy) – are processed using the same module: each text string is split into tokens, with each token mapped to a size 64 embedding by indexing a learnable embedding table using a vocabulary of 370 words. We reserve an additional 1000 indexable embeddings for input words that fall outside the vocabulary. For these words, an index is calculated using a 64-bit hash function with the output reduced to an integer between 370 and 1369. Using a 1-layer transformer with 4 heads (“language transformer”) we attend over the token embeddings of each individual string to produce a single 512-dimensional embedding using cross attention – the token embeddings are used to generate keys and values, with an extra learnable embedding used as a query. The extra learnable embeddings provide input-independent components to the attention. This is analogous to the special “CLS” tokens used in BERT (Devlin et al, 2018) whose outputs can be directly used as an aggregate output of the transformer. "
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                409,
+                885,
+                696
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Multimodal integration and memory. The visual input embeddings, the language embeddings produced from DOM and task instructions, and two extra learned embeddings are fed into a multimodal transformer with 8 layers, 8 heads, and a 512 dimensional embedding. "
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                717,
+                885,
+                791
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The processed outputs corresponding to the extra embeddings are concatenated with the result of a feature-wise mean pooling operation across the remaining outputs and an embedding of the previous action. The resulting 1536- dimensional vector is input to a dual-layer LSTM with 512 hidden units per layer. Residual connections bypass each LSTM layer. "
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                800,
+                885,
+                904
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8f6447335393e722449c68e57951ea899de5eee32dc4d01b5921eb0a96166b69.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 2. The Computer Control agent architecture (CC-Net). Pixel inputs are encoded by 4 ResNet blocks; language inputs (task instruction and DOM) are encoded via cross-attention. An 8-layer multimodal transformer combines pixel and language embeddings, whose output is concatenated with an embedding of the previous action and passed through 2 LSTMs. The agent produces 4 outputs: action type, cursor coordinates, keyboard-key index, and task-field index (which allows the agent to choose one of the task field strings to emit). All outputs are produced via linear transformations, with the exception of the task-field index, whose logits are produced via an attention-based policy. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                88,
+                80,
+                888,
+                303
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We have not run LSTM ablations in the final configuration, but earlier tuning showed that a dual-layer LSTM improved performance relative to a single-layer LSTM or to a feedforward architecture. It may be that this is due to the increased parameter count associated with the dual layer LSTM, as we did not control for this in our tuning. We note that there are some tasks for which memory is especially useful, such as those with moving elements. "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                421,
+                475,
+                542
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Policy. The agent’s policy consists of 4 outputs: the action type, cursor coordinates, keyboard-key index and task-field index. Each output is modeled by a single discrete probability distribution, except for cursor coordinates which are modeled by two discrete distributions (for height and width coordinates), dividing each dimension into 51 bins. This is the only policy component that is auto-regressive, with the height coordinate conditioned on the width coordinate. "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                558,
+                473,
+                679
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The action type is chosen from a set of 10 possible actions, which includes a no-op (indicating no action), 7 mouse actions (move, click, double click, press, release, wheel up, wheel down), and two keyboard actions (key press, emit text). The key press action is used to emit a keyboard key or one of a set of small macros (such as "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { C T R L + C }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", full list in Appendix Table 2). The emit text action can be used to emit a string given by one of the MiniWob “task-field” observations. "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                686,
+                475,
+                821
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Sampling of the remaining policy outputs is dependent on which action type was chosen – i.e. cursor coordinates are sampled if move mouse was chosen; a task-field index is sampled if emit text was chosen (to determine which taskfield string to emit); a keyboard-key index is sampled if key "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                829,
+                475,
+                906
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "press was chosen (to determine which key to emit). "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                422,
+                836,
+                436
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The logits for the action-type, cursor coordinates and keyboard-key index distributions are produced via linear transformations, whereas the logits for the task-field index are produced via dot-product attention. This attention policy works as follows: we first use a linear output to produce a query. A separate linear transformation is used to produce keys from the embeddings of the available task fields. The logits are the attention weights that result from the dotproduct between query and keys, followed by a softmax. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                444,
+                887,
+                582
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In the ablation experiments in Section 3.4, we use two alternative action types which allow the agent to act directly on the DOM – DOM click, for triggering a click on a specific DOM element, and DOM emit text, for directly writing a task-field string into a specified DOM element (i.e. in this macro-action a DOM element is focused on and then text is emitted into it). These actions require an additional policy output (DOM element index) to determine which DOM element to click. This was produced using an attention policy as described above, but with attention over DOM element embeddings. For the DOM emit text action, we reused the task-field index output to determine which text string to emit. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                588,
+                888,
+                784
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.4. Human Data Collection "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                496,
+                801,
+                697,
+                815
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Given that agents and humans use the same interface, the use of human demonstrations was considered in the original MiniWob publication (Shi et al., 2017). However, only 17 hours of human data were collected for that study (with pure behavioural cloning policies only solving "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "more tasks "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                824,
+                887,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "compared to a random policy), with a further 1000 demonstrations per task for a handful of tasks utilised in the later "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "paper (Liu et al., 2018). Given recent trends that indicate the effect of data scaling on performance (Deep-Mind Interactive Agents Team, 2021; Kaplan et al., 2020, e.g.), it is natural to revisit the use of human demonstrations in larger quantities. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                84,
+                475,
+                191
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We collected over 2.4 million demonstrations of the 104 MiniWob++ tasks from a total of 77 human participants, which amounts to approximately 6300 hours. Participants were recruited via a crowdsourcing data collection platform and paid a fixed hourly rate. Human data-collection was subject to an ethical review process. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                196,
+                473,
+                289
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Humans can perform many of the MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "tasks well without practice. However a subset require practice, learning of specialized knowledge (e.g. POSIX terminal commands), understanding small amounts of ambiguity in the intent of the templated goal, or adjusting to timing or lag. Accordingly, we observed human performance increased as they practiced (data not shown), and as described below, unsuccessful trajectories were filtered out of the dataset. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                296,
+                475,
+                417
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.5. Training "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                433,
+                181,
+                448
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We trained agents using a straightforward mixture of imitation learning (behavioural cloning (BC) (Pomerleau, 1989)) and reinforcement learning (RL) (using the VMPO algorithm (Song et al., 2019)), which is a combination that has been largely successful in many challenging domains (Silver et al., 2016; Vinyals et al., 2019; Stiennon et al., 2020; Liu et al., 2018; Shi et al., 2017). Training hyper-parameters are provided in Appendix Table 1. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                455,
+                475,
+                578
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "To combine imitation and reinforcement learning one can: (1) Co-train from scratch with a weighted mixture of the two losses; (2) Pre-train using BC and subsequently tune with RL, with or without divergence penalties back to the BC policy (Vinyals et al., 2019, e.g.). In our work we consider the former with equal weighting to the BC and RL losses, though we have early evidence that pre-training with BC may improve the efficiency of learning (data not shown). "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                585,
+                473,
+                707
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Before being used for BC, our human demonstration data was split into train and test sets (2.2 million & 310 thousand episodes respectively). These episodes were further filtered by success; that is, tasks where the final reward was less than 0.5 were removed "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( \\sim 5 \\% )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Additionally, we cleave “noop” steps from the demonstrations, which are steps where humans did not act, up to a maximum of 10 consecutive steps. Agents were trained indiscriminately on this data: all tasks were co-trained, using uniform sampling across demonstrations, which might introduce slight asymmetries across task representations depending on the data collected, the filtering procedure, and the length of the demonstrations. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                713,
+                475,
+                893
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/14e3e6d30fce322cbced4e0ddaa2ad8397e566628f2417a266687997c7d6b21c.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 3. Mean performance across MiniWob++ tasks. Shown are previously published MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "results (Shi et al., 2017; Liu et al., 2018; Gur et al., 2018; Jia et al., 2019), which each only report performance for a subset of tasks (for these results the performance on non-reported tasks is set to zero, all scores used are given in Appendix Table 3). In order to make a fair comparison, we combine the best external results for each task into aggregated external SotA scores, reporting those obtained both with and without additional augmentations (we filter the 16 out of 104 tasks without external scores from our corresponding results). Our agent, CC-Net, outperforms these results by a large margin, and matches mean human performance. We achieve this without using environment augmentations. Instead, we find that the combination of BC and RL is crucial to CC-Net performance; BC- and RL-only training are less effective. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                501,
+                84,
+                883,
+                204
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We choose to co-train on all tasks for two reasons. First, we find that there is a significant transfer effect, with training being more efficient per frame of each task seen for cotraining (see Sec. 3.2). Second, our ultimate objective is a generally useful agent, and we therefore require one agent with as many capabilities as possible. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                450,
+                885,
+                542
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Finally, due to the computational requirements of our agents, tuning was done by hand based on a limited number of experiments. We were furthermore only able to run one seed for each of the conditions that we report in this paper. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                549,
+                885,
+                609
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3. Results "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                496,
+                630,
+                584,
+                643
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.1. Human-Level Performance on MiniWob++ "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                496,
+                655,
+                830,
+                669
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "It is challenging to directly compare our performance to the previous literature, as papers have typically only tackled a subset of the "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "tasks. We therefore take the best published performance on each individual task, and use this aggregated performance as a comparison for our agent (we perform separate aggregations for both with and without curricula or other augmentations). Our agent exceeds this SotA benchmark performance by a wide margin (Fig. 3, a per-task comparison to external SotA is reported in Appendix Fig. 11). In addition, we find that our agent achieves human-level mean performance across the suite of MiniWob "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "tasks. This performance is enabled by our combination of BC and RL co-training – as shown in Fig. 3, ablations without both training signals perform much worse. Fig. 6 shows frames of a successful agent trajectory on the "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                678,
+                885,
+                905
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/9e0743470fde55177b69ffdebe69e686c46ea38004474a93916242bd4d009b4b.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                84,
+                82,
+                625,
+                287
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/7f1c99681fba2da28c36ce22f9ab891e85076e0abb54a194bea8bf6791cd5058.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 4. Per-task comparison of CC-Net and human performance. a) On a small number of tasks humans (green) perform better than our agent (blue), and vice versa. For the large majority, performance differences are minimal, as both humans and agents solve the tasks nearly perfectly (see Appendix Fig. 10 for all tasks). b) Depicted in the scatter-plot on the right are performance scores for all 104 tasks save for three outliers (the polar extremes of the bar plot where one of human or agent scores are "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "< 0 . 7 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "). "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                614,
+                82,
+                880,
+                281
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/7acdf6f3c63cdc227d1f6d5b63a2ca9c5f719313945fe1650d36e8b182b93d2e.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 5. Comparison between single and multi-task training. Co-training on all 104 MiniWob tasks is significantly more data efficient than training on each task individually, providing evidence of transfer between tasks. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                109,
+                376,
+                444,
+                530
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "challenging task book-flight. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                626,
+                313,
+                642
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Examining our performance across the task suite in detail, we find that, while our mean score matches mean human performance, there are tasks for which humans significantly out-perform our agent (Fig. 4). In particular, our agent fails to get any score for two tasks: simon-says, and terminal. simon-says is challenging even for humans. It requires remembering a random sequence of button pushes, and then repeating this sequence back. Our agent observes the environment at about 2Hz, meaning that it frequently misses the presentation of at least one button in the sequence. terminal involves using a Unix terminal to search for and delete a file. Human participants required training to perform this task before they achieved high performance, as most had no experience with a Unix terminal. Further investigation is needed to understand why our agent fails to get any score on this task, especially given that it is able to solve "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                648,
+                475,
+                905
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "related key-pressing tasks such as text-transform, simple-arithmetic and enter-text-2 (see Appendix Fig. 12 for the histogram of key presses for 100 episodes of text-transform). There are a few tasks for which our agent performs significantly above mean human performance. The biggest performance gap is for the moving-items task where human participants rarely succeeded at all, most likely due to network-related control latency. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                376,
+                888,
+                512
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.2. Task Transfer "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                496,
+                527,
+                629,
+                541
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We find that, with a fixed budget of training steps per task, training one agent on all "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 0 4 \\mathrm { M i n i W o b } \\substack { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "tasks leads to a strong boost in performance compared to training separate agents on each task (Fig. 5). In order to compare these training regimes, we measured performance for each task expressed as a function of frames consumed on that individual task. The plot shows the average across all tasks. These results provide a promising hint of the potential of such a unified control interface to support generalisation across a diverse range of human tasks. Similar results were found on a smaller scale (training on 9 tasks simultaneously) in Jia et al. (2019). "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                551,
+                887,
+                733
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.3. Scaling "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                496,
+                750,
+                584,
+                763
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The size of the human trajectory dataset is a crucial factor in agent performance (Fig. 7). Using 1/1000 of the dataset, which roughly corresponds to 6 hours of data, leads to rapid overfitting and no significant gain over RL only performance. We see continuing performance gains as we increase the amount of data from this baseline over three orders of magnitude up to the full dataset size. We note that higher performance at these dataset sizes could be possible "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                773,
+                887,
+                893
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/be08f6573f4231f30b9fdf5e897b6a7877098a207abb1c7f664924f314cc429b.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 6. Selected steps from a successful agent trajectory on book-flight. This task has over 1.9 billion possible permutations, representing a significant exploration challenge for pure reinforcement learning. We find that the combination of BC & RL is sufficient to solve it, demonstrating the utility of using human data to shape behavioural priors. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                86,
+                80,
+                888,
+                195
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/756928f8aa50124a31c48479e58bb825c698a323b6bfa543a177c01c1c18ab7f.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                119,
+                273,
+                434,
+                395
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8f2cc315b06b3771639f27833ffd2d162b301ea5e8d87d43258ceca203b01d13.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 7. Agent performance for varying dataset sizes: a) Performance at 2 billion frames for BC & RL co-training using different dataset sizes. Also shown are maximum BC-only training performances. b) Corresponding log probabilities for agent predictions of human actions on train (solid) and validation (dashed) trajectories under BC & RL co-training. As can be seen, significant overfitting occurs for smaller dataset sizes. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                117,
+                396,
+                434,
+                536
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "with changes in algorithm or architecture. For example, as we reduced the dataset size, we simply reduced the relative weight of the BC loss (scaled by the square root of the relative size) to slow overfitting, when it may in fact be more effective to instead use a KL divergence penalty to a pre-trained BC-only policy that is trained to the point of minimum validation loss. Nevertheless, the research and experimentation costs required to explore avenues that afford efficiency gains in low data-regimes should be balanced with the simplicity of collecting more data. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                684,
+                475,
+                835
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.4. Input and Output Ablations "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                851,
+                316,
+                867
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Our agent consumes both pixel and DOM information, and can be configured to support a range of different possible "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                875,
+                473,
+                906
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "actions. We perform ablations to understand the importance of these different architectural choices. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                273,
+                883,
+                303
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We first ablate the different agent inputs (Fig. 8a). Our current agent configuration is strongly reliant on DOM information, with a "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "7 5 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "drop in performance if this input is removed. In contrast, the agent is less sensitive to operating without visual information. This is even the case for tasks that require processing of a “canvas” with shapes and lines. An inspection of the DOM shows that, for "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { M i n i W o b { + + } }"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", this canvas is cleanly represented within the DOM, making such information available to the agent even without pixel information. This would not be the case for more general computer control tasks, pointing to the importance of improving our agent’s pixel-only performance. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                311,
+                887,
+                492
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In Fig. 8b we show an ablation in which we remove the agent’s ability to use the text input choices (task fields) given by the environment. Interestingly, such an agent is still able to solve tasks involving form filling, however, it learns from human trajectories to do this by highlighting text, and then dragging this to the relevant text box. Notably, this dragging action would not be straightforward for agents to achieve in the original Selenium version of the environment. "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                500,
+                885,
+                621
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We further show an ablation in Fig. 8b in which the agent uses alternative actions that interact with a specified DOM element (described in Section 2.3). This means that the agent is unable to solve tasks that involve clicking at a specific location within a canvas, dragging, or highlighting. As we did not optimise for this agent architecture, there is a significant mismatch between our recorded human trajectories and the actions available to the agent. During imitation learning, we simply ignore these actions, but this nonetheless leads to the agents being nudged towards trajectories that are not necessarily optimal for DOM-based actions. In an additional experiment, we found that augmenting our original action set with DOM-based actions did not lead to a boost in performance over the baseline (data not shown). "
+                    }
+                ]
+            },
+            "bbox": [
+                495,
+                628,
+                887,
+                840
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2dab79e01dd586d0318319985e1658e165ab315d931d2b6862fe5288a90b5982.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                102,
+                82,
+                276,
+                203
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/b6bda9f11dbaeee20eb9478f7c0deba35b416f979c7bae8e921d69339e2db415.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 8. Ablations. a) Agent input ablations: Removing the DOM input observation leads to a large drop in performance, while removing the pixel observation is less deleterious. b) Output ablations: The agent is surprisingly effective without text input choices (task fields) provided by the environment. This is because it is able to learn to use the mouse to copy the text from the prompt into the required input field. Using an action space in which the agent interacts with specified DOM elements directly is less effective than our baseline mouse and keyboard actions. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                277,
+                80,
+                454,
+                218
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4. Discussion, Limitations, & Related Work "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                388,
+                452,
+                405
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Device assistance. Creating agents that effectively assist us on our digital devices requires: (1) understanding human intent, language, and judgement, and (2) the ability to turn language-specified goals into actions on a device. The MiniWob++ benchmark (Liu et al., 2018) serves as a jumping off point for studying the second requirement: agents must turn language goals into actions for a modern web browser. While we show that deep reinforcement learning, augmented with human data, is well positioned for solving this issue, the "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "benchmark hides the complexity of the first requirement; work remains to tackle (1) and (2) in concert to produce useful agents on our devices. "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                414,
+                475,
+                597
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { M i n i W o b + + }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "prescribes goals via natural (but scripted) language that is precisely mapped to reward outcomes by code, putting aside the difficulties of dealing with human intent, language, and preferences. Reward information is thus lownoise, undelayed, and available in large quantities. Recent work has studied how to align RL agents with the complexity of human preferences and human language. For example, Christiano et al. (2017) trained agents via reinforcement learning and using reward grounded in human feedback to play Atari and perform motor control tasks. Interest in human alignment has accelerated (Wirth et al., 2017; Ibarz et al., 2018), and spread to a variety of domains, including dialogue agents (Jaques et al., 2019). In parallel, large-scale language models built on the Transformer architecture (Vaswani et al., 2017) have revolutionized our capacity to build agents that consume and generate natural language. GPT-3 (Brown et al., 2020) and related work (Shoeybi et al., 2019; Rae et al., 2021) has shown that pretraining on vast quantities of human generated text creates models that are fast and flexible learners for a dizzying array "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                603,
+                477,
+                906
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "of language understanding tasks. A recent language model called Codex (Chen et al., 2021) has shown the potential of these “foundation models” (Bommasani et al., 2021) for connecting natural language intent with our computers by fine-tuning models on publicly available code. "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                84,
+                885,
+                161
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "A growing body of work has begun to connect these pieces: Ammanabrolu et al. (2020) build agents that both act and communicate in pursuit of goals in a crowd-sourced fantasy text-game. They incorporate large language models and human demonstrations to derive agents that can act and speak to effectively pursue goals. DeepMind Interactive Agents Team (2021) use human demonstrations and judgement to construct agents that are responsive to human language and intent in a 3D game environment. Most relevant here, WebGPT (Nakano et al., 2021) builds on large-scale language modelling results to create a browserassisted question-answering agent that is enhanced by human feedback. This agent acts on the internet using a bespoke text interface which allows it to search, follow links, and quote sources. By using the internet, the agent improves its question-answering capacities, as judged by human participants. "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                167,
+                888,
+                425
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Data. Approximately "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "4 0 0 \\times"
+                    },
+                    {
+                        "type": "text",
+                        "content": "more data than was initially collected (Shi et al., 2017) is required for achieving humanlevel performance. While this is a lot in comparison to the initial collection, it is also a one-time cost, and is orders of magnitude smaller than recent datasets used for language modeling, for example. Moreover, the costs associated with the experimentation of new algorithms and architectures that work well on lower amounts of data can very quickly swamp those required for simply collecting more data. "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                441,
+                888,
+                580
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "One might worry that our dataset exhausts every possible permutation of MiniWob++ task presentation, rendering the task of “solving” tasks to simple memorization. However, this is far from true since the possible permutations of taskpresentation vastly exceeds the amount of data we collected for it. Moreover, there is natural variance embedded in the environment, including, for example, initial mouse cursor location. Finally, the significant difference between individual versus multi-task training suggests that there are many tasks for which transferable skills can be gained from other tasks, which would likely not be the case if each task was solved by simply memorising its required outputs. "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                585,
+                888,
+                767
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Performance. There are a number of unexplored approaches that might improve performance. For example, we could skew the presentation of behavioural cloning data so that harder tasks are over-represented. Or, we could tune the RL and BC objectives, perhaps using BC pre-trainined and a decaying KL-penalty back towards the BC policy during RL (Vinyals et al., 2019). Nevertheless, part of the goal of this work was to show the effectiveness of a straightforward "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                785,
+                888,
+                906
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "technique, executed with minimal bells-and-whistles. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                85,
+                437,
+                99
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "While our approach does not lie on the cutting edge of algorithmic novelty, it provides a resolution to a concrete hypothesis introduced in the original MiniWob work; namely, the effectiveness of deep RL methods for solving tasks on a computer involving keyboards and mice. Indeed, examining the literature in this space would suggest that conventional approaches are inadequate, and more specialized techniques are needed. We have shown this to not be the case, so long as one appreciates the role of demonstration data in augmenting standard deep RL techniques. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                107,
+                475,
+                258
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Conclusion. Humans use digital devices for billions of hours every day. If we can develop agents that can assist with even a tiny fraction of these tasks, we can hope to enter a virtuous cycle of agent assistance, followed by human feedback on failures, and hence to agent improvement and new capabilities. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                273,
+                473,
+                364
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "5. Contributions "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                383,
+                228,
+                400
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "AS, TP, TL and PCH conceived the project. AG managed the project. GT, AS, TP, AM, PCH, PG, RC and JA developed the environment, data collection, experiment and agent infrastructure. AS, DR and PCH developed the agent architecture, ran experiments and analysed data. AS, DR, TL and PCH wrote the manuscript. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                410,
+                475,
+                501
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "6. Acknowledgements "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                84,
+                520,
+                272,
+                537
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We thank the DeepMind Interactive Agents Team (Deep-Mind Interactive Agents Team, 2021) for helping us to use their infrastructure as the base for our experiments. We also thank the DeepMind Platform Team and Crowd Compute for their work contributing to our human data collection pipeline and environment. "
+                    }
+                ]
+            },
+            "bbox": [
+                84,
+                546,
+                475,
+                637
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "References "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                86,
+                656,
+                181,
+                671
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Sandbox2 GitHub Repository. https://github. com/google/sandboxed-api/tree/main/ sandboxed_api/sandbox2. [Online; accessed 20-January-2022]. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Chrome Webdriver Security Considerations. https://chromedriver.chromium.org/ security-considerations. [Online; accessed 20-January-2022]. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "P. Ammanabrolu, J. Urbanek, M. Li, A. Szlam, T. Rocktaschel, and J. Weston. How to motivate your ¨ dragon: Teaching goal-driven agents to speak and act in fantasy worlds. arXiv preprint arXiv:2010.00685, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "R. Bommasani, D. A. Hudson, E. Adeli, R. Altman, "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                86,
+                680,
+                477,
+                904
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "S. Arora, S. von Arx, M. S. Bernstein, J. Bohg, A. Bosselut, E. Brunskill, et al. On the opportunities and risks of foundation models. arXiv preprint arXiv:2108.07258, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "T. B. Brown, B. Mann, N. Ryder, M. Subbiah, J. Kaplan, P. Dhariwal, A. Neelakantan, P. Shyam, G. Sastry, A. Askell, et al. Language models are few-shot learners. arXiv preprint arXiv:2005.14165, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "M. Chen, J. Tworek, H. Jun, Q. Yuan, H. P. d. O. Pinto, J. Kaplan, H. Edwards, Y. Burda, N. Joseph, G. Brockman, et al. Evaluating large language models trained on code. arXiv preprint arXiv:2107.03374, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "P. Christiano, J. Leike, T. B. Brown, M. Martic, S. Legg, and D. Amodei. Deep reinforcement learning from human preferences. arXiv preprint arXiv:1706.03741, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "DeepMind Interactive Agents Team. Creating multimodal interactive agents with imitation and self-supervised learning. arXiv preprint arXiv:2112.03763, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "I. Gur, U. Rueckert, A. Faust, and D. Hakkani-Tur. Learning to navigate the web. arXiv preprint arXiv:1812.09195, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "I. Gur, N. Jaques, Y. Miao, J. Choi, M. Tiwari, H. Lee, and A. Faust. Environment generation for zero-shot compositional reinforcement learning. Advances in Neural Information Processing Systems, 34, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "B. Ibarz, J. Leike, T. Pohlen, G. Irving, S. Legg, and D. Amodei. Reward learning from human preferences and demonstrations in atari. arXiv preprint arXiv:1811.06521, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "N. Jaques, A. Ghandeharioun, J. H. Shen, C. Ferguson, A. Lapedriza, N. Jones, S. Gu, and R. Picard. Way off-policy batch deep reinforcement learning of implicit human preferences in dialog. arXiv preprint arXiv:1907.00456, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "S. Jia, J. Kiros, and J. Ba. Dom-q-net: Grounded rl on structured language. arXiv preprint arXiv:1902.07257, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "J. Kaplan, S. McCandlish, T. Henighan, T. B. Brown, B. Chess, R. Child, S. Gray, A. Radford, J. Wu, and D. Amodei. Scaling laws for neural language models. arXiv preprint arXiv:2001.08361, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980, 2014. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "J. Li, A. H. Miller, S. Chopra, M. Ranzato, and J. Weston. Dialogue learning with human-in-the-loop. arXiv preprint arXiv:1611.09823, 2016. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                500,
+                85,
+                887,
+                906
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Y. Li, J. He, X. Zhou, Y. Zhang, and J. Baldridge. Mapping natural language instructions to mobile ui action sequences. arXiv preprint arXiv:2005.03776, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "E. Z. Liu, K. Guu, P. Pasupat, T. Shi, and P. Liang. Reinforcement learning on web interfaces using workflow-guided exploration. arXiv preprint arXiv:1802.08802, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "R. Nakano, J. Hilton, S. Balaji, J. Wu, L. Ouyang, C. Kim, C. Hesse, S. Jain, V. Kosaraju, W. Saunders, et al. Webgpt: Browser-assisted question-answering with human feedback. arXiv preprint arXiv:2112.09332, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "D. A. Pomerleau. Alvinn: An autonomous land vehicle in a neural network. In Advances in neural information processing systems, pages 305–313, 1989. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "J. W. Rae, S. Borgeaud, T. Cai, K. Millican, J. Hoffmann, F. Song, J. Aslanides, S. Henderson, R. Ring, S. Young, et al. Scaling language models: Methods, analysis & insights from training gopher. arXiv preprint arXiv:2112.11446, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "T. Shi, A. Karpathy, L. Fan, J. Hernandez, and P. Liang. World of bits: An open-domain platform for webbased agents. In International Conference on Machine Learning, pages 3135–3144. PMLR, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "M. Shoeybi, M. Patwary, R. Puri, P. LeGresley, J. Casper, and B. Catanzaro. Megatron-lm: Training multi-billion parameter language models using model parallelism. arXiv preprint arXiv:1909.08053, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "M. Shvo, Z. Hu, R. T. Icarte, I. Mohomed, A. Jepson, and S. A. McIlraith. Appbuddy: Learning to accomplish tasks in mobile apps via reinforcement learning. arXiv preprint arXiv:2106.00133, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "D. Silver, A. Huang, C. J. Maddison, A. Guez, L. Sifre, G. Van Den Driessche, J. Schrittwieser, I. Antonoglou, V. Panneershelvam, M. Lanctot, et al. Mastering the game of Go with deep neural networks and tree search. Nature, 529(7587):484, 2016. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "H. F. Song, A. Abdolmaleki, J. T. Springenberg, A. Clark, H. Soyer, J. W. Rae, S. Noury, A. Ahuja, S. Liu, D. Tirumala, et al. V-mpo: On-policy maximum a posteriori policy optimization for discrete and continuous control. arXiv preprint arXiv:1909.12238, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "N. Stiennon, L. Ouyang, J. Wu, D. M. Ziegler, R. Lowe, C. Voss, A. Radford, D. Amodei, and P. Christiano. Learning to summarize from human feedback. arXiv preprint arXiv:2009.01325, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "R. S. Sutton and A. G. Barto. Reinforcement learning: An introduction. MIT press, 2018. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                86,
+                84,
+                475,
+                906
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "D. Toyama, P. Hamel, A. Gergely, G. Comanici, A. Glaese, Z. Ahmed, T. Jackson, S. Mourad, and D. Precup. Androidenv: A reinforcement learning platform for android. arXiv preprint arXiv:2105.13231, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, Ł. Kaiser, and I. Polosukhin. Attention is all you need. In Advances in neural information processing systems, pages 5998–6008, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "O. Vinyals, I. Babuschkin, W. M. Czarnecki, M. Mathieu, A. Dudzik, J. Chung, D. H. Choi, R. Powell, T. Ewalds, P. Georgiev, et al. Grandmaster level in starcraft ii using multi-agent reinforcement learning. Nature, 575(7782): 350–354, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "C. Wirth, R. Akrour, G. Neumann, J. Furnkranz, et al. A ¨ survey of preference-based reinforcement learning methods. Journal of Machine Learning Research, 18(136): 1–46, 2017. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                84,
+                887,
+                371
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                679,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/4e3fd9e465a173d9f13b84eead9b0dccf14c91943efe105bc01f81ee928bb1d0.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Pixel observation "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                98,
+                126,
+                205,
+                233
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Task instruction "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                228,
+                108,
+                307,
+                118
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Book the shortest one-way flight from: HVR to: Fayetteville, AR on 12/27/2016. "
+                    }
+                ]
+            },
+            "bbox": [
+                227,
+                126,
+                357,
+                151
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Task fields "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                228,
+                176,
+                282,
+                186
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "criterion: 'shortest' "
+                    }
+                ]
+            },
+            "bbox": [
+                227,
+                195,
+                303,
+                203
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "date: '12/27/2016' "
+                    }
+                ]
+            },
+            "bbox": [
+                227,
+                204,
+                300,
+                210
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "from: 'HVR' "
+                    }
+                ]
+            },
+            "bbox": [
+                227,
+                212,
+                276,
+                219
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "to: 'Fayetteville, AR' "
+                    }
+                ]
+            },
+            "bbox": [
+                227,
+                220,
+                307,
+                227
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Raw DOM tree "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                379,
+                107,
+                457,
+                118
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "- [1] body "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\therefore { }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(0, 0) classes=[NO_CLASS] children=3 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "|- [2] div : wrap : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(0, 0) classes=[NO_CLASS] children=1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| |- [3] div : area : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(0, 50) classes=[NO_CLASS] children=1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| |- [4] div : menu : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(2, 60.3) classes=[NO_CLASS] children=5 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| |- [5] h2 : header-book : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(4, 60.3) text='Book Your One-Way Fl...' classes=[NO_CLASS] "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| | |- [7] input_text : flight-from : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(4, 81.1) value= classes=[flight-input ui-autocomplete-input] placeholder=From: "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| |- [8] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(2, 104.39) classes=[input-container] children=1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| | |- [9] input_text : flight-to : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(4, 106.39) value= classes=[flight-input ui-autocomplete-input] placeholder=To: "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| |- [10] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(2, 144.67) classes=[departure-container] children=2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| | |- [11] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(2, 144.67) text='Departure Date' classes=[departure-header] "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| | |- [12] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(2, 159.18) classes=[input-container] children=1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| | |- [13] input_text : datepicker : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(12, 161.18) value= classes=[flight-input hasDatepicker] placeholder= "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "| |- [14] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(2, 182.18) classes=[search-container] children=1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "|- [15] button : search : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(4, 184.18) text='Search' classes=[NO_CLASS] "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "|- [16] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(-1, 209) classes=[ui-helper-hidden-accessible] "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "|- [17] div : : None "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "@"
+                            },
+                            {
+                                "type": "text",
+                                "content": "(-1, 209) classes=[ui-helper-hidden-accessible] "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                385,
+                125,
+                875,
+                266
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Figure 9. An example of the MiniWob observations for the book-flight task. The raw DOM tree is processed into a list of DOM elements. The information included in this list for each DOM element includes an integer reference, its text, any input text, the class, the state of e.g. radio buttons, its position, whether it is focused, and if it has been interacted with in the episode so far. "
+                    }
+                ]
+            },
+            "bbox": [
+                83,
+                303,
+                887,
+                347
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/fa139784d532c4780693c0d3f3257d875733fb93d72dd35137b6c5dc796214f4.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 1. Hyper-parameters used in training. See Song et al. (2019) for descriptions of the VMPO hyper-parameters. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>PARAMETER</td><td>VALUE</td></tr><tr><td>Optimizer</td><td>Adam (Kingma and Ba, 2014)</td></tr><tr><td>Learning rate</td><td>1e-4</td></tr><tr><td>Adam b1 parameter</td><td>0.9</td></tr><tr><td>Adam b2 parameter</td><td>0.999</td></tr><tr><td>Weight decay (biases excluded)</td><td>1e-1</td></tr><tr><td>VMPO loss weight</td><td>1.0</td></tr><tr><td>BC loss weight (baseline)</td><td>1.0</td></tr><tr><td>VMPO εα</td><td>0.1</td></tr><tr><td>VMPO εη</td><td>0.2</td></tr><tr><td>Agent discount γ</td><td>0.9</td></tr><tr><td>Batch size</td><td>256</td></tr><tr><td>Trajectory unroll length</td><td>64</td></tr><tr><td>Target-network update period T</td><td>50</td></tr><tr><td>Maximum number of steps per episode</td><td>300</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                258,
+                421,
+                707,
+                614
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ae11173c237be18303b5d7672e6ae5fd3ab3d7cd15961ec393d0c79f8b7dc846.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 10. Per-task performance comparison to human participants. An expanded version of the plot in Fig. 4a. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                89,
+                662,
+                880,
+                837
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                290,
+                56,
+                681,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/09b4b02df85435283df3f17d82cbd2b5dbfd79f9bdb0bbe9cd5da3c538d3cd01.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 2. List of keyboard keys and macros that the agent can emit in a key press action. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Enter</td><td>Digit6</td><td>KeyG</td><td>ControlRight+KeyV</td></tr><tr><td>PageUp</td><td>Digit7</td><td>KeyH</td><td>ShiftLeft+KeyA</td></tr><tr><td>PageDown</td><td>Digit8</td><td>KeyI</td><td>ShiftLeft+KeyB</td></tr><tr><td>Backspace</td><td>Digit9</td><td>KeyJ</td><td>ShiftLeft+KeyC</td></tr><tr><td>Delete</td><td>Digit0</td><td>KeyK</td><td>ShiftLeft+KeyD</td></tr><tr><td>Tab</td><td>Numpad0</td><td>KeyL</td><td>ShiftLeft+KeyE</td></tr><tr><td>Space</td><td>Numpad1</td><td>KeyM</td><td>ShiftLeft+KeyF</td></tr><tr><td>ArrowUp</td><td>Numpad2</td><td>KeyN</td><td>ShiftLeft+KeyG</td></tr><tr><td>ArrowRight</td><td>Numpad3</td><td>KeyO</td><td>ShiftLeft+KeyH</td></tr><tr><td>ArrowDown</td><td>Numpad4</td><td>KeyP</td><td>ShiftLeft+KeyI</td></tr><tr><td>ArrowLeft</td><td>Numpad5</td><td>KeyQ</td><td>ShiftLeft+KeyJ</td></tr><tr><td>BracketLeft</td><td>Numpad6</td><td>KeyR</td><td>ShiftLeft+KeyK</td></tr><tr><td>BracketRight</td><td>Numpad7</td><td>KeyS</td><td>ShiftLeft+KeyL</td></tr><tr><td>Minus</td><td>Numpad8</td><td>KeyT</td><td>ShiftLeft+KeyM</td></tr><tr><td>Equal</td><td>Numpad9</td><td>KeyU</td><td>ShiftLeft+KeyN</td></tr><tr><td>Semicolon</td><td>NumpadAdd</td><td>KeyV</td><td>ShiftLeft+KeyO</td></tr><tr><td>Quote</td><td>NumpadMultiply</td><td>KeyW</td><td>ShiftLeft+KeyP</td></tr><tr><td>Backslash</td><td>NumpadSubtract</td><td>KeyX</td><td>ShiftLeft+KeyQ</td></tr><tr><td>Comma</td><td>NumpadDivide</td><td>KeyY</td><td>ShiftLeft+KeyR</td></tr><tr><td>Period</td><td>NumpadDecimal</td><td>KeyZ</td><td>ShiftLeft+KeyS</td></tr><tr><td>Slash</td><td>NumpadEnter</td><td>ControlLeft+KeyA</td><td>ShiftLeft+KeyT</td></tr><tr><td>Backquote</td><td>KeyA</td><td>ControlRight+KeyA</td><td>ShiftLeft+KeyU</td></tr><tr><td>Digit1</td><td>KeyB</td><td>ControlLeft+KeyC</td><td>ShiftLeft+KeyV</td></tr><tr><td>Digit2</td><td>KeyC</td><td>ControlRight+KeyC</td><td>ShiftLeft+KeyW</td></tr><tr><td>Digit3</td><td>KeyD</td><td>ControlLeft+KeyX</td><td>ShiftLeft+KeyX</td></tr><tr><td>Digit4</td><td>KeyE</td><td>ControlRight+KeyX</td><td>ShiftLeft+KeyY</td></tr><tr><td>Digit5</td><td>KeyF</td><td>ControlLeft+KeyV</td><td>ShiftLeft+KeyZ</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                232,
+                159,
+                733,
+                502
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/5a064d641ab9b9db44da8274d6af7a877a0c9022b68ff16424171849bc9c5a72.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "a) "
+                    },
+                    {
+                        "type": "text",
+                        "content": "Figure 11. Per-task performance comparison to the best published external SotA results for each task. These SotA scores correspond to the aggregated scores shown in Table 3. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                99,
+                617,
+                880,
+                795
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2d32525ce3db3a80bec50819f422533ea99a9fdb6f8b5949eb9a7a2c3ac1a076.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "a) "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                333,
+                295,
+                470,
+                430
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/18e47bf21fe2eb408abf598d82c3f7b14b55ae56cfdc3c2777527e9135bd3697.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                488,
+                295,
+                674,
+                444
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/9ce5013d1878bd64fc4a8abac9dd677cf7af689262022bac198a004399ad4095.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 12. a) Initial frame of an example episode of text-transform. Note that the text (captcha) to be typed is also present in the DOM, and thus passed to the agent as a language input. b) Distribution of action types selected by the agent for a random sample of 100 episodes of text-transform. In this task the agent most frequently chooses to output a key press. c) Distribution of specific key-press choices for the episodes included in b). The agent learns to produce individual key presses for every letter (a-z, lower and upper case) and all digits (0-9), in order to complete the captcha. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                84,
+                443,
+                888,
+                588
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/2b945b38d299503292bb2874aa37f1e2e63c353271cf270f6049ce2f3c9b7ded.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 3: Per-task mean scores for human participants, our agent (CC-Net) and scores gathered from external studies (Shi et al., 2017; Liu et al., 2018; Gur et al., 2018; Jia et al., 2019). Some scores from these studies were only available in figure format and were therefore estimated as accurately as possible. The final two columns give the best externally reported score for each task using either BC & RL, or BC, RL and augmentations. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>TASK</td><td>Human</td><td>CC-Net</td><td>CC-Net BC only</td><td>World of bits (BC &amp; RL)</td><td>Workflow guidedexplo-ration (BC &amp; RL)</td><td>Learning to navi-gate the web (RL)</td><td>DOM-Q-Net (RL)</td><td>Workflow guidedexplo-ration (Aug-mented)</td><td>Learning to navi-gate the web (Aug-mented)</td><td>Aggregated SotA (BC &amp; RL)</td><td>Aggregated SotA (Aug-mented)</td></tr><tr><td>bisect-angle</td><td>0.92</td><td>0.97</td><td>0.29</td><td>0.80</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.80</td><td>0.80</td></tr><tr><td>book-flight</td><td>0.87</td><td>0.87</td><td>0.00</td><td>0.00</td><td>0.00</td><td>n/a</td><td>n/a</td><td>0.00</td><td>1.00</td><td>0.00</td><td>1.00</td></tr><tr><td>chase-circle</td><td>0.82</td><td>0.93</td><td>0.80</td><td>1.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>choose-date-easy</td><td>0.99</td><td>0.99</td><td>0.42</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>choose-date-medium</td><td>0.98</td><td>0.99</td><td>0.26</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>choose-date</td><td>0.97</td><td>0.97</td><td>0.12</td><td>0.00</td><td>0.00</td><td>n/a</td><td>1.00</td><td>0.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>choose-list</td><td>0.98</td><td>0.99</td><td>0.19</td><td>0.25</td><td>0.16</td><td>0.26</td><td>n/a</td><td>0.16</td><td>0.26</td><td>0.26</td><td>0.26</td></tr><tr><td>circle-center</td><td>0.96</td><td>0.97</td><td>0.36</td><td>0.98</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.98</td><td>0.98</td></tr><tr><td>click-button-sequence</td><td>0.94</td><td>1.00</td><td>0.47</td><td>0.22</td><td>0.99</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-button</td><td>0.98</td><td>1.00</td><td>0.78</td><td>0.62</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>click-checkboxes-large</td><td>0.87</td><td>0.71</td><td>0.00</td><td>n/a</td><td>0.68</td><td>n/a</td><td>n/a</td><td>0.84</td><td>n/a</td><td>0.68</td><td>0.84</td></tr><tr><td>click-checkboxes-soft</td><td>0.73</td><td>0.95</td><td>0.04</td><td>n/a</td><td>0.51</td><td>n/a</td><td>n/a</td><td>0.94</td><td>n/a</td><td>0.51</td><td>0.94</td></tr><tr><td>click-checkboxes-transfer</td><td>0.98</td><td>0.99</td><td>0.36</td><td>n/a</td><td>0.64</td><td>n/a</td><td>n/a</td><td>0.64</td><td>n/a</td><td>0.64</td><td>0.64</td></tr><tr><td>click-checkboxes</td><td>0.97</td><td>0.98</td><td>0.32</td><td>0.48</td><td>0.98</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-collapse-2</td><td>0.97</td><td>0.98</td><td>0.17</td><td>0.11</td><td>0.65</td><td>n/a</td><td>n/a</td><td>0.99</td><td>n/a</td><td>0.65</td><td>0.99</td></tr><tr><td>click-collapse</td><td>0.99</td><td>1.00</td><td>0.81</td><td>0.98</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>click-color</td><td>0.97</td><td>1.00</td><td>0.82</td><td>0.23</td><td>1.00</td><td>n/a</td><td>n/a</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-dialog-2</td><td>0.99</td><td>1.00</td><td>0.88</td><td>0.53</td><td>1.00</td><td>n/a</td><td>n/a</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-dialog</td><td>1.00</td><td>1.00</td><td>0.95</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>click-link</td><td>0.99</td><td>0.99</td><td>0.59</td><td>0.31</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>click-menu-2</td><td>0.98</td><td>0.83</td><td>0.52</td><td>0.16</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.16</td><td>0.16</td></tr><tr><td>click-menu</td><td>0.97</td><td>0.94</td><td>0.22</td><td>0.13</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.13</td><td>0.13</td></tr><tr><td>click-option</td><td>0.99</td><td>0.99</td><td>0.21</td><td>0.28</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-pie</td><td>0.98</td><td>0.97</td><td>0.15</td><td>0.15</td><td>0.32</td><td>1.00</td><td>n/a</td><td>0.32</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>click-scroll-list</td><td>0.91</td><td>0.60</td><td>0.01</td><td>0.07</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.07</td><td>0.07</td></tr><tr><td>click-shades</td><td>0.91</td><td>1.00</td><td>0.04</td><td>0.27</td><td>0.22</td><td>n/a</td><td>n/a</td><td>0.99</td><td>n/a</td><td>0.27</td><td>0.99</td></tr><tr><td>click-shape</td><td>0.88</td><td>0.95</td><td>0.11</td><td>0.11</td><td>0.64</td><td>n/a</td><td>n/a</td><td>0.64</td><td>n/a</td><td>0.64</td><td>0.64</td></tr><tr><td>click-tab-2-easy</td><td>0.99</td><td>0.99</td><td>0.61</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>click-tab-2-hard</td><td>0.96</td><td>0.98</td><td>0.19</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>click-tab-2-medium</td><td>0.97</td><td>0.99</td><td>0.54</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>click-tab-2</td><td>0.97</td><td>0.98</td><td>0.27</td><td>0.08</td><td>0.64</td><td>n/a</td><td>1.00</td><td>0.98</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-tab</td><td>0.99</td><td>1.00</td><td>0.95</td><td>0.97</td><td>0.55</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>click-test-2</td><td>0.99</td><td>1.00</td><td>0.95</td><td>0.83</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-test-transfer</td><td>0.99</td><td>1.00</td><td>0.94</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>click-test</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>click-xml-xml-xml</td><td>0.83</td><td>1.00</td><td>0.56</td><td>0.34</td><td>0.93</td><td>n/a</td><td>1.00</td><td>0.93</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>copy-paste-2</td><td>0.94</td><td>0.63</td><td>0.01</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>copy-paste</td><td>0.94</td><td>0.79</td><td>0.04</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>count-shape</td><td>0.82</td><td>0.85</td><td>0.21</td><td>0.18</td><td>0.59</td><td>n/a</td><td>n/a</td><td>0.76</td><td>n/a</td><td>0.59</td><td>0.76</td></tr><tr><td>count-sides</td><td>0.98</td><td>1.00</td><td>0.74</td><td>0.30</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.30</td><td>0.30</td></tr><tr><td>drag-box</td><td>0.99</td><td>1.00</td><td>0.61</td><td>0.31</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.31</td><td>0.31</td></tr><tr><td>drag-cube</td><td>0.99</td><td>0.79</td><td>0.23</td><td>0.18</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.18</td><td>0.18</td></tr><tr><td>drag-item</td><td>0.98</td><td>1.00</td><td>0.61</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>drag-items-grid</td><td>0.87</td><td>0.98</td><td>0.05</td><td>0.01</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.01</td><td>0.01</td></tr><tr><td>drag-items</td><td>0.93</td><td>0.99</td><td>0.13</td><td>0.41</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.41</td><td>0.41</td></tr><tr><td>drag-shapes</td><td>0.96</td><td>0.99</td><td>0.26</td><td>0.92</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.92</td><td>0.92</td></tr><tr><td>drag-sort-numbers</td><td>0.92</td><td>0.97</td><td>0.11</td><td>0.66</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.66</td><td>0.66</td></tr><tr><td>email-inbox-delete</td><td>0.99</td><td>1.00</td><td>0.22</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00</td><td>n/a</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>email-inbox-forward-nl-turk</td><td>0.88</td><td>1.00</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox-forward-nl</td><td>0.91</td><td>1.00</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox-forward</td><td>0.96</td><td>1.00</td><td>0.01</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox-important</td><td>0.99</td><td>1.00</td><td>0.30</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox-nl-turk</td><td>0.93</td><td>1.00</td><td>0.05</td><td>n/a</td><td>0.77</td><td>n/a</td><td>n/a</td><td>0.93</td><td>n/a</td><td>0.77</td><td>0.93</td></tr><tr><td>email-inbox-noscroll</td><td>0.96</td><td>1.00</td><td>0.13</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox-reply</td><td>0.91</td><td>1.00</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox-star-reply</td><td>0.95</td><td>1.00</td><td>0.11</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>email-inbox</td><td>0.96</td><td>1.00</td><td>0.09</td><td>0.03</td><td>0.43</td><td>n/a</td><td>0.54</td><td>0.99</td><td>n/a</td><td>0.54</td><td>0.99</td></tr><tr><td>enter-date</td><td>0.97</td><td>1.00</td><td>0.02</td><td>0.61</td><td>0.00</td><td>1.00</td><td>n/a</td><td>0.96</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>enter-password</td><td>0.96</td><td>1.00</td><td>0.02</td><td>0.00</td><td>0.99</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>enter-text-2</td><td>0.91</td><td>0.98</td><td>0.04</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>enter-text-dynamic</td><td>0.97</td><td>1.00</td><td>0.39</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>enter-text</td><td>0.98</td><td>1.00</td><td>0.35</td><td>0.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>enter-time</td><td>0.98</td><td>0.97</td><td>0.04</td><td>0.08</td><td>0.52</td><td>n/a</td><td>n/a</td><td>0.90</td><td>n/a</td><td>0.52</td><td>0.90</td></tr><tr><td>find-midpoint</td><td>0.94</td><td>0.97</td><td>0.35</td><td>0.31</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.31</td><td>0.31</td></tr><tr><td>find-word</td><td>1.00</td><td>1.00</td><td>0.99</td><td>0.95</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>grid-coordinate</td><td>0.87</td><td>1.00</td><td>0.66</td><td>0.26</td><td>1.00</td><td>n/a</td><td>n/a</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>guess-number</td><td>0.99</td><td>1.00</td><td>0.21</td><td>0.20</td><td>0.00</td><td>n/a</td><td>n/a</td><td>0.00</td><td>n/a</td><td>0.20</td><td>0.20</td></tr><tr><td>highlight-text-2</td><td>0.97</td><td>1.00</td><td>0.40</td><td>0.13</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.13</td><td>0.13</td></tr><tr><td>highlight-text</td><td>0.97</td><td>1.00</td><td>0.51</td><td>0.90</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.90</td><td>0.90</td></tr><tr><td>identify-shape</td><td>0.98</td><td>1.00</td><td>0.68</td><td>0.36</td><td>0.90</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>0.90</td><td>1.00</td></tr><tr><td>login-user-popup</td><td>0.94</td><td>1.00</td><td>0.02</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>login-user</td><td>0.96</td><td>1.00</td><td>0.00</td><td>0.00</td><td>0.99</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>moving-items</td><td>0.18</td><td>0.88</td><td>0.13</td><td>0.78</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.78</td><td>0.78</td></tr><tr><td>multi-Layouts</td><td>0.95</td><td>1.00</td><td>0.00</td><td>n/a</td><td>0.99</td><td>n/a</td><td>n/a</td><td>1.00</td><td>n/a</td><td>0.99</td><td>1.00</td></tr><tr><td>multi-orderings</td><td>0.96</td><td>1.00</td><td>0.00</td><td>n/a</td><td>0.05</td><td>n/a</td><td>n/a</td><td>1.00</td><td>n/a</td><td>0.05</td><td>1.00</td></tr><tr><td>navigate-tree</td><td>0.98</td><td>0.99</td><td>0.32</td><td>0.20</td><td>0.99</td><td>1.00</td><td>1.00</td><td>0.99</td><td>1.00</td><td>1.00</td><td>1.00</td></tr><tr><td>number-checkboxes</td><td>0.96</td><td>0.99</td><td>0.00</td><td>0.16</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.16</td><td>0.16</td></tr><tr><td>read-table-2</td><td>0.95</td><td>0.94</td><td>0.00</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>read-table</td><td>0.97</td><td>0.97</td><td>0.01</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>resize-textarea</td><td>0.94</td><td>1.00</td><td>0.27</td><td>0.11</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.11</td><td>0.11</td></tr><tr><td>right-angle</td><td>0.87</td><td>0.98</td><td>0.26</td><td>0.38</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.38</td><td>0.38</td></tr><tr><td>scroll-text-2</td><td>0.97</td><td>1.00</td><td>0.88</td><td>0.96</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.96</td><td>0.96</td></tr><tr><td>scroll-text</td><td>0.97</td><td>0.96</td><td>0.04</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>search-engine</td><td>0.97</td><td>1.00</td><td>0.15</td><td>0.00</td><td>0.26</td><td>n/a</td><td>1.00</td><td>0.99</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>simon-says</td><td>0.62</td><td>-0.00</td><td>0.02</td><td>0.28</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.28</td><td>0.28</td></tr><tr><td>simple-algebra</td><td>0.86</td><td>0.75</td><td>0.03</td><td>0.04</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.04</td><td>0.04</td></tr><tr><td>simple-arithmetic</td><td>0.96</td><td>0.86</td><td>0.38</td><td>0.07</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.07</td><td>0.07</td></tr><tr><td>social-media-all</td><td>0.89</td><td>0.75</td><td>0.00</td><td>n/a</td><td>0.01</td><td>n/a</td><td>n/a</td><td>0.01</td><td>1.00</td><td>0.01</td><td>1.00</td></tr><tr><td>social-media-some</td><td>0.91</td><td>0.85</td><td>0.01</td><td>n/a</td><td>0.01</td><td>n/a</td><td>n/a</td><td>0.42</td><td>n/a</td><td>0.01</td><td>0.42</td></tr><tr><td>social-media</td><td>0.96</td><td>0.90</td><td>0.03</td><td>0.23</td><td>0.39</td><td>n/a</td><td>1.00</td><td>1.00</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>terminal</td><td>0.88</td><td>-0.01</td><td>0.00</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>text-editor</td><td>0.88</td><td>0.98</td><td>0.11</td><td>0.01</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.01</td><td>0.01</td></tr><tr><td>text-transform</td><td>0.86</td><td>0.60</td><td>0.19</td><td>0.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.00</td><td>0.00</td></tr><tr><td>tic-tac-toe</td><td>0.71</td><td>0.83</td><td>0.32</td><td>0.34</td><td>0.37</td><td>n/a</td><td>n/a</td><td>0.47</td><td>n/a</td><td>0.37</td><td>0.47</td></tr><tr><td>unicode-test</td><td>0.99</td><td>1.00</td><td>0.86</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr><tr><td>use-autocomplete</td><td>0.98</td><td>1.00</td><td>0.07</td><td>0.00</td><td>0.78</td><td>n/a</td><td>n/a</td><td>0.98</td><td>n/a</td><td>0.78</td><td>0.98</td></tr><tr><td>use-colorwheel-2</td><td>0.94</td><td>0.95</td><td>0.38</td><td>1.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>use-colorwheel</td><td>0.90</td><td>0.98</td><td>0.68</td><td>1.00</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00</td><td>1.00</td></tr><tr><td>use-skier-2</td><td>0.97</td><td>0.95</td><td>0.03</td><td>0.15</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.15</td><td>0.15</td></tr><tr><td>use-skier</td><td>0.98</td><td>0.91</td><td>0.18</td><td>0.51</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.51</td><td>0.51</td></tr><tr><td>use-spinner</td><td>0.98</td><td>1.00</td><td>0.47</td><td>0.17</td><td>0.04</td><td>n/a</td><td>n/a</td><td>0.04</td><td>n/a</td><td>0.17</td><td>0.17</td></tr><tr><td>visual-addition</td><td>0.97</td><td>0.99</td><td>0.36</td><td>0.01</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td>0.01</td><td>0.01</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                107,
+                152,
+                864,
+                905
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/"
+                },
+                "table_caption": [],
+                "table_footnote": [],
+                "html": "",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                107,
+                85,
+                866,
+                320
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                71
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/6bde8332277b6dc9b4e04d62f23d009a2bdacb7dbea89f1eaf59dd3ce6a98427.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 13. Results from Fig. 7 broken out per task. Note that the individual task results have significant variance as there is only one seed per experiment. Blue shows performance of BC&RL, purple BC only, and the dashed line gives RL only performance. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                145,
+                85,
+                823,
+                868
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                70
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/714d7319d91a5cc0eab8174dd40efe0fcd78917820f51a3863677a0f6b41224e.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 14. Scatter plot showing the mean number of environment steps per episode versus mean reward for different MiniWob tasks. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                212,
+                333,
+                689,
+                621
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "A Data-Driven Approach for Learning to Control Computers "
+                    }
+                ]
+            },
+            "bbox": [
+                292,
+                56,
+                679,
+                71
+            ]
+        }
+    ]
+]

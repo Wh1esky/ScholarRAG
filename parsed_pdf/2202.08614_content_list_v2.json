@@ -1,0 +1,3800 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Fourier PlenOctrees for Dynamic Radiance Field Rendering in Real-time "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        116,
+        130,
+        852,
+        152
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Liao Wang1∗ Jiakai Zhang1∗ Xinhang Liu1 Fuqiang Zhao1 Yanshun Zhang3 Yingliang Zhang3 Minye Wu2 Lan "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathrm { X u } } ^ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "Jingyi Yu1 1 ShanghaiTech University 2 KU leuven 3 DGene "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        178,
+        857,
+        233
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        233,
+        268,
+        313,
+        284
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Implicit neural representations such as Neural Radiance Field (NeRF) have focused mainly on modeling static objects captured under multi-view settings where real-time rendering can be achieved with smart data structures, e.g., PlenOctree. In this paper, we present a novel Fourier PlenOctree (FPO) technique to tackle efficient neural modeling and real-time rendering of dynamic scenes captured under the free-view video (FVV) setting. The key idea in our FPO is a novel combination of generalized NeRF, PlenOctree representation, volumetric fusion and Fourier transform. To accelerate FPO construction, we present a novel coarse-to-fine fusion scheme that leverages the generalizable NeRF technique to generate the tree via spatial blending. To tackle dynamic scenes, we tailor the implicit network to model the Fourier coefficients of timevarying density and color attributes. Finally, we construct the FPO and train the Fourier coefficients directly on the leaves of a union PlenOctree structure of the dynamic sequence. We show that the resulting FPO enables compact memory overload to handle dynamic objects and supports efficient fine-tuning. Extensive experiments show that the proposed method is 3000 times faster than the original NeRF and achieves over an order of magnitude acceleration over SOTA while preserving high visual quality for the free-viewpoint rendering of unseen dynamic scenes. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        301,
+        472,
+        680
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        726,
+        209,
+        742
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Interactive and immersive applications, such as Telepresence and Virtual Reality (VR), make plenty use of freeviewpoint videos to provide unique and fully controllable viewing experiences. At the core are fast generation and real-time rendering at new viewpoints with ultra-high photorealism. Traditional image-based modeling and rendering approaches rely on feature matching and view interpolation, whereas the latest neural rendering techniques are able to in-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        752,
+        468,
+        875
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/46436e34c76a8633df8b727346189203d6b13273afbdd99b581f9ced7d7fab0a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        504,
+        273,
+        794,
+        446
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/73cbe8a986eb1ceca696bb981e0a6df55cfb36b438a8ed1ebc07344e24756d00.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1. Our method achieves a photo-realistic rendered result for dynamic scenes in real-time based on our novel Fourier PlenOctree structure. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        795,
+        272,
+        880,
+        448
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tegrate the two processes into a deep net that simultaneously represents the geometry and appearance for efficient rendering. By far, most neural rendering techniques have focused on modeling static objects and employing smart data structures. For example, volumetric neural modeling techniques [21, 25] overcome many limitations of traditional methods, including tailored matching algorithms and optimization procedures and can even tackle non-Lambertian materials. The seminal work of the Neural Radiance Field (NeRF) [25] learns a neural representation based on MLP to represent static scenes as radiance fields with the property of density and color. It only requires calibrated multi-view images to produce compelling free-viewpoint rendering. However, the MLP structure is still too slow to achieve real-time performance. Existing techniques explore using thousands of tiny MLPs [37], applying factorization [9], tailored volumetric data structures [11, 56], and primitive-based rendering [22]. Despite their effectiveness, very few techniques are directly applicable to handle dynamic scenes, in particular, objects with non-rigid deformations such as the human body. In this work, we present a novel neural representation for generating free-viewpoint videos from multi-view sequence inputs as well as for real-time photorealistic rendering. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        505,
+        892,
+        867
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Several recent efforts have investigated combining neural modeling with classical flow or geometry estimations "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        869,
+        890,
+        901
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2202.08614v2 [cs.CV] 22 Feb 2022 "
+          }
+        ]
+      },
+      "bbox": [
+        19,
+        263,
+        58,
+        708
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "* Authors contributed equally to this work. "
+          }
+        ]
+      },
+      "bbox": [
+        99,
+        886,
+        328,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "[30, 34]. For example, one can apply motion flows to explicitly transform sampled points in individual frames to a canonical model to partially account for non-rigid deformations. However, they are vulnerable to lost tracks and can lead to motion artifacts. There are also emerging interests on utilizing pre-defined (e.g. skeleton [31] or parametric models [20, 32]) to explicitly calculate stable motion flows from model animations. These approaches, however, are limited to handling specific types of objects consistent with the pre-defined model. [48] directly predicts a neural radiance field using a general network for each frame while avoiding online training. Its rendering speed, however, is not yet sufficient for interactive and immersive experiences. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        472,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper, we present a novel Fourier PlenOctree (FPO) technique for neural dynamic scene representation, which enables efficient neural modeling and real-time rendering of unseen dynamic objects with compact memory overload, as illustrated in Fig. 1. The key idea in our FPO is a novel combination of generalized NeRF, PlenOctree representation, volumetric fusion, and Fourier transform. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        287,
+        472,
+        392
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For efficient scene modeling, we present a novel coarse-to-fine fusion scheme that leverages generalizable NeRF [49] technique to generate the PlenOctree with fast plenoptic functions inference. Inspired by the volumetric fusion strategy [28], we propose a spatial blending scheme to generate the neural tree in the order of minutes. To tackle dynamic scenes, we tailor the implicit network to model the Fourier coefficients of time-varying density and plenoptic functions of the dynamic PlenOctree. By discarding highfrequency bases, our novel representation can achieve high storage efficiency while persevering perceptive details. Finally, we construct the FPO and train the Fourier coefficients directly on the leaves of a union PlenOctree structure of the dynamic sequence. By combining the benefits of PlenOctree rendering and Fourier operations, our FPO enables real-time free-viewpoint synthesis of dynamic scenes and supports efficient fine-tuning. Comprehensive experiments show that FPO is 3000 times faster than the original NeRF implementation and achieves over an order of magnitude acceleration over state-of-the-art techniques for dynamic scene modeling and rendering. To summarize, our contributions include: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        393,
+        472,
+        724
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We introduce a FPO representation that enables realtime rendering of general dynamic scenes with fast fine-tuning and compact memory overload. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We present a coarse-to-fine scheme that utilizes generalizable NeRF for PlenOctree generation and constructing FPO efficiently. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        729,
+        468,
+        829
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Related work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        845,
+        215,
+        859
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Novel View Synthesis for Static Scenes. The task of synthesizing novel views of a scene given a set of pho-"
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        869,
+        468,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tographs has attracted the attention of the community. All current methods predict an underlying geometric or imagebased 3D representation that allows rendering from novel viewpoints. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        151
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Among them, mesh-based representations [47, 51] are compact and easy to render; however, optimizing a mesh to fit a complex scene of arbitrary topology is challenging. Volume rendering is a classical technique with a long history of research in the graphics community [7]. Volume-based representations such as voxel grids [15, 39] and multi-plane images (MPIs) [33, 41] are a popular alternative to mesh representations due to their topology-free nature: gradient-based optimization is therefore straightforward, while rendering can still be real-time. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        152,
+        892,
+        304
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The most notable approach Neural Radiance Field (NeRF) [25] combines the implicit representation with volumetric rendering to achieve compelling novel view synthesis with rich view-dependent effects. However, these neural representations above can only handle static scenes. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        306,
+        890,
+        381
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Novel View Synthesis for Dynamic Scenes. Different from static scenes, tackling dynamic scenes requires settling the illumination changes and moving objects. One approach is to obtain a reconstruction for dynamic objects with input data from either camera array or a single camera. Methods involving silhouette [14,43], stereo [16,23,24,54], segmentation [35, 38], and photometric [1, 10, 46] have been explored. Early solutions [4, 5, 26] rely on multi-view domebased setup for high-fidelity reconstruction and texture rendering of human activities in novel views. Recently, volumetric approaches with RGB-D sensors and modern GPUs have enabled real-time novel view synthesis for dynamic scenes and eliminated the reliance on a pre-scanned template model. The high-end solutions [5, 6, 13, 55] rely on multi-view studio setup to achieve high-fidelity reconstruction and rendering, while the low-end approaches [27, 40, 53] adopt the most handy monocular setup with a temporal fusion pipeline [28] but suffer from inherent self-occlusion constraint. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        383,
+        892,
+        671
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent work [17, 29, 30, 34, 36, 44, 52, 58] extend the approach NeRF [25] using neural radiance field into the dynamic settings. They decompose the task into learning a spatial mapping from the current scene to the canonical scene at each timestamp and regressing the canonical radiance field. However, the above solutions using dynamic neural radiance fields still suffer from a long training time as well as rendering time. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        672,
+        890,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NeRF Accelerations. While NeRFs can produce highquality results, their computationally expensive rendering leads to slow training and inference. One way to speed up the process of fitting a NeRF to a new scene is to incorporate priors learned from a dataset of similar scenes. This can be accomplished by conditioning on predicted images features [45, 49, 57] or meta-learning [42]. To improve render-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        794,
+        890,
+        901
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f6ef48f048313487348ba24b38d2da4291be24286cf308601f9f1a7dfa224dc2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Fast PlenOctree Generation "
+          },
+          {
+            "type": "text",
+            "content": "(b) Fast Fourier PlenOctree Generation "
+          },
+          {
+            "type": "text",
+            "content": "Figure 2. Illustration of our fast PlenOctree generation for static scene and fast Fourier PlenOctree generation for dynamic scene. (a) illustrates how to generate a PlenOctree from multiview images. Given these images, a generalized NeRF "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": "predicts view-dependent density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and color c by inputting 3D sample point "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": "with view direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\theta , \\phi )"
+          },
+          {
+            "type": "text",
+            "content": ", then we can convert them to view-independent density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and SH coefficients z. Using sparse view RGB images and masks rendered by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": ", we can obtain a coarse PlenOctree. Finally we fine-tune it to be a fine Plenoctree by inputting dense view images rendered by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": ". (b) extends the pipeline to dynamic scene by combining the idea with Discrete Fourier Transform(DFT) and achieves a fast Fourier PlenOctree generation and real-time rendering for dynamic scene using Fourier PlenOctree. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        83,
+        122,
+        872,
+        364
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ing speed, Neural Sparse Voxel Fields (NSVF) [19] learns sparse voxel grids of features that are input into a NeRF-like model. The sparse voxel grid allows the renderer to skip over empty regions when tracing a ray which improves the rendering time "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\sim } 1 0 \\mathbf { x }"
+          },
+          {
+            "type": "text",
+            "content": ". AutoInt [18] modifies the architecture of the NeRF so that inference requires fewer samples but produces lower quality results. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        470,
+        468,
+        575
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NeX [50] extends MPIs to encode spherical basis functions that enable view-dependent rendering effects in realtime. [9, 12, 37] also distill NeRFs to enable real-time rendering. [56] use an octree-based 3D representation which supports view-dependent effects to achieve real-time performance. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        580,
+        468,
+        670
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "However, none of the current methods tackles the challenge to accelerate the training and rendering process of the dynamic radiance field. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        676,
+        468,
+        720
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Generalized PlenOctree Fusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        748,
+        362,
+        763
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recall that NeRF takes an MLP as a mapping function to predict a density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and a color c for a queried 3D point "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p = ( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": "in a given viewing direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { d } = ( \\theta , \\phi )"
+          },
+          {
+            "type": "text",
+            "content": ". To boost the NeRF rendering procedure, [56] modifies the outputs of the mapping function to Spherical Harmonic (SH) coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z } \\in \\mathbb { R } ^ { \\bar { \\ell } _ { m a x } ^ { 2 } \\times 3 }"
+          },
+          {
+            "type": "text",
+            "content": "with a density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": ", which will be cached in leaves of PlenOctree as an initialization. Having "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": ", we can calculate the color of queried 3D point in "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        777,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "given viewing direction: "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        470,
+        663,
+        484
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {c} (\\mathbf {d}; \\mathbf {z}) = S \\left(\\sum_ {\\ell = 0} ^ {\\ell_ {m a x}} \\sum_ {m = - \\ell} ^ {\\ell} z _ {m, \\ell} Y _ {m, \\ell} (\\mathbf {d})\\right) \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/219dfdfc489dbee5c663644d221238980fcaac439989f0637d806088f3c862fc.jpg"
+        }
+      },
+      "bbox": [
+        558,
+        491,
+        890,
+        532
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "is the sigmoid function to normalize color, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Y _ { m , \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S ^ { 2 } \\to \\mathbb { R }"
+          },
+          {
+            "type": "text",
+            "content": "is a real-valued basis function of SH. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        537,
+        890,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Even though the rendering speed of PlenOctree is rather fast due to this simple calculation, the acquisition of SH coefficients and densities is still time-consuming. Therefore, we present a novel coarse-to-fine fusion scheme that leverages the generalizable NeRF technique "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": "[3, 48, 49] to attack this problem via spatial blending. In the following, we demonstrate PlenOctree Fusion algorithm in traditional static scenes as an example. Note that we can also do PlenOctree Fusion in Fourier PlenOctree to deal with dynamic scenarios in the same way since both of them have very similar data structures which will be introduced in Sec. 4.2. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        569,
+        890,
+        748
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A generalized neural rendering network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": "takes images of adjacent views of a target view as inputs and infers an implicit volume with regard to the target view. We can directly query colors and densities of sample points corresponding to leaves in PlenOctree from this volume without per-scene training. However, these colors and densities are all with respect to a specific target view due to different view directions. To obtain a completed PlenOctree, we need to sample more target views and fuse their local PlenOctree together. Fig. 2 (a) illustrates our pipeline. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        750,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The proposed PlenOctree Fusion follows a coarse-tofine strategy. Specifically, to obtain coarse PlenOctrees, we initialize a coarse PlenOctree with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N ^ { 3 }"
+          },
+          {
+            "type": "text",
+            "content": "voxel grids as tree leaves. Given multi-view images and silhouettes extracted via chroma key segmentation and background subtraction, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": "predicts images for 6 sparse views which are uniformly around the object. Then Shape-From-Silhouette (SFS) method [2] is applied to generate a coarse visual hull from sparse view silhouettes. For each leaf inside the visual hull, we uniformly sample directions "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta , \\phi ~ \\in ~ [ 0 , 2 \\pi ]"
+          },
+          {
+            "type": "text",
+            "content": "to predict densities and colors by feeding positions and directions to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": ". Note that predicted densities and colors are both view-dependent, denoted as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma ( \\theta , \\phi )"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { c } ( \\theta , \\phi )"
+          },
+          {
+            "type": "text",
+            "content": "respectively. Next, we need to convert those predictions to view-independent densities and SH coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z }"
+          },
+          {
+            "type": "text",
+            "content": "for each leaf by: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        472,
+        332
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\sigma = \\mathbb {E} (\\sigma (\\theta , \\phi)) \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/4a185433fcadf2a452ed6058c8e4831ca2cca5e196cd63f9d6e90f42460907f7.jpg"
+        }
+      },
+      "bbox": [
+        181,
+        343,
+        468,
+        367
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {z} = \\mathbb {E} (\\mathrm {S H} (\\theta , \\phi) \\cdot \\mathbf {c} (\\theta , \\phi)),",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c5dd34beed5756f9dd43a717476c400eabe50122a40cbd3a567fcf883930d65d.jpg"
+        }
+      },
+      "bbox": [
+        184,
+        363,
+        362,
+        380
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbb { E } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": "is the expectation operator, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\operatorname { S H } ( \\theta , \\phi )"
+          },
+          {
+            "type": "text",
+            "content": "is an evaluation function which calculates SH from a direction. After filling in all leaves, we obtain a coarse PlenOctree. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        390,
+        468,
+        435
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As the coarse PlenOctree tree is generated from sparse viewpoints, many redundant leaves need to be filtered out. Also, the values of leaves are not accurate. In the fine stage, inspired by fusion-based methods [8, 28], we first render 100 dense view images by PlenOctree, and query the points that the transmittance in volume rendering "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ T _ { i } } > 1 e \\mathrm { ~ - ~ } 3"
+          },
+          {
+            "type": "text",
+            "content": "from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": ", then we fuse PlenOctree using these points by calculating the updating weights for each leaf. The reason why PlenOctree is initialized from 6 views is that the 6 views query all the points, while the 100 views will only query about "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "points which are fast compared to querying all the points of 100 views. At "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i"
+          },
+          {
+            "type": "text",
+            "content": "-th viewpoints, we use the transmittance "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { i } ( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": "as update weight for leaves at position "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": "and update density and SH coefficients by the following equation: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        436,
+        468,
+        662
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\sigma_ {i} = \\frac {W _ {i - 1} \\sigma_ {i - 1} + T _ {i} \\sigma_ {i}}{W _ {i - 1} + T _ {i}} \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/27cf20e42fe85afda8e6f4983f86888fa004548b608d485944515484e8ed3c58.jpg"
+        }
+      },
+      "bbox": [
+        189,
+        672,
+        468,
+        704
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {z} = \\frac {W _ {i - 1} \\mathbf {z} _ {i - 1} + T _ {i} \\cdot \\operatorname {S H} \\left(\\theta_ {i} , \\phi_ {i}\\right) \\cdot \\mathbf {c} \\left(\\theta_ {i} , \\phi_ {i}\\right)}{W _ {i - 1} + T _ {i}} \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f3eb0026eac84d440c79a85593a41179b4e0b54bf48c59bd683ee56927fef7a1.jpg"
+        }
+      },
+      "bbox": [
+        125,
+        731,
+        468,
+        763
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Then calculate weight and count of updated times: "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        773,
+        410,
+        787
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {i} = \\frac {C _ {i} - 1}{C _ {i}} W _ {i - 1} + \\frac {1}{C _ {i}} T _ {i} \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/53e230713e0234e2844d92dc47e20b0e100e1fa8725d7b04b8820e2837e1b35e.jpg"
+        }
+      },
+      "bbox": [
+        176,
+        799,
+        468,
+        830
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { i } = C _ { i - 1 } + 1"
+          },
+          {
+            "type": "text",
+            "content": "means how many times the leaf has been updated at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i"
+          },
+          {
+            "type": "text",
+            "content": "-th step. After these iterations, we filter out the leaves which have "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma < 1 e - 3"
+          },
+          {
+            "type": "text",
+            "content": "to save the PlenOctree storage and further computational costs. Using PlenOctree "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        839,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/32eb13a7c5455c3c1e2d00a196f82633d1c19654c9378a049994042f85f493e6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3. Illustration of our 4D Scene Representation in frequency domain, including first predicting Fourier coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\sigma }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf k } ^ { \\mathbf { z } }"
+          },
+          {
+            "type": "text",
+            "content": "by inputting "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": ", then computing density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and factors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z }"
+          },
+          {
+            "type": "text",
+            "content": "of SH basis by summing the weighted Fourier Transform with additional timestamp "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          },
+          {
+            "type": "text",
+            "content": ", finally, computing color "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "by summing the weighted SH bases with viewing direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\theta , \\phi )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        504,
+        89,
+        887,
+        256
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "fusion with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Psi"
+          },
+          {
+            "type": "text",
+            "content": "instead of naive gradient descend to do updating can avoid a tremendous amount of optimization iterations so as to accelerate refinement. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        351,
+        890,
+        395
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "With the help of the generalized PlenOctree Fusion, we can obtain a PlenOctree representation for a static scene within 60 seconds, which greatly improves generation speed. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        396,
+        890,
+        457
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Fourier PlenOctree "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        470,
+        686,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we elaborate how Fourier PlenOctree records and renders free-viewpoint videos. As illustrated in Fig. 2 (b), we introduce Fourier PlenOctree with a novel 4D scene representation, which adopts PlenOctree to dynamic scenes by compressing time-variant information in the frequency domain (Sec. 4.1). Combined with Generalized PlenOctree Fusion, Fourier PlenOctree exhibits fast generation and real-time rendering abilities (Sec. 4.2). Fourier PlenOctree fine-tuning can further improve rendering quality within a short time (Sec. 4.3). "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        496,
+        890,
+        647
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1. 4D Scene Representation in Frequency Domain "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        656,
+        890,
+        672
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We propose a novel 4D Scene Representation in a high dimensional frequency domain to enable efficient neural modeling and real-time rendering for general dynamic scenes. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        680,
+        890,
+        738
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As illustrated in Fig. 3, given a 4D scene sample point "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y , z , t )"
+          },
+          {
+            "type": "text",
+            "content": ", the mapping function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Phi"
+          },
+          {
+            "type": "text",
+            "content": "is defined as below: "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        739,
+        890,
+        771
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\Phi (x, y, z) = \\mathbf {k} ^ {\\sigma}, \\mathbf {k} ^ {\\mathbf {z}} \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/71efcb4914a87961cc850363ea1cb835ae41154cb9cd77b55ed238257172f0e7.jpg"
+        }
+      },
+      "bbox": [
+        627,
+        784,
+        890,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\sigma } ~ \\in ~ \\mathbb { R } ^ { n _ { 1 } }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\mathbf { z } } ~ \\in ~ \\mathbb { R } ^ { n _ { 2 } \\times ( \\ell _ { m a x } + 1 ) ^ { 2 } \\times 3 }"
+          },
+          {
+            "type": "text",
+            "content": "are two Fourier Transform coefficients of the functions of density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma ( t )"
+          },
+          {
+            "type": "text",
+            "content": "and SH coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf z } ( t )"
+          },
+          {
+            "type": "text",
+            "content": "at position "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": "respectively; "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "is the Fourier coefficient number of σ, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "is the Fourier coefficient number of each SH coefficient "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z }"
+          },
+          {
+            "type": "text",
+            "content": ", note that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\ell _ { m a x } + 1 ) ^ { 2 } \\times 3"
+          },
+          {
+            "type": "text",
+            "content": "is the number of SH coefficients for "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        808,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/30b782b9f44c9e12de42dfabee582904440ca47dd200a04f9b09818039d5a0db.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4. A straightforward pipeline to generate Fourier PlenOctree from multiple PlenOctrees, for each leaf in Fourier PlenOctree, we first find all corresponding PlenOctree leaves at the same position. They store a sequence of density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and SH coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf z } ( t )"
+          },
+          {
+            "type": "text",
+            "content": "along the time axis. We can convert them to Fourier coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\sigma }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf k } ^ { \\bf z }"
+          },
+          {
+            "type": "text",
+            "content": "corresponding to density and SH coefficients, and store them in Fourier PlenOctree. Finally, we can optimize Fourier PlenOctree using ground truth images. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        81,
+        85,
+        467,
+        227
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RGB channels. As the timestamp "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          },
+          {
+            "type": "text",
+            "content": "is given, density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "can be recovered by the following real-valued Inverse Discrete Fourier Transform (IDFT) in Eq. 7: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        347,
+        470,
+        393
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\sigma (t; \\mathbf {k} ^ {\\sigma}) = \\sum_ {i = 0} ^ {n _ {1} - 1} \\mathbf {k} _ {\\mathbf {i}} ^ {\\sigma} \\cdot \\operatorname {I D F T} _ {i} (t) \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/10c10c2baba24c44776110a2c209171399270ef176ec1479e09203e03bd8db29.jpg"
+        }
+      },
+      "bbox": [
+        168,
+        404,
+        468,
+        444
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          },
+          {
+            "type": "text",
+            "content": "is the frame index and "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        449,
+        281,
+        462
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathrm {I D F T} _ {i} (t) = \\left\\{ \\begin{array}{l l} \\cos \\left(\\frac {i \\pi}{T} t\\right) & \\text {i f i i s e v e n} \\\\ \\sin \\left(\\frac {(i + 1) \\pi}{T} t\\right) & \\text {i f i i s o d d} \\end{array} \\right. \\tag {8}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a1436fd3288b72f9e288ad51f76edd92f0813e16037b48453ee2839f9a89dc97.jpg"
+        }
+      },
+      "bbox": [
+        124,
+        469,
+        468,
+        529
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To handle view-dependent effects, We use a similar idea to compute Fourof coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z } = ( z _ { m , l } ) _ { l : 0 \\leq \\ell \\leq \\ell _ { m a x } } ^ { m : - \\ell \\leq m \\leq \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "h element of SH fun ction by the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { m , l } \\in \\mathbb { R } ^ { 3 }"
+          },
+          {
+            "type": "text",
+            "content": "following Eq. 9: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        536,
+        468,
+        599
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "z _ {m, \\ell} (t; \\mathbf {k} ^ {\\mathbf {z}}) = \\sum_ {i = 0} ^ {n _ {2} - 1} \\mathbf {k} _ {m, \\ell , i} ^ {\\mathbf {z}} \\cdot \\mathrm {I D F T} _ {i} (t) \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/3a50951af21eabfea54733e41e554e8b529fede8e7df3cb2cafbb2f7a2b4df28.jpg"
+        }
+      },
+      "bbox": [
+        150,
+        609,
+        468,
+        650
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } _ { m , \\ell , i } ^ { \\mathbf { z } } \\in \\mathbb { R } ^ { 3 }"
+          },
+          {
+            "type": "text",
+            "content": "is defined as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\mathbf { z } } = ( k _ { m , \\ell , i } ) _ { \\ell : 0 \\leq \\ell \\leq \\ell _ { m a x } } ^ { m : - \\ell \\leq m \\leq \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 \\leq i \\leq n _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "is an additional dimension to store corresponding Fourier coefficients for each SH element "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { m , l }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        655,
+        468,
+        702
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Similar to PlenOctree [56], the mapping function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Phi"
+          },
+          {
+            "type": "text",
+            "content": "can be adapted by an MLP based NeRF network which we called Fourier NeRF-SH and be further discretized into octree-based volume representation. Content in each leaf contains the Fourier coefficients "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\sigma }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\mathbf { z } }"
+          },
+          {
+            "type": "text",
+            "content": "of the corresponding position. As a result, the proposed representation absorbs the advantages and benefits of the original PlenOctree and enables real-time novel view synthesis for freeviewpoint videos. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        703,
+        468,
+        838
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2. Fourier PlenOctree Generation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        847,
+        352,
+        861
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Reconstruction a Fourier PlenOctree as described in Sec. 4.1 is a big challenge. A naive way to reconstruct such "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        869,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fourier PlenOctree is to fit a continual implicit function as described in Eq. 6 from scratch using Fourier NeRF-SH like [56], which takes about 1-2 days. For speed considerations, we adopt Generalized PlenOctree Fusion (Section. 3) in free-viewpoint video generation. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        167
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Octree structures vary from frame to frame due to object’s motion. Fourier PlenOctree requires the structures to be the same in all frames in order to analyze plenoptic functions located at the same position. Fortunately, we are able to fast infer octree structures via Shape-From-Silhouette (SFS). Applying Generalized PlenOctree Fusion for each frame, we fill content in all frames’ PlenOctrees. After that, all we need is to unify them. For PlenOctrees at timestamps "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t = 1 , 2 , \\cdots , T"
+          },
+          {
+            "type": "text",
+            "content": ", we first calculate the union of their structures, note that the union of their structures always has equal or deeper leaves comparing PlenOctree at any frame. In other words, each leaf in an octree either is divided or keeps the same. In the case of division, we just copy the preexisted value from the parent node (previous leaf) to new leaves. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        167,
+        890,
+        391
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Having unified Plenoctrees for each frame, we calculate a Fourier PlenOctree, as shown in Fig. 4, which has the same octree structure as theirs by using the Discrete Fourier Transform (DFT) for each leaf’s values "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\sigma }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { \\mathbf { z } }"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        393,
+        890,
+        453
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {k} _ {i} ^ {\\sigma} = \\sum_ {t = 1} ^ {T} \\sigma (t) \\cdot \\mathrm {D F T} _ {i} (t) \\tag {10}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/3e1534fbcf5f6ab1ad654d62f1e49c2c604a53796e2727987d02a913a61980ca.jpg"
+        }
+      },
+      "bbox": [
+        609,
+        463,
+        890,
+        503
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {k} _ {m, \\ell , i} ^ {\\mathbf {z}} = \\sum_ {t = 1} ^ {T} z _ {m, \\ell} (t) \\cdot \\mathrm {D F T} _ {i} (t) \\tag {11}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/24866e8556b7f10bf172c9a7ef794f20f05485a411f6749d14312d7b92460f84.jpg"
+        }
+      },
+      "bbox": [
+        591,
+        513,
+        890,
+        555
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        560,
+        544,
+        573
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathrm {D F T} _ {i} (t) = \\left\\{ \\begin{array}{l l} \\frac {1}{T} \\cos \\left(\\frac {i \\pi}{T} t\\right) & \\text {i f i i s e v e n} \\\\ \\frac {1}{T} \\sin \\left(\\frac {(i + 1) \\pi}{T} t\\right) & \\text {i f i i s o d d} \\end{array} \\right. \\tag {12}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c207d8fbd65f92ca77cf95580392e2f287045770cbc03658475349f9588544c4.jpg"
+        }
+      },
+      "bbox": [
+        527,
+        580,
+        890,
+        643
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3. Fourier PlenOctree Fine-tuning "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        651,
+        779,
+        667
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Although our proposed Fourier PlenOctree has a DFT mapping function from Fourier coefficients to densities and SH coefficients at a specific timestamp, the fine-tuning procedure discussed in [56] can be extended to our method to improve the image quality via back propagation as DFT is totally differentiable. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        674,
+        890,
+        763
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The objective function of this procedure is the same as the loss function of [25]: "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        765,
+        890,
+        794
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} = \\sum_ {t = 1} ^ {T} \\sum_ {i = 1} ^ {N} \\| \\hat {I} _ {i} ^ {t} - I _ {i} ^ {t} \\| _ {2} ^ {2} \\tag {13}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7a5f6c0af3f298d48cdb1784019486ad0cf0f94e793e283260278526928c9993.jpg"
+        }
+      },
+      "bbox": [
+        614,
+        805,
+        890,
+        847
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { I } _ { i } ^ { t }"
+          },
+          {
+            "type": "text",
+            "content": "is the rendered image for view "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i"
+          },
+          {
+            "type": "text",
+            "content": "and frame "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        854,
+        857,
+        869
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The optimization time is much shorter than optimizing Fourier NeRF-SH, since Fourier PlenOctree is an explicit "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        869,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/22a48d84d812ffd99051722b360131d9277c96cf8fba813cc657318d08f3d0e7.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5. The rendered appearance results of our Fourier PlenOctree method on several sequences. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        101,
+        92,
+        861,
+        448
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "representation which is easier to optimize than MLP-based implicit representations. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        474,
+        470,
+        506
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5. Experimental Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        521,
+        282,
+        537
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we evaluate our Fourier Plenoctree method on a variety of challenging scenarios. We run our experiments on a PC with a single NVIDIA GeForce RTX3090 GPU. It only takes us about 2 hours to reconstruct Fourier PlenOctree with input from 60 views and 60 frames. For dynamic datasets, we have five real datasets in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 0 4 8 \\times 1 5 3 6"
+          },
+          {
+            "type": "text",
+            "content": "and five synthetic datasets in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 0 8 0 \\times 1 0 8 0"
+          },
+          {
+            "type": "text",
+            "content": ". We use "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { m a x } = 2"
+          },
+          {
+            "type": "text",
+            "content": "(9 components) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 1 2 ^ { 3 }"
+          },
+          {
+            "type": "text",
+            "content": "grid size for our Fourier PlenOctree. Our method achieves rendering speed at 100fps with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 0 0 \\times 8 0 0"
+          },
+          {
+            "type": "text",
+            "content": "resolution, which is 3000 times faster than the original NeRF. As demonstrated in Fig. 5, our approach generates high-quality appearance results and even handles identities with rich textures and challenging motions. Please refer to the supplementary video for more video results. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        547,
+        468,
+        773
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1. Comparison "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        785,
+        209,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our approach is first to enable the fast generation and real-time dynamic rendering to the best of our knowledge. To demonstrate the overall performance of our approach, we compare to the existing free-viewpoint video methods based on neural rendering, including the voxel-based method Neural Volumes [21], and implicit methods iBut-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        810,
+        470,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ter [48], ST-NeRF [58] and Neural Body [32] based on neural radiance field. For a fair comparison, all the methods share the same training dataset as our approach. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        474,
+        890,
+        521
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Fig. 6, our approach achieves photorealistic free-viewpoint rendering with the most vivid rendering result in terms of photo-realism and sharpness, which, in addition, can be done in real-time. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        521,
+        890,
+        580
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For quantitative comparison, we adopt the peak signalto-noise ratio (PSNR), structural similarity index (SSIM), mean absolute error (MAE), and Learned Perceptual Image Patch Similarity (LPIPS) [59] as metrics to evaluate our rendering accuracy. We keep 90 percent of captured views as training set and the other 10 percent views as testing set. As shown in Tab. 1, our approach outperforms other methods in terms of all the metrics for appearance. Such a qualitative comparison illustrates the effectiveness of our approach to encode the spatial and temporal information from our multi-view setting. In Tab. 2, our method achieves the fastest rendering in dynamic scenes and uses the second least training or fine-tuning time given a new multi-view sequence. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        580,
+        890,
+        792
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2. Ablation Study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        801,
+        653,
+        816
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fourier dimensions. We carried out an experiment to find the best choice of Fourier dimension with both realistic rendering performance and acceptable memory usage. As is shown in Fig. 7 and Tab. 3, the results with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 1 } = 3 1"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 2 } = 5"
+          },
+          {
+            "type": "text",
+            "content": "have a better appearance than those using smaller "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        825,
+        893,
+        902
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/aa484c8c02cc8ab5a3f744fb497bf334db9140996ad36be9bcec6ceb9cfd263b.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        81,
+        89,
+        200,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/11dabac62e80e39b603ca7e0bf55cfa4089d5338bd9bf1a4123183a29622a1c4.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        217,
+        90,
+        336,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/455f4e572a71f40208a031c4704c98facacbe8bf39b0bdb720c12b1536861b58.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        351,
+        90,
+        470,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1c5f0358c772c1fb17d3e462f8b14f07e4b054a35fc9248db5193058c3d4c1e3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        486,
+        90,
+        604,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c86267911e4747dee8e59be000a2baa64080e39a3fd7968cca5d47bbdce3d7f6.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        622,
+        90,
+        740,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a31520efbc8294e1614c741a69f757eb540865688999d7bc6dc1e166df96c479.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        756,
+        90,
+        874,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5ccf0c516a2e35710cec3d11f75494b038a9e3bab5387f8947d2ffb7ff8fbb91.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Ground Truth "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        83,
+        237,
+        197,
+        386
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6c2b649a55f7fcf5fbd1110f8f090a7a38b89277ab8dbbf575e3b9b503783a84.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Ours "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        218,
+        237,
+        333,
+        386
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bb5c586fe8b56ce5c41b8c4e0f3e36f652b56d4fa7bb60e94c95656352dd7ed4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "iButter "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        354,
+        237,
+        467,
+        386
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a1fc37caa4b00b490907cc2cb881ac6a34c8af85414e61dfcf2a74bf25f3cb69.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Neural Body "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        490,
+        239,
+        604,
+        387
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/032f8e5d80806b6f33cc4a0a776bdce4534953ebd4223dcf241ff4fb56585a23.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Neural Volume "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        622,
+        237,
+        738,
+        386
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/95658f92d8dc2733fa7d1001bcfa1d5ccae5ea00b00ca99d61a4e6e0b18a63c3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "ST-NeRF "
+          },
+          {
+            "type": "text",
+            "content": "Figure 6. Qualitative comparison against dynamic scene rendering methods. We compare our method with Neural Body, Neural volumes and ST-NeRF and our approach generalizes the most photo-realistic and finer detail. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        759,
+        237,
+        872,
+        386
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/8a9e8da73eb8be84d7171482cf7ff7ca12be5e014b12bff4f03d863611b9e2d1.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "best second-best "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>PSNR↑</td><td>SSIM↑</td><td>MAE↓</td><td>LPIPS↓</td></tr><tr><td>Neural Body</td><td>27.34</td><td>0.9414</td><td>0.0123</td><td>0.0373</td></tr><tr><td>NeuralVolumes</td><td>23.62</td><td>0.9219</td><td>0.0251</td><td>0.0881</td></tr><tr><td>ST-NeRF</td><td>30.63</td><td>0.9486</td><td>0.0092</td><td>0.0324</td></tr><tr><td>iButter</td><td>33.77</td><td>0.9596</td><td>0.0054</td><td>0.0295</td></tr><tr><td>Ours</td><td>35.21</td><td>0.9910</td><td>0.0033</td><td>0.0217</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        86,
+        465,
+        452,
+        551
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/1a0fc5038bf07de862d58c88cfa9b2cef13fcfb51136b0c07c596f6757b761f4.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1. Quantitative comparison against several methods in terms of rendering accuracy. Compared with ST-NeRF, Neural Volumes, NeuralBody and iButter , our approach achieves the best performance in PSNR, SSIM, LPIPS and MAE metrics. "
+          },
+          {
+            "type": "text",
+            "content": "Table 2. Quantitative comparison against several methods in terms of training and rendering speed. Compared with NeuralBody, Neural Volumes, ST-NeRF and iButter, our approach achieves the best performance in FPS metrics and the second best in training or fine-tuning time. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>best</td><td>second-best</td><td></td></tr><tr><td>Method</td><td>Time↓</td><td>FPS↑</td></tr><tr><td>Neural Body</td><td>9.6 hours</td><td>0.34</td></tr><tr><td>NeuralVolumes</td><td>6 hours</td><td>2.3</td></tr><tr><td>ST-NeRF</td><td>12 hours</td><td>0.04</td></tr><tr><td>iButter</td><td>20 mins</td><td>3.54</td></tr><tr><td>Ours</td><td>2 hours</td><td>100</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        148,
+        631,
+        390,
+        733
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fourier dimensions and have less storage cost and faster rendering than using higher dimensions. Our model keeps an outstanding balance. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        824,
+        468,
+        868
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Time of fine-tuning. We analyze the relationship between rendering quality and fine-tuning time. In these ex-"
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        869,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/da7bef25d6196335c4a285fcbb8e01eda44cf1d017bdd7f5581e8b3ed22c5b26.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        511,
+        453,
+        575,
+        551
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ffa33329c25bee02db506f389616ec12468d6332e4a7f18682ae253f72b43c89.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Ground "
+          },
+          {
+            "type": "text",
+            "content": "Truth "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        514,
+        551,
+        566,
+        590
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/568ef0f7dc467b9cf0ebccef7694fdd038ca049526ecfe0db4de183ec36a6d76.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        588,
+        453,
+        651,
+        551
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1e57c881059418ea6ac9879fdf330d940c3acfce7742cd8970f3c7a12079a3d4.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        589,
+        551,
+        640,
+        590
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/65867bed1eeba259e49e33479236839f2333b861dbecf1162e121e1cd077e812.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        663,
+        453,
+        728,
+        551
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/786c28b37d0141c3ffea0f136ad131899e4a1b9b849fe57209582e2e77948652.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        666,
+        551,
+        718,
+        590
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e22b785eb91b5c0b89a5748f7cf20e263c5fd6a8507965d527b161b7694711f9.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        741,
+        453,
+        805,
+        551
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/89656e6159198aeab77af136c99746cb18657b07952b5aa9657ee4f636f00ce2.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        741,
+        551,
+        795,
+        590
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/0b85635e11b0ddaf03c07534f453b5f9f58ceb9ac8d6025d75a859917cef3d83.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        818,
+        453,
+        883,
+        551
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7401ef10e2ae348d0a8ae43e3db4f76198b4c6e730ad739d776ac8987d323e54.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7. Qualitative evaluation on Fourier dimensions. The setting with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 1 } = 3 1"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 2 } = 5"
+          },
+          {
+            "type": "text",
+            "content": "achieves the satisfactory rendering quality while higher Fourier dimension does not result in a significant improvement. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        818,
+        551,
+        872,
+        590
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "periments, we compared the results obtained without finetuning, with a 10-minute fine-tuning, and with a 10-hour fine-tuning which is long enough. As is shown in Fig. 8, the results without fine-tuning have blured in the details. After 10 minutes of fine-tuning, such artifacts were removed. We also found that further fine-tuning only turns out slight improvement. Quantitative results in Tab. 4 shows the same phenomenon. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        700,
+        890,
+        820
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "4D Representation in Frequency Domain. We also evaluate the efficiencies of our 4D Representation variants from the perspectives of rendering quality, storage, and consumed time. We set a limit of memory usage as 24GB in our experiments. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        825,
+        890,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/77e7e05b9b6b298cc89868db2d8238d614e46131ff508dd9642cae08eb2172e4.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "best second-best "
+          },
+          {
+            "type": "text",
+            "content": "Table 3. Quantitative evaluation on Fourier dimensions. Compared with other choices, the setting with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 1 } ~ = ~ 3 1"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { 2 } ~ = ~ 5"
+          },
+          {
+            "type": "text",
+            "content": "achieves the best balance among rendering accuracy, time and storage. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Fourier dimensions</td><td>PSNR↑</td><td>FPS ↑</td><td>Storage (GB)↓</td></tr><tr><td>n1 = 11 n2 = 5</td><td>31.56</td><td>118.47</td><td>6.421</td></tr><tr><td>n1 = 21 n2 = 5</td><td>33.31</td><td>118.14</td><td>6.861</td></tr><tr><td>n1 = 31 n2 = 5 (ours)</td><td>36.21</td><td>117.87</td><td>7.251</td></tr><tr><td>n1 = 31 n2 = 11</td><td>36.40</td><td>109.95</td><td>14.91</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        81,
+        104,
+        462,
+        175
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/296fdbb5aa68c2209f97c9c20ee6a11cd20bd6f9f65be9d605c8edaf573eb2be.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4. Qualitative evaluation on time of fine-tuning. 10- minute fine-tuning achieves the Satisfactory rendering quality while 10-hour fine-tuning does not result in a significant improvement. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>best</td><td colspan=\"4\">second-best</td></tr><tr><td>Method</td><td>PSNR↑</td><td>SSIM↑</td><td>MAE↓</td><td>LPIPS↓</td></tr><tr><td>w/o fine-tuning</td><td>26.02</td><td>0.9671</td><td>0.0126</td><td>0.0678</td></tr><tr><td>10-min fine-tuning (ours)</td><td>32.93</td><td>0.9766</td><td>0.0050</td><td>0.0340</td></tr><tr><td>10-hour fine-tuning</td><td>33.39</td><td>0.9763</td><td>0.0046</td><td>0.0336</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        81,
+        260,
+        465,
+        325
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/d5fb1bc130379170b0cf1977f768506cf5f2d145a3f031480794f19c94883d29.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5. Quantitative evaluation on our Fourier Plenoctree. (a) Our model, using Fourier representation, limited memory w/ DFT (ours), (b) w/o DFT, limited memory, (c) w/o DFT, unlimited memory. Our model is able to use minimal storage with the least fine-tuning time to achieve high fidelity results. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Method</td><td colspan=\"2\">best</td><td colspan=\"2\">second-best</td></tr><tr><td>PSNR↑</td><td>GB↓</td><td>Realtime Rendering</td><td>Fine-tuning time↓</td></tr><tr><td>(a)</td><td>32.15</td><td>7.033</td><td>✓</td><td>2 hours</td></tr><tr><td>(b)</td><td>25.97</td><td>8.669</td><td>✓</td><td>10 hours</td></tr><tr><td>(c)</td><td>32.39</td><td>74.32</td><td>X</td><td>19 hours</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        81,
+        410,
+        465,
+        477
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As is shown in Fig. 9 and Tab. 5, when the memory is limited, the use of DFT can significantly improve the quality of the results to the case where there is no memory limitation. Also, our model uses the least storage and training time to enable dynamic real-time rendering compared to other methods. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        570,
+        468,
+        659
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6. Discussion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        676,
+        191,
+        691
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Limitation. As the first trial to enable fast generation of octree-based representations and real-time rendering for both static and dynamic scenes, our approach has some limitations. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        703,
+        468,
+        762
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "First, despite using a generalized NeRF to directly predict density and color for scenes from input images, we still need dense inputs for static or dynamic scenes. The capturing settings are still expensive and hard to construct. Second, compared with implicit representations such as MLPbased representation for static or dynamic scenes, Fourier PlenOctree still needs larger storage and GPU memory requirement. Also, when the motion of the dynamic scene is faster or the frame number of the multi-view videos is "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        763,
+        468,
+        898
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/83d27dbb1b9a766fc0d1173975d8c702f5b548a26e99ddf5cca7b7f3fd0e7f61.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        506,
+        90,
+        602,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/56649e861f21cfdb838958065fd6df8f612d59e1e7f7af7e94a12453d5f14a37.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        604,
+        90,
+        694,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/69d57da4e529331685819f7bae48cdc4b7a498eb2b45e636cf9ccd037f9bd7ab.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        697,
+        90,
+        789,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d8dee5c14441a04e2542c8dbc70a4dbe436e92aa13236bf3448b6afb997d9d3c.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        790,
+        90,
+        883,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/dbdc8852a3089833d8a62f4bc104f237205ddf005fd9db0d9bf868930e671344.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 8. Qualitative evaluation on time of fine-tuning. 10- minute fine-tuning achieves the Satisfactory rendering quality while longer fine-tuning does not result in a significant improvement. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        516,
+        316,
+        604,
+        468
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f22235282eb077ce6efb7e08357d6edfc4732dc417c0dece646f4ab885e63972.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        606,
+        316,
+        694,
+        469
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/193ac3f4dd6b2ef38e5344cb3cd00dff99488e7a29ed3dd88af505e639b14fe5.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        697,
+        316,
+        784,
+        469
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8e8e066bcf59b37d735515285f10fb1ca9262fec9d24cb03616c1c81713fa6c9.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 9. Qualitative evaluation on DFT. (a) Our model, using Fourier representation, limited memory w/ DFT, limited memory (ours), (b) w/o DFT, limited memory, (c) w/o DFT, unlimited memory. Our model is able to use minimal storage with the least training time to achieve high fidelity results. The use of DFT can significantly improve the quality of the results. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        789,
+        316,
+        877,
+        469
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "more extended, a higher dimension of Fourier coefficients is needed to keep a high quality of rendered results, which requires higher storage and GPU memory. Finally, we cannot handle large movements of entities like walking performers on the street. Our approach is inefficient as we use the union of visual hulls to initialize Fourier PlenOctrees. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        585,
+        890,
+        675
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Conclusion. We have presented a novel Fourier PlenOctree (FPO) technique for efficient neural modeling and realtime rendering of dynamic scenes captured under the freeview video setting. Our coarse-to-fine fusion scheme combines generalizable NeRF with PlenOctree for efficient neural scene construction in minutes. We construct the FPO by tailoring the implicit network to model Fourier coefficients, achieving high-quality rendering for dynamic objects in real-time with compact memory overload. Our experimental results demonstrate the effectiveness and efficiency of FPO for high-quality dynamic scene modeling. With the unique fast generation and real-time rendering ability for dynamic scenes, we believe that our approach serve as a critical step for neural scene modeling, with various potential applications in VR/AR and immersive telepresence. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        676,
+        890,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        78,
+        89,
+        173,
+        104
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[1] Naveed Ahmed, Christian Theobalt, Petar Dobrev, Hans-Peter Seidel, and Sebastian Thrun. Robust fusion of dynamic shape and normal capture for high-quality reconstruction of time-varying geometry. In CVPR. IEEE Computer Society, 2008. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[2] Bruce Guenther Baumgart. Geometric modeling for computer vision. Stanford University, 1974. 4 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[3] Anpei Chen, Zexiang Xu, Fuqiang Zhao, Xiaoshuai Zhang, Fanbo Xiang, Jingyi Yu, and Hao Su. Mvsnerf: Fast generalizable radiance field reconstruction from multi-view stereo. arXiv preprint arXiv:2103.15595, 2021. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[4] Alvaro Collet, Ming Chuang, Pat Sweeney, Don Gillett, Dennis Evseev, David Calabrese, Hugues Hoppe, Adam Kirk, and Steve Sullivan. High-quality streamable free-viewpoint video. ACM Transactions on Graphics (TOG), 34(4):69, 2015. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[5] Mingsong Dou, Philip Davidson, Sean Ryan Fanello, Sameh Khamis, Adarsh Kowdle, Christoph Rhemann, Vladimir Tankovich, and Shahram Izadi. Motion2fusion: Realtime volumetric performance capture. ACM Trans. Graph., 36(6):246:1–246:16, Nov. 2017. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[6] Mingsong Dou, Sameh Khamis, Yury Degtyarev, Philip Davidson, Sean Ryan Fanello, Adarsh Kowdle, Sergio Orts Escolano, Christoph Rhemann, David Kim, Jonathan Taylor, Pushmeet Kohli, Vladimir Tankovich, and Shahram Izadi. Fusion4d: Real-time performance capture of challenging scenes. ACM Trans. Graph., 35(4), July 2016. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[7] Robert A Drebin, Loren Carpenter, and Pat Hanrahan. Volume rendering. ACM Siggraph Computer Graphics, 22(4):65–74, 1988. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[8] Peng Gao, Zhengkai Jiang, Haoxuan You, Pan Lu, Steven CH Hoi, Xiaogang Wang, and Hongsheng Li. Dynamic fusion with intra-and inter-modality attention flow for visual question answering. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 6639–6648, 2019. 4 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[9] Stephan J. Garbin, Marek Kowalski, Matthew Johnson, Jamie Shotton, and Julien Valentin. Fastnerf: High-fidelity neural rendering at 200fps. arXiv, 2021. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[10] Yannan He, Anqi Pang, Xin Chen, Han Liang, Minye Wu, Yuexin Ma, and Lan Xu. Challencap: Monocular 3d capture of challenging human performances using multi-modal references. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pages 11400– 11411, June 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[11] Peter Hedman, Pratul P Srinivasan, Ben Mildenhall, Jonathan T Barron, and Paul Debevec. Baking neural radiance fields for real-time view synthesis. arXiv preprint arXiv:2103.14645, 2021. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[12] Peter Hedman, Pratul P. Srinivasan, Ben Mildenhall, Jonathan T. Barron, and Paul Debevec. Baking neural radiance fields for real-time view synthesis. arXiv, 2021. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[13] Hanbyul Joo, Tomas Simon, and Yaser Sheikh. Total capture: A 3d deformation model for tracking faces, hands, and bodies. In 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 8320–8329, 2018. 2 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        114,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[14] Hansung Kim, Jean-Yves Guillemaut, Takeshi Takai, Muhammad Sarim, and Adrian Hilton. Outdoor dynamic 3- d scene reconstruction. IEEE Transactions on Circuits and Systems for Video Technology, 22(11):1611–1622, 2012. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[15] Kiriakos N Kutulakos and Steven M Seitz. A theory of shape by space carving. International journal of computer vision, 38(3):199–218, 2000. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[16] Zhengqi Li, Tali Dekel, Forrester Cole, Richard Tucker, Noah Snavely, Ce Liu, and William T. Freeman. Learning the depths of moving people by watching frozen people. In 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pages 4516–4525, 2019. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[17] Zhengqi Li, Simon Niklaus, Noah Snavely, and Oliver Wang. Neural scene flow fields for space-time view synthesis of dynamic scenes. arXiv preprint arXiv:2011.13084, 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[18] David B Lindell, Julien NP Martel, and Gordon Wetzstein. Autoint: Automatic integration for fast neural volume rendering. In CVPR, 2021. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[19] Lingjie Liu, Jiatao Gu, Kyaw Zaw Lin, Tat-Seng Chua, and Christian Theobalt. Neural sparse voxel fields. NeurIPS, 2020. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[20] Lingjie Liu, Marc Habermann, Viktor Rudnev, Kripasindhu Sarkar, Jiatao Gu, and Christian Theobalt. Neural actor: Neural free-view synthesis of human actors with pose control. ACM Trans. Graph.(ACM SIGGRAPH Asia), 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[21] Stephen Lombardi, Tomas Simon, Jason Saragih, Gabriel Schwartz, Andreas Lehrmann, and Yaser Sheikh. Neural volumes: Learning dynamic renderable volumes from images. ACM Transactions on Graphics (TOG), 38(4):65:1– 65:14, 2019. 1, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[22] Stephen Lombardi, Tomas Simon, Gabriel Schwartz, Michael Zollhoefer, Yaser Sheikh, and Jason Saragih. Mixture of volumetric primitives for efficient neural rendering. ACM Trans. Graph., 40(4), jul 2021. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[23] Xuan Luo, Jia-Bin Huang, Richard Szeliski, Kevin Matzen, and Johannes Kopf. Consistent video depth estimation. ACM Transactions on Graphics (TOG), 39(4):71–1, 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[24] Zhaoyang Lv, Kihwan Kim, Alejandro Troccoli, Deqing Sun, James M. Rehg, and Jan Kautz. Learning rigidity in dynamic scenes with a moving camera for 3d motion field estimation. In Vittorio Ferrari, Martial Hebert, Cristian Sminchisescu, and Yair Weiss, editors, Computer Vision – ECCV 2018, pages 484–501, Cham, 2018. Springer International Publishing. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[25] Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik, Jonathan T Barron, Ravi Ramamoorthi, and Ren Ng. Nerf: Representing scenes as neural radiance fields for view synthesis. In European conference on computer vision, pages 405–421. Springer, 2020. 1, 2, 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[26] Armin Mustafa, Hansung Kim, Jean-Yves Guillemaut, and Adrian Hilton. Temporally coherent 4d reconstruction of complex dynamic scenes. In 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pages 4660– 4669, 2016. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[27] Richard A. Newcombe, Dieter Fox, and Steven M. Seitz. Dynamicfusion: Reconstruction and tracking of non-rigid scenes in real-time. In 2015 IEEE Conference on Com-"
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "puter Vision and Pattern Recognition (CVPR), pages 343– 352, 2015. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[28] Richard A. Newcombe, Shahram Izadi, Otmar Hilliges, David Molyneaux, David Kim, Andrew J. Davison, Pushmeet Kohi, Jamie Shotton, Steve Hodges, and Andrew Fitzgibbon. Kinectfusion: Real-time dense surface mapping and tracking. In 2011 10th IEEE International Symposium on Mixed and Augmented Reality, pages 127–136, 2011. 2, 4 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[29] Julian Ost, Fahim Mannan, Nils Thuerey, Julian Knodt, and Felix Heide. Neural scene graphs for dynamic scenes. 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[30] Keunhong Park, Utkarsh Sinha, Jonathan T Barron, Sofien Bouaziz, Dan B Goldman, Steven M Seitz, and Ricardo-Martin Brualla. Deformable neural radiance fields. arXiv, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[31] Sida Peng, Junting Dong, Qianqian Wang, Shangzhan Zhang, Qing Shuai, Xiaowei Zhou, and Hujun Bao. Animatable neural radiance fields for modeling dynamic human bodies. In ICCV, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[32] Sida Peng, Yuanqing Zhang, Yinghao Xu, Qianqian Wang, Qing Shuai, Hujun Bao, and Xiaowei Zhou. Neural body: Implicit neural representations with structured latent codes for novel view synthesis of dynamic humans. In CVPR, 2021. 2, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[33] Eric Penner and Li Zhang. Soft 3d reconstruction for view synthesis. ACM Transactions on Graphics (TOG), 36(6):1– 11, 2017. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[34] Albert Pumarola, Enric Corona, Gerard Pons-Moll, and Francesc Moreno-Noguer. D-nerf: Neural radiance fields for dynamic scenes. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 10318–10327, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[35] Rene Ranftl, Vibhav Vineet, Qifeng Chen, and Vladlen ´ Koltun. Dense monocular depth estimation in complex dynamic scenes. In 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pages 4058–4066, 2016. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[36] Daniel Rebain, Wei Jiang, Soroosh Yazdani, Ke Li, Kwang Moo Yi, and Andrea Tagliasacchi. DeRF: Decomposed radiance fields. In CVPR, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[37] Christian Reiser, Songyou Peng, Yiyi Liao, and Andreas Geiger. Kilonerf: Speeding up neural radiance fields with thousands of tiny mlps. arXiv, 2021. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[38] Chris Russell, Rui Yu, and Lourdes Agapito. Video pop-up: Monocular 3d reconstruction of dynamic scenes. In David Fleet, Tomas Pajdla, Bernt Schiele, and Tinne Tuytelaars, editors, Computer Vision – ECCV 2014, pages 583–598, Cham, 2014. Springer International Publishing. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[39] Steven M Seitz and Charles R Dyer. Photorealistic scene reconstruction by voxel coloring. International Journal of Computer Vision, 35(2):151–173, 1999. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[40] Zhuo Su, Lan Xu, Zerong Zheng, Tao Yu, Yebin Liu, and Lu Fang. Robustfusion: Human volumetric capture with datadriven visual cues using a rgbd camera. In Andrea Vedaldi, Horst Bischof, Thomas Brox, and Jan-Michael Frahm, editors, Computer Vision – ECCV 2020, pages 246–264, Cham, 2020. Springer International Publishing. 2 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        470,
+        900
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[41] Richard Szeliski and Polina Golland. Stereo matching with transparency and matting. In Sixth International Conference on Computer Vision (IEEE Cat. No. 98CH36271), pages 517–524. IEEE, 1998. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[42] Matthew Tancik, Ben Mildenhall, Terrance Wang, Divi Schmidt, Pratul P. Srinivasan, Jonathan T. Barron, and Ren Ng. Learned initializations for optimizing coordinate-based neural representations. In CVPR, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[43] Aparna Taneja, Luca Ballan, and Marc Pollefeys. Modeling dynamic scenes recorded with freely moving cameras. In Ron Kimmel, Reinhard Klette, and Akihiro Sugimoto, editors, Computer Vision – ACCV 2010, pages 613–626, Berlin, Heidelberg, 2011. Springer Berlin Heidelberg. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[44] Edgar Tretschk, Ayush Tewari, Vladislav Golyanik, Michael Zollhofer, Christoph Lassner, and Christian Theobalt. Non- ¨ rigid neural radiance fields: Reconstruction and novel view synthesis of a deforming scene from monocular video. arXiv preprint arXiv:2012.12247, 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[45] Alex Trevithick and Bo Yang. GRF: Learning a general radiance field for 3d scene representation and rendering. arXiv, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[46] Daniel Vlasic, Pieter Peers, Ilya Baran, Paul Debevec, Jovan Popovic, Szymon Rusinkiewicz, and Wojciech Matusik. Dy- ´ namic shape capture using multi-view photometric stereo. In ACM SIGGRAPH Asia 2009 Papers, SIGGRAPH Asia ’09, New York, NY, USA, 2009. Association for Computing Machinery. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[47] Michael Waechter, Nils Moehrle, and Michael Goesele. Let there be color! large-scale texturing of 3d reconstructions. In European conference on computer vision, pages 836–850. Springer, 2014. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[48] Liao Wang, Ziyu Wang, Pei Lin, Yuheng Jiang, Xin Suo, Minye Wu, Lan Xu, and Jingyi Yu. ibutter: Neural interactive bullet time generator for human free-viewpoint rendering. In Proceedings of the 29th ACM International Conference on Multimedia, pages 4641–4650, 2021. 2, 3, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[49] Qianqian Wang, Zhicheng Wang, Kyle Genova, Pratul Srinivasan, Howard Zhou, Jonathan T Barron, Ricardo Martin-Brualla, Noah Snavely, and Thomas Funkhouser. IBRNet: Learning multi-view image-based rendering. In CVPR, 2021. 2, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[50] Suttisak Wizadwongsa, Pakkapon Phongthawee, Jiraphon Yenphraphai, and Supasorn Suwajanakorn. NeX: Real-time view synthesis with neural basis expansion. In 2021. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[51] Daniel N Wood, Daniel I Azuma, Ken Aldinger, Brian Curless, Tom Duchamp, David H Salesin, and Werner Stuetzle. Surface light fields for 3d photography. In Proceedings of the 27th annual conference on Computer graphics and interactive techniques, pages 287–296, 2000. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[52] Wenqi Xian, Jia-Bin Huang, Johannes Kopf, and Changil Kim. Space-time neural irradiance fields for free-viewpoint video. arXiv preprint arXiv:2011.12950, 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[53] Lan Xu, Wei Cheng, Kaiwen Guo, Lei Han, Yebin Liu, and Lu Fang. Flyfusion: Realtime dynamic scene reconstruction using a flying depth camera. IEEE Transactions on Visualization and Computer Graphics, 27(1):68–82, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[54] Lan Xu, Yebin Liu, Wei Cheng, Kaiwen Guo, Guyue Zhou, Qionghai Dai, and Lu Fang. Flycap: Markerless "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "motion capture using multiple autonomous flying cameras. IEEE Transactions on Visualization and Computer Graphics, 24(8):2284–2297, Aug 2018. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[55] Lan Xu, Zhuo Su, Lei Han, Tao Yu, Yebin Liu, and Lu Fang. Unstructuredfusion: Realtime 4d geometry and texture reconstruction using commercial rgbd cameras. IEEE Trans. Pattern Anal. Mach. Intell., 42(10):2508–2522, Oct. 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[56] Alex Yu, Ruilong Li, Matthew Tancik, Hao Li, Ren Ng, and Angjoo Kanazawa. PlenOctrees for real-time rendering of neural radiance fields. In ICCV, 2021. 1, 3, 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[57] Alex Yu, Vickie Ye, Matthew Tancik, and Angjoo Kanazawa. pixelNeRF: Neural radiance fields from one or few images. In CVPR, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[58] Jiakai Zhang, Xinhang Liu, Xinyi Ye, Fuqiang Zhao, Yanshun Zhang, Minye Wu, Yingliang Zhang, Lan Xu, and Jingyi Yu. Editable free-viewpoint video using a layered neural representation. ACM Transactions on Graphics (TOG), 40(4):1–18, 2021. 2, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[59] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, and Oliver Wang. The unreasonable effectiveness of deep features as a perceptual metric. In 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 586–595, 2018. 6 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        92,
+        467,
+        416
+      ]
+    }
+  ]
+]

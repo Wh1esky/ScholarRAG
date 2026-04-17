@@ -1,0 +1,5217 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        250,
+        140,
+        751,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lin Liu1 Lingxi Xie3 Xiaopeng Zhang3 Shanxin Yuan4 Xiangyu Chen "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ { 5 , 6 }"
+          },
+          {
+            "type": "text",
+            "content": "Wengang Zhou "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ { 1 , 2 }"
+          },
+          {
+            "type": "text",
+            "content": "Houqiang Li "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ { 1 , 2 }"
+          },
+          {
+            "type": "text",
+            "content": "Qi Tian3 "
+          }
+        ]
+      },
+      "bbox": [
+        254,
+        210,
+        746,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "^ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "CAS Key Laboratory of Technology in GIPAS, EEIS Department, University of Science and Technology of China "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ 2"
+          },
+          {
+            "type": "text",
+            "content": "Institute of Artificial Intelligence, Hefei Comprehensive National Science Center "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ 3"
+          },
+          {
+            "type": "text",
+            "content": "Huawei Cloud BU 4Huawei Noah’s Ark Lab 5University of Macau "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ 6"
+          },
+          {
+            "type": "text",
+            "content": "Shenzhen Institutes of Advanced Technology, CAS "
+          }
+        ]
+      },
+      "bbox": [
+        230,
+        253,
+        769,
+        325
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Abstract. Learning a generalized prior for natural image restoration is an important yet challenging task. Early methods mostly involved handcrafted priors including normalized sparsity, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { 0 }"
+          },
+          {
+            "type": "text",
+            "content": "gradients, dark channel priors, etc. Recently, deep neural networks have been used to learn various image priors but do not guarantee to generalize. In this paper, we propose a novel approach that embeds a task-agnostic prior into a transformer. Our approach, named Task-Agnostic Prior Embedding (TAPE), consists of two stages, namely, task-agnostic pre-training and task-specific fine-tuning, where the first stage embeds prior knowledge about natural images into the transformer and the second stage extracts the knowledge to assist downstream image restoration. Experiments on various types of degradation validate the effectiveness of TAPE. The image restoration performance in terms of PSNR is improved by as much as 1.45dB and even outperforms task-specific algorithms. More importantly, TAPE shows the ability of disentangling generalized image priors from degraded images, which enjoys favorable transfer ability to unknown downstream tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        259,
+        363,
+        743,
+        598
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        626,
+        375,
+        642
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A good image prior can help to distinguish many kinds of noises from original image contents and improve the quality of images. Learning an image prior is important and challenging for image restoration tasks. Early studies explore specific degradation priors to achieve good performances on some low-level vision tasks, such as image dehazing [31,86], image deblurring [53,38], and image deraining [45,85]. However, most priors are hand-crafted and mainly based on limited observations. With the popularity of deep learning, data-driven image priors estimated by combining conventional degradation properties with deep neural networks have been explored [40,26,79,37,24,52,11]. But these networks capturing task-specific priors, do not guarantee to generalize to unseen tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        657,
+        787,
+        809
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recently, there are also efforts in learning complicated priors for low-level vision tasks [64,25,54,10,44,74]. These methods can be roughly grouped into two "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        809,
+        785,
+        840
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2203.06074v2 [cs.CV] 5 Aug 2022 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        263,
+        60,
+        700
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b70dce355b139a774e3db8c8df780cb5238c9c2c0b557db1521e02ab1046aa29.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "（b）Task-specific learning "
+          },
+          {
+            "type": "text",
+            "content": "（c）Task-agnostic learning "
+          },
+          {
+            "type": "text",
+            "content": "Fig. 1: The illustration of the differences of task specific learning and taskagnostic learning. Our method aims to learn ‘what is normal image’ instead of ‘what are rain, snow or other degradation’. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        228,
+        141,
+        777,
+        271
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "types. The first type [10,44] learns specific priors for each task, i.e., the priors formulate ‘what is the distribution of specific noise’. Despite their effectiveness, these methods are often difficult to transfer across different tasks. The second type instead formulates generalized image priors, i.e., ‘what is the distribution of normal images’. For this purpose, these methods [25,54,68] often make use of scalable GANs [6] pre-trained on natural images, hence, the learned priors are often hidden in a latent feature space, making it difficult to disentangle the noise from image contents, especially in the scenarios of complex images. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        378,
+        787,
+        500
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper, we propose Task-Agnostic Prior Embedding (TAPE), a novel kind of priors that are easily generalized to different low-level vision tasks. An intuitive comparison between TAPE and prior task-specific learning is illustrated in Fig. 1. TAPE absorbs the benefits of the aforementioned approaches: on the one hand, we learn the distribution of normal images from non-degraded natural images, which does not rely on any true or synthesized degradation; on the other hand, the priors are encoded in a simple prior learning module named PLM and the main network can decode them by transformer decoders (query embeddings). The training procedure of TAPE consists of two stages, namely, task-agnostic pre-training and task-specific fine-tuning, where a pixel-wise contrastive loss is designed in the first stage for unsupervised low-level representation learning. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        503,
+        787,
+        671
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the experiment, we pre-train our model on four tasks (including deraining, deraindrop, denoising, and demoireing), fine-tune and test it on these four known tasks and four unknown tasks (desnowing, shadow removal, super-resolution, and deblurring). After the one-time learning, the generalized image prior (through pre-training) can be transferred to different tasks. Quantitative and qualitative experimental comparisons show that the proposed TAPE improves the performance for multiple tasks in both task-specific and task-agnostic settings. In particular, our method improves the PSNR by 1.45dB, 1.03dB, 0.84dB, 0.49dB, and 0.75dB on the Rain200L, Rain200H, Raindrop800, SIDD, and TIP2018 datasets, respectively. The task-agnostic pre-training without touching the real noisy image on SIDD increases PSNR by 0.31dB. For the unseen tasks in the pre-training, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        674,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        732,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "TAPE improves the PSNR by 0.91dB, 0.29dB, 0.41dB and 0.48dB on desnowing, shadow removal, super-resolution, and deblurring, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        146,
+        782,
+        176
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In summary, the contributions of our work are: "
+          }
+        ]
+      },
+      "bbox": [
+        238,
+        176,
+        580,
+        191
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "– The possibility and importance of learning task-agnostic and generalized image prior is addressed. As far as we know, TAPE is the first work to (explicitly) represent the universal prior that can be used in multiple image restoration tasks. We disentangle the generalized clean image prior of the corrupted images from the degrading objects/noises. "
+          }
+        ]
+      },
+      "bbox": [
+        225,
+        203,
+        782,
+        277
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "– We propose a two-stage method named TAPE for image restoration to learn the generalized degradation prior. The experiments demonstrate that our method can be easily applied to pre-train image restoration algorithms with other transformer backbones. "
+          }
+        ]
+      },
+      "bbox": [
+        223,
+        279,
+        782,
+        335
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "– We propose a pixel-wise contrastive loss in pre-training for learning better generalized features for PLM, which increases the generalization ability. "
+          }
+        ]
+      },
+      "bbox": [
+        223,
+        339,
+        782,
+        368
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        393,
+        387,
+        409
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Image Restoration. Image restoration is a general term for a series of lowlevel vision tasks, including denoising [78,80,27], deraining [45,85,43], deblurring [40,36], demoireing [63,83,29], etc. The aim of image restoration is to restore clean "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x }"
+          },
+          {
+            "type": "text",
+            "content": "from corrupted y. The corrupted image y can be formulated as, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { y } = \\mathbf { H } \\mathbf { x } + \\mathbf { v }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { H }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x }"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { v }"
+          },
+          {
+            "type": "text",
+            "content": "are degradation matrix, underlying clean image, and noise, respectively. Before the deep learning era, studies design hand-crafted features of the degradation objects (e.g., rain, snow, etc.) for different image restoration tasks. With the popularity of convolutional neural networks (CNNs), a handful of deep-learning based methods are proposed to handle one or multiple types of image restoration tasks. Most of these methods design task-specific models or loss functions to achieve better performances. For image super-resolution [20,32], Dong et al. propose SRCNN [20] to obtain high-resolution images from the corresponding low-resolution images. For HDR imaging, solutions [82,18,41] are proposed for using multiple exposed images to reconstruct an HDR image. Fu et al. [23] introduce a ResNet-based CNN for image deraining. Li et al. and Yu et al., propose FDRNet [44] and RL-Restore [74] to handle hybrid-distorted image restoration tasks. Zheng et al. [84] propose a learnable bandpass filter network for image demoireing. Different from these methods, we explore the power of pre-training to handle several image processing tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        426,
+        787,
+        714
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Image Degradation Prior and Natural Image Prior. Since image restoration is ill-posed, the image prior can help to constrain the solution space. From the Bayesian perspective, the solution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { x }"
+          },
+          {
+            "type": "text",
+            "content": "can be obtained by optimizing: "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        714,
+        785,
+        760
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\hat {\\mathbf {x}} = \\arg \\min  _ {\\mathbf {x}} \\frac {1}{2} \\| \\mathbf {y} - \\mathbf {H} \\mathbf {x} \\| ^ {2} + \\lambda \\Phi (\\mathbf {x}), \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/43231527f25dbcd1fee352408b15d8578c71127b8620fadc1871d8e3cfb2cd7d.jpg"
+        }
+      },
+      "bbox": [
+        377,
+        771,
+        784,
+        799
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where the first term is the fidelity and the second term is the regularization. Deep-learning based methods try to learn the prior parameters "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Theta"
+          },
+          {
+            "type": "text",
+            "content": "and a compact "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        809,
+        782,
+        839
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        732,
+        130
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "inference through an optimization of a loss function on a training dataset with corrupted-clean image pairs. Then Eqn. 1 can be refined as, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        176
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\underset {\\Theta} {\\min } \\ell (\\hat {\\mathbf {x}}, \\mathbf {x}) \\quad \\mathrm {s . t .} \\quad \\hat {\\mathbf {x}} = \\arg \\underset {\\mathbf {x}} {\\min } \\frac {1}{2} \\| \\mathbf {y} - \\mathbf {H x} \\| ^ {2} + \\lambda \\varPhi (\\mathbf {x}; \\Theta). \\qquad (2)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/e5a6d153d65f3c0364e6d8ea6f014ce3fb058880b251fa91fe91f0af8318fa53.jpg"
+        }
+      },
+      "bbox": [
+        305,
+        184,
+        785,
+        213
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Image priors have been widely used in computer vision, including markov random fields [61,87], dark channel prior [31,53], low rank prior [16], and total variation [62,3]. He et al. [31] propose dark channel prior for image dehazing. It exploits the prior property that in an haze-free image there are pixels where at least one color channel is of low value. Chen et al. [16] propose a low-rank model to capture the spatial and temporal correlations between rain streaks. Different from these task-specific priors, we use a pre-trained network to extract more general priors from images. The prior queries are also being adjusted during end-to-end training. Recently, deep image prior (DIP) [64] shows that image statistics can be implicitly captured by the network’s structure, which is also a kind of prior. Inspired by DIP, some attempts use a pre-trained GAN as a source of image statistics [25,54,59,22,8,68]. MGAN prior [25] utilizes multiple latent codes to increase the power of the pre-trained GAN model. DGP [54] fine-tunes the weights generator together with the latent code and use the discriminator to calculate the gap between the generated and real images. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        219,
+        787,
+        445
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Image Restoration Transformers. Transformer [65] is a new type of neural network framework of using mainly self-attention mechanism. It has achieved many successes in computer vision tasks, including object classification [21], objection detection [88,19,7], etc. Recently, it’s also been used in image restoration tasks [70,10,77,46,69,42,15,48]. Chen et al. [10] and Li et al. [42] develop pretrained transformers IPT and EDT respectively for some low-level vision tasks. Wang et al. [69] and Zamir et al. [75] design novel transformer structures, named Uformer and Restormer respectively, and obtain good performance on several image restoration tasks. Most of these methods proposed new transformer-based backbones for image restoration, whereas the goal of our work is a new pretraining pipeline for image restoration. One can apply our method to pre-train an image restoration algorithm with other backbones. We make use of the strong fitting ability of transformers and the learning ability of the transformer decoder to embed prior information. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        446,
+        787,
+        657
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 Proposed Method "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        676,
+        426,
+        695
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we first illustrate why we need to learn a task-agnostic prior (Sec. 3.1). And then, the architecture (Sec. 3.2) and the pipeline (Sec. 3.3) of our method are presented. At last, we briefly discuss the relationship to prior work (Sec. 3.4). "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        707,
+        787,
+        767
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 Motivation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        787,
+        354,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The motivation is shown in Fig. 1, where we assume that many image restoration tasks (e.g., deraining, desnowing, etc.) are present. Most existing image "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        809,
+        785,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        733,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d1ddd5965edde4a496e4ecea01b24e38f46656ce55b2cdb6b7e3af1b7bb94af5.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 2: The network architecture of our TAPE-Net. It consist of two parts: Backbone and prior learning module. With the input of natural images, PLM learns the features that natural images contain, not the features that noise contains. This makes our approach task-agnostic. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        251,
+        143,
+        751,
+        303
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "restoration methods learn a specific model for each single task, trying to capture task-specific priors (e.g., what patterns are likely to be rain and thus need to be removed). While the learning procedure is straightforward, the trained models are difficult to be applied to new restoration tasks because the degradation patterns may have changed significantly. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        405,
+        782,
+        479
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To alleviate the burden, we propose a different pipeline that is generalized across different restoration tasks. The key is to learn task-agnostic priors (i.e., what patterns are likely to be from clean, non-degraded images) rather than the aforementioned, task-specific counterparts. For this purpose, we embed an explicit module, the prior learning module (PLM), into the network, and design a two-stage learning procedure that (i) pre-trains the architecture on multi-source clean images and then (ii) fine-tunes it on specific image restoration datasets. The second stage often occupies a small portion of computation, showing the advantage of our method. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        482,
+        787,
+        617
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 Network Architecture "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        643,
+        444,
+        657
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The TAPE-Net (see Fig. 2) consists of two components: backbone and prior learning module. The backbone has a transformer architecture, containing a CNN encoder for feature extraction, a transformer encoder, a transformer decoder, and a CNN decoder for mapping the deep features into restored images. With the self-attention mechanism, the transformer can separate the generalized prior from the corrupted images. Different from conventional transformer [21], the decoder of our transformer takes additional prior queries, which comes from the prior learning module. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        672,
+        787,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CNN encoder and CNN decoder. The CNN encoder consists of two "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 \\times 3"
+          },
+          {
+            "type": "text",
+            "content": "convolutional layers. The RGB image, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I \\in \\mathbb { R } ^ { 3 \\times H \\times W }"
+          },
+          {
+            "type": "text",
+            "content": ", is the input of the CNN encoder, which generates a feature map "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { e } \\in \\mathbb { R } ^ { 6 4 \\times H \\times W }"
+          },
+          {
+            "type": "text",
+            "content": "with 64 channels "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        794,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        732,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "and with the same resolution as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I"
+          },
+          {
+            "type": "text",
+            "content": ". The CNN decoder also consists of two "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 \\times 3"
+          },
+          {
+            "type": "text",
+            "content": "convolutional layers. It generates a reconstructed image "
+          },
+          {
+            "type": "equation_inline",
+            "content": "O \\in \\mathbb { R } ^ { 3 \\times H \\times W }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        176
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Transformer encoder. The feature map "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { e }"
+          },
+          {
+            "type": "text",
+            "content": "is firstly flattened into small patches "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ f _ { e } ^ { 1 } , f _ { e } ^ { 2 } , . . . , f _ { e } ^ { N } \\}"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { e } ^ { i } \\in \\mathbb { R } ^ { 6 4 P ^ { 2 } } ( i = 1 , 2 , . . . , N )"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { N = \\frac { H W } { P ^ { 2 } } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "is the total patch number and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P"
+          },
+          {
+            "type": "text",
+            "content": "is the patch size. A learnable position encoding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P E _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "with the same size of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { e } ^ { i }"
+          },
+          {
+            "type": "text",
+            "content": "is added to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { e } ^ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and the sum (denoted as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x _ { i }"
+          },
+          {
+            "type": "text",
+            "content": ") is sent into the transformer encoder. The transformer encoder has "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "transformer blocks ( "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n = 1"
+          },
+          {
+            "type": "text",
+            "content": "in this work), each having a multi-head self-attention module and a feed forward network. The process of the transformer encoder can be formulated as, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        176,
+        787,
+        282
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "x ^ {\\prime} = \\operatorname {M S A} (\\ln (x), \\ln (x), \\ln (x)) + x \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ce137ce5dbca4778d0409ed6da49f53be2a716029d0c1b8dbac662ada656c0be.jpg"
+        }
+      },
+      "bbox": [
+        362,
+        294,
+        785,
+        309
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "o _ {e} = \\operatorname {F F N} \\left(\\ln \\left(x ^ {\\prime}\\right)\\right) + x ^ {\\prime},",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/6d976d31635b73a57e182a5a6990a18ab8069325993d0bc239f0a79c243c1be5.jpg"
+        }
+      },
+      "bbox": [
+        362,
+        308,
+        539,
+        324
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where MSA, FFN, and LN denote the multi-head self-attention module, feed forward network, and linear layer in the conventional transformer [65], respectively. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x = [ x _ { 1 } , x _ { 2 } , \\ldots , x _ { N } ]"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "o _ { e } = [ o _ { e _ { 1 } } , o _ { e _ { 2 } } , \\ldots , o _ { e _ { N } } ]"
+          },
+          {
+            "type": "text",
+            "content": "are the input and the output with the same size, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        335,
+        782,
+        396
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Prior learning module. The prior learning module (PLM) aims at providing additional prior queries to the transformer decoder. As shown in Fig. 2, PLM encodes an image into a feature map, and it can be formulated as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { n } = \\mathrm { G } _ { \\mathrm { n } } ( I _ { g t } )"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { n }"
+          },
+          {
+            "type": "text",
+            "content": "is a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 4 \\times H \\times W"
+          },
+          {
+            "type": "text",
+            "content": "feature map representing the deep natural image feainto a series of patches tures and Gn is a VGG19 network to extract image features. Then "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\left[ f _ { n } ^ { 1 } , f _ { n } ^ { 2 } , \\ldots , f _ { n } ^ { N } \\right]"
+          },
+          {
+            "type": "text",
+            "content": "and combined with learnable parameters "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { n }"
+          },
+          {
+            "type": "text",
+            "content": "is flattened "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ e _ { 1 } , e _ { 2 } , \\dots , e _ { N } ]"
+          },
+          {
+            "type": "text",
+            "content": "as follows, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        397,
+        787,
+        503
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "Q = \\left[ e _ {1} + f _ {n} ^ {1}, e _ {2} + f _ {n} ^ {2}, \\dots , e _ {N} + f _ {n} ^ {N} \\right], \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/9ba956d918c78fdb15b4481b4b9c42acf59ff7b37a7e80d66b92803da82a4fdc.jpg"
+        }
+      },
+      "bbox": [
+        367,
+        516,
+        785,
+        534
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": "have the same length as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "o _ { e }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        540,
+        482,
+        555
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Transformer decoder. The transformer decoder has a similar architecture as the transformer encoder except for an additional input of the prior queries "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": "(Similar with the object queries in [19]). In this paper, we use one transformer decoder block that consists of two multi-head self-attention (MSA) layers and one feed forward network (FFN). The transformer decoder is formulated as, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        555,
+        787,
+        631
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "y = \\operatorname {M S A} \\left(\\ln \\left(o _ {e}\\right) + Q, \\ln \\left(o _ {e}\\right) + Q, \\ln \\left(o _ {e}\\right)\\right) + o _ {e}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f8c9eb96a742562afe9bf16bfda85a63046e54251927aad6a3cf97f4487e0659.jpg"
+        }
+      },
+      "bbox": [
+        323,
+        643,
+        679,
+        657
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "y ^ {\\prime} = \\operatorname {M S A} (\\ln (y) + Q, \\ln \\left(o _ {e}\\right), \\ln \\left(o _ {e}\\right)) + y \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/4b80a0478b628d4396998bdc33f41eace86d7146536ba6e66c45c0614adb58a9.jpg"
+        }
+      },
+      "bbox": [
+        323,
+        659,
+        784,
+        674
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "o _ {d} = \\mathrm {F F N} \\left(\\mathrm {L N} \\left(y ^ {\\prime}\\right)\\right) + y ^ {\\prime},",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/fe57d06c23e64a3bda0294b29ea4c6ecdd09cec2b1db5a557afd2148a628b354.jpg"
+        }
+      },
+      "bbox": [
+        323,
+        674,
+        500,
+        689
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "o _ { d } = [ o _ { d _ { 1 } } , o _ { d _ { 2 } } , \\ldots , o _ { d _ { N } } ]"
+          },
+          {
+            "type": "text",
+            "content": "denotes the outputs of the transformer decoder. And then these patches are reshaped into "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "with the size of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 4 \\times H \\times W"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        700,
+        782,
+        731
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3 Optimization "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        753,
+        372,
+        768
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3.1 The Training and Fine-tuning Pipeline "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        779,
+        596,
+        794
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "From Sec. 3.2, in our network design, PLM should extract statistics from the non-degraded (Ground truth) image and use the statistics to assist the main network for image restoration. However, ground truth is unavailable during the "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        795,
+        785,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        733,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a2ce0a1bf3f83f9c914dfcd894f561abd2407852166d1d1f55877cb0d44e952f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 3: The optimization procedure of TAPE. TAPE contains two stages: taskagnostic pre-training and task-specific fine-tuning. The dotted line means that the network trained in the previous stage is used to initialize the network in the next stage. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        246,
+        145,
+        759,
+        247
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "inference (test) stage. So PLM cannot extract statistics from it. To compensate, we train an auxiliary module (backbone "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "in Fig. 3) to generate a pseudo GT from the degraded input. The pseudo GT, not being perfect, depicts the property of a non-degraded image to some extent. The pseudo GT is then fed into PLM for extracting general image priors, and the priors assist the main network (backbone "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": ") to generate the final output. As shown in Fig. 3, TAPE-Net has two stages: task-agnostic pre-training and task-specific fine-tuning. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        348,
+        782,
+        452
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the task-agnostic pre-training, multiple low-level vision tasks are trained together, using corresponding datasets "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ D _ { 1 } , . . . , D _ { m } \\}"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D _ { i } , ( i = 1 , 2 , . . . , m )"
+          },
+          {
+            "type": "text",
+            "content": "represents the dataset for task "
+          },
+          {
+            "type": "equation_inline",
+            "content": "_ i"
+          },
+          {
+            "type": "text",
+            "content": ". In each iteration, a pair of images (a corrupted image "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { c o r }"
+          },
+          {
+            "type": "text",
+            "content": "and its ground truth "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { g t }"
+          },
+          {
+            "type": "text",
+            "content": ") are selected from one dataset "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D _ { i }"
+          },
+          {
+            "type": "text",
+            "content": ". The ground truth "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "is sent into PLM to learn the prior queries, which are then sent to the backbone for end-to-end training. The combination of the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "loss and the proposed pixel-wise contrastive loss (see section 3.3.2) is used to optimize the network (the weighting parameter is for the latter). Due to the task-agnostic pre-training, both the backbone and PLM are well optimized. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        454,
+        787,
+        589
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in the right part of Fig. 3, in the task-specific fine-tuning, because we cannot take the ground truth as input as discussed above, we use an auxiliary module (network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "in Fig. 3) to generate a pseudo GT from the degraded input (Note that in our paper, the network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "can be any neural network or the backbone borrowed from the pre-training stage. For faster convergence, we use the network pre-trained in the first stage). And then, the pseudo GT generated by the network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "is served as the input of pre-trained PLM. The PLM outputs the prior queries and help the pre-trained network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": "to predict better final result. With the estimated pseudo ground truth, PLM can capture the natural image priors better. There are two ways to optimize the parameters in the fine-tuning stage, namely: 1) The network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "is fine-tuned by loss between pseudo GT and GT firstly, and then fixed when fine-tuning other networks; 2) All components are fine-tuned simultaneously. In the supplementary material, we will show that these two optimization methods lead to similar performance. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        590,
+        787,
+        801
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3.2 Pixel-wise Contrastive Loss "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        824,
+        503,
+        838
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        732,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6c8e586f5a863eb2055f3f36c298d6a43009e61f87a3a7a80059294917e64cad.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 4: The use of pixel-wise contrastive loss. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z"
+          },
+          {
+            "type": "text",
+            "content": "is selected from the prior queries of the natural image as ‘query’. And "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z ^ { + }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { j } ^ { - }"
+          },
+          {
+            "type": "text",
+            "content": "are selected as the ‘positive’ and ‘negative’ elements in the contrastive loss, respectively. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        254,
+        146,
+        748,
+        232
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "PLM aims to estimate the distribution of natural patches. However, due to the limited amount of training data, learning from the loss between prediction and GT (unary term) is insufficient for accurate estimation. Inspired by some self-supervised learning for high-level semantics (e.g. MoCo [30] and Sim-CLR [12]) and image to image translation method [4,55], we propose a pixel-wise contrastive loss to offer another cue (binary terms) of estimation – the distance between the features of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "(from the same location) shall be smaller than that between features from different locations. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        316,
+        782,
+        436
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Fig. 4, in the task-agnostic pre-training stage, the degraded image "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "and the natural image "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "are put into PLM, then "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q ^ { d }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q ^ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "are obtained as described in Sec. 3.2. We aim at minimizing the distance between the features of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "from the same location while maximizing the distance between features from different locations. For example, in Fig. 4, the roof without rain should be more closely associated with the roof contaminated by the rain than the other patches of the rainy input, such as other parts of the house or the blue sky. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        438,
+        784,
+        556
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Suppose that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { i } ^ { d }"
+          },
+          {
+            "type": "text",
+            "content": "is selected from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q ^ { d } = \\{ q _ { 1 } ^ { d }"
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q ^ { d } = \\{ q _ { 1 } ^ { d } , \\ q _ { 2 } ^ { d } , . . . , \\ q _ { N } ^ { d } \\}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { N } ^ { d } \\}"
+          },
+          {
+            "type": "text",
+            "content": "as the ‘query’ eliement in the contrastive loss. 1 {qgt1 , qgt2 , ..., qgtN } as the ‘positive’ and ‘negative’ elements in the contrastive loss, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { i } ^ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { j _ { 1 } } ^ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "1, qgtj2 ,..., qjm "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { j _ { m } } ^ { g t }"
+          },
+          {
+            "type": "text",
+            "content": "are selected from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q ^ { g t } ="
+          },
+          {
+            "type": "text",
+            "content": "respectively. Thus, the contrastive loss is formulated as, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        556,
+        785,
+        622
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} = \\sum_ {t = 1} ^ {T} \\ell_ {t} \\left(q _ {i} ^ {d}, q _ {i} ^ {g t}, q _ {j} ^ {g t}\\right), \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/071c17d244407b9b86b4d75c2ab8fbcbcf8d7aeaa7f25bae0117d6e2d957e843.jpg"
+        }
+      },
+      "bbox": [
+        413,
+        631,
+        785,
+        671
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\ell \\left(q _ {i} ^ {d}, q _ {i} ^ {g t}, q _ {j} ^ {g t}\\right) = - \\log \\left[ \\frac {\\exp \\left(q _ {i} ^ {d} \\cdot q _ {i} ^ {g t} / \\tau\\right)}{\\exp \\left(q _ {i} ^ {d} \\cdot q _ {i} ^ {g t} / \\tau\\right) + \\sum_ {k = 1} ^ {m} \\exp \\left(q _ {i} ^ {d} \\cdot q _ {j _ {k}} ^ {g t} / \\tau\\right)} \\right], \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/4368e8dcf11c6e47ae3c4965e51be8e3132d77525ed3ab0e17859742d6bb563b.jpg"
+        }
+      },
+      "bbox": [
+        299,
+        681,
+        785,
+        715
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T = 2 5 6"
+          },
+          {
+            "type": "text",
+            "content": "is the feature number we randomly choose each time and the temperature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau"
+          },
+          {
+            "type": "text",
+            "content": "is set to 0.07. The negative sample number "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m"
+          },
+          {
+            "type": "text",
+            "content": "is set to 256 in our work. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        720,
+        787,
+        763
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.4 Relationship to Prior Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        786,
+        488,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "1) Compared with recent multiple degradation prior learning methods (e.g., IPT and EDT), our TAPE formulates generalized image priors, which means that our "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        809,
+        785,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        733,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/96e9a75b9ba7e0338656fecf7ca33abb343a545ef0be3302437e2ee63a19e386.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: Datasets’ statistics (number of training and testing images) and quantitative comparison for two models (in terms of PSNR (dB)). "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td colspan=\"2\">Rain200L</td><td colspan=\"2\">Rain200H</td><td>Raindrop800</td><td>SIDD</td><td>TIP2018</td><td>Snow100K</td><td>ISTD</td><td>DIV2K</td><td>REDS</td></tr><tr><td>#Train/test images</td><td>1800/200</td><td>1800/200</td><td>800/60</td><td>96000/1280</td><td>10000/200</td><td>10000/500</td><td>1330/540</td><td>800/100</td><td>24000/3000</td><td></td><td></td></tr><tr><td>Baseline</td><td>31.72</td><td>22.81</td><td>26.85</td><td>37.41</td><td>26.77</td><td>25.42</td><td>26.28</td><td>31.25</td><td>32.46</td><td></td><td></td></tr><tr><td>TAPE-Net (Ours)</td><td>33.17</td><td>23.84</td><td>27.69</td><td>37.90</td><td>27.52</td><td>26.33</td><td>26.57</td><td>31.66</td><td>32.94</td><td></td><td></td></tr><tr><td>PSNR Gain</td><td>+1.45</td><td>+1.03</td><td>+0.84</td><td>+0.49</td><td>+0.75</td><td>+0.91</td><td>+0.29</td><td>+0.41</td><td>+0.48</td><td></td><td></td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        217,
+        186,
+        795,
+        256
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "method can generalize well to the pre-training-unknown tasks. Recently, Air-Net [39] also has the ability to generalize to unknown tasks, but their learned representation contains the degraded information instead of normal image information through contrastive learning. 2) Different from the methods [25,54,5,68] where the learned image priors are hidden in the parameters of the generator, the learned prior of our model is explicit. It makes easy for our method to disentangle the unwanted noise from the image contents in some complex image restoration cases. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        295,
+        784,
+        415
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 Experiments and Analysis "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        438,
+        504,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we evaluate the performance of TAPE on several low-level vision tasks and conduct an ablation study. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        469,
+        782,
+        500
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 Tasks and Datasets "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        521,
+        421,
+        535
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For pre-training, we use five datasets, each for one type of degradation. We also test on four more datasets for four tasks that are unknown in the pre-training stage. For both training and testing, we resize images into the resolution of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 5 6 \\times 2 5 6"
+          },
+          {
+            "type": "text",
+            "content": ", and then crop them into "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 4 \\times 6 4"
+          },
+          {
+            "type": "text",
+            "content": "patches for balancing the training procedure with different data sizes. Note that same resizing and cropping operations are also adopted for other models for a fair comparison. The evaluated tasks include denoising, deraining, deraindrop, demoireing, desnowing, shadow removal, super resolution and deblurring. As shown in Table 1 for details, the used datasets are: SIDD [1] for denoising, Rain200H and Rain200L [72] for deraining, Raindrop800 [56] for deraindrop, TIP2018 [63] for demoireing1, Snow100K [49] for desnowing, ISTD [66] for shadow removal, DIV2K [2] for super resolution and REDS [51] for deblurring. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        545,
+        787,
+        728
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 Implementation Details "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        748,
+        455,
+        763
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Pre-training. We use one Nvidia Tesla V100 GPU to train our model using the Adam optimizer for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 0 \\times 2 4 0 0 0"
+          },
+          {
+            "type": "text",
+            "content": "iterations on the mixture of the five dataset "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        772,
+        784,
+        801
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        113,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        784,
+        126
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1 We select a subset of TIP2018 and Snow100K with 10000 training image pairs and 200 test pairs; 10000 training image pairs and 500 test pairs, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        810,
+        784,
+        839
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/153e896a5be535dc013f8836b781a4339bf863b585c7a3ab9b873fc7b7110719.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 5: Visual deraining comparison among our methods and SOTA deraining methods on Rain200L. The differences between the output and the ground truth are shown followed the predicted results. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        222,
+        143,
+        782,
+        265
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(SIDD, Rain200L, Rain200H, Raindrop800, and TIP2018). The initial learning rate is set as 0.0002 and decayed to 0.0001 in the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 0 \\times 2 4 0 0 0"
+          },
+          {
+            "type": "text",
+            "content": "th iteration with batch size 4. In each iteration, we first randomly choose a dataset, from which one clean-corrupted image pair is randomly selected. Fine-tuning. After pretraining on all the datasets, we fine-tune the model on each desired task (e.g., denoising). TAPE-Net is fine-tuned with 200 epochs and a learning rate of 2e-4 for task-specific fine-tuning. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        354,
+        787,
+        460
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3 Pre-training & Generalization Ability "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        488,
+        571,
+        505
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this subsection, we illustrate that our method has good generalization performance on both pre-training-known tasks and pre-training-unknown tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        520,
+        785,
+        550
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Pre-training-known tasks, corresponding data. To illustrate the effectiveness of our task-agnostic pre-training, we compare our pre-trained model with the model without pre-training (denoted as ‘Baseline’ in Table 1). The TAPE-Net improve the PSNR by 1.45dB, 1.03dB, 0.84dB, 0.49dB and 0.75dB on the Rain200L, Rain200H, Raindrop800, SIDD, and TIP2018 dataset, respectively. Please note that in image restoration, an 0.5dB improvement is usually considered significant. It demonstrates the effectiveness of the pre-training and the superiority of our model. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        551,
+        787,
+        671
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Pre-training-known tasks, different data. And we also do experiments to explore the good generalization performance of our pre-trained model when transferred to different distributions of data in the pre-training-known task. Our experiments show that pre-training with synthetic Gaussian noises helps to restore the images corrupted by real noises (see Table 3). In practice, in the taskagnostic pre-training, we use ground truth in SIDD with added synthetic Gaussian noises as input, without touching the real noise images on the SIDD dataset. Then the pre-trained model is fine-tuned on SIDD (using real-noise/non-noise image pairs). The PSNRs increase by 0.19dB, and 0.31dB respectively when the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "of the added Gaussian noise (Sampled from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { N } ( 0 , \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": ") are in [5,20], and [1,50], respectively. When the range of the added Gaussian noise is larger, the "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        674,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        732,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/06445570ba1a0243eea0c4aa4ce9253c472096cddb19dbb31ce8643a680a9b1a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 6: Visual desnowing and shadow removal comparison among our methods and SOTA general image restoration methods on Snow100K and ISTD. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        146,
+        782,
+        258
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/f157864518feca0c39f19c03f2edf984189799faa29c08b36900d5c3a4b3adef.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Quantitative comparison with 4 SOTA general image restoration methods with similar model sizes (in terms of PSNR (dB)). "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>Model size</td><td>Snow100K</td><td>ISTD</td><td>Rain200L</td><td>SIDD</td><td>Raindrop800</td></tr><tr><td>IPT</td><td>2.51M</td><td>26.26</td><td>26.34</td><td>32.67</td><td>38.80</td><td>27.86</td></tr><tr><td>Restormer</td><td>0.93M</td><td>26.80</td><td>26.42</td><td>33.61</td><td>38.91</td><td>27.98</td></tr><tr><td>UFormer</td><td>0.97M</td><td>26.50</td><td>26.27</td><td>32.66</td><td>38.84</td><td>27.70</td></tr><tr><td>MPRNet</td><td>1.11M</td><td>26.30</td><td>26.23</td><td>33.30</td><td>38.89</td><td>28.13</td></tr><tr><td>TAPE-Swin (Ours)</td><td>0.97M</td><td>26.93</td><td>26.61</td><td>34.46</td><td>38.98</td><td>29.15</td></tr><tr><td>TAPE-Restormer (Ours)</td><td>1.07M</td><td>26.91</td><td>26.65</td><td>34.28</td><td>39.01</td><td>29.18</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        295,
+        359,
+        709,
+        441
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "generalization ability of the model in the pre-training stage is stronger, and the performance in the fine-tuning stage is better. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        484,
+        784,
+        513
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Pre-training-unknown tasks. To illustrate the generalization ability of our model, we conduct several experiments on the tasks that are unknown to the pre-training stage. In practice, we fine-tune the pre-trained model on four new low-level vision tasks: desnowing, shadow removal, super resolution and deblurring. As shown in Table 1, compared with the none-pre-trained model, TAPE-Net improves the PSNR by 0.91dB, 0.29dB, 0.41dB and 0.48dB, which demonstrates that the pre-trained model can capture more useful information and features from natural images. Learning task-agnostic priors and pixel-wise contrastive loss on pre-training stage can help the performance of fine-tuning on the unknown tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        515,
+        785,
+        664
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.4 Comparisons with State-of-the-Arts "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        691,
+        555,
+        705
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this subsection, the comparison between our methods and the very recent SOTA image restoration methods are shown in Table 2. we compare our methods (TAPE-swin and TAPE-restormer) with the 4 SOTA methods (IPT [10], Restormer [75], UFormer [69], MPRNet [76]) with the similar model parameters in 3 pre-training-known tasks and 2 pre-training-unknown tasks. The visual results on two pre-training-unknown tasks (desnowing and shadow removal) are shown in Fig. 6. Our method removes the artifacts more thoroughly and retains more details. In the supplementary material, we compare our TAPE-Net with 12 "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        719,
+        787,
+        839
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        767,
+        116,
+        782,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/73698748153d42b1ba8c8281013be3a59db0ac8687e1c9d6462dd78a403a85de.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 7: Visual deraining comparison (a) and visual demoireing comparison (b) among our methods and task-specific methods. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        225,
+        146,
+        781,
+        266
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/66f29d2681a91209cf1ba89881ac4c107b87e9dfe31b726186e7c1ab364db456.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Quantitative comparison on SIDD. It shows the good generalization performance of TAPE-Net when transferred to different distributions of data in the pre-training-known task. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td colspan=\"4\">TAPE-Net W/o pre-train Pre-train (σ ∈ [5,20]) Pre-train (σ ∈ [1,50])</td></tr><tr><td>PSNR</td><td>37.41</td><td>37.60</td><td>37.72</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        300,
+        383,
+        707,
+        422
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/c20dc5d0c87b02af3a597cceab9442ebc8722e95ec109c9f54d2d0ac46688085.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Ablation study of the impact of the multi-task pre-training, which illustrates that adding more tasks will not harm the performance. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>Raindrop800</td><td>Rain200L</td><td>TIP2018</td><td>Snow100K</td></tr><tr><td>RD+RL+RH</td><td>27.71</td><td>33.20</td><td>27.56</td><td>26.17</td></tr><tr><td>RD+TIP+RL+RH</td><td>27.70</td><td>33.18</td><td>27.54</td><td>26.26</td></tr><tr><td>RD+TIP+RL+RH+S</td><td>27.69</td><td>33.17</td><td>27.52</td><td>26.33</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        321,
+        494,
+        684,
+        551
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "state-of-the-art task-specific methods, including deraining methods (DDN [23], SPANet [67], RESCAN [43], PreNet [58], BRN [57],SPDNet [73] and PCNet [34]); demoireing methods ( DMCNN [63], MopNet [29], FHDe2Net [29], HRDN [71], WDNet [47] and MBCNN [84]); and denoising methods (DnCNN [78], FFD-Net [80], RDN [81], and SADNet [9]) on PSNR. Qualitative results on deraining are shown in Figs. 5 and 7(a), showing that our methods get cleaner images and recover more details. The visual demoireing results are shown in Fig. 7(b). Ours can remove moire patterns successfully and restore the underlying clean image. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        595,
+        784,
+        717
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In order to show the performance of our method on pre-training-unknown tasks, we compare ours with the existing SOTA multi-task pre-training method, IPT [10]. We fine-tuned and tested the official pre-trained model of IPT on three unseen tasks, namely, desnowing, shadow removal and deblurring. We compared the gain of PSNR with and without pre-training, because the training patches and model size of IPT and ours are different. The pre-training stage of IPT boosts PSNR by 0.07dB, 0.19dB and 0.08dB, respectively, while the improvements of TAPE (our method) are 0.91dB, 0.29dB and 0.48dB, larger than that of IPT. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        719,
+        787,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        732,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/cca3e3f31f797809e4a09c5d0785383533bfe3c9569e8dbe7bdca2d3a3aae05c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5: The ablation study of the importance of each pre-trained part on the Rain200H and the Raindrop-TestB dataset. ‘-’ and ‘✓’ in the first three columns mean that the model parameters are randomized and pre-trained respectively before the finetuning. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { \\nabla } \\cdot \\mathbf { { \\vec { x } } } ^ { \\mathrm { ~ ~ } }"
+          },
+          {
+            "type": "text",
+            "content": "means the corresponding part does not exist. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Name</td><td>Depth</td><td>network φ</td><td>network θ</td><td>PLM</td><td>Rain200H</td><td>Raindrop-TestB</td><td>Model size (M)</td></tr><tr><td>Baseline</td><td>3</td><td>X</td><td>-</td><td>X</td><td>25.57</td><td>26.13</td><td>0.76</td></tr><tr><td>With no-pre-trained all parts</td><td>2</td><td>-</td><td>-</td><td>-</td><td>25.46</td><td>25.96</td><td>1.12</td></tr><tr><td>With no-pre-trained φ</td><td>2</td><td>-</td><td>✓</td><td>✓</td><td>26.15</td><td>26.39</td><td>1.12</td></tr><tr><td>With no-pre-trained θ</td><td>2</td><td>✓</td><td>-</td><td>✓</td><td>25.96</td><td>26.35</td><td>1.12</td></tr><tr><td>With no-pre-trained θ and PLM</td><td>2</td><td>✓</td><td>-</td><td>-</td><td>25.73</td><td>26.17</td><td>1.12</td></tr><tr><td>Full model</td><td>2</td><td>✓</td><td>✓</td><td>✓</td><td>26.18</td><td>26.41</td><td>1.12</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        223,
+        218,
+        792,
+        310
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.5 Ablation Study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        352,
+        388,
+        367
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Impact of the multi-task pre-training. We do ablation study to analyze the effect of the number of datasets in the pre-training. We pre-train our models on fewer datasets and compare with our original models. As shown in Table 4, RD, TIP, RL, RH, and S mean Raindrop800, TIP2018, Rain200L, Rain200H, and SIDD datasets respectively. ‘+’ means we use these datasets in the pretraining stage. We do the experiments on three pre-trained-known datasets and the maximum PSNR difference is 0.04 dB. This PSNR difference is within a controllable error range. Increasing the dataset in the pre-training is meaningful. Compared with pre-training with 3 datasets, pre-training with 5 datasets increases the PSNR by 0.16dB on Snow100K. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        378,
+        787,
+        529
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Importance of pre-training of each component. In order to verify which component is more important with pre-training (network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": ", network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": "or PLM), we randomize the weights of corresponding parts of TAPE-Net before the finetuning stage. As shown in Table 5, we do ablation study on Rain200H and Raindrop-TestB. All the modified models in this table have the same backbone, TAPE-Swin. Compared ‘With no-pre-trained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "’ and the ‘Full model’, we can see that the PSNRs drop slightly (0.03dB and 0.02dB). With no-pre-trained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": "effects more than the network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "(the PSNRs drop by 0.22dB and 0.06dB). ‘Without pre-training the network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": "and PLM’ also makes the PSNRs drop a lot. Thus, the last four lines in Table 5 demonstrate that the effectiveness of pre-training of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": "and PLM. The first two lines in Table 5 show that even if the model size is larger than Baseline, the performance is not good without pre-training. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        531,
+        787,
+        710
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The ablation studies about the pixel-wise contrastive loss, optimization methods in task-specific fine-tuning can be see in the supplementary material. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        712,
+        785,
+        742
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.6 Visualization Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        767,
+        437,
+        781
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To validate that PLM learns useful and meaningful features with our proposed pipeline, we visualize the features learned by PLM on the deraining task. We put the input, pseudo GT and GT into PLM to get their respective output "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        794,
+        785,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        113,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 3 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ce104c2eb5bfe4523d9005ab7ff7978d29b886bed9bbfe35e0a226ec3570b14d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        240,
+        143,
+        509,
+        253
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/65e3dc20d1f6f2bfada284abadcba525f1978c1edb0133fa350adc928d348d99.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 8: The visualization of the PLM’s output, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": ". (a) The features of the pseudo GT and GT are very similar, but most of the features of input have the features of degraded objects. It means that the features of the pseudo GT is useful and can help the image restoration of the backbone. (b) The last lines are one of the predicted results of PLM. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        522,
+        143,
+        761,
+        253
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Fig. 8(a), in the output features, some channels tend to preserve the information of shapes (the first three feature maps) and edges (the last three feature maps). The features of the pseudo GT and GT are very similar, but most of the features of input have the features of degraded objects. It means that the features of the pseudo GT is useful and can help the image restoration of the backbone. From Fig. 8(b), we can see that with the help of pre-training, the PLM module can correlate the information of similar textures or patches from a long distance. Thus, the transformer decoder of the backbone can utilize these long-distance similar areas/patches to restore the image. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        371,
+        787,
+        508
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 Conclusions and Limitations "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        532,
+        526,
+        549
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Conclusions. In this paper, we address the possibility and importance of learning task-agnostic and generalized image prior. We propose a pipeline named TAPE to learn task-agnostic prior embedding for image restoration. TAPE has two stages: task-agnostic pre-training and task-specific fine-tuning. Our taskagnostic training strategy is able to learn generalized natural image prior. It has good generalization performance when faced with pre-training-unknown tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        566,
+        787,
+        657
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Limitations. Although our method shows generalized ability on a few image restoration tasks, the learned statistics in PLM are still difficult to explain, either in theory or by visualization results. Without these proofs, the PSNR and SSIM numbers are only side evidences of the effectiveness of the task-agnostic priors. In the future, we will continue exploring the possibility of disentangling the taskagnostic priors as well as finding more essential ways to evaluate cross-task image restoration. The pipeline may make the training time longer than the baseline. And the performance of TAPE on mixed degradation tasks needs to be explored. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        657,
+        787,
+        779
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Acknowledgements. This work was supported by the National Natural Science Foundation of China under Contract 61836011 and 62021001. It was also supported by the GPU cluster built by MCC Lab of Information Science and Technology Institution, USTC. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        779,
+        787,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        732,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        143,
+        323,
+        160
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Abdelhamed, A., Lin, S., Brown, M.S.: A high-quality denoising dataset for smartphone cameras. In: CVPR, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Agustsson, E., Timofte, R.: Ntire 2017 challenge on single image super-resolution: Dataset and study. In: CVPRW, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. Babacan, S.D., Molina, R., Katsaggelos, A.K.: Variational bayesian blind deconvolution using a total variation prior. TIP, 2008 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "4. Baek, K., Choi, Y., Uh, Y., Yoo, J., Shim, H.: Rethinking the truly unsupervised image-to-image translation. In: International Conference on Computer Vision (ICCV, 2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "5. Bau, D., Strobelt, H., Peebles, W., Zhou, B., Zhu, J.Y., Torralba, A., et al.: Semantic photo manipulation with a generative image prior. arXiv preprint arXiv:2005.07727 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "6. Brock, A., Donahue, J., Simonyan, K.: Large scale gan training for high fidelity natural image synthesis. In: ICLR, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "7. Carion, N., Massa, F., Synnaeve, G., Usunier, N., Kirillov, A., Zagoruyko, S.: Endto-end object detection with transformers. In: ECCV,2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "8. Chan, K.C., Wang, X., Xu, X., Gu, J., Loy, C.C.: Glean: Generative latent bank for large-factor image super-resolution. arXiv preprint arXiv:2012.00739 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "9. Chang, M., Li, Q., Feng, H., Xu, Z.: Spatial-adaptive network for single image denoising. ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "10. Chen, H., Wang, Y., Guo, T., Xu, C., Deng, Y., Liu, Z., Ma, S., Xu, C., Xu, C., Gao, W.: Pre-trained image processing transformer. CVPR, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "11. Chen, L., Fang, F., Wang, T., Zhang, G.: Blind image deblurring with local maximum gradient prior. In: CVPR, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "12. Chen, T., Kornblith, S., Norouzi, M., Hinton, G.E.: A simple framework for contrastive learning of visual representations. In: ICML, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "13. Chen, W.T., Fang, H.Y., Ding, J.J., Tsai, C.C., Kuo, S.Y.: Jstasr: Joint size and transparency-aware snow removal algorithm based on modified partial convolution and veiling effect removal. In: ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "14. Chen, W.T., Fang, H.Y., Hsieh, C.L., Tsai, C.C., Chen, I., Ding, J.J., Kuo, S.Y., et al.: All snow removed: Single image desnowing algorithm using hierarchical dualtree complex wavelet representation and contradict channel loss. In: CVPR, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "15. Chen, X., Wang, X., Zhou, J., Dong, C.: Activating more pixels in image superresolution transformer. arXiv preprint arXiv:2205.04437 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "16. Chen, Y.L., Hsu, C.T.: A generalized low-rank appearance model for spatiotemporally correlated rain streaks. In: ICCV, 2013 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "17. Cun, X., Pun, C.M., Shi, C.: Towards ghost-free shadow removal via dual hierarchical aggregation network and shadow matting gan. In: AAAI, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "18. Dai, T., Li, W., Cao, X., Liu, J., Jia, X., Leonardis, A., Yan, Y., Yuan, S.: Waveletbased network for high dynamic range imaging. arXiv preprint 2108.01434 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "19. Dai, Z., Cai, B., Lin, Y., Chen, J.: Up-detr: Unsupervised pre-training for object detection with transformers. In: CVPR, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "20. Dong, C., Loy, C.C., He, K., Tang, X.: Image super-resolution using deep convolutional networks. TPAMI, 2015 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "21. Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., et al.: An image is worth 16x16 words: Transformers for image recognition at scale. arXiv preprint arXiv:2010.11929, 2020 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        225,
+        176,
+        784,
+        838
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 5 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "22. El Helou, M., S¨usstrunk, S.: BIGPrior: Towards decoupling learned prior hallucination and data fidelity in image restoration. arXiv preprint arXiv:2011.01406 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "23. Fu, X., Huang, J., Zeng, D., Huang, Y., Ding, X., Paisley, J.: Removing rain from single images via a deep detail network. In: CVPR, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "24. Golts, A., Freedman, D., Elad, M.: Unsupervised single image dehazing using dark channel prior loss. TIP, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "25. Gu, J., Shen, Y., Zhou, B.: Image processing using multi-code gan prior. In: CVPR, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "26. Guo, S., Liang, Z., Zhang, L.: Joint denoising and demosaicking with green channel prior for real-world burst images. arXiv preprint arXiv:2101.09870 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "27. Guo, S., Yan, Z., Zhang, K., Zuo, W., Zhang, L.: Toward convolutional blind denoising of real photographs. In: CVPR, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "28. He, B., Wang, C., Shi, B., Duan, L.Y.: Fhde2net: Full high definition demoireing network. ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "29. He, B., Wang, C., Shi, B., Duan, L.Y.: Mop moire patterns using mopnet. In: ICCV, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "30. He, K., Fan, H., Wu, Y., Xie, S., Girshick, R.: Momentum contrast for unsupervised visual representation learning. In: CVPR, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "31. He, K., Sun, J., Tang, X.: Single image haze removal using dark channel prior. TPAMI, 2010 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "32. Isobe, T., Li, S., Jia, X., Yuan, S., Slabaugh, G., Xu, C., Li, Y.L., Wang, S., Tian, Q.: Video super-resolution with temporal group attention. In: CVPR, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "33. Jha, D., Smedsrud, P.H., Riegler, M.A., Johansen, D., De Lange, T., Halvorsen, P., Johansen, H.D.: Resunet++: An advanced architecture for medical image segmentation. In: ISM, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "34. Jiang, K., Wang, Z., Yi, P., Chen, C., Lin, C.W.: Pcnet: Progressive coupled network for real-time image deraining. In: TIP, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "35. Jin, Y., Sharma, A., Tan, R.T.: Dc-shadownet: Single-image hard and soft shadow removal using unsupervised domain-classifier guided network. In: ICCV, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "36. Kupyn, O., Martyniuk, T., Wu, J., Wang, Z.: Deblurgan-v2: Deblurring (ordersof-magnitude) faster and better. In: ICCV, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "37. Lee, H., Sohn, K., Min, D.: Unsupervised low-light image enhancement using bright channel prior. IEEE Signal Processing Letters, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "38. Levin, A., Weiss, Y., Durand, F., Freeman, W.T.: Understanding and evaluating blind deconvolution algorithms. In: CVPR, 2009 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "39. Li, B., Liu, X., Hu, P., Wu, Z., Lv, J., Peng, X.: All-in-one image restoration for unknown corruption. In: CVPR (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "40. Li, L., Pan, J., Lai, W.S., Gao, C., Sang, N., Yang, M.H.: Blind image deblurring via deep discriminative priors. IJCV, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "41. Li, W., Xiao, S., Dai, T., Yuan, S., Wang, T., Li, C., Song, F.: Sj-hdˆ 2r: Selective joint high dynamic range and denoising imaging for dynamic scenes. arXiv preprint 2206.09611 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "42. Li, W., Lu, X., Lu, J., Zhang, X., Jia, J.: On efficient transformer and image pre-training for low-level vision. In: arXiv preprint 2112.10175 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "43. Li, X., Wu, J., Lin, Z., Liu, H., Zha, H.: Recurrent squeeze-and-excitation context aggregation net for single image deraining. In: ECCV, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "44. Li, X., Jin, X., Lin, J., Liu, S., Wu, Y., Yu, T., Zhou, W., Chen, Z.: Learning disentangled feature representation for hybrid-distorted image restoration. In: ECCV, 2020 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        146,
+        784,
+        838
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        114,
+        730,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "45. Li, Y., Tan, R.T., Guo, X., Lu, J., Brown, M.S.: Rain streak removal using layer priors. In: CVPR, 2016 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "46. Liang, J., Cao, J., Sun, G., Zhang, K., Van Gool, L., Timofte, R.: Swinir: Image restoration using swin transformer. In: ICCVW, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "47. Liu, L., Liu, J., Yuan, S., Slabaugh, G., Leonardis, A., Zhou, W., Tian, Q.: Waveletbased dual-branch network for image demoir´eing. ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "48. Liu, L., Yuan, S., Liu, J., Guo, X., Yan, Y., Tian, Q.: Siamtrans: Zero-shot multiframe image restoration with pre-trained siamese transformers. In: AAAI, 2022 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "49. Liu, Y.F., Jaw, D.W., Huang, S.C., Hwang, J.N.: Desnownet: Context-aware deep network for snow removal. TIP, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "50. Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., Lin, S., Guo, B.: Swin transformer: Hierarchical vision transformer using shifted windows. CVPR, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "51. Nah, S., Baik, S., Hong, S., Moon, G., Son, S., Timofte, R., Lee, K.M.: Ntire 2019 challenge on video deblurring and super-resolution: Dataset and study. In: CVPRW, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "52. Pan, J., Bai, H., Tang, J.: Cascaded deep video deblurring using temporal sharpness prior. In: CVPR, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "53. Pan, J., Sun, D., Pfister, H., Yang, M.H.: Blind image deblurring using dark channel prior. In: CVPR, 2016 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "54. Pan, X., Zhan, X., Dai, B., Lin, D., Loy, C.C., Luo, P.: Exploiting deep generative prior for versatile image restoration and manipulation. In: ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "55. Park, T., Efros, A.A., Zhang, R., Zhu, J.Y.: Contrastive learning for unpaired image-to-image translation. In: ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "56. Qian, R., Tan, R.T., Yang, W., Su, J., Liu, J.: Attentive generative adversarial network for raindrop removal from a single image. In: CVPR, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "57. Ren, D., Shang, W., Zhu, P., Hu, Q., Meng, D., Zuo, W.: Single image deraining using bilateral recurrent network. TIP, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "58. Ren, D., Zuo, W., Hu, Q., Zhu, P., Meng, D.: Progressive image deraining networks: A better and simpler baseline. In: CVPR, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "59. Richardson, E., Alaluf, Y., Patashnik, O., Nitzan, Y., Azar, Y., Shapiro, S., Cohen-Or, D.: Encoding in style: a stylegan encoder for image-to-image translation. arXiv preprint arXiv:2008.00951 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "60. Ronneberger, O., Fischer, P., Brox, T.: U-net: Convolutional networks for biomedical image segmentation. In: MICCAI, 2015 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "61. Roth, S., Black, M.J.: Fields of experts: A framework for learning image priors. In: CVPR, 2005 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "62. Rudin, L.I., Osher, S., Fatemi, E.: Nonlinear total variation based noise removal algorithms. Physica D: nonlinear phenomena, 1992 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "63. Sun, Y., Yu, Y., Wang, W.: Moir´e photo restoration using multiresolution convolutional neural networks. TIP, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "64. Ulyanov, D., Vedaldi, A., Lempitsky, V.: Deep image prior. In: CVPR, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "65. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, L., Polosukhin, I.: Attention is all you need. arXiv preprint arXiv:1706.03762, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "66. Wang, J., Li, X., Yang, J.: Stacked conditional generative adversarial networks for jointly learning shadow detection and shadow removal. CVPR, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "67. Wang, T., Yang, X., Xu, K., Chen, S., Zhang, Q., Lau, R.W.: Spatial attentive single-image deraining with a high quality real rain dataset. In: CVPR, 2019 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "68. Wang, X., Li, Y., Zhang, H., Shan, Y.: Towards real-world blind face restoration with generative facial prior. In: CVPR, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "69. Wang, Z., Cun, X., Bao, J., Liu, J.: Uformer: A general u-shaped transformer for image restoration. arXiv preprint 2106.03106 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        146,
+        784,
+        839
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        767,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "70. Yang, F., Yang, H., Fu, J., Lu, H., Guo, B.: Learning texture transformer network for image super-resolution. In: CVPR, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "71. Yang, S., Lei, Y., Xiong, S., Wang, W.: High resolution demoire network. In: ICIP, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "72. Yang, W., Tan, R.T., Feng, J., Liu, J., Guo, Z., Yan, S.: Deep joint rain detection and removal from a single image. In: CVPR, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "73. Yi, Q., Li, J., Dai, Q., Fang, F., Zhang, G., Zeng, T.: Structure-preserving deraining with residue channel prior guidance. ICCV (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "74. Yu, K., Dong, C., Lin, L., Loy, C.C.: Crafting a toolchain for image restoration by deep reinforcement learning. In: CVPR, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "75. Zamir, S.W., Arora, A., Khan, S., Hayat, M., Khan, F.S., Yang, M.H.: Restormer: Efficient transformer for high-resolution image restoration. In: CVPR, 2022 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "76. Zamir, S.W., Arora, A., Khan, S., Hayat, M., Khan, F.S., Yang, M.H., Shao, L.: Multi-stage progressive image restoration. In: CVPR (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "77. Zeng, Y., Fu, J., Chao, H.: Learning joint spatial-temporal transformations for video inpainting. In: ECCV, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "78. Zhang, K., Zuo, W., Chen, Y., Meng, D., Zhang, L.: Beyond a gaussian denoiser: Residual learning of deep cnn for image denoising. TIP, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "79. Zhang, K., Zuo, W., Gu, S., Zhang, L.: Learning deep cnn denoiser prior for image restoration. In: CVPR, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "80. Zhang, K., Zuo, W., Zhang, L.: Ffdnet: Toward a fast and flexible solution for CNN based image denoising. TIP, 2018 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "81. Zhang, Y., Tian, Y., Kong, Y., Zhong, B., Fu, Y.: Residual dense network for image restoration. TPAMI, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "82. Zheng, B., Pan, X., Zhang, H., Zhou, X., Slabaugh, G., Yan, C., Yuan, S.: Domainplus: Cross transform domain learning towards efficient high dynamic range imaging. In: ACM MM, 2022 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "83. Zheng, B., Yuan, S., Slabaugh, G., Leonardis, A.: Image demoireing with learnable bandpass filters. In: CVPR, 2020 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "84. Zheng, B., Yuan, S., Yan, C., Tian, X., Zhang, J., Sun, Y., Liu, L., Leonardis, A., Slabaugh, G.: Learning frequency domain priors for image demoireing. TPAMI, 2021 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "85. Zhu, L., Fu, C.W., Lischinski, D., Heng, P.A.: Joint bi-layer optimization for singleimage rain streak removal. In: ICCV, 2017 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "86. Zhu, Q., Mai, J., Shao, L.: A fast single image haze removal algorithm using color attenuation prior. TIP, 2015 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "87. Zhu, S.C., Mumford, D.: Prior learning and gibbs reaction-diffusion. TPAMI, 1997 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "88. Zhu, X., Su, W., Lu, L., Li, B., Wang, X., Dai, J.: Deformable detr: Deformable transformers for end-to-end object detection. In: ICLR, 2021 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        146,
+        784,
+        686
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "18 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        114,
+        730,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A Appendix "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        143,
+        354,
+        162
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1 Comparison with general image restoration methods "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        185,
+        699,
+        200
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We compare our TAPE-Net with two models, DnCNN [78] and UNet [60], which are widely used in image restoration tasks. As shown in Table 6, our model outperforms these two models on all datasets. Note that for a fair comparison, we set the compared models with a similar number of FLOPs. The parameters of DnCNN, UNet, and our TAPE are 0.5M, 9.8M, and 1.3M, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        218,
+        787,
+        295
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/fb3105f698f677e0780e7f4b681eaf833834fdbf8cdb020182a8bbbd3c6142f2.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6: Quantitative comparison for three models (in terms of PSNR (dB)). "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Rain200L</td><td>Rain200H</td><td>Raindrop800</td><td>SIDD</td><td>TIP2018</td><td>Snow100K</td><td>ISTD</td><td>FLOPs</td></tr><tr><td>DnCNN [78]</td><td>27.73</td><td>19.20</td><td>26.12</td><td>34.31</td><td>24.74</td><td>23.77</td><td>23.21</td><td>14.4 G</td></tr><tr><td>UNet [60]</td><td>31.50</td><td>22.50</td><td>26.41</td><td>33.72</td><td>25.58</td><td>23.48</td><td>25.64</td><td>18.2 G</td></tr><tr><td>TAPE-Net (Ours)</td><td>33.17</td><td>23.84</td><td>27.69</td><td>37.90</td><td>27.52</td><td>26.33</td><td>26.57</td><td>14.1 G</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        225,
+        353,
+        781,
+        416
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2 Comparison with task-specific methods "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        489,
+        589,
+        505
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Table 7, we firstly compare our methods with state-of-the-art denoising methods (DnCNN [78], FFDNet [80], RDN [81], and SADNet [9]). Note that the FLOPs number of our method (14.1G) is much smaller than that of RDN (46.6G) or SADNet (45.8G), when the input is a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 4 \\times 6 4"
+          },
+          {
+            "type": "text",
+            "content": "RGB image. We replace our backbone model (original transformer) with a specially designed transformer, Swin transformer [50] (termed as ‘TAPE-Net-swin-L’ in Table 7), which outperforms all the SOTA methods with our pre-training strategy. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        523,
+        787,
+        630
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "And we also compare with SOTA deraining methods in Table 8 and compare with SOTA demoireing methods in Table 9. Our method outperforms all these task-specific SOTA methods. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        631,
+        787,
+        676
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/aebd820ba1a051705b07bea4951a100f00dc273325c83616d9ea1c66197026d9.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 7: Quantitative comparison with the state-of-the-art denoising methods on SIDD. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>DnCNN [78]</td><td>FFDNet [80]</td><td>RDN [81]</td><td>SADNet [9]</td><td>TAPE-Net (Ours)</td><td>TAPE-Net-swin-L (Ours)</td></tr><tr><td>PSNR/SSIM</td><td>34.31/0.892</td><td>33.26/0.890</td><td>38.70/0.901</td><td>38.41/0.900</td><td>37.90/0.896</td><td>38.76/0.901</td></tr><tr><td>FLOPS (G)</td><td>14.4</td><td>0.87</td><td>46.6</td><td>45.8</td><td>14.1</td><td>5.3</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        225,
+        750,
+        782,
+        795
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        113,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 9 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/5d4ed26b218a54ae5182af8cc62b1049733882a5480b4244e83d43c86dd186f6.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 8: Quantitative comparison with the state-of-the-art deraining methods on Rain200L and Rain200H. The best result are in Bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Method</td><td>DDN [23]</td><td>SPANet [67]</td><td>RESCAN [43]</td><td>PreNet [58]</td><td>BRN [57]</td><td>PCNet [34]</td><td>TAPE-Net (Ours)</td></tr><tr><td>Rain200L</td><td>PSNR/SSIM</td><td>28.35/0.878</td><td>30.92/0.930</td><td>32.07/0.949</td><td>31.98/0.948</td><td>32.40/0.953</td><td>32.62/0.954</td><td>33.17/0.959</td></tr><tr><td>Rain200H</td><td>PSNR/SSIM</td><td>20.98/0.705</td><td>22.65/0.714</td><td>23.04/0.729</td><td>23.27/0.743</td><td>23.39/0.755</td><td>23.43/0.755</td><td>23.84/0.759</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        218,
+        186,
+        795,
+        237
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/b841a3266c43691872ad91036efa6de071375b806343002f1574c42c7bf07a7c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 9: Quantitative comparison with the state-of-the-art dermoireing methods on TIP2018. The best result are in Bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>DMCNN [63]</td><td>MopNet [29]</td><td>HRDN [71]</td><td>FHDe2Net [28]</td><td>WDNet [47]</td><td>MBCNN [84]</td><td>TAPE-Net (ours)</td></tr><tr><td>PSNR/SSIM</td><td>25.82/0.806</td><td>26.20/0.861</td><td>26.68/0.864</td><td>26.25/0.862</td><td>26.86/0.865</td><td>27.37/0.866</td><td>27.52/0.866</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        218,
+        303,
+        795,
+        338
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3 Additional visualization results. "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        376,
+        527,
+        390
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A.3.1 Visualization some results of the prior queries, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": ". We also visualize some other results of the prior queries (Q) of TAPE. As shown in Fig. 9, (a) and (b) are rain inputs and ground truth respectively; (c) are one of the predicted results of PLM. We can see that with the help of pre-training, the PLM module can correlate the information of similar textures or patches from a long distance. Thus, the transformer decoder of the backbone can utilize these long-distance similar areas/patches to restore the image. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        398,
+        787,
+        506
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A.3.2 Visualization some results of learned parameters (e). We visualize the learned parameters (e) of TAPE. Fig. 10 shows some visualization results of learned parameters (e) and the position embeddings of IPT (these results are copied from [10]). We can find that our learned parameters (e) focus on other patches with farther distances than the position embeddings of IPT. Besides, our learned feature maps show richer patterns. For example, some of the patches focus on the four corners of the image at the same time (the patch on the 3rd row and 2nd column). Some of the patches focus on the characters of oblique directions (the patch on the 1st row and 5th column). These rich feature maps do not appear in the visualization results of IPT. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        523,
+        789,
+        676
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4 Additional results on other transformer backbones. "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        696,
+        687,
+        710
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our TAPE is a widely applicable method, where the backbone can be replaced by other transformer backbones. We replace our backbone network with the swin transformer backbone [50] for experiments. As shown in Table 10, ‘Baselineswintrans’ is the Swin transformer backbone without pre-training. ‘TAPE-Netswintrans-S’, ‘TAPE-Net-swintrans-M’, and ‘TAPE-Net-swintrans-L’ are our TAPE-Nets with the Swin transformer backbone and contain 1 Swin block, 3 Swin blocks and 5 Swin blocks, respectively. The results illustrate that our 3-stage pre-training and adding blocks can significantly boost the performance. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        719,
+        810,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "20 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        732,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/61f98b5fc22490c49d66c1b7cf0e5743e2d4c9cacd2fa8d64622ec8a3c1e3571.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        276,
+        145,
+        321,
+        191
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8a0fc3497d3791d3ff01a8a9bbf21f0e99c66f3454d8b9491a4e2538240d4984.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        323,
+        146,
+        372,
+        193
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e4e2cae8c9c36d3ae9591786d8ace9bede29e47c945bac79a57e20c52cc6f657.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        375,
+        146,
+        421,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9dd2771e6bbf3fda76aa32073ad1799c9477fcb9a17e0a74d5973c9f109cf16b.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        433,
+        146,
+        482,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/95f8f1114ab8df76df92570419fd99953a26edeca8cbc96082506dd80bbec50e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        483,
+        146,
+        550,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9bc62f42b72dc4eeff8fdd76e9388a816e5a3a79a2b074867a0c4130382396f9.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        553,
+        146,
+        573,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ae7b90ef68ba360524410dcaef463ff06252f021a8cb8476786d6f9ea7846986.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        578,
+        146,
+        627,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/91bbf47067e229bbf743499b60e19d1c23df2108bb8ee58f5d2dbc77ebb23fbc.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        630,
+        146,
+        651,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/849f2dd7dfead3594f072271e7d78d00f7d7d9ab8121bfd86337a2f12e4b9971.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        655,
+        146,
+        727,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4c6f943f928112710accc9d8f5356d9531a4b76e345b173e7eb2205089b80eef.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        276,
+        199,
+        323,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e6def534930a621828e7adb180637b1a8ed12c1303f37cd2891ebb32298e458d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        325,
+        199,
+        372,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a614ba42ab86f6bc22f526bb43eba58eee35dce99a9b816e9fb08081b5c7c379.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        375,
+        199,
+        421,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/60bb1bad7a09e7fe032b8d01c8620320ae0f05d6137116918c70be9bb18d676f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        434,
+        199,
+        501,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e6bab44b4af6de96d7997a1458751b174aeaa7880196aae64d7dae7ad36bca36.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        503,
+        199,
+        550,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/0fa54ef91cbb19d65cfe5cf017720b56e6e46202899791862d5112ec6832e2a4.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        553,
+        199,
+        601,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/158fb2b51062d368da4b909cd979a4ac01284a3accfabc353ee829449da8490a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        602,
+        199,
+        651,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a443a58534bab04f8792d6db662e6d176c73eb09e61fb1894fa570efc1c072f7.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        655,
+        199,
+        702,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/56463546758267c5a87b078401467fbe31778eb646fe53d4b7af73c024a38997.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 9: Visualization of some results of the prior queries, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": "on the Rain200L dataset. (a) Rain inputs. (b) Ground truth. (c) one of the predicted results of PLM. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        679,
+        199,
+        727,
+        234
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b900ca0686d7e368c2bcb747906eecf93c8c8392d8367480820cce9f6131385d.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Learnable parameters (e) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        281,
+        314,
+        527,
+        443
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ce62c7f2effadf9344f48362dee419403f39812c6e064228cc00774a0b4bd692.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) Position embeddings of IPT "
+          },
+          {
+            "type": "text",
+            "content": "Fig. 10: Visual comparison between our learnable parameters and the position embeddings of IPT. Our learnable parameters show more richer patterns. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        545,
+        314,
+        723,
+        441
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.5 Ablation study about optimization in task-specific fine-tuning. "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        532,
+        779,
+        549
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Sec. 3.2.1, there are two ways to optimize the networks in the task-specific finetuning stage, namely: 1) The backbone "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi"
+          },
+          {
+            "type": "text",
+            "content": "is fine-tuned by loss between pseudo GT and GT firstly, and then fixed when fine-tuning other networks (denoted as Step by Step finetuning in Table 11); 2) All components are fine-tuned simultaneously (denoted as Joint finetuning in Table 11). As shown in Table 11, the performance of the two methods is equivalent. How to choose different optimization methods for different tasks is future work. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        559,
+        787,
+        662
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.6 Ablation Study of pixel-wise contrastive loss. "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        688,
+        635,
+        704
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We remove the pixel-wise contrastive loss in the task-agnostic pre-training. And the PSNR/SSIM decrease by 0.12dB/0.001 on Rain200L without the proposed pixel-wise contrastive loss. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        714,
+        785,
+        760
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.7 Ablation Study about Transformer or CNN. "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        782,
+        632,
+        799
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We replace the transformer encoder and decoder with the ResNet encoder and decoder [33] respectively with the same model size. The feature map outputed "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        809,
+        785,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        767,
+        116,
+        782,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/017fe503fb2b7ef13c3252370918bd0462fcf9882f04d9b005961e625a9a9a09.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 10: Quantitative comparison for Baseline-swintrans and TAPE-Net-trans (in terms of PSNR (dB)). The numbers in () of the 2nd line are the PSNR gain compared with ‘Baseline-swintrans’. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>Blocks numbers</td><td>Network parameters</td><td>Rain200L (dB)</td><td>SIDD (dB)</td><td>Raindrop800 (dB)</td></tr><tr><td>Baseline-swintrans</td><td>1</td><td>0.19M</td><td>33.52</td><td>38.01</td><td>27.79</td></tr><tr><td>TAPE-Net-swintrans-S</td><td>1</td><td>0.19M</td><td>34.07 (+0.55)</td><td>38.76 (+0.75)</td><td>28.31 (+0.52)</td></tr><tr><td>TAPE-Net-swintrans-M</td><td>3</td><td>0.61M</td><td>34.20</td><td>38.87</td><td>28.97</td></tr><tr><td>TAPE-Net-swintrans-L</td><td>5</td><td>0.97M</td><td>34.46</td><td>38.98</td><td>29.15</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        218,
+        203,
+        785,
+        275
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/97a00eed73ada15cbae71be63bc726248020949a0927b689e6f14193cb73018b.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 11: Comparison between Step by step fine-tuning and Joint fine-tuning. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>TAPE-Swin</td><td>Rain200L</td><td>Rain200H</td><td>Raindrop800-TestB</td></tr><tr><td>Step by step fine-tuning</td><td>35.10</td><td>26.18</td><td>26.41</td></tr><tr><td>Joint fine-tuning</td><td>35.06</td><td>26.05</td><td>26.49</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        300,
+        329,
+        707,
+        382
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "from the encoder and the feature map outputed from the PLM are concatenated and served as the input of the ResNet decoder. We do the ablation study on the Rain200L dataset with the same setting as Sec. 4.5 of the main paper. The PSNR/SSIM drops 1.03dB/0.006 compared with the baseline with the transformer encoder and decoder. The result shows that using the transformer is better when fusing the information of the output of PLM and the encoder. We also made a comparison between pre-trained CNN and no-pre-trained CNN. Compared with transformer, CNN’s performance improvement is much smaller. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        424,
+        787,
+        545
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.8 Visual comparison with other SOTA methods on desnowing and shadow removal "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        569,
+        764,
+        598
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We compare our method with several state-of-the-art desnowing and shadow removal methods. Fig. 11 and Fig. 12 show our method can remove the shadow or snow. Please note that these compared methods use the snow/shadow masks for training, while our method only uses snow/snow-free or shadow/shadow-free image pairs. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        611,
+        787,
+        686
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e389b6cd5e15e294dc96300eb877e96a810f97fe9ef84e4bce7cfffbeed0ea50.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 11: Visual shadow removal comparison among ours and two other methods (DC-ShadowNet [35] and Ghost-freeNet [17]). "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        277,
+        715,
+        728,
+        792
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "22 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "L. Liu, L. Xie, X. Zhang, S. Yuan, X. Chen, W. Zhou, H. Li, Q. Tian "
+          }
+        ]
+      },
+      "bbox": [
+        269,
+        113,
+        732,
+        128
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c094f33f1033e64f6311b7488c6c9dbb56381c89b97ab9efb68ca4be7c7792e9.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 12: Visual desnowing comparison among ours and two other methods (JS-TASR [13] and HDCWNet [14]). "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        276,
+        148,
+        728,
+        228
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "TAPE: Task-Agnostic Prior Embedding for Image Restoration "
+          }
+        ]
+      },
+      "bbox": [
+        315,
+        114,
+        730,
+        128
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 3 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        784,
+        126
+      ]
+    }
+  ]
+]

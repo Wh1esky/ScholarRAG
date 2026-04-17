@@ -1,0 +1,4146 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ENVBRIDGE: BRIDGING DIVERSE ENVIRONMENTS WITH CROSS-ENVIRONMENT KNOWLEDGE TRANSFER FOR EMBODIED AI "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        98,
+        823,
+        170
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Tomoyuki Kagaya1∗, Yuxuan Lou2∗, Thong Jing Yuan3∗, Subramanian Lakshmi3∗, Jayashree Karlekar3 , Sugiri Pranata3, Natsuki Murakami1, Akira Kinose1, Koki Oguri1, Felix Wick4, Yang You2 "
+          }
+        ]
+      },
+      "bbox": [
+        179,
+        193,
+        810,
+        238
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1Panasonic Connect Co., Ltd. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2National University of Singapore "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3Panasonic R&D Center Singapore "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "4Panasonic R&D Center Germany "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        239,
+        416,
+        296
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        450,
+        332,
+        545,
+        347
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In recent years, Large Language Models (LLMs) have demonstrated high reasoning capabilities, drawing attention for their applications as agents in various decision-making processes. One notably promising application of LLM agents is robotic manipulation. Recent research has shown that LLMs can generate text planning or control code for robots, providing substantial flexibility and interaction capabilities. However, these methods still face challenges in terms of flexibility and applicability across different environments, limiting their ability to adapt autonomously. Current approaches typically fall into two categories: those relying on environment-specific policy training, which restricts their transferability, and those generating code actions based on fixed prompts, which leads to diminished performance when confronted with new environments. These limitations significantly constrain the generalizability of agents in robotic manipulation. To address these limitations, we propose a novel method called EnvBridge. This approach involves the retention and transfer of successful robot control codes from source environments to target environments. EnvBridge enhances the agent’s adaptability and performance across diverse settings by leveraging insights from multiple environments. Notably, our approach alleviates environmental constraints, offering a more flexible and generalizable solution for robotic manipulation tasks. We validated the effectiveness of our method using robotic manipulation benchmarks: RLBench, MetaWorld, and CALVIN. Our experiments demonstrate that LLM agents can successfully leverage diverse knowledge sources to solve complex tasks. Consequently, our approach significantly enhances the adaptability and robustness of robotic manipulation agents in planning across diverse environments. "
+          }
+        ]
+      },
+      "bbox": [
+        228,
+        364,
+        766,
+        696
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 INTRODUCTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        723,
+        336,
+        738
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The development of Large Language Models (LLMs) has remarkably advanced various fields, demonstrating impressive capabilities in understanding and generating human-like text. Methods such as Chain of Thought (CoT) (Wei et al. (2023)) and ReAct (Yao et al. (2023)) have showcased the high reasoning capabilities of LLMs, while models like OpenAI-o1 have further enhanced these abilities. Building on these strengths, researchers have explored the integration of LLMs into intelligent agents capable of complex decision-making tasks. These LLM agents leverage sophisticated language understanding and reasoning abilities to perform a wide range of functions, from customer service chatbots to complex problem-solving systems, demonstrating their versatility and potential. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        753,
+        826,
+        867
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Among the various applications of LLM Agents, robotic manipulation stands out as a particularly promising area. Recent studies such as EmbodiedGPT (Mu et al. (2023)) combine LLM with vi-"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        873,
+        823,
+        902
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2410.16919v1 [cs.RO] 22 Oct 2024 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        263,
+        57,
+        707
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "∗Equal contribution. "
+          }
+        ]
+      },
+      "bbox": [
+        191,
+        910,
+        315,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sual components and policy net, building agents based on LLM’s planning ability. Methods such as Code as Policies (CaP) (Liang et al. (2023)) and VoxPoser (Huang et al. (2023)) utilize LLMs to create robotic control code, achieving high accuracy and stability in responding to instructions and removing the need for extensive pre-training specific to robot actions. However, despite these advancements, LLM embodied agents still face significant limitations. LLM agents which use natural language for planning often require policy training to align text action steps with the environment’s numerical action space. This need for environment-specific policy training restricts their flexibility to adapt to diverse and new environments. On the other hand, LLM agents that generate control code for robots, while eliminating the need for pre-training, still exhibit poor performance when applied to unseen environments due to the use of fixed, human-created prompts. This shortcoming reveals their limited transfer ability and lack of robustness across diverse settings. Essentially, current methods struggle to support continuous learning and adaptation, which are crucial for sustained high performance in changing environments. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        826,
+        285
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our research addresses these critical limitations by introducing a novel agent, EnvBridge. EnvBridge employs a key process called Cross-Environment Knowledge Transfer to integrate insights from different environments. This is based on traditional human intelligence: gaining insights from successful experiences in previous familiar environments and transferring knowledge to similar tasks in unseen scenarios. In a similar approach, we leverage successful robotic control code from one benchmark environment and apply it to another, thereby enhancing the agent’s adaptability and performance in diverse environments. This approach alleviates the environmental constraints, providing a more flexible and generalizable solution. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        291,
+        823,
+        402
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "EnvBridge is comprised of three components: Code Generation, Memory-Retrieval, and Re-Planning with Transferred Knowledge. When encountering the tasks in the target environment, EnvBridge will first use LLMs to generate robotic control code attempting the task. If the task is not accomplished, EnvBridge will retrieve successfully executed codes solving similar tasks in source environment stored in our memory. Subsequently, EnvBridge transfers the codes into knowledge appropriate for the target environment and applies them as in-context learning for the agent. By leveraging on appropriate transfer of knowledge across environments, EnvBridge can operate across diverse environments with high performance. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        409,
+        823,
+        521
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We evaluate EnvBridge across three representative embodied environments: RLBench, MetaWorld, and Calvin. These benchmarks encompass common actions like pick and place, while each presents unique environments and a diverse range of tasks. EnvBridge achieves an average success rate of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "69 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on RLBench tasks, significantly outperforming both code generation and Re-Planning baselines. Furthermore, EnvBridge demonstrates robust performance across various knowledge sources and task instructions, highlighting its adaptability to diverse environments and tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        527,
+        823,
+        612
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our contributions can be summarized as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        618,
+        495,
+        632
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "• We propose a novel agent named EnvBridge, which tackles the key challenges in LLM embodied agents that struggle with transferability using a process called Cross-Environment Knowledge Transfer. Inspired by human intelligence?where successful experiences in familiar environments are applied to similar tasks in new scenarios?EnvBridge leverages successful examples from one benchmark environment and applies them to another, enhancing adaptability and performance. "
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        662,
+        823,
+        746
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "• EnvBridge enhances adaptability across various environments without relying on pretraining or human-initiated prompt adjustments. It uses Cross-Environment Knowledge Transfer to retrieve successful control codes from memory and adapt them for the target environment, allowing the agent to flexibly handle new environments and tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        771,
+        823,
+        828
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "• We evaluate EnvBridge with three distinct robot manipulation benchmarks: RLBench, MetaWorld, and CALVIN. Each benchmark has different settings and task complexities, making them ideal for evaluating EnvBridge’s performance. Our results demonstrate that EnvBridge consistently achieves high task success rates across varied scenarios, confirming its effectiveness and robustness. "
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        854,
+        823,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        946,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 RELATED WORK "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        102,
+        346,
+        118
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1 ADVANCEMENTS IN REASONING WITH LLMS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        133,
+        532,
+        148
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "LLMs have made significant strides in natural language processing tasks, including text generation, summarization, translation, and tasks that require elements of reasoning such as reading, comprehension, and question answering. Though their capacity for reasoning and complex problem-solving is impressive, there is still much room for improvement. To enhance their reasoning skills, researchers are exploring techniques like hierarchical reasoning, where complex problems are broken down into smaller sub-problems. Wei et al. (2023) developed chain-of-thought prompting, a strategy that prompts LLMs to reason by articulating their thought process step-by-step. Multi-agent discussion, as demonstrated in Debate (Du et al. (2023)), involves multiple LLMs working together to reason collaboratively. To further improve LLM reasoning, incorporating external knowledge is crucial. Approaches like knowledge graph integration (Pan et al. (2024)) and Retrieval-Augmented Generation (Lewis et al. (2021)) allow LLMs to access and leverage structured information, leading to more accurate and informed responses. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        159,
+        826,
+        325
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2 LLM AGENTS WITH MEMORY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        342,
+        426,
+        357
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "LLM-based agents can interact with humans using natural language, offering a more flexible and transparent interface. The memory module is crucial for enabling an agent to acquire, accumulate, and use knowledge through interactions with its environment, achieved via three key operations: memory reading, writing, and reflection. Memory reading extracts useful information from past experiences to guide future actions, while memory writing stores environmental data for later use. Memory reflection allows agents to evaluate their cognitive processes. Unlike traditional LLMs, agents must learn and act in dynamic environments, necessitating a module that aids in planning future actions. RAP (Kagaya et al. (2024)) dynamically leverages past experiences corresponding to the current situation and context, thereby enhancing agents’ planning capabilities. SayPlan (Ahn et al. (2022)) is an embodied agent tailored for task planning. In this system, scene graphs and environmental feedback function as the agent’s short-term memory, directing its actions. The Generative Agent (Park et al. (2023)) utilizes a hybrid memory structure to support the agent’s behavior. Its short-term memory holds contextual information about the agent’s present situation, while its long-term memory stores past behaviors and thoughts, which can be accessed based on current events. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        368,
+        826,
+        575
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.3 EMBODIED AGENTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        593,
+        354,
+        606
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent works have developed more efficient reinforcement learning agents for robotics and embodied artificial intelligence to enhance agents’ abilities for planning, reasoning, and collaboration in embodied environments. Hierarchical planning models (e.g., Sharma et al. (2022)) represent a type of approach where a high-level planner leverages LLMs to generate subgoals, and a low-level planner carries out their execution. The LLMs outline a sequence of subgoals aimed at reaching the final objective specified by the language instruction, while the low-level planner translates these subgoals into appropriate actions for the given environment. Dasgupta et al. (2023) proposes a similar idea of a unified system for embodied reasoning and task planning, combining high-level commands with low-level controllers for effective planning and action execution. Furthermore, various approaches that utilize the high code-generation capabilities of LLMs for robotic manipulation are being researched. These include methods for grounding actions available within the environment (Singh et al. (2022)), attempting error recovery in case of failures (Duan et al. (2024)), and learning skills from a lifelong learning perspective (Tziafas & Kasaei (2024)). These methods do not require pretraining and can take advantage of the flexible reasoning abilities of LLMs, making them highly notable. However, their applications across various environments are still limited. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        618,
+        826,
+        827
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 ENVBRIDGE: CROSS-ENVIRONMENT KNOWLEDGE TRANSFER AND RE-PLANNING "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        847,
+        767,
+        880
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we introduce how we design and combine Cross-Environment Knowledge Transfer, Re-Planning method with LLM code generation to build our agent EnvBridge. Figure 1 provides an "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/66c761e60aae610d6ecd89a9773a1649380d592bd0b7305e233ee4d8a9872dab.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Cross-Environment Knowledge Transfer in Humans "
+          },
+          {
+            "type": "text",
+            "content": "Cross-Environment Knowledge Transfer in EnvBridge "
+          },
+          {
+            "type": "text",
+            "content": "Figure 1: Overview of EnvBridge. In the method for generating code for robot operation, the successfully generated code in the source environment is stored in memory and utilized for code generation (Re-Planning) in the target environment. At that time, codes with high query similarity are retrieved from memory and converted to match the style of the target environment, thereby facilitating smooth knowledge transfer. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        200,
+        133,
+        823,
+        353
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "overview of the framework. The framework consists of three main components: Code Generation, Memory Retrieval, Knowledge Transfer and Re-Planning. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        463,
+        823,
+        493
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 PROBLEM FORMULATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        511,
+        392,
+        523
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this work, we consider an agent operating in a particular environment "
+          },
+          {
+            "type": "equation_inline",
+            "content": "E _ { 0 }"
+          },
+          {
+            "type": "text",
+            "content": "and assigned with completing some task given a free-form language instruction l. To achieve this goal, the agent needs to generate robot trajectories "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "according to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        537,
+        823,
+        580
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 CODE GENERATION FOR ROBOT MANIPULATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        598,
+        553,
+        612
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use LLMs to generate Python code that is executed by an interpreter to decompose the language instruction into subtasks, invoke perception APIs and generate robot trajectories. Our Code Generation pipeline follows the design from VoxPoser (Huang et al. (2023)), which comprises 3 LLM-calling steps: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        625,
+        823,
+        680
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Step 1: The Planner is responsible for decomposing the language-instruction guided task (e.g., ”press the light switch”) into sub-tasks (e.g., ”grasp the button”, ”move to the center of the button”). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        686,
+        823,
+        729
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\operatorname {P l a n n e r} (l) = \\left(l _ {1}, l _ {2} \\dots , l _ {n}\\right) \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0172f6cf0bcf62f9ecd49e80b21c58b919d0f69f21a0031380344e0ccd9c8092.jpg"
+        }
+      },
+      "bbox": [
+        405,
+        731,
+        823,
+        747
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Step 2: The Composer takes in sub-task instruction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "(e.g., ”grasp the button”, ”move to the center of the button”) and invokes necessary low-level language model program (LMP). Each low-level LMP is responsible for unique functionality (e.g., parsing query objects in dictionary form, generating affordance map in Numpy array from Composer parametrization). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        758,
+        825,
+        816
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\operatorname {C o m p o s e r} \\left(l _ {i}\\right) = \\left(L M P _ {1} \\left(l _ {i}\\right), L M P _ {2} \\left(l _ {i}\\right),.. L M P _ {k} \\left(l _ {i}\\right)\\right) \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/b062a9b1d7f248bd8d6e3ef5bd563aefc682b4c0a3440f5d4057ac23adfbef21.jpg"
+        }
+      },
+      "bbox": [
+        312,
+        825,
+        823,
+        842
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Step 3: The Low-Level LMPs will be executed to interact with certain perception APIs to generate necessary value maps such as affordance and avoidance maps. These value maps will then be used together to find a sequence of end-effector positions serving as robot trajectories. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        857,
+        823,
+        900
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "e x e c _ {L M P} \\left(\\operatorname {C o m p o s e r} \\left(l _ {i}\\right)\\right) = \\tau_ {l i} \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ca944db3f4e5d677865d386fe0d6e3d2c9628f89d7de316a0b6d5ecacd37ec0d.jpg"
+        }
+      },
+      "bbox": [
+        387,
+        909,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Thereafter, we combine the robot trajectories of each sub-task "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "to form the complete robot trajectories attempting to accomplish the task. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        132
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\tau_ {l} = \\left(\\tau_ {l _ {1}}, \\tau_ {l _ {2}} \\dots , \\tau_ {l _ {n}}\\right) \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d789de861caba958a0c771104706c4c1dbfdd35bd2a49b65c5809632bf2103d1.jpg"
+        }
+      },
+      "bbox": [
+        429,
+        141,
+        825,
+        159
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additionally, the prompt used for code generation is documented in Appendix A.2.1. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        174,
+        730,
+        189
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3 MEMORY CONSTRUCTION AND RETRIEVAL "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        208,
+        511,
+        222
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Although Code Generation method can be applied to different embodied environments, we observe a high failure rate in solving tasks in unseen environments. The challenges mainly come from two perspectives. The high-level planner struggles to decompose unseen tasks in new environments and the composer fails to assign proper low-level LMPs. These reveal LLM’s limitations when reasoning in complex zero-shot scenarios. Aiming to build a robust embodied agent that can function in various environments with high efficacy, we leverage on traditional human behavior: learning from successful experiences in previous familiar environments and transferring knowledge to similar tasks in unseen scenarios. To enhance the ability for our agent, we build our Memory and Retrieval mechanism, inspired by the Retrieval-Augmented Generation (Lewis et al. (2021)) framework. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        234,
+        826,
+        359
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3.1 MEMORY COMPONENT"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        377,
+        390,
+        390
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we describe in detail the contents stored in the memory component shown in Figure 1. During the execution of tasks in the Code Generation pipeline, our system records the details of each task, including the environment, the input instructions, the generated code, and the outcomes (successes or failures). After execution and evaluation, only successfully executed codes are saved into our memory. We place heavier emphasis on Planner-level and Composer-level code as they are highly related to the specific task instruction and can be flexible, while low-level LMPs code has less variation in terms of instructions. Therefore, we save only Planner and Composer-level code in our memory. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        402,
+        823,
+        513
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Each successful log "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "text",
+            "content": "contains the following information: The environment E, the code-level c (Planner or Composer), the instruction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": "(task instruction on Planner-level and decomposed sub-task instruction on Composer-level), and the successfully executed code. Examples of the information recorded in memory are provided in Appendix A.3, showcasing the types of data our system stores. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        520,
+        825,
+        577
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "L _ {\\text {p l a n n e r}} = \\left\\{E, c = \\text {p l a n n e r}, l, \\left(l _ {1}, l _ {2} \\dots , l _ {n}\\right) \\right\\} \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/447a6cdab047f6d68cfb96f18caa0d84546677679fb0b2229d9b2eb307f430ca.jpg"
+        }
+      },
+      "bbox": [
+        341,
+        585,
+        823,
+        603
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "L _ {\\text {c o m p o s e r}} = \\{E, c = \\text {c o m p o s e r}, l _ {i}, \\left(L M P _ {1} \\left(l _ {i}\\right), L M P _ {2} \\left(l _ {i}\\right),.. L M P _ {k} \\left(l _ {i}\\right)\\right) \\} \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/4ac11caaf8fc3fbcb8ab1cd88c2a77b68a5014b1496c74a0ed6b9e2fe7157b29.jpg"
+        }
+      },
+      "bbox": [
+        250,
+        613,
+        823,
+        630
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3.2 MEMORY RETRIEVAL "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        645,
+        380,
+        659
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When encountering a new task "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ", EnvBridge can query the memory to find relevant successful logs that can be adapted and helpful at the two stages of code generation. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        671,
+        823,
+        700
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Assuming we are at the code generation stage "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c _ { T }"
+          },
+          {
+            "type": "text",
+            "content": ", the instruction is "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { T }"
+          },
+          {
+            "type": "text",
+            "content": ". For each log in the memory "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { j } ~ = ~ \\{ \\bar { E } , c _ { j } , l _ { j } , C o d e _ { j } \\}"
+          },
+          {
+            "type": "text",
+            "content": ", we will calculate a similarity score between the instructions from the memory log and the current instruction of task "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        705,
+        823,
+        750
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\operatorname {S c o r e} \\left(L _ {j}\\right) = \\mathbf {1} _ {\\left\\{c _ {T} = c _ {j} \\right\\}} * \\cos_ {-} \\operatorname {s i m} \\left(l _ {T}, l _ {j}\\right) \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/10d7154833e7161d76683dc8e8cd6203648c3ac59c465f6678ab5375c67f2304.jpg"
+        }
+      },
+      "bbox": [
+        357,
+        757,
+        823,
+        776
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, the similarity score is calculated as the cosine similarity between the text embedding of current task instruction and logged instruction, if they are on the same code generation level "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( c _ { T } = c _ { j } )"
+          },
+          {
+            "type": "text",
+            "content": "; otherwise, it is 0. Then we retrieve the codes with the highest similarity scores. For generating these text embeddings, we employ sentence-transformers (Reimers & Gurevych (2019)). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        790,
+        823,
+        847
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "After retrieval, EnvBridge transfers the retrieved codes and applies them as prompts for agents to generate more accurate code in the current task. This will be further explained in Section 3.4. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        853,
+        823,
+        882
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\operatorname {R e t r i e v e d} \\left(\\operatorname {C o d e} _ {1}, \\operatorname {C o d e} _ {2},.. \\operatorname {C o d e} _ {K}\\right) = T O P _ {K} ^ {\\operatorname {S c o r e} \\left(L _ {j}\\right)} \\left\\{\\operatorname {C o d e} _ {j} \\right\\} \\tag {8}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/085f0a5ab3bdfdf558674c9da1b16f920ba78740ac82009c36bc8e5479e9d71b.jpg"
+        }
+      },
+      "bbox": [
+        282,
+        890,
+        823,
+        912
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b89ddadeb3c48e1e97821eef92b2f763a3c96503f6b60b335de5a4e9006cebc8.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: The process flow from Knowledge Transfer to Re-Planning. From left to middle: Using a code example from the target environment as a reference, convert the code from the source environment. From middle to right: Use the target environment’s example and the transferred code to generate new code for the task. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        173,
+        103,
+        823,
+        239
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.4 RE-PLANNING WITH TRANSFERRED KNOWLEDGE "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        332,
+        558,
+        345
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we introduce two important designs to apply retrieved code from source environments to LLM code generation in the target environment: Knowledge Transfer and Re-Planning. In Section 3.4.1, we introduce how Knowledge Transfer minimize the difference in robotic manipulation code between source and target environments. In Section 3.4.2, we introduce the instances and the form we apply the adapted retrieved code to better leverage in-context learning for code generation. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        359,
+        823,
+        429
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.4.1 KNOWLEDGE TRANSFER "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        446,
+        401,
+        460
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Robot foundation models such as RT-X (Collaboration (2024)) learn by integrating diverse robotic manipulation data, enabling them to operate in various environments. This clearly demonstrates that common information is shared across different tasks and environments. Building on these insights, we apply Cross-Environment Knowledge Transfer for robotic planning by adapting the retrieved code to different target environments. This process minimizes differences between environments and focuses on transferring the essential insights needed for the target context. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        473,
+        823,
+        556
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This process is illustrated in the left and center of Figure 2. Here, code examples from the target environment are provided as prompts, and the retrieved code is adapted to suit the target environment by LLMs. This allows us to convert environment-specific plans (such as initializing a robot arm at the beginning) and environment-dependent information like coordinates and scales to match the target environment. The prompt used for knowledge transfer is provided in Appendix A.2.2. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        564,
+        823,
+        633
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.4.2 RE-PLANNING "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        652,
+        331,
+        666
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Using the code adapted by Knowledge Transfer, EnvBridge proceeds with Re-Planning. Figure 2 shows this process progressing from the middle to the right. If the initially generated code fails, the agent utilizes the most similar retrieved code in LLM inference context to generate new code. If this new attempt also fails, the agent uses the second most similar code to generate the code again. In this manner, EnvBridge incorporates new ideas from similar knowledge to perform Re-Planning. By combining initial prompt examples with those retrieved from memory, we leverage in-context learning. This approach allows us to maintain code quality while integrating new insights. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        676,
+        823,
+        776
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This methodology is akin to the technique for generating new ideas discussed by Lu et al. (2024) and demonstrates that leveraging archived ideas or insights for the target task is a viable approach. Consequently, this method enhances the agents’ capabilities, improving their flexibility and creativity in task resolution. Detailed prompt illustrating this process is provided in Appendix A.2.3. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        782,
+        823,
+        839
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 EXPERIMENTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        862,
+        328,
+        877
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To assess the effectiveness of EnvBridge, we conducted experiments across three representative embodied agent benchmarks: RLBench, MetaWorld, and CALVIN. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 1 Re-Planning in EnvBridge "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "Initialize: Environment  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "E"
+          },
+          {
+            "type": "text",
+            "content": " ,Memory  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": " MaxTrial  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "   \nInput: Task  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": " ,Instruction  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": "   \ncode  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\equiv"
+          },
+          {
+            "type": "text",
+            "content": " CodeGeneration(l,E) // Code Generation for 1st trial   \nresult  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\equiv"
+          },
+          {
+            "type": "text",
+            "content": " Execution(code,E)   \nif result is Fail then   \nfor i in range(d-1) do   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm{code}_{m} ="
+          },
+          {
+            "type": "text",
+            "content": " MemoryRetrieval(l,M,i) // Memory Retrieval for ith similar code   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm{code}_m^{\\prime} ="
+          },
+          {
+            "type": "text",
+            "content": " KnowledgeTransfer  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(\\mathrm{code}_m)"
+          },
+          {
+            "type": "text",
+            "content": " // Knowledge Transfer into target environment   \ncode  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\equiv"
+          },
+          {
+            "type": "text",
+            "content": " CodeGeneration(l,  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm{code}_m^{\\prime}"
+          },
+          {
+            "type": "text",
+            "content": " E// Code Generation with transferred code   \nresult  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\equiv"
+          },
+          {
+            "type": "text",
+            "content": " Execution(code,E)   \nif result is Success then   \nbreak   \nend if   \nend for   \nend if "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        121,
+        777,
+        330
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "These benchmarks are chosen for their widespread use in embodied agent research and their nearreal-world robotic settings. These benchmarks share common actions, such as pick and place, but they each include different variations in terms of robots and types of tasks. In the following section, we present the evaluation results, demonstrating how memory transfer?where knowledge gained in one environment is applied to an unfamiliar one?enhances the agent’s efficiency and performance. This approach allows us to assess the agent’s adaptability to new challenges while leveraging previously learned knowledge to solve novel tasks, closely mimicking real-world problem-solving scenarios for embodied AI. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        364,
+        823,
+        476
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 RLBENCH: MAIN RESULTS COMPARED WITH BASELINES"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        498,
+        609,
+        512
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RLBench(James et al. (2019)) is a robot learning benchmark for tabletop environments with various tasks. We sampled 10 tasks from it and conduct evaluations covering various tasks, instructions, and objects. Each task comprises 20 trials, with instructions randomly selected from those supported by RLBench. GPT-4o-mini was used for this evalution. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        526,
+        823,
+        583
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We compare EnvBridge with Voxposer(Code Generation baseline) and two Re-Planning baselines: Retry and Self-Reflection. Retry indicates re-executing without making any changes if the previous trial fails. As the method for Self-Reflection, we used a novel conventional approach (Shinn et al. (2023)) to generate a plan for the next trial. Additionally, to extend Self-Reflection to RLBench, we create the prompts ourselves and use the images obtained from RLBench as Observations to generate the next plan. The prompts used for generating Self-Reflection are described in the Appendix A.2.4. In the proposed method, we conduct the evaluation using memory constructed from successful codes in the CALVIN benchmark (Mees et al. (2022)). While detailed settings for the CALVIN benchmark are described in Section 4.3, we used the successful codes from 200 tasks in CALVIN, executed with the Retry Re-Planning method, to build the memory. Moreover, for methods excluding the baseline, the success rate is calculated based on up to three trials. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        589,
+        825,
+        743
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The evaluation results are shown in the Figure 3. From these results, our proposed method performs better than Self-Reflection. Furthermore, while our method requires memory from other environments, Self-Reflection necessitates manual creation of prompts for reflection for each environment. Therefore, our method is more generalized for expanding the application range of robotic operations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        750,
+        823,
+        806
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When analyzing individual task performance, we observe distinct trends between Self-Reflection and EnvBridge. Self-Reflection shows improved performance on tasks partially addressed by the baseline, such as BeatTheBuzz and CloseDrawer. In contrast, EnvBridge demonstrates significant improvements on tasks with low baseline performance, like PushButton and TakeLidOffSaucepan. This difference arises because Self-Reflection enhances the generation of better code for tasks that are already partially solvable, whereas EnvBridge can solve previously unsolvable tasks by incorporating new insights from other environments. Additionally, specific examples of success and failure with EnvBridge are provided in Appendix A.5. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        811,
+        825,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f19c761c57d66f93a1a017fcbfde76836a419256d2e0889120cb7d0298bcd82f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        171,
+        98,
+        591,
+        345
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4fc8d1d2cc5bda212c7997f7b543ba762be160d196ff36c4aa276914b18859f4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: Task-specific and average success rate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\% )"
+          },
+          {
+            "type": "text",
+            "content": "on RLBench. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        627,
+        112,
+        826,
+        347
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/216971349d3365a97c0963478f6973dc55b594bea87b3e0d0f180d324fb3848f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: Task-specific success rate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\% )"
+          },
+          {
+            "type": "text",
+            "content": "on MetaWorld "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        233,
+        388,
+        761,
+        614
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 METAWORLD: EVALUATION WITH VARIOUS KNOWLEDGE SOURCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        664,
+        681,
+        678
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "MetaWorld (Yu et al. (2021)) is an open-source simulated robotics environment designed for multitask and meta-learning scenarios. It provides a suite of benchmark manipulation tasks of varying complexity, all sharing a common robot arm and basic physics. MetaWorld’s standardized task set and simulated table robotic manipulation scenario are similar to the settings in RLBench, making it an appropriate benchmark environment to evaluate EnvBrdige’s transferability across environments. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        691,
+        823,
+        763
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We select five tasks from MetaWorld’s standardized task set for evaluation. Assembly, Button-Press, Drawer-open, Hammer, and Window-close. One instruction is given for each task. For each task, we evaluate with 20 trials. GPT-4o is used for this evalution. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        768,
+        823,
+        811
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For MetaWorld, we evaluate EnvBridge’s performance with different sources of knowledge. They are in-domain knowledge (memory from MetaWorld), transferred knowledge (memory from RL-Bench) and unified knowledge (a combined memory from MetaWorld and RLBench). We compare EnvBridge under various settings with Voxposer, which is the LLM code generation agent baseline. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        818,
+        823,
+        876
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "From Figure 4 we can see that with transferred knowledge from RLBench, EnvBridge can surpass the perfomance of robotic manipulation code generation baseline, which proves EnvBridge’s efficacy in the unseen environment. Furthermore, if EnvBridge can retrieve successful experiences from "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "unified memory of the source environment and target environment, it can have a better performance than the agent with only in-domain knowledge, which further prove EnvBridge’s robustness. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        133
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3 CALVIN: EVALUATION ON INSTRUCTION ROBUSTNESS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        148,
+        602,
+        165
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CALVIN (Mees et al. (2022)) is a robot manipulation benchmark for language-conditioned tasks. It allows for the construction of long-horizon tasks, which are specified solely through natural language. To maintain a consistent number of subtasks, we chose 200 single tasks from the validation dataset instead of long-horizon tasks, with GPT-4o-mini as the LLM for the evalution. For comparison, we use the learning-based model provided by CALVIN, known as multi-context imitation learning (MCIL) (Lynch & Sermanet (2021)), as well as two Re-Planning methods: Retry and EnvBridge. Additionally, CALVIN includes 15 types of tasks, primarily involving the movement of blocks, with each type having a single instruction assigned to it. To assess robustness to variations in instructions, we conducted two types of evaluations. The first evaluation uses a single instruction, specifically the one provided by CALVIN. The second evaluation uses multiple instructions, where we generated five additional paraphrased instructions for each task using GPT-4o. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        176,
+        826,
+        329
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Table 1, the results indicate that in the evaluation with a single instruction, Retry method performs slightly better. However, when evaluated with paraphrased instructions, the performance of Retry degrades, whereas our method demonstrates better performance. These results indicate that while the effect is less observable in environments with limited variations in instructions and tasks, such as CALVIN with single instructions, our method is confirmed to be effective in more complex environments with greater variations, like CALVIN with paraphrased instructions and RLBench. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        335,
+        823,
+        420
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/ae6289491f47df0d66e506d822aafc11a3fd0053dcb9a71932e367067cb667fc.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: Success rate(%) on CALVIN. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>Single Instruction</td><td>Paraphrased Instructions</td></tr><tr><td>MCIL</td><td>32.0</td><td>-</td></tr><tr><td>Retry</td><td>61.0</td><td>57.5</td></tr><tr><td>Ours</td><td>60.5</td><td>63.0</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        303,
+        459,
+        694,
+        532
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 ABLATION STUDY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        566,
+        359,
+        583
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1 KNOWLEDGE TRANSFER "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        599,
+        387,
+        614
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In EnvBridge, Knowledge Transfer is a crucial process for connecting different environments. Therefore, we evaluated its impact on performance. In this evaluation, we assessed the scenario without Knowledge Transfer described in Section 3.4.1, directly using the code from different environments for Re-Planning. The results are shown in Figure 5. These results confirm that Knowledge Transfer improves performance and enables smooth transfer of insights across various environments. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        625,
+        823,
+        696
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2 MEMORY RETRIEVAL "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        713,
+        366,
+        728
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the Memory-Retrieval mechanism, it is important to efficiently utilize the various codes stored in memory. In this section, to verify the effectiveness of our similarity-based query retrieval, we compare it with the scenario where codes are randomly selected. The results are shown in Figure 5. These results demonstrate that our method improves performance compared to random choice, confirming that selecting the most relevant codes will effectively improve the performance. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        739,
+        823,
+        810
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.3 MEMORY COMPARISON "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        827,
+        380,
+        842
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Memory is an important component in EnvBridge, and performance varies depending on the codes stored. We evaluated the performance differences due to different memories. Specifically, we constructed and assessed memories from three different benchmarks: RLBench, MetaWorld, and CALVIN. The results are shown in Table 2. All results with EnvBridge show improved performance compared to Retry. Interestingly, the performance with memory from CALVIN outperformed that "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/0ce9a8ad39ecf1672a1a393bc099b50fed99df855b6b6e8182f66e5deb17b0f1.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5: Performance comparison across different methods on RLBench. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        256,
+        103,
+        738,
+        292
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "with memory from RLBench, even though RLBench is the same environment used in the evaluation. On the other hand, the performance using memory from MetaWorld is worse compared to the other two. Upon analysis, it is found that MetaWorld’s memory contains 10 codes as planners, whereas CALVIN has 26 and RLBench has 50 codes. It is believed that the smaller variation in the codes stored in the memory affects the performance. This suggests that incorporating various knowledge from other environments can potentially yield better results. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        338,
+        823,
+        422
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.4 ACCURACY IMPROVEMENT WITH TRIALS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        438,
+        501,
+        452
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "EnvBridge promotes the generation of new code by incorporating insights from different environments. To verify whether EnvBridge enables effective Re-Planning, we examine trends in accuracy improvement with the number of trials. The results are shown in Figure 6. The figure illustrates that the accuracy of the EnvBridge method improves over the number of trials and consistently outperforms the Retry method. This demonstrates that EnvBridge is more effective in achieving accurate results through its Re-Planning strategy. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        464,
+        823,
+        549
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/a830feb216c1aba9356da4c04ed5398bb0dc6a25b0134a3effe86c816055a526.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Performance comparison of different memory on RLBench. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Memory</td><td>Success rate(%)</td></tr><tr><td>Retry without memory</td><td>47.0</td></tr><tr><td>MetaWorld</td><td>57.5</td></tr><tr><td>CALVIN</td><td>69.0</td></tr><tr><td>RLBench</td><td>65.5</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        173,
+        633,
+        468,
+        720
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/710e01a8f9c534c51ecac02ec3f3c2054905dec2459e1e22e08e2e9d7d65299f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6: Accuracy improvement with number of trials on RLBench. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        540,
+        561,
+        821,
+        714
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 CONCLUSION AND LIMITATIONS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        781,
+        477,
+        796
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We propose EnvBridge, a novel method for transferring knowledge from various environments to target environment in robotic manipulation agents. EnvBridge stores successful control codes from one environment in memory and transfers this knowledge to other environments to apply it, thereby enhancing the agent’s adaptability and performance. Our approach demonstrates superior performance in robotic manipulation benchmarks. While EnvBridge improves adaptability to different environments, effectively organizing the accumulating data in memory for lifelong learning scenarios and handling diverse information such as images and audio remain important challenges for practical applications. In conclusion, EnvBridge utilizes information from various environments, "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        811,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "improving adaptability to new settings and flexible planning capabilities. These advancements are crucial for the practical use of AI agents in diverse real-world scenarios. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        133
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ETHICS STATEMENT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        152,
+        346,
+        167
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We have read the ICLR Code of Ethics and ensured this paper follows it. Our work does not involve the release of any new datasets; all benchmark datasets used in this research, specifically RLBench, MetaWorld, and CALVIN, are publicly available. We believe our work will have a positive societal impact by enhancing the adaptability and robustness of robotic manipulation agents, which can lead to more efficient and safer autonomous systems in various real-world applications. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        181,
+        826,
+        253
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "REFERENCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        273,
+        287,
+        287
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Michael Ahn, Anthony Brohan, Noah Brown, Yevgen Chebotar, Omar Cortes, Byron David, Chelsea Finn, Chuyuan Fu, Keerthana Gopalakrishnan, Karol Hausman, Alex Herzog, Daniel Ho, Jasmine Hsu, Julian Ibarz, Brian Ichter, Alex Irpan, Eric Jang, Rosario Jauregui Ruano, Kyle Jeffrey, Sally Jesmonth, Nikhil J Joshi, Ryan Julian, Dmitry Kalashnikov, Yuheng Kuang, Kuang-Huei Lee, Sergey Levine, Yao Lu, Linda Luu, Carolina Parada, Peter Pastor, Jornell Quiambao, Kanishka Rao, Jarek Rettinghouse, Diego Reyes, Pierre Sermanet, Nicolas Sievers, Clayton Tan, Alexander Toshev, Vincent Vanhoucke, Fei Xia, Ted Xiao, Peng Xu, Sichun Xu, Mengyuan Yan, and Andy Zeng. Do as i can, not as i say: Grounding language in robotic affordances, 2022. URL https: //arxiv.org/abs/2204.01691. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Embodiment Collaboration. Open x-embodiment: Robotic learning datasets and rt-x models, 2024. URL https://arxiv.org/abs/2310.08864. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ishita Dasgupta, Christine Kaeser-Chen, Kenneth Marino, Arun Ahuja, Sheila Babayan, Felix Hill, and Rob Fergus. Collaborating with language models for embodied reasoning, 2023. URL https://arxiv.org/abs/2302.00763. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yilun Du, Shuang Li, Antonio Torralba, Joshua B. Tenenbaum, and Igor Mordatch. Improving factuality and reasoning in language models through multiagent debate, 2023. URL https: //arxiv.org/abs/2305.14325. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jiafei Duan, Wentao Yuan, Wilbert Pumacay, Yi Ru Wang, Kiana Ehsani, Dieter Fox, and Ranjay Krishna. Manipulate-anything: Automating real-world robots using vision-language models, 2024. URL https://arxiv.org/abs/2406.18915. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Wenlong Huang, Chen Wang, Ruohan Zhang, Yunzhu Li, Jiajun Wu, and Li Fei-Fei. Voxposer: Composable 3d value maps for robotic manipulation with language models, 2023. URL https: //arxiv.org/abs/2307.05973. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Stephen James, Zicong Ma, David Rovick Arrojo, and Andrew J. Davison. Rlbench: The robot learning benchmark and learning environment, 2019. URL https://arxiv.org/abs/ 1909.12271. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tomoyuki Kagaya, Thong Jing Yuan, Yuxuan Lou, Jayashree Karlekar, Sugiri Pranata, Akira Kinose, Koki Oguri, Felix Wick, and Yang You. Rap: Retrieval-augmented planning with contextual memory for multimodal llm agents, 2024. URL https://arxiv.org/abs/2402.03610. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich Kuttler, Mike Lewis, Wen tau Yih, Tim Rockt ¨ aschel, Sebastian Riedel, and Douwe ¨ Kiela. Retrieval-augmented generation for knowledge-intensive nlp tasks, 2021. URL https: //arxiv.org/abs/2005.11401. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jacky Liang, Wenlong Huang, Fei Xia, Peng Xu, Karol Hausman, Brian Ichter, Pete Florence, and Andy Zeng. Code as policies: Language model programs for embodied control, 2023. URL https://arxiv.org/abs/2209.07753. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chris Lu, Cong Lu, Robert Tjarko Lange, Jakob Foerster, Jeff Clune, and David Ha. The ai scientist: Towards fully automated open-ended scientific discovery, 2024. URL https://arxiv.org/ abs/2408.06292. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        295,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        490,
+        948,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Corey Lynch and Pierre Sermanet. Language conditioned imitation learning over unstructured data, 2021. URL https://arxiv.org/abs/2005.07648. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Oier Mees, Lukas Hermann, Erick Rosete-Beas, and Wolfram Burgard. Calvin: A benchmark for language-conditioned policy learning for long-horizon robot manipulation tasks, 2022. URL https://arxiv.org/abs/2112.03227. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yao Mu, Qinglong Zhang, Mengkang Hu, Wenhai Wang, Mingyu Ding, Jun Jin, Bin Wang, Jifeng Dai, Yu Qiao, and Ping Luo. Embodiedgpt: Vision-language pre-training via embodied chain of thought, 2023. URL https://arxiv.org/abs/2305.15021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Shirui Pan, Linhao Luo, Yufei Wang, Chen Chen, Jiapu Wang, and Xindong Wu. Unifying large language models and knowledge graphs: A roadmap. IEEE Transactions on Knowledge and Data Engineering, 36(7):3580–3599, July 2024. ISSN 2326-3865. doi: 10.1109/tkde.2024.3352100. URL http://dx.doi.org/10.1109/TKDE.2024.3352100. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Joon Sung Park, Joseph C. O’Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, and Michael S. Bernstein. Generative agents: Interactive simulacra of human behavior, 2023. URL https://arxiv.org/abs/2304.03442. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Nils Reimers and Iryna Gurevych. Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks. In arXiv, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pratyusha Sharma, Antonio Torralba, and Jacob Andreas. Skill induction and planning with latent language, 2022. URL https://arxiv.org/abs/2110.01517. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Noah Shinn, Federico Cassano, Edward Berman, Ashwin Gopinath, Karthik Narasimhan, and Shunyu Yao. Reflexion: Language agents with verbal reinforcement learning, 2023. URL https://arxiv.org/abs/2303.11366. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ishika Singh, Valts Blukis, Arsalan Mousavian, Ankit Goyal, Danfei Xu, Jonathan Tremblay, Dieter Fox, Jesse Thomason, and Animesh Garg. Progprompt: Generating situated robot task plans using large language models, 2022. URL https://arxiv.org/abs/2209.11302. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Georgios Tziafas and Hamidreza Kasaei. Lifelong robot library learning: Bootstrapping composable and generalizable skills for embodied control with language models, 2024. URL https:// arxiv.org/abs/2406.18746. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc Le, and Denny Zhou. Chain-of-thought prompting elicits reasoning in large language models, 2023. URL https://arxiv.org/abs/2201.11903. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. React: Synergizing reasoning and acting in language models, 2023. URL https://arxiv. org/abs/2210.03629. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tianhe Yu, Deirdre Quillen, Zhanpeng He, Ryan Julian, Avnish Narayan, Hayden Shively, Adithya Bellathur, Karol Hausman, Chelsea Finn, and Sergey Levine. Meta-world: A benchmark and evaluation for multi-task and meta reinforcement learning, 2021. URL https://arxiv.org/ abs/1910.10897. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        103,
+        823,
+        750
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A APPENDIX "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        102,
+        299,
+        118
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1 PARAMETERS FOR EVALUATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        162,
+        439,
+        176
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/1b0634d5ec740588e31109cb2fd5aceeca571862f28fd2e1fea0645c1ddaa7dc.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Parameters "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td colspan=\"2\">Parameters for EnvBridge</td></tr><tr><td>Text Embedding Model</td><td>sentence-transformers/all-MiniLM-L6-v2</td></tr><tr><td>LLM model for RLBench and CALVIN evaluation</td><td>gpt-4o-mini-2024-07-18</td></tr><tr><td>LLM model for MetaWorld evaluation</td><td>gpt-4o-2024-05-13</td></tr><tr><td>LLM temperature</td><td>0</td></tr><tr><td>LLM max token</td><td>512</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        174,
+        289,
+        823,
+        390
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2 PROMPTS IN RLBENCH "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        516,
+        382,
+        530
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2.1 PROMPT FOR CODE GENERATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        561,
+        465,
+        575
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The prompt is exactly the same as VoxPoser. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        606,
+        467,
+        621
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Instruction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        187,
+        643,
+        277,
+        657
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "You are a helpful assistant that pays attention to the user’s instructions and writes good python code for operating a robot arm in a tabletop environment. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        657,
+        807,
+        686
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        699,
+        230,
+        712
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "I would like you to help me write Python code to control a robot arm operating in a tabletop environment. Please complete the code every time when I give you new query. Pay attention to appeared patterns in the given context code. Be thorough and thoughtful in your code. Do not include any import statement. Do not repeat my question. Do not provide any text explanation (comment in code is okay). I will first give you the context of the code below: "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        713,
+        807,
+        796
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{The same examples as VoxPoser} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        797,
+        449,
+        810
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Note that x is back to front, y is left to right, and z is bottom to up. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        811,
+        660,
+        825
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Assistant "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        837,
+        267,
+        849
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Got it. I will complete what you give me next. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        851,
+        513,
+        867
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        878,
+        230,
+        892
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# {Query} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        893,
+        267,
+        909
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Instruction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        187,
+        161,
+        277,
+        174
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "You are a helpful assistant that pays attention to the user’s instructions and writes good python code for operating a robot arm in a tabletop environment. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        174,
+        807,
+        204
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        215,
+        228,
+        229
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "I would like you to help me write Python code to control a robot arm operating in a tabletop environment. Please complete the Python code to execute the query in the target environment. Pay attention to appeared patterns, coordinates, and scale in the given context code. Be thorough and thoughtful in your code. Do not include any import statement. Do not repeat my question. Do not provide any text explanation. I will first give you the context of the code in the target environment below: "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        229,
+        807,
+        313
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{The same examples as VoxPoser} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        313,
+        447,
+        327
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Note that coordinates and scale should be modified to match the target environment. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        327,
+        807,
+        340
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Please do not generate empty code. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        340,
+        452,
+        354
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Assistant "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        368,
+        267,
+        381
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Got it. I will complete what you give me next. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        382,
+        514,
+        398
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        410,
+        228,
+        422
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# Python code in different environment "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        422,
+        470,
+        438
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{Example retrieved from memory} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        438,
+        439,
+        452
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# Python code in target environment "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        452,
+        454,
+        465
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2.3 PROMPT FOR RE-PLANNING "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        545,
+        428,
+        559
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Instruction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        187,
+        603,
+        277,
+        616
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "You are a helpful assistant that pays attention to the user’s instructions and writes good python code for operating a robot arm in a tabletop environment. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        616,
+        807,
+        646
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        657,
+        228,
+        671
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "I would like you to help me write Python code to control a robot arm operating in a tabletop environment. Please complete the code every time when I give you new query. Pay attention to appeared patterns in the given context code. Be thorough and thoughtful in your code. Do not include any import statement. Do not repeat my question. Do not provide any text explanation (comment in code is okay). I will first give you the context of the code below: "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        671,
+        807,
+        755
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{The same examples as VoxPoser} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        756,
+        447,
+        768
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Note that x is back to front, y is left to right, and z is bottom to up. Please refer to the Python code for similar query. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        768,
+        807,
+        797
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Assistant "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        810,
+        267,
+        823
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Got it. I will complete what you give me next. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        824,
+        511,
+        839
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        852,
+        228,
+        864
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# Python code for similar query "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        866,
+        416,
+        880
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{Example retrieved and transferred from memory} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        880,
+        553,
+        895
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# Python code for target query "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        893,
+        411,
+        909
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "A.2.2 PROMPT FOR KNOWLEDGE TRANSFER "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        103,
+        500,
+        118
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2.4 PROMPT FOR SELF-REFLECTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        103,
+        457,
+        118
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Instruction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        187,
+        141,
+        277,
+        154
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "You are a helpful assistant that pays attention to the user’s instructions and writes good python code for operating a robot arm in a tabletop environment. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        154,
+        807,
+        185
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        196,
+        228,
+        210
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "I would like you to help me consider new plan to solve the task in a tabletop environment using a robot arm. Please complete the new plan every time when I give you new Python code. Do not summarize the Python code, but rather think about the strategy and path you took to attempt to complete the task. Devise a concise, new plan of action that accounts for the wrong code with reference to specific actions that you should have taken. I will first give you the examples of the new plan: "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        210,
+        808,
+        295
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "objects "
+          },
+          {
+            "type": "equation_inline",
+            "content": "="
+          },
+          {
+            "type": "text",
+            "content": "[’grape’, ’lemon’, ’drill’, ’router’, ’bread’, ’tray’] "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        306,
+        581,
+        323
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# Query: put the sweeter fruit in the tray that contains the bread. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        321,
+        653,
+        335
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "composer(”grasp the grape”) "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        335,
+        398,
+        349
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "composer(”back to default pose”) "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        349,
+        429,
+        364
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "composer(”move to the top of the tray that contains the bread”) "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        364,
+        642,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "composer(”open gripper”) "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        378,
+        377,
+        392
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# done STATUS: FAIL "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        392,
+        349,
+        404
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "New plan: Based on the image, I was able to grasp the grape, but I couldn’t place it in the correct position. Therefore, I will create a detailed plan by interpreting the intent of the query regarding where to place it. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        404,
+        807,
+        446
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "objects "
+          },
+          {
+            "type": "equation_inline",
+            "content": "="
+          },
+          {
+            "type": "text",
+            "content": "[’drawer’, ’umbrella’] "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        459,
+        406,
+        474
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# Query: close the drawer. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        474,
+        383,
+        488
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "composer(”push close the drawer handle by 25cm”) "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        488,
+        562,
+        502
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "# done STATUS: FAIL "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        502,
+        349,
+        515
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "New plan: Based on the image, I couldn’t reach the drawer handle. Therefore, the plan should take into account the location of the target and the position of other objects. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        515,
+        807,
+        544
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Please refer to the given image as the current observation information. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        556,
+        699,
+        571
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Assistant "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        584,
+        267,
+        597
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Got it. I will complete what you give me next. "
+          }
+        ]
+      },
+      "bbox": [
+        187,
+        598,
+        513,
+        614
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "User "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        189,
+        626,
+        228,
+        638
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{Generated Python code in the previous trial} "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        638,
+        519,
+        654
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "STATUS: FAIL "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        654,
+        295,
+        667
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "New plan: "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        667,
+        264,
+        681
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3 MEMORY EXAMPLES FROM RLBENCH "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        714,
+        486,
+        728
+      ]
+    },
+    {
+      "type": "code",
+      "content": {
+        "code_caption": [],
+        "code_content": [
+          {
+            "type": "text",
+            "content": "{ \"environment\": \"rlbench\", \"type\": \"planner\", \"query\": \"pick up the rubbish and leave it in the trash can.\", \"code\": \"objects = ['bin', 'rubbish', 'tomato1', 'tomato2'] # Query: pick up the rubbish and leave it in the trash can. composer(\\\"grasp the rubbish\\\") composer(\\\"back to default pose\\\") composer(\\\"move to the top of the bin\\\") composer(\\\"open gripper\\\") # done\"   \n} "
+          }
+        ],
+        "code_language": "txt"
+      },
+      "bbox": [
+        171,
+        739,
+        754,
+        893
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "code",
+      "content": {
+        "code_caption": [],
+        "code_content": [
+          {
+            "type": "text",
+            "content": "\"environment\": \"rlbench\",  \n\"type\": \"composer\",  \n\"query\": \"grasp the rubbish.\",  \n\"code\": \"# Query: grasp the rubbish.  \nmovable = parse_query_obj('gripper')  \naffordance_map = get_affordance_map('a point at the center of the rubbish')  \ngripper_map = get_gripper_map('open everywhere except lcm around the rubbish')  \nexecute(movable, affordance_map=affordance_map, gripper_map= gripper_map)\" "
+          }
+        ],
+        "code_language": "python"
+      },
+      "bbox": [
+        169,
+        103,
+        828,
+        260
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4 BENCHMARK DETAILS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        285,
+        377,
+        299
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4.1 RLBENCH "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        310,
+        307,
+        324
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/8907abb91a501baab75b8c48793d6a1aeffdec33e59fa2523c2db03fe9b9873c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Task-specific success rate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\% )"
+          },
+          {
+            "type": "text",
+            "content": "on RLBench. Best results are in bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Tasks</td><td>Baseline</td><td>Retry</td><td>Self-Reflection</td><td>EnvBridge</td></tr><tr><td>BasketballInHoop</td><td>15</td><td>15</td><td>20</td><td>25</td></tr><tr><td>BeatTheBuzz</td><td>60</td><td>70</td><td>90</td><td>65</td></tr><tr><td>CloseDrawer</td><td>60</td><td>65</td><td>85</td><td>75</td></tr><tr><td>LampOff</td><td>55</td><td>75</td><td>80</td><td>65</td></tr><tr><td>OpenWineBottle</td><td>15</td><td>40</td><td>65</td><td>95</td></tr><tr><td>PushButton</td><td>15</td><td>25</td><td>45</td><td>80</td></tr><tr><td>PutRubbishInBin</td><td>60</td><td>80</td><td>100</td><td>90</td></tr><tr><td>TakeFrameOffHanger</td><td>5</td><td>15</td><td>30</td><td>15</td></tr><tr><td>TakeLidOffSaucepan</td><td>0</td><td>0</td><td>15</td><td>85</td></tr><tr><td>TakeUmbrellaOutOfUmbrellaStand</td><td>80</td><td>85</td><td>95</td><td>95</td></tr><tr><td>Average</td><td>36.5</td><td>47.0</td><td>62.5</td><td>69.0</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        225,
+        378,
+        772,
+        551
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4.2 METAWORLD "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        574,
+        328,
+        588
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/2503e37c9b62f4c6b0964174c719d8fa8ec98c22be39511d4d50e627ced0235c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5: Task-specific success rate(%) on MetaWorld "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Tasks</td><td>Baseline</td><td>In-domain</td><td>Transferred</td><td>Unified</td></tr><tr><td>Hammer</td><td>25</td><td>35</td><td>25</td><td>50</td></tr><tr><td>Window-close</td><td>20</td><td>55</td><td>35</td><td>50</td></tr><tr><td>Assembly</td><td>25</td><td>50</td><td>35</td><td>50</td></tr><tr><td>Button-Press</td><td>20</td><td>35</td><td>40</td><td>55</td></tr><tr><td>Drawer-Open</td><td>35</td><td>65</td><td>50</td><td>85</td></tr><tr><td>Average</td><td>25</td><td>48</td><td>37</td><td>56</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        294,
+        642,
+        702,
+        753
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.5 QUALITATIVE ANALYSIS ON RLBENCH "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        777,
+        491,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We provide specific success and failure examples as part of our qualitative evaluation. In the success case, the Planner generates detailed subtasks. In contrast, in the failure case, it produces almost identical subtasks. We believe this issue arises because the memory lacks the appropriate code to solve the tasks, preventing the presentation of suitable examples. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        803,
+        826,
+        861
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        509,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b4182ab2fae5f6bcd6dbdcdeb3af4b80fbdd351fc0aa0c6ea2d24a89fa4bbcec.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7: Success Case "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        171,
+        166,
+        826,
+        429
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f52ba27f0e40cfc30068ba2f806c63c018329b03c6fd558477644a1ae387cc4e.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 8: Failure Case "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        173,
+        585,
+        823,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ]
+]

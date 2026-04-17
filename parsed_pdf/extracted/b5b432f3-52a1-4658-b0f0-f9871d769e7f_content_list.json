@@ -1,0 +1,2906 @@
+[
+    {
+        "type": "text",
+        "text": "Oneshot Differentially Private Top- $k$ Selection ",
+        "text_level": 1,
+        "bbox": [
+            253,
+            109,
+            718,
+            132
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Gang Qiao 1 Weijie J. Su 2 Li Zhang 3 ",
+        "bbox": [
+            346,
+            176,
+            622,
+            194
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            241,
+            220,
+            318,
+            236
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Being able to efficiently and accurately select the top- $k$ elements with differential privacy is an integral component of various private data analysis tasks. In this paper, we present the oneshot Laplace mechanism, which generalizes the well-known Report Noisy Max (Dwork & Roth, 2014) mechanism to reporting noisy top- $k$ elements. We show that the oneshot Laplace mechanism with a noise level of $\\tilde { O } ( \\sqrt { k } / \\varepsilon )$ is approximately differentially private. Compared to the previous peeling approach of running Report Noisy Max $k$ times, the oneshot Laplace mechanism only adds noises and computes the top $k$ elements once, hence much more efficient for large $k$ . In addition, our proof of privacy relies on a novel coupling technique that bypasses the use of composition theorems. Finally, we present a novel application of efficient top- $k$ selection in the classical problem of ranking from pairwise comparisons. ",
+        "bbox": [
+            117,
+            250,
+            442,
+            551
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1. Introduction ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            588,
+            217,
+            604
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Modern statistical analyses have increasingly relied on sensitive data from individuals and, accordingly, there is a growing recognition that privacy constraints should be incorporated into consideration in data analysis. In response, a mathematically rigorous framework called differential privacy (Dwork et al., 2006a;b) was introduced for privacy-preserving data analysis. Roughly speaking, a differentially private procedure ensures that the released information is not influenced significantly by any individual record in the dataset. As a consequence, the privacy of the individuals will not be revealed based on the released information. ",
+        "bbox": [
+            84,
+            614,
+            475,
+            795
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1Department of Statistics, University of Michigan, Ann Arbor, MI, USA. 2The Wharton School, University of Pennsylvania, Philadelphia, PA, USA. 3Google Research, Mountain View, CA, USA. Correspondence to: <qiaogang@umich.edu, suw@wharton.upenn.edu, liqzhang@google.com>. ",
+        "bbox": [
+            84,
+            803,
+            473,
+            868
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Proceedings of the ${ 3 } { { \\boldsymbol { \\mathit { 8 } } } ^ { t h } }$ International Conference on Machine Learning, PMLR 139, 2021. Copyright 2021 by the author(s). ",
+        "bbox": [
+            84,
+            878,
+            473,
+            905
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "This paper is concerned with the top- $k$ problem, one of the most important primitives in differential privacy: reporting $k$ items with (approximately) the maximum values among $m$ given values. The problem of privately reporting the $k$ largest elements is an essential building block in many machine learning tasks and has gained continued popularity in the literature (McSherry & Mironov, 2009; Friedman & Schuster, 2010; Banerjee et al., 2012; McSherry & Mironov, 2013; Shen & Jin, 2014; Qin et al., 2016; Bafna & Ullman, 2017; Steinke & Ullman, 2017; Dwork et al., 2018; Durfee & Rogers, 2019). The common peeling solution Hardt & Roth (2013) and Dwork et al. (2018) is by iteratively applying the Report Noisy Max algorithm and then resorting to the composition theorem for computing the privacy loss. In general, this results in the noise level of $O ( k / \\varepsilon )$ for $\\varepsilon$ pure privacy and $\\widetilde { O } ( \\sqrt { k } / \\varepsilon ) ^ { 1 }$ f o r $( \\varepsilon , \\delta )$ privacy loss. While the peeling algorithm has good privacy guarantee, it requires to run Report Noisy Max $k$ times, hence incurring a high computational cost for large $k$ . ",
+        "bbox": [
+            495,
+            220,
+            887,
+            523
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we show that by adapting Report Noisy Max to reporting noisy top- $k$ items, we can still achieve comparable utility but with a much more efficient procedure as we only need to run the selection once. We call the resulted algorithm the oneshot Laplace mechanism. More precisely, in the oneshot Laplace mechanism, we add the Laplace noise to each count and then report the set of items with the top- $k$ noisy counts. In this paper, we show that the oneshot Laplace mechanism can achieve utility comparable to those obtained from the peeling procedure (see Theorems 2.1 and 2.2 for the precise statements). ",
+        "bbox": [
+            495,
+            530,
+            885,
+            698
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "It is relatively straightforward to show that by adding Laplace noise of level $k / \\varepsilon$ , the mechanism is $\\varepsilon$ purely differentially private (Theorem 2.1).2 However, it turns out to be much more challenging to show that with $\\widetilde { O } ( \\sqrt { k } / \\varepsilon )$ noise, it is $( \\varepsilon , \\delta )$ -differentially private. Indeed, the proof of this fact is the main contribution of our paper (Theorem 2.2). ",
+        "bbox": [
+            495,
+            704,
+            885,
+            810
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Our proof directly bounds the privacy loss without the help ",
+        "bbox": [
+            496,
+            816,
+            883,
+            834
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2105.08233v2 [cs.LG] 23 Jun 2021 ",
+        "bbox": [
+            22,
+            246,
+            57,
+            681
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_footnote",
+        "text": "1Throughout the paper, we use $\\widetilde O$ to hide dependence on logarithmic factors. ",
+        "bbox": [
+            496,
+            843,
+            883,
+            868
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_footnote",
+        "text": "2This is probably a folklore but since we could not find a reference, we include its proof for completeness. ",
+        "bbox": [
+            496,
+            869,
+            883,
+            896
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "of the composition theorems. The difficulty of this approach is in untangling the complex distribution dependence of the $k$ selected items, as opposed to the conditional dependence in other existing mechanisms, which allows us to use the advanced composition theorem (Dwork et al. (2010), see also Kairouz et al. (2017)). To deal with this difficulty, we introduce a novel theoretical technique that, in effect, reduces the oneshot problem to a multinomial distribution problem to bypass the use of composition theorems. To shed light on our proof, consider the case of many similar or equal values. This is the case where the true top- $k$ set can be extremely sensitive to the change of input values. In order to privately report the top- $k$ set in this case, we add independent Laplace noises centered at zero to these values, which yields an approximately equal chance that the noisy values of two adjacent inputs will “go up” or “go down”, leading to the cancellation of certain first-order terms in the (logarithms of) the probabilities of events and hence a tight control between their ratio. ",
+        "bbox": [
+            88,
+            84,
+            473,
+            369
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Circumventing composition theorems, however, may have its advantage. Since it relies on the direct analysis so may avoid the slackness introduced by the generic composition theorems. Indeed, there have been recent work on exploring the special properties of the privacy mechanisms to improve upon the generic composition theorem (Abadi et al., 2016; Bun & Steinke, 2016; Dong et al., 2021). ",
+        "bbox": [
+            84,
+            378,
+            473,
+            484
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "One closely related previous work is the oneshot Gumbel mechanism proposed in Durfee & Rogers (2019). In that paper, the authors show that adding Gumbel noise and reporting the top- $k$ items is equivalent to the peeling procedure of the exponential mechanism for reporting the maximum item (Dwork & Roth, 2014). This elegant connection immediately provides privacy guarantees through the well understood composition of exponential mechanisms and can benefit from any improvement of the composition property (Dong et al., 2019). In addition, their mechanism reports the noisy rank of the top- $k$ selections. However, it is important to note that their analysis goes through the composition theorem, whereas our paper takes an entirely different angle by employing a composition-free analysis. The comparison between these two approaches, both in theory and in practice, remains an interesting future work. ",
+        "bbox": [
+            84,
+            492,
+            473,
+            734
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "1.1. Preliminaries ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            750,
+            215,
+            763
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Before continuing, we pause to revisit some basic concepts in differential privacy. ",
+        "bbox": [
+            84,
+            773,
+            473,
+            805
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Definition 1.1. Data sets $D , D ^ { \\prime }$ are said to be neighbors, or adjacent, if one is obtained by removing or adding a single data item. ",
+        "bbox": [
+            84,
+            813,
+            473,
+            858
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Differential privacy, sometimes called pure differential privacy now, was first defined and constructed in Dwork et al. ",
+        "bbox": [
+            84,
+            875,
+            473,
+            905
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "(2006b). The relaxation of pure differential privacy defined next is sometimes referred to as approximate differential privacy or $( \\varepsilon , \\delta )$ -differential privacy. ",
+        "bbox": [
+            495,
+            84,
+            885,
+            130
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Definition 1.2 (Differential privacy (Dwork et al., 2006b)). A randomized mechanism $\\mathcal { M }$ is $( \\varepsilon , \\delta )$ -differentially private if for all adjacent $D , D ^ { \\prime }$ , and for any subset of possible outputs $S$ : $\\mathbb { P } ( \\mathcal { M } ( D ) \\in S ) \\le \\mathtt { e } ^ { \\varepsilon } \\mathbb { P } ( \\mathcal { M } ( D ^ { \\prime } ) \\in S ) + \\delta$ . Pure differential privacy is the special case of approximate differential privacy in which $\\delta = 0$ . ",
+        "bbox": [
+            495,
+            133,
+            885,
+            224
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In differential privacy problems, privacy law protects individually identifiable data, and the parameters $\\varepsilon$ and $\\delta$ in the definition above measure the degree of privacy protected. Let $\\begin{array} { r } { f \\ = \\ f ( D ) } \\end{array}$ be a statistic on a database $D$ . In any randomized $( \\varepsilon , \\delta )$ -differentially private mechanism $\\mathcal { M }$ , the perturbed response $f ( D ) + Z$ is reported instead of the true answer $f ( D )$ , where $Z$ is the random noise to guarantee indistinguishability between two datasets. The sensitivity of the statistic, or query function $f$ , is the largest change in its output when we change a single data item and is defined below. ",
+        "bbox": [
+            495,
+            236,
+            885,
+            402
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Definition 1.3 (Sensitivity). Let $f = ( f _ { 1 } , \\cdot \\cdot \\cdot , f _ { m } )$ be $m$ real valued functions that take a database as input. The sensitivity of $f$ , denoted as $s$ , is defined as ",
+        "bbox": [
+            495,
+            406,
+            885,
+            452
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\ns _ {f} = \\max  _ {D, D ^ {\\prime}} \\max  _ {1 \\leq i \\leq m} | f _ {i} (D) - f _ {i} (D ^ {\\prime}) |,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            568,
+            460,
+            815,
+            484
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "where the maximum is taken over any adjacent databases $D$ and $D ^ { \\prime }$ . ",
+        "bbox": [
+            496,
+            493,
+            885,
+            523
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In the Laplace Mechanism, the output $f ( D )$ is perturbed with noise generated from the Laplace distribution $\\mathrm { L a p } ( \\lambda )$ with probabilitywhere the scale ensity function: should be calib $\\begin{array} { r } { f _ { \\mathrm { L a p } ( \\lambda ) } ( z ) = \\frac { 1 } { 2 \\lambda } \\mathrm { e } ^ { - | z | / \\lambda } } \\end{array}$ $\\lambda$ the statistics $f$ . ",
+        "bbox": [
+            495,
+            536,
+            885,
+            611
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2. The Oneshot Laplace Mechanism ",
+        "text_level": 1,
+        "bbox": [
+            496,
+            630,
+            802,
+            648
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In this section, we introduce the oneshot Laplace mechanism in full detail, along with its privacy guarantees. Consider the problem of privately reporting the minimum $k$ locations of $m$ values $x _ { 1 } , \\ldots , x _ { m }$ and their estimated values. Here two input values $( x _ { 1 } , \\ldots , x _ { m } )$ and $( x _ { 1 } ^ { \\prime } , \\ldots , x _ { m } ^ { \\prime } )$ are called adjacent if $\\| x - x ^ { \\prime } \\| _ { \\infty } \\leq 1$ , i.e., $| x _ { i } - x _ { i } ^ { \\prime } | \\leq 1$ for all $1 \\leq i \\leq m$ . In this definition, $x$ can be considered as the counts of each of $m$ -attributes of the population in some database $D$ and, therefore, changing any individual in $D$ may in the worst case change each count $x _ { i }$ by 1. ",
+        "bbox": [
+            495,
+            656,
+            885,
+            808
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "As a special case when $k \\ = \\ 1$ , the solution relies on the Report Noisy Min algorithm (Dwork & Roth, 2014; Dwork et al., 2018), which takes as input a function $f$ , database $D$ , and privacy parameter $\\varepsilon$ , and outputs the index of the minimum element and its estimated value. The Report Noisy Min algorithm adds independently sampled ",
+        "bbox": [
+            495,
+            814,
+            885,
+            906
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            70
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "$\\mathrm { L a p } ( 2 s _ { f } / \\varepsilon )$ noise to each element of $f ( D )$ and reports the index $i ^ { * }$ of the minimum noisy count. The algorithm further reports its estimated value by adding noise freshly sampled from $\\mathrm { L a p } ( 2 s _ { f } / \\varepsilon )$ to $f _ { i ^ { * } } ( D )$ . In Dwork & Roth (2014); Dwork et al. (2018), the Report Noisy Min algorithm is proved to be $( \\varepsilon , 0 )$ -differentially private. Notably, in order to avoid violation of differential privacy, we shall not report the minimum noisy element as its estimated value. Hence, we need to add fresh random noise to $f _ { i ^ { * } } ( D )$ in the last step. ",
+        "bbox": [
+            84,
+            84,
+            473,
+            236
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "To efficiently solve the top- $k$ problem where $k$ can be larger than 1, we introduce the oneshot Laplace mechanism $\\mathcal { M } ^ { \\mathrm { o s } }$ , which is one of our main contributions in this paper. In $\\mathcal { M } ^ { \\mathrm { o s } }$ , we add noise $\\mathrm { L a p } ( \\lambda )$ once to each value and report the indices and approximations of the minimum $k$ noisy values (Algorithm 1). ",
+        "bbox": [
+            84,
+            243,
+            475,
+            335
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Algorithm 1 The Oneshot Laplace Mechanism $\\mathcal { M } ^ { \\mathrm { o s } }$ for Privately Reporting Minimum $k$ Elements ",
+        "bbox": [
+            84,
+            345,
+            473,
+            377
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Input: database $D$ , functions ${ \\overline { { f = ( f _ { 1 } , \\cdots , f _ { m } ) } } }$ with sensitivity $s _ { f }$ , parameter $k$ , and the noise scale $\\lambda$ ",
+        "bbox": [
+            86,
+            378,
+            472,
+            410
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Output: indices $i _ { 1 } , \\dots , i _ { k }$ and approximations to $f _ { i _ { 1 } } ( D ) , \\cdots , f _ { i _ { k } } ( D )$ ",
+        "bbox": [
+            86,
+            411,
+            472,
+            441
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1: for $i = 1$ to $m$ do ",
+            "2: set $y _ { i } = f _ { i } ( D ) + g _ { i }$ where $g _ { i }$ is sampled i.i.d. from $\\mathrm { L a p } ( \\lambda )$ ",
+            "3: end for ",
+            "4: sort $y _ { 1 } , \\ldots , y _ { m }$ from low to high, $y _ { i _ { 1 } } \\leq y _ { i _ { 2 } } \\leq \\cdot \\cdot \\cdot \\leq$ $y _ { i _ { m } }$ ",
+            "5: return the set $\\{ i _ { 1 } , \\ldots , i _ { k } \\}$ and $f _ { i _ { j } } ( D ) + g _ { i _ { j } } ^ { \\prime }$ , where $1 \\leq j \\leq k$ and $g _ { i _ { j } } ^ { \\prime }$ are fresh independent random noise sampled from Lap(λ) "
+        ],
+        "bbox": [
+            94,
+            441,
+            472,
+            579
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We provide the following theorem for pure differential privacy of the oneshot Laplace mechanism. Its proof uses a standard coupling argument and it is given in the supplementary material. ",
+        "bbox": [
+            84,
+            598,
+            473,
+            657
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Theorem 2.1. The oneshot Laplace mechanism is $( \\varepsilon , 0 )$ - differentially private if we set $\\lambda = 2 k s _ { f } / \\varepsilon$ or larger. ",
+        "bbox": [
+            84,
+            662,
+            472,
+            694
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "However, it is surprisingly challenging to prove the privacy guarantees for the oneshot Laplace mechanism in the approximate differential privacy framework. Here we state the theorem and leave the technical sketches and intuition to Section 4 and the complete proof to the supplementary material. ",
+        "bbox": [
+            84,
+            703,
+            472,
+            792
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Theorem 2.2 (Privacy guarantees). Given $\\varepsilon \\le 0 . 2 , \\delta \\le$ 0.05 and $m \\geq 2$ , the oneshot Laplace mechanism is $( \\varepsilon , \\delta )$ - differentially private if we set $\\begin{array} { r } { \\lambda _ { \\mathrm { o n e s h o t } } = \\frac { 8 s _ { f } \\sqrt { k \\log ( m / \\delta ) } } { \\varepsilon } o r } \\end{array}$ larger. ",
+        "bbox": [
+            84,
+            797,
+            473,
+            864
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We remark that $\\varepsilon$ can be set up to ${ \\cal O } ( \\log ( m / \\delta ) )$ (Dwork et al., 2015), and the constant in $\\lambda _ { \\mathrm { o n e s h o t } }$ is for ease ",
+        "bbox": [
+            84,
+            875,
+            473,
+            906
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "of analysis. We also point out that our result includes a higher multiplicative factor of $O ( \\sqrt { \\log ( m / \\delta ) } )$ compared to $O ( \\sqrt { { 1 0 } \\mathrm { g } ( { 1 / \\delta } ) } )$ in the other results, which only incurs a small constant factor since $\\delta$ is typically required to be $o ( 1 / m )$ . The next result is concerned with the utility of the oneshot Laplace mechanism. ",
+        "bbox": [
+            495,
+            84,
+            885,
+            178
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Theorem 2.3 (Utility). Let $f _ { ( 1 ) } ( D ) \\leq f _ { ( 2 ) } ( D ) \\leq \\cdots \\leq$ $f _ { ( m ) } ( D )$ denote the order statistics of the counts. Write $\\begin{array} { r } { \\Delta \\ : = \\ \\operatorname* { m i n } _ { 1 \\leq i \\leq m - 1 } \\left\\{ f _ { ( i + 1 ) } ( D ) - f _ { ( i ) } ( D ) \\right\\} } \\end{array}$ . Then with probability at least ",
+        "bbox": [
+            496,
+            186,
+            885,
+            250
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\np (\\Delta) = \\max  \\left\\{0, 1 - \\frac {(m - 1) (2 \\lambda + \\Delta) \\mathrm {e} ^ {- \\Delta / \\lambda}}{4 \\lambda} \\right\\},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            521,
+            270,
+            859,
+            306
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "the oneshot Laplace mechanism returns the index set of the true top-k elements. ",
+        "bbox": [
+            496,
+            325,
+            885,
+            356
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "The proof of Theorem 2.3 is mainly based on the application of Bonferroni bound and is left to the supplementary material. The form of $p ( \\Delta )$ guarantees that when the gaps of $f _ { i } ( D )$ ’s are significantly large, the oneshot Laplace mechanism can return the true index set of top-$k$ elements almost surely. Specifically, when $\\Delta \\ge 2 0 \\lambda$ and $m \\leq 8 \\times 1 0 ^ { 6 }$ , then with probability at least $p ( \\Delta ) > 0 . 9 9$ the oneshot Laplace mechanism correctly returns the index set of the true top- $k$ elements. ",
+        "bbox": [
+            495,
+            375,
+            885,
+            511
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3. Application to Differentially Private Pairwise Comparison ",
+        "text_level": 1,
+        "bbox": [
+            496,
+            529,
+            823,
+            565
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Our work was first motivated by and used for the private false discovery rate control mechanism (Dwork et al., 2018). Here we present another application in ranking $n$ objects from partial binary comparisons, a problem with many important applications in Statistics and Computer Science. ",
+        "bbox": [
+            495,
+            573,
+            885,
+            662
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Given a large collection of $m$ items, and only part of the comparisons $\\{ X _ { i j } \\} _ { 1 \\leq i \\neq j \\leq m }$ between pairs of the $m$ items are revealed. Our goal is to privately recover the set of $k$ items with the highest ranks through the information released by pairwise comparison. One of the most widely used parametric models for pairwise comparison discovered is the Bradley-Terry-Luce (BTL) model (Bradley & Terry, 1952; Luce, 2012). ",
+        "bbox": [
+            495,
+            671,
+            885,
+            792
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "The BTL model was introduced to derive a full ranking when one only has access to pairwise comparison information. The basic idea of the Bradley-Terry-Luce parametric model is to assume that there exists a latent preference score $\\omega _ { i } ^ { * } ( i = 1 , \\cdots , m )$ assigned to the $m$ items of interest, and given a pair of items $( i , j )$ from the population, one can estimate the winning probability of item $j$ over item i ",
+        "bbox": [
+            495,
+            799,
+            885,
+            906
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            70
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "in the pairwise comparison as ",
+        "bbox": [
+            84,
+            85,
+            285,
+            99
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP _ {j i} = \\mathbb {P} \\{\\text {i t e m} j \\text {i s p r e f e r r e d o v e r i t e m} i \\} = \\frac {\\omega_ {j} ^ {*}}{\\omega_ {i} ^ {*} + \\omega_ {j} ^ {*}}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            99,
+            109,
+            460,
+            148
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "To define a comparison graph $\\mathcal { G } = ( \\nu , E )$ for the Bradley-Terry-Luce model, we define the vertices set $\\nu = [ m ]$ of the graph $\\mathcal { G }$ to represent the $m$ items we aim to compare, and each edge $( i , j )$ included in the edge set $E$ indicates that items $i$ and $j$ are compared and the comparison information is included in $\\textbf {  { y } }$ . We further assume that the comparison graph $\\mathcal { G }$ is drawn from the Erdös-Rényi random graph (Erdos & Rényi, 1960), such that each edge between any two vertices is present independently with some probability that captures the fraction of paired items being compared. For each edge $( i , j ) \\in E$ , we obtain $L$ independent paired comparison sampled from items $i$ and $j$ , and for the lth comparison y(l)i,j $y _ { i , j } ^ { ( l ) }$ , where $1 \\le l \\le L$ , we build the pairwise comparison model by assigning ",
+        "bbox": [
+            84,
+            164,
+            475,
+            380
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\ny _ {i, j} ^ {(l)} = \\left\\{ \\begin{array}{l l} 1, & \\text {w i t h p r o b a b i l i t y} \\frac {\\omega_ {j} ^ {*}}{\\omega_ {i} ^ {*} + \\omega_ {j} ^ {*}}, \\\\ 0, & \\text {o t h e r w i s e}, \\end{array} \\right. \\tag {3.1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            151,
+            388,
+            475,
+            431
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "and y j, i $y _ { j , i } ^ { ( l ) } = 1 - y _ { i , j } ^ { ( l ) }$ yi,j for all $( i , j ) \\in E$ . The sufficient statistics of this model are given by ",
+        "bbox": [
+            84,
+            443,
+            473,
+            478
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\pmb {y} := \\{y _ {i, j} | (i, j) \\in E \\},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            199,
+            488,
+            361,
+            508
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where yi,j := 1L P1 l L y(l)i,j $\\begin{array} { r } { y _ { i , j } } & { : = ~ \\frac { 1 } { L } \\sum _ { 1 \\leq l \\leq L } y _ { i , j } ^ { ( l ) } } \\end{array}$ . We remark that in the regime of differential privacy, the comparison graphs of two adjacent datasets only differ in one data item, i.e., only one sample of a specific edge in the adjacent datasets is different. ",
+        "bbox": [
+            84,
+            517,
+            475,
+            594
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Two algorithms tailored to the Bradley-Terry-Luce model that attract most attention are the spectral method (rank centrality) and the maximum likelihood estimator method (Chen et al., 2017), the former of which we will focus on due to the applicability of the oneshot Laplace mechanism. To adopt the spectral method, we make use of the pairwise comparison information $\\textbf {  { y } }$ to establish a random walk over the graph $\\mathcal { G }$ by defining its time-independent transition matrix $P _ { m \\times m } = [ P _ { i j } ]$ , where $P _ { i j } = \\mathbb { P } ( X _ { t + 1 } = j | X _ { t } = i )$ is defined as ",
+        "bbox": [
+            84,
+            602,
+            475,
+            753
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP _ {i j} = \\left\\{ \\begin{array}{l l} \\frac {1}{d} y _ {i, j} & \\text {i f} (i, j) \\in E, \\\\ 1 - \\frac {1}{d} \\sum_ {k: (i, k) \\in E} y _ {i, k} & \\text {i f} i = j, \\\\ 0 & \\text {o t h e r w i s e .} \\end{array} \\right. \\tag {3.2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            109,
+            763,
+            473,
+            819
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Here $d > 0$ is some given normalization factor which is on the same order of the maximum vertex degree of graph $\\mathcal { G }$ , and in general, we can assume that the normalization factor $d$ becomes larger as the number of vertices in graph $\\mathcal { G }$ grows. The spectral method is summarized in Algorithm 2. ",
+        "bbox": [
+            84,
+            829,
+            475,
+            906
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Algorithm 2 The spectral method for pairwise comparison ",
+        "text_level": 1,
+        "bbox": [
+            498,
+            84,
+            885,
+            99
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Input: comparison graph $G = ( [ m ] , E )$ , sufficient statistics $\\textbf {  { y } }$ and the normalization factor $d > 0$ ",
+        "bbox": [
+            498,
+            101,
+            885,
+            132
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Output: the rank of $\\{ \\pi ( i ) \\} _ { i \\in [ m ] }$ ",
+        "bbox": [
+            498,
+            132,
+            718,
+            148
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1: define the defined transition matrix $_ { r }$ as in (3.2) ",
+            "2: compute the stationary distribution $\\pi$ of $_ { P }$ ",
+            "3: sort $\\pi _ { 1 } , \\cdots , \\pi _ { m }$ from low to high, $\\pi _ { ( 1 ) } ~ \\leq ~ \\pi _ { ( 2 ) } ~ \\leq$ · · · ≤ π(m) "
+        ],
+        "bbox": [
+            506,
+            148,
+            885,
+            210
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The intuition behind the spectral method is based on the fact that, assuming the sample size is sufficiently large, the stationary distribution $\\pi$ of the transition matrix $_ { r }$ defined in (3.2) is a reliable estimate of the preference scores $[ \\omega _ { 1 } ^ { * } , \\omega _ { 2 } ^ { * } , \\cdots , \\omega _ { m } ^ { * } ]$ up to some scaling (Chen et al., 2017). We notice that the result derived from the spectral method of pairwise comparison only takes advantage of the stationary distribution and, therefore, the oneshot Laplace mechanism can be applied to report top- $k$ elements via pairwise comparison information privately. We pause to introduce some definitions and a lemma to find the sensitivity of the statistic that maps the pairwise information to the stationary distribution. Throughout this paper, the $\\infty$ -norm $\\| \\boldsymbol { P } \\| _ { \\infty }$ of a matrix $_ { r }$ is its maximum absolute row sum. ",
+        "bbox": [
+            496,
+            238,
+            885,
+            449
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Definition 3.1 (Ergodicity coefficient of a stochastic matrix (Ipsen & Selee, 2011)). For a $m \\times m$ stochastic matrix $\\pmb { A }$ , the ergodicity coefficient $\\tau _ { 1 } ( A )$ of matrix $\\pmb { A }$ is defined as ",
+        "bbox": [
+            496,
+            453,
+            885,
+            511
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\tau_{1}(\\boldsymbol {A})\\equiv \\sup_{\\substack{\\| \\boldsymbol {v}\\|_{1} = 1\\\\ \\boldsymbol{v}^{\\top}e = 0}}\\| \\boldsymbol{v}^{\\top}\\boldsymbol {A}\\|_{1},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            599,
+            512,
+            782,
+            550
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $e$ is the vector of all ones. ",
+        "bbox": [
+            496,
+            554,
+            712,
+            568
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Definition 3.2 (Conditional number of a Markov Chain (Cho & Meyer, 2001)). Let $_ { r }$ denote the transition probability matrix of an $m$ state Markov chain $\\mathcal { C }$ , and $\\pi$ denotes the stationary distribution vector. The perturbed matrix $\\tilde { P }$ is the transition probability matrix of another $n$ state Markov chain $\\tilde { \\mathcal { C } }$ with stationary distribution vector $\\tilde { \\pi }$ . The conditional number $\\kappa$ of a Markov chain $\\mathcal { C }$ is defined by the following perturbation bound $\\| \\pi - \\tilde { \\pi } \\| _ { \\infty } \\leq \\kappa \\| P - \\tilde { P } \\| _ { \\infty }$ . ",
+        "bbox": [
+            495,
+            571,
+            885,
+            710
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "In Ipsen & Selee (2011), the authors stated the result that for every transition matrix $_ { r }$ , the ergodicity coefficient of $_ { r }$ always falls between 0 and 1, and $\\tau _ { 1 } ( P ) = 1$ if and only if the rank of matrix $_ { r }$ equals 1. There is also a vast literature on exploring the form of the conditional number $\\kappa$ (Cho & Meyer, 2001). With all these preparations, we will build our private spectral method based on the following conclusion from Seneta (1988) and Cho & Meyer (2001). ",
+        "bbox": [
+            495,
+            719,
+            885,
+            856
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Lemma 3.3 (Sensitivity of stationary distribution (Seneta, 1988; Cho & Meyer, 2001)). Suppose $_ { r }$ and $\\tilde { P }$ are $m \\times m$ transition matrices with unique stationary distributions $\\pi ^ { \\top }$ ",
+        "bbox": [
+            496,
+            859,
+            885,
+            906
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            70
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "and $\\tilde { \\pi } ^ { \\top }$ . If the ergodicity coefficient of transition matrix $_ { P }$ satisfies $\\tau _ { 1 } ( P ) < 1$ , then $\\begin{array} { r } { \\| \\pi ^ { \\top } - \\tilde { \\pi } ^ { \\top } \\| _ { \\infty } \\leq \\frac { 1 } { 1 - \\tau _ { 1 } ( P ) } \\| \\tilde { P } - } \\end{array}$ $P \\| _ { \\infty }$ . ",
+        "bbox": [
+            84,
+            84,
+            473,
+            133
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Motivated by Lemma 3.3, the mapping $f$ has a bound sensitivity when the ergodicity coefficient of the transition matrix $_ { r }$ is upper bounded by a constant $\\rho < 1$ . In light of this observation, we can build our oneshot algorithm based on the following definition. ",
+        "bbox": [
+            84,
+            142,
+            475,
+            218
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Definition 3.4 $\\overset { \\cdot } { \\rho }$ -constrained comparison graph). A comparison graph $\\mathcal { G } = ( \\nu , E )$ is said to be $\\rho$ -constrained if: (1) the transition matrix $_ { r }$ of the Markov Chain defined as in (3.2) has unique stationary distribution $\\pi ^ { \\top }$ . (2) there exists a constant $\\rho < 1$ such that $\\tau _ { 1 } ( P ) \\leq \\rho$ . ",
+        "bbox": [
+            84,
+            220,
+            475,
+            297
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Definition 3.4 implies that if the comparison graph $\\mathcal { G }$ defined by the database $D$ is $\\rho$ -constrained, then the mapping $f : P \\to \\pi$ has a sensitivity bounded by $( 1 - \\rho ) ^ { - 1 }$ . Making use of this fact, the oneshot Laplace mechanism for privately reporting the maximum $k$ elements through pairwise comparison information is stated in Algorithm 3. ",
+        "bbox": [
+            84,
+            306,
+            475,
+            398
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "code",
+        "sub_type": "algorithm",
+        "code_caption": [
+            "Algorithm 3 The oneshot differentially private spectral method "
+        ],
+        "code_body": "Input: $\\rho$ -constrained comparison graph $\\mathcal{G} = ([m], E)$ , sufficient statistics $\\pmb{y}$ , parameter $L$ , normalization factor $d > 0$ , $k \\geq 1$ and privacy parameters $\\varepsilon, \\delta$ ",
+        "bbox": [
+            86,
+            439,
+            475,
+            486
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Now we establish the differential privacy of Algorithm 3 in Theorem 3.5 stated below, and the proof is left to the supplementary material. ",
+        "bbox": [
+            84,
+            625,
+            473,
+            669
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Theorem 3.5. Given $\\varepsilon ~ \\leq ~ 0 . 2$ and $\\delta ~ \\leq ~ 0 . 0 5$ , assume that the comparison graph $\\mathcal { G } = ( [ m ] , E )$ is $\\rho$ -constrained, then Algorithm 3 is $( \\varepsilon , \\delta )$ -differentially private if $\\lambda \\ =$ $\\frac { 8 s \\sqrt { k \\log ( m / \\delta ) } } { \\varepsilon }$ or larger, where the sensitivity s = 2dL(1 ρ) . $\\begin{array} { r } { s = \\frac { 2 } { d L ( 1 - \\rho ) } } \\end{array}$ ",
+        "bbox": [
+            84,
+            672,
+            475,
+            744
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "4. Proofs and Intuition ",
+        "text_level": 1,
+        "bbox": [
+            84,
+            758,
+            279,
+            773
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "In this section, we introduce a novel technique to prove the privacy of the oneshot Laplace mechanism. At a high level, the proof proceeds by considering the “bad” events, which have a large probability bias between two neighboring inputs. We show that those “bad” events happen when the sum of some dependent random variables deviates from its mean. We first partition the event space to remove the dependence between the random variables and, therefore, we ",
+        "bbox": [
+            84,
+            784,
+            475,
+            906
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "can apply a concentration bound directly. Furthermore, we apply a coupling technique to pair up the partitions for the two neighboring inputs. For each pair, we apply a concentration inequality to bound the probability of “bad” events. The technical tools developed for proving the privacy of the oneshot top- $k$ algorithm in this section can be applied in many other settings. We provide the proof sketch to our main result and leave most of the technical details to the supplementary material. ",
+        "bbox": [
+            495,
+            84,
+            885,
+            220
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Our goal is to reduce the dependence on $k$ to $\\sqrt { k }$ for $( \\varepsilon , \\delta )$ - differential privacy in the oneshot Laplace mechanism. We note that in the oneshot Laplace mechanism $\\mathcal { M } ^ { \\mathrm { o s } }$ , only a subset of $k$ elements, but not their ordering, is returned. The privacy proof of the oneshot Laplace mechanism crucially depends on this fact. We remark that one can further obtain the relative ranks and scores by running a second ranking phase in either mechanism to the reported $k$ elements. For example, by utilizing the Gaussian mechanism, one can publish more accurate scores, and hence their relative ranks, with the maximum noise of $O ( { \\sqrt { k \\log k } } )$ by paying slightly more privacy cost. ",
+        "bbox": [
+            495,
+            226,
+            885,
+            411
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "We start by providing the following lemma that directly establishes the privacy part of the oneshot Laplace mechanism in Theorem 2.2. ",
+        "bbox": [
+            495,
+            417,
+            885,
+            460
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Lemma 4.1. For any $k$ -subset $S$ of $\\{ 1 , \\cdots , m \\}$ and any adjacent $x , x ^ { \\prime }$ , we have ",
+        "bbox": [
+            496,
+            467,
+            885,
+            498
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} \\left(\\mathcal {M} ^ {\\mathrm {o s}} (x) \\in S\\right) \\leq \\mathrm {e} ^ {\\varepsilon} \\mathbb {P} \\left(\\mathcal {M} ^ {\\mathrm {o s}} \\left(x ^ {\\prime}\\right) \\in S\\right) + \\delta .\n$$",
+        "text_format": "latex",
+        "bbox": [
+            542,
+            510,
+            836,
+            527
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The key idea of the proof is to divide the event space by fixing the kth smallest noisy element $j$ together with the noise value $g _ { j }$ . For each partition, whether an element $i \\neq j$ is selected by $\\mathcal { M } ^ { \\mathrm { o s } }$ only depends on whether $x _ { i } + g _ { i } \\leq x _ { j } + g _ { j }$ , which happens with probability $q _ { i } = G ( ( x _ { j } + g _ { j } - x _ { i } ) / \\lambda )$ . Here $G$ denotes the cumulative distribution function of the standard Laplace distribution. As a result, we consider the following mechanism $\\mathcal { M }$ instead: given $( q _ { 1 } , \\dots , q _ { m } )$ where $0 < q _ { i } < 1$ , output a subset of indices where each index $i$ is included in the subset with probability $q _ { i }$ . In the following proof, we will first understand the sensitivity of $q _ { i }$ dependent on the change of $x _ { i }$ and then show that $\\mathcal { M }$ is “private” with respect to the corresponding sensitivity on $q$ . In order to prove Lemma 4.1, we present the definition of $\\tau$ -closeness for vectors and two other lemmata we shall also use. ",
+        "bbox": [
+            495,
+            547,
+            885,
+            789
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Definition 4.2 $\\tau$ -closeness for vectors). For two vectors $q = ( q _ { 1 } , \\dots , q _ { m } )$ and $q ^ { \\prime } = ( q _ { 1 } ^ { \\prime } , \\ldots , q _ { m } ^ { \\prime } ) $ , we say $q$ is $\\tau$ - close with respect to $q ^ { \\prime }$ if for each $1 \\leq i \\leq m$ , $| q _ { i } - q _ { i } ^ { \\prime } | \\leq$ $\\tau q _ { i } ( 1 - q _ { i } )$ . ",
+        "bbox": [
+            495,
+            795,
+            885,
+            857
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Lemma 4.3. For any $z , z ^ { \\prime }$ , we have ",
+        "bbox": [
+            496,
+            861,
+            740,
+            876
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left| G \\left(z ^ {\\prime}\\right) - G (z) \\right| \\leq 2 \\mathrm {e} ^ {\\left| z ^ {\\prime} - z \\right|} \\left| z ^ {\\prime} - z \\right| G (z) \\left(1 - G (z)\\right),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            519,
+            887,
+            862,
+            907
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            70
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "here $G$ denotes the cumulative distribution function of the standard Laplace distribution. ",
+        "bbox": [
+            84,
+            85,
+            475,
+            116
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "The following lemma is the key step that constitutes the privacy guarantee of the mechanism $\\mathcal { M }$ with respect to the sensitivity on $q$ , and the proof of Lemma 4.1 is largely based on this result combined with Lemma 4.3. ",
+        "bbox": [
+            84,
+            128,
+            473,
+            189
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Lemma 4.4. Assume $C _ { 0 } ~ = ~ 3 . 9 ^ { 2 }$ , $C _ { 1 } ~ = ~ 1 . 9 5$ . Under the conditions $\\varepsilon ~ \\leq ~ 0 . 2$ , $\\delta ~ \\leq ~ 0 . 0 5$ , $m \\ \\geq \\ 2$ and $k \\geq C _ { 0 } \\log ( m / \\delta )$ , and if $q$ is $\\tau$ -close with respect to $q ^ { \\prime }$ with $\\tau \\leq \\frac { \\varepsilon } { C _ { 1 } \\sqrt { k \\log ( m / \\delta ) } }$ , then for any set $S$ of $k$ -subsets of $\\{ 1 , \\cdots , m \\}$ , we have ",
+        "bbox": [
+            84,
+            194,
+            475,
+            277
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} (\\mathcal {M} (q) \\in S) \\leq \\mathrm {e} ^ {\\varepsilon} \\mathbb {P} (\\mathcal {M} (q ^ {\\prime}) \\in S) + \\delta / m.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            133,
+            290,
+            424,
+            308
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "The proof of Lemma 4.3 is relatively straightforward and is relegated to the supplementary material. To prove Lemma 4.4, notice that if $k \\le C _ { 0 } \\log ( m / \\delta )$ , then according to Theorem 2.1, the mechanism is $( \\varepsilon , 0 )$ -private. Thus we assume $k \\geq C _ { 0 } \\log ( m / \\delta )$ . Since $S$ consists of $k$ -sets, we first show that if $\\textstyle \\sum _ { i } q _ { i } \\gg k$ , then $\\mathbb { P } ( \\mathcal { M } ( q ) \\in S )$ is small. This can be done by applying the standard concentration bound in the following lemma. ",
+        "bbox": [
+            84,
+            328,
+            473,
+            450
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Lemma 4.5. Let $Z _ { 1 } , \\ldots , Z _ { m }$ be m independent Bernoulli random variables with $\\mathbb { P } ( Z _ { i } ~ = ~ 1 ) ~ = ~ q _ { i }$ . Suppose $\\textstyle \\sum _ { i = 1 } ^ { m } q _ { i } \\geq ( 1 + t ) k$ for any $t > 0$ . Then $\\begin{array} { r } { \\mathbb { P } \\left( \\sum _ { i } Z _ { i } \\leq k \\right) \\leq } \\end{array}$ $\\begin{array} { r } { \\exp \\left( - ( 1 + t ) k h \\left( \\frac { t } { t + 1 } \\right) \\right) } \\end{array}$ where $h ( u ) = ( 1 + u ) \\log ( 1 +$ $u ) - u .$ . Specifically, by setting $K = ( 1 + c \\sqrt { \\log ( m / \\delta ) / k } ) k$ and $c = 1 . 9$ , if we have $\\textstyle \\sum _ { i = 1 } ^ { m } q _ { i } \\geq K$ , then ",
+        "bbox": [
+            84,
+            455,
+            475,
+            559
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} \\left(\\sum_ {i = 1} ^ {m} Z _ {i} \\leq k\\right) \\leq \\frac {\\delta}{m}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            205,
+            571,
+            351,
+            609
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "The proof of Lemma 4.5 is based on the classical Bennett’s inequality and is left to the supplementary material. By Lemma 4.5, we only need to consider the case of $\\textstyle \\sum _ { i } q _ { i } \\leq$ $K$ , which is more difficult than the case above. We first represent a set $S \\subseteq \\{ 1 , \\dots , m \\}$ by a binary vector $z \\in \\{ 0 , 1 \\} ^ { m }$ and write $\\mathbb { P } _ { q } ( z )$ as $\\begin{array} { r } { \\mathbb { P } _ { q } ( z ) = \\prod _ { i : z _ { i } = 1 } q _ { i } \\prod _ { i : z _ { i } = 0 } ( 1 - q _ { i } ) } \\end{array}$ . Our goal is to show that for any $S$ consisting of weight $k$ vectors in $\\{ 0 , 1 \\} ^ { m }$ , ",
+        "bbox": [
+            84,
+            628,
+            475,
+            752
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sum_ {z \\in S} \\mathbb {P} _ {q} (z) \\leq \\mathrm {e} ^ {\\varepsilon} \\sum_ {z \\in S} \\mathbb {P} _ {q ^ {\\prime}} (z) + \\frac {\\delta}{m}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            168,
+            763,
+            390,
+            801
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "By defining the set $S ^ { * } = \\{ z \\ : \\ \\mathbb { P } _ { q } ( z ) \\geq \\mathrm { e } ^ { \\varepsilon } \\mathbb { P } _ { q ^ { \\prime } } ( z ) \\}$ , to prove Lemma 4.4, it suffices to show that $\\begin{array} { r } { \\sum _ { z \\in S ^ { * } } \\mathbb { P } _ { q } ( z ) \\le } \\end{array}$ $\\begin{array} { l } { { \\frac { \\delta } { m } } } \\end{array}$ . By the form of $\\mathbb { P } _ { q } ( z )$ , $z \\in S ^ { * }$ ∈holds if and only if ",
+        "bbox": [
+            84,
+            813,
+            475,
+            864
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\prod_ {i: z _ {i} = 1} q _ {i} \\prod_ {i: z _ {i} = 0} (1 - q _ {i}) \\geq \\mathrm {e} ^ {\\varepsilon} \\prod_ {i: z _ {i} = 1} q _ {i} ^ {\\prime} \\prod_ {i: z _ {i} = 0} (1 - q _ {i} ^ {\\prime}). \\tag {4.1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            96,
+            875,
+            475,
+            909
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Let $\\Delta _ { i } = q _ { i } ^ { \\prime } - q _ { i }$ . The $\\tau$ -closeness of $q$ with respect to $q ^ { \\prime }$ implies $| \\Delta _ { i } | \\leq \\tau q _ { i } ( 1 - q _ { i } )$ . Taking the logarithm of both sides of (4.1) and rearranging gives ",
+        "bbox": [
+            496,
+            84,
+            885,
+            131
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sum_ {i: z _ {i} = 1} \\log (1 + \\Delta_ {i} / q _ {i}) + \\sum_ {i: z _ {i} = 0} \\log (1 - \\Delta_ {i} / (1 - q _ {i})) \\leq - \\varepsilon .\n$$",
+        "text_format": "latex",
+        "bbox": [
+            496,
+            142,
+            885,
+            175
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "To bound $\\textstyle \\sum _ { z \\in S ^ { * } } \\mathbb { P } _ { q } ( z )$ , we consider indepen-∈dent Bernoulli random variables $Z _ { 1 } , \\ldots , Z _ { m }$ , where for each i, $\\begin{array} { r l r l } { Z _ { i } } & { { } = } & { 1 } \\end{array}$ with probability $q _ { i }$ and $\\begin{array} { r l r } { Z _ { i } } & { { } = } & { 0 } \\end{array}$ with probability $1 \\ - \\ q _ { i }$ . We set $\\zeta _ { i } = Z _ { i } \\log ( 1 + \\Delta _ { i } / q _ { i } ) + ( 1 - Z _ { i } ) \\log ( 1 - \\Delta _ { i } / ( 1 - q _ { i } ) )$ . Note that ",
+        "bbox": [
+            495,
+            185,
+            885,
+            276
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sum_ {z \\in S ^ {*}} \\mathbb {P} _ {q} (z) = \\sum_ {z} \\mathbf {1} _ {\\{\\sum \\zeta_ {i} \\leq - \\varepsilon \\}} \\mathbb {P} _ {q} (z) = \\mathbb {P} \\left(\\sum_ {i} \\zeta_ {i} \\leq - \\varepsilon\\right),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            496,
+            285,
+            885,
+            327
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { 1 } _ { \\{ \\cdot \\} }$ denotes the indicator function and the last probability is over the distribution of $Z _ { 1 } , \\ldots , Z _ { m }$ . Combine this with previous arguments, we need to prove that $\\begin{array} { l l l l } { \\mathbb { P } ( \\sum _ { i } \\zeta _ { i } } & { \\leq } & { - \\varepsilon ) } & { \\leq } & { \\delta / m } \\end{array}$ . It is easy to check that $\\zeta _ { 1 } ~ + ~ . ~ . ~ + ~ \\zeta _ { m }$ has mean i=1 and variance $\\textstyle \\sum _ { i = 1 } ^ { m } \\big ( q _ { i } \\log ( 1 + \\Delta _ { i } / q _ { i } ) + ( 1 - q _ { i } ) \\log ( 1 - \\Delta _ { i } / ( 1 - q _ { i } ) ) \\big )$ $\\begin{array} { r l r } { \\sigma ^ { 2 } } & { { } = } & { \\sum _ { i = 1 } ^ { m } q _ { i } ( 1 - q _ { i } ) \\log ^ { 2 } \\frac { 1 + \\Delta _ { i } / q _ { i } } { 1 - \\Delta _ { i } / ( 1 - q _ { i } ) } } \\end{array}$ . the ranges of the centered random variables $\\tilde { \\zeta } _ { i } : = \\zeta _ { i } -$ $q _ { i } \\log ( 1 { + } \\Delta _ { i } / q _ { i } ) - ( 1 { - } q _ { i } ) \\log ( 1 { - } \\Delta _ { i } / ( 1 { - } q _ { i } ) )$ are bounded in absolute value by max1≤i≤m \f\flog 1 ∆ /(1 q ) \f\f. $\\begin{array} { r } { \\operatorname* { m a x } _ { 1 \\leq i \\leq m } \\left. \\log \\frac { 1 + \\Delta _ { i } / q _ { i } } { 1 - \\Delta _ { i } / ( 1 - q _ { i } ) } \\right. } \\end{array}$ 1+∆i/qi To see why this is true, observe that ",
+        "bbox": [
+            495,
+            338,
+            890,
+            529
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left| \\tilde {\\zeta} _ {i} \\right| = \\left| \\left(Z _ {i} - q _ {i}\\right) \\log \\frac {1 + \\Delta_ {i} / q _ {i}}{1 - \\Delta_ {i} / \\left(1 - q _ {i}\\right)} \\right| \\\\ \\leq \\max  _ {1 \\leq i \\leq m} \\left| \\log \\frac {1 + \\Delta_ {i} / q _ {i}}{1 - \\Delta_ {i} / (1 - q _ {i})} \\right|. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            560,
+            539,
+            818,
+            609
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Therefore, according to Bennett’s inequality we can assert that for any $t \\geq 0$ , ",
+        "bbox": [
+            496,
+            619,
+            885,
+            648
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sum_ {i = 1} ^ {m} \\zeta_ {i} \\geq \\sum_ {i = 1} ^ {m} \\left(q _ {i} \\log \\left(1 + \\frac {\\Delta_ {i}}{q _ {i}}\\right) + (1 - q _ {i}) \\log \\left(1 - \\frac {\\Delta_ {i}}{1 - q _ {i}}\\right)\\right) - t\n$$",
+        "text_format": "latex",
+        "bbox": [
+            496,
+            660,
+            921,
+            700
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "with probability at least $\\begin{array} { r } { 1 - \\exp \\left( - \\frac { \\sigma ^ { 2 } h ( A t / \\sigma ^ { 2 } ) } { A ^ { 2 } } \\right) } \\end{array}$ ",
+        "bbox": [
+            496,
+            712,
+            870,
+            737
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\nA = \\max  _ {1 \\leq i \\leq m} | \\log \\frac {1 + \\Delta_ {i} / q _ {i}}{1 - \\Delta_ {i} / (1 - q _ {i})} |.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            571,
+            750,
+            808,
+            781
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Furthermore, by taking $\\begin{array} { r l r l r l } { t } & { { } \\quad } & { = \\quad } & { { } } & { \\varepsilon } & { { } + } \\end{array}$ $\\textstyle \\sum _ { i = 1 } ^ { m } \\big ( q _ { i } \\log ( 1 + \\Delta _ { i } / q _ { i } ) + ( 1 - q _ { i } ) \\log ( 1 - \\Delta _ { i } / ( 1 - q _ { i } ) ) \\big )$ Bennett’s inequality implies that $\\begin{array} { r } { \\mathbb { P } ( \\sum _ { i } \\zeta _ { i } ~ \\le ~ - \\varepsilon ) ~ \\le ~ } \\end{array}$ $\\exp \\left( - \\sigma ^ { 2 } h ( A \\bar { t } / \\sigma ^ { 2 } ) / A ^ { 2 } \\right)$ . Hence, the case of $\\textstyle \\sum _ { i } q _ { i } \\leq K$ can be established by proving ",
+        "bbox": [
+            496,
+            792,
+            895,
+            868
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {\\sigma^ {2} h \\left(A t / \\sigma^ {2}\\right)}{A ^ {2}} \\geq \\log \\frac {m}{\\delta}. \\tag {4.2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            611,
+            877,
+            885,
+            910
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Now we seek to bound $t , \\varepsilon , A$ and $\\sigma$ using the fact that $| \\Delta _ { i } | \\le \\tau q _ { i } ( 1 - q _ { i } )$ . We start with exploring the relationship between $t$ and $\\varepsilon$ by applying the standard results that $\\log ( 1 + u ) \\leq u$ , and when $\\begin{array} { r } { | u | \\le \\frac { 1 } { 2 } } \\end{array}$ , $\\log ( 1 + u ) \\geq u - u ^ { 2 }$ . Notice that ",
+        "bbox": [
+            84,
+            85,
+            475,
+            159
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\max  \\left\\{\\left| \\frac {\\Delta_ {i}}{q _ {i}} \\right|, \\left| \\frac {\\Delta_ {i}}{1 - q _ {i}} \\right| \\right\\} \\leq \\tau \\leq \\frac {\\varepsilon}{C _ {1} \\sqrt {k \\log (m / \\delta)}} \\\\ \\leq \\frac {\\varepsilon}{C _ {1} \\sqrt {C _ {0}} \\log (m / \\delta)} \\leq \\frac {0 . 2}{1 . 9 5 \\times 3 . 9 \\times \\log (2 / 0 . 0 5)} <   \\frac {1}{2}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            91,
+            172,
+            468,
+            242
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We distinguish two cases. When $\\Delta _ { i } ~ \\geq ~ 0$ , we see that $q _ { i } \\log ( 1 { + } \\Delta _ { i } / q _ { i } ) > 0$ and $( 1 - q _ { i } ) \\log ( 1 - \\Delta _ { i } / ( 1 - q _ { i } ) ) < 0$ . If $| q _ { i } \\log ( 1 + \\Delta _ { i } / q _ { i } ) | \\geq | ( 1 - q _ { i } ) \\log ( 1 - \\Delta _ { i } / ( 1 - q _ { i } ) ) |$ , these relations yield that ",
+        "bbox": [
+            84,
+            252,
+            475,
+            313
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left. \\left| q _ {i} \\log \\left(1 + \\Delta_ {i} / q _ {i}\\right) + \\left(1 - q _ {i}\\right) \\log \\left(1 - \\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right) \\right| \\right. \\\\ \\leq \\left| q _ {i} \\left(\\Delta_ {i} / q _ {i} + \\left(\\Delta_ {i} / q _ {i}\\right) ^ {2}\\right) + \\left(1 - q _ {i}\\right) \\left(- \\Delta_ {i} / \\left(1 - q _ {i}\\right) \\right. \\right. \\\\ + \\left. \\left(\\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right) ^ {2}\\right) | \\\\ = q _ {i} \\left(\\Delta_ {i} / q _ {i}\\right) ^ {2} + \\left(1 - q _ {i}\\right) \\left(\\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right) ^ {2} \\\\ \\leq \\tau^ {2} \\left(q _ {i} (1 - q _ {i}) ^ {2} + q _ {i} ^ {2} (1 - q _ {i})\\right) \\\\ \\leq \\tau^ {2} q _ {i}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            99,
+            325,
+            464,
+            441
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Similarly, in the case that $\\begin{array} { r l } { | q _ { i } \\log ( 1 + \\Delta _ { i } / q _ { i } ) | } & { { } < } \\end{array}$ $| ( 1 - q _ { i } ) \\log ( 1 - \\Delta _ { i } / ( 1 - q _ { i } ) ) |$ , it follows that ",
+        "bbox": [
+            86,
+            454,
+            473,
+            486
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left. \\left| q _ {i} \\log \\left(1 + \\Delta_ {i} / q _ {i}\\right) + \\left(1 - q _ {i}\\right) \\log \\left(1 - \\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right) \\right| \\right. \\\\ \\leq \\left| q _ {i} \\left(\\Delta_ {i} / q _ {i} - \\left(\\Delta_ {i} / q _ {i}\\right) ^ {2}\\right) + \\left(1 - q _ {i}\\right) \\left(- \\Delta_ {i} / \\left(1 - q _ {i}\\right) \\right. \\right. \\\\ - \\left. \\left(\\Delta_ {i} / (1 - q _ {i})\\right) ^ {2}\\right) | \\\\ = q _ {i} \\left(\\Delta_ {i} / q _ {i}\\right) ^ {2} + \\left(1 - q _ {i}\\right) \\left(\\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right) ^ {2} \\\\ \\leq \\tau^ {2} \\left(q _ {i} (1 - q _ {i}) ^ {2} + q _ {i} ^ {2} (1 - q _ {i})\\right) \\\\ \\leq \\tau^ {2} q _ {i}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            99,
+            498,
+            462,
+            614
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "To proceed, note that $\\begin{array} { r } { \\sum _ { i } q _ { i } \\le K \\le ( 1 + \\frac { c } { \\sqrt { C _ { 0 } } } ) k } \\end{array}$ , and thus ",
+        "bbox": [
+            86,
+            627,
+            470,
+            648
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left| \\sum_ {i = 1} ^ {m} \\left(q _ {i} \\log \\left(1 + \\Delta_ {i} / q _ {i}\\right) + \\left(1 - q _ {i}\\right) \\log \\left(1 - \\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right)\\right) \\right| \\\\ \\leq \\sum_ {i = 1} ^ {m} \\left| q _ {i} \\log \\left(1 + \\Delta_ {i} / q _ {i}\\right) + (1 - q _ {i}) \\log \\left(1 - \\Delta_ {i} / (1 - q _ {i})\\right) \\right| \\\\ \\leq \\tau^ {2} \\sum_ {i = 1} ^ {m} q _ {i} \\leq \\left(1 + \\frac {c}{\\sqrt {C _ {0}}}\\right) \\tau^ {2} k. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            89,
+            659,
+            493,
+            782
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "When $\\Delta _ { i } < 0$ , by using the same arguments, we can also obtain ",
+        "bbox": [
+            84,
+            794,
+            473,
+            821
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left| \\sum_ {i = 1} ^ {m} \\left(q _ {i} \\log \\left(1 + \\Delta_ {i} / q _ {i}\\right) + \\left(1 - q _ {i}\\right) \\log \\left(1 - \\Delta_ {i} / \\left(1 - q _ {i}\\right)\\right)\\right) \\right| \\\\ \\leq \\left(1 + \\frac {c}{\\sqrt {C _ {0}}}\\right) \\tau^ {2} k. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            89,
+            833,
+            493,
+            909
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Making use of the assumption $\\tau \\leq \\varepsilon / ( C _ { 1 } \\sqrt { k \\log ( m / \\delta ) } )$ , we observe ",
+        "bbox": [
+            496,
+            84,
+            885,
+            113
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left| t - \\varepsilon \\right| \\\\ = \\left| \\sum_ {i = 1} ^ {m} \\left(q _ {i} \\log \\left(1 + \\frac {\\Delta_ {i}}{q _ {i}}\\right) + (1 - q _ {i}) \\log \\left(1 - \\frac {\\Delta_ {i}}{1 - q _ {i}}\\right)\\right) \\right| \\\\ \\leq \\frac {1 + \\frac {c}{\\sqrt {C _ {0}}}}{C _ {1} ^ {2}} \\frac {\\varepsilon^ {2}}{\\log (m / \\delta)} \\leq \\frac {1 + \\frac {1 . 9}{3 . 9}}{1 . 9 5 ^ {2}} \\times \\frac {0 . 2 \\varepsilon}{\\log (2 / 0 . 0 5)} \\\\ <   0. 0 2 1 3 \\varepsilon . \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            511,
+            128,
+            872,
+            241
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Rearranging the inequality above gives ",
+        "bbox": [
+            496,
+            258,
+            756,
+            273
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n0. 9 7 8 7 \\leq \\frac {t}{\\varepsilon} \\leq 1. 0 2 1 3.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            612,
+            286,
+            769,
+            314
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Furthermore, note that ",
+        "bbox": [
+            496,
+            327,
+            650,
+            340
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\tau \\leq \\frac {\\varepsilon}{C _ {1} \\sqrt {k \\log (m / \\delta)}} \\leq \\frac {\\varepsilon}{C _ {1} \\sqrt {C _ {0}} \\log (m / \\delta)} \\\\ \\leq \\frac {0 . 2}{1 . 9 5 \\times 3 . 9 \\times \\log (2 / 0 . 0 5)} <   0. 0 0 7 2. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            547,
+            354,
+            834,
+            419
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Hence, ",
+        "bbox": [
+            496,
+            431,
+            547,
+            445
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left| \\log \\frac {1 + \\Delta_ {i} / q _ {i}}{1 - \\Delta_ {i} / (1 - q _ {i})} \\right| \\leq \\left| \\log \\frac {1 + \\tau (1 - q _ {i})}{1 - \\tau q _ {i}} \\right| \\\\ \\leq \\frac {\\tau}{1 - \\tau q _ {i}} \\leq \\frac {\\tau}{1 - 0 . 0 0 7 2} <   1. 0 0 7 3 \\tau , \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            532,
+            459,
+            849,
+            522
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "which implies ",
+        "bbox": [
+            496,
+            535,
+            594,
+            550
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\nA \\leq 1. 0 0 7 3 \\tau . \\tag {4.3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            642,
+            554,
+            885,
+            569
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Combining the relations above implies that ",
+        "bbox": [
+            496,
+            580,
+            784,
+            595
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\sigma^ {2} = \\sum_ {i = 1} ^ {m} q _ {i} (1 - q _ {i}) \\log^ {2} \\frac {1 + \\Delta_ {i} / q _ {i}}{1 - \\Delta_ {i} / (1 - q _ {i})} \\\\ \\leq 1. 0 0 7 3 ^ {2} \\sum_ {i = 1} ^ {m} q _ {i} (1 - q _ {i}) \\tau^ {2} \\\\ \\leq 1. 5 0 9 \\tau^ {2} k. \\tag {4.4} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            553,
+            611,
+            885,
+            710
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Since $u h ( a / u )$ is a decreasing function in $u$ , from (4.4) it follows that ",
+        "bbox": [
+            496,
+            724,
+            885,
+            753
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sigma^ {2} h \\left(A t / \\sigma^ {2}\\right) \\geq 1. 5 0 9 \\tau^ {2} k h \\left(A t / \\left(1. 5 0 9 \\tau^ {2} k\\right)\\right),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            540,
+            768,
+            841,
+            787
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "we set $\\tau ~ = ~ \\varepsilon / ( C _ { 1 } \\sqrt { k \\log ( m / \\delta ) } )$ . Recognizing $k \\_ \\geq$ $C _ { 0 } \\log ( m / \\delta )$ , it is clear that ",
+        "bbox": [
+            496,
+            799,
+            883,
+            832
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\frac {A t}{1 . 5 0 9 \\tau^ {2} k} \\leq \\frac {1 . 0 0 7 3}{1 . 5 0 9} \\cdot \\frac {t}{\\tau k} = \\frac {1 . 0 0 7 3 \\times 1 . 9 5}{1 . 5 0 9} \\frac {t}{\\varepsilon} \\sqrt {\\frac {\\log (m / \\delta)}{k}} \\\\ \\leq \\frac {1 . 0 0 7 3 \\times 1 . 9 5}{1 . 5 0 9} \\times 1. 0 2 1 3 \\times \\frac {1}{3 . 9} \\leq 0. 3 4 0 9. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            501,
+            845,
+            905,
+            910
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Finally, by taking advantage of the fact that $h ( u ) / u ^ { 2 }$ is a decreasing function in $u$ , we see that ",
+        "bbox": [
+            84,
+            84,
+            477,
+            116
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\frac {\\sigma^ {2} h (A t / \\sigma^ {2})}{A ^ {2}} \\\\ \\geq \\frac {1 . 5 0 9 \\tau^ {2} k h (A t / (1 . 5 0 9 \\tau^ {2} k))}{A ^ {2}} \\\\ \\geq \\frac {1 . 5 0 9 \\tau^ {2} k}{A ^ {2}} \\cdot \\frac {h (0 . 3 4 0 9)}{0 . 3 4 0 9 ^ {2}} \\cdot \\left(\\frac {A t}{1 . 5 0 9 \\tau^ {2} k}\\right) ^ {2} \\\\ \\geq 1. 5 0 9 \\cdot \\frac {h (0 . 3 4 0 9)}{0 . 3 4 0 9 ^ {2}} \\cdot \\frac {1}{1 . 5 0 9 ^ {2}} \\cdot 1. 9 5 ^ {2} \\cdot \\frac {t ^ {2} \\log (m / \\delta)}{\\varepsilon^ {2}} \\\\ \\geq 1. 5 0 9 \\cdot \\frac {h (0 . 3 4 0 9)}{0 . 3 4 0 9 ^ {2}} \\cdot \\frac {1}{1 . 5 0 9 ^ {2}} \\cdot 1. 9 5 ^ {2} \\cdot (0. 9 7 8 7) ^ {2} \\log \\left(\\frac {m}{\\delta}\\right) \\\\ \\geq 1. 0 8 \\log \\left(\\frac {m}{\\delta}\\right) \\\\ > \\log \\left(\\frac {m}{\\delta}\\right). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            88,
+            132,
+            473,
+            354
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "This completes the proof of inequality (4.2), and therefore, also completes the proof of Lemma 4.4. We now prove Lemma 4.1. The proof follows from Lemma 4.3 combined with Lemma 4.4. ",
+        "bbox": [
+            84,
+            369,
+            475,
+            429
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Proof of Lemma 4.1. Without loss of generality, we assume $s _ { f } = 1$ . First, notice that if $k < C _ { 0 } \\log ( m / \\delta )$ , ",
+        "bbox": [
+            84,
+            468,
+            473,
+            500
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\lambda > \\frac {8 \\sqrt {k \\log (m / \\delta)}}{\\varepsilon} \\geq \\frac {8}{\\sqrt {C _ {0}}} \\cdot \\frac {k}{\\varepsilon} > \\frac {2 k}{\\varepsilon}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            142,
+            517,
+            418,
+            554
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Therefore, Theorem 2.1 immediately implies the mechanism is $( \\varepsilon , 0 )$ -private. Now we assume $k \\geq C _ { 0 } \\log ( m / \\delta )$ . Throughout we use $J _ { k }$ to denote the random variable of the index of the kth smallest element in terms of the noisy count $x$ , and we use $g _ { j }$ to denote the noise added to the $j$ th element of $x$ . We also define $J _ { k } ^ { \\prime }$ and $g _ { j } ^ { \\prime }$ in terms of $x ^ { \\prime }$ , respectively. For any given $J _ { k } = j$ and the noise $g _ { j } = g$ , we have ",
+        "bbox": [
+            84,
+            568,
+            475,
+            688
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} (i \\in \\mathcal {M} ^ {\\mathrm {o s}} (x)) = G ((x _ {j} + g - x _ {i}) / \\lambda) := q _ {i}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            125,
+            708,
+            433,
+            726
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Setting $q = q ( g ) = ( q _ { i } )$ for $1 \\leq i \\leq m$ and $i \\neq j$ , and $S _ { j } = \\{ s / \\{ j \\} \\ : \\ s \\in S$ and $j \\in s \\}$ , then we have ",
+        "bbox": [
+            84,
+            743,
+            473,
+            773
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} (\\mathcal {M} ^ {\\mathrm {o s}} (x) \\in S, J _ {k} = j | g _ {j} = g) = \\mathbb {P} (\\mathcal {M} (q) \\in S _ {j}).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            109,
+            791,
+            449,
+            809
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Making use of the fact that $\\| x - x ^ { \\prime } \\| _ { \\infty } \\leq 1$ , we conclude that for any $i$ , ",
+        "bbox": [
+            84,
+            825,
+            473,
+            858
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left| \\frac {x _ {j} + g - x _ {i}}{\\lambda} - \\frac {x _ {j} ^ {\\prime} + g - x _ {i} ^ {\\prime}}{\\lambda} \\right| \\leq \\frac {2}{\\lambda}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            156,
+            875,
+            401,
+            910
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "By Lemma 4.3, this implies ",
+        "bbox": [
+            496,
+            84,
+            684,
+            99
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} | q - q ^ {\\prime} | \\\\ \\leq 2 q (1 - q) \\mathrm {e} ^ {\\left| \\frac {x _ {j} + g - x _ {i}}{\\lambda} - \\frac {x _ {j} ^ {\\prime} + g - x _ {i} ^ {\\prime}}{\\lambda} \\right|}. \\\\ \\left| \\frac {x _ {j} + g - x _ {i}}{\\lambda} - \\frac {x _ {j} ^ {\\prime} + g - x _ {i} ^ {\\prime}}{\\lambda} \\right| \\\\ \\leq 2 \\mathrm {e} ^ {\\left| \\frac {2}{\\lambda} \\right|} \\left| \\frac {2}{\\lambda} \\right| q (1 - q) \\leq \\frac {4}{\\lambda} \\mathrm {e} ^ {2 \\varepsilon / 8 \\sqrt {k \\log (m / \\delta)}} q (1 - q) \\\\ \\leq \\frac {4}{\\lambda} \\mathrm {e} ^ {\\varepsilon / 4 \\sqrt {C _ {0}} \\log (m / \\delta)} q (1 - q) \\\\ <   \\frac {4 . 0 1 4}{\\lambda} q (1 - q). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            522,
+            107,
+            861,
+            284
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Hence $q$ is $4 . 0 1 4 / \\lambda$ -close with respect to $q ^ { \\prime }$ . We also notice that ",
+        "bbox": [
+            496,
+            290,
+            885,
+            318
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\lambda \\geq \\frac {8 \\sqrt {k \\log (m / \\delta)}}{\\varepsilon} = \\frac {C _ {1} \\sqrt {k \\log (m / \\delta)}}{1 . 9 5 \\varepsilon / 8},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            547,
+            323,
+            833,
+            359
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "which implies that $q$ is $\\frac { 0 . 9 7 8 5 \\varepsilon } { C _ { 1 } \\sqrt { k \\log ( m / \\delta ) } }$ -close with respect to $q ^ { \\prime }$ . We write $\\mathbb { P } ( \\mathcal { M } ^ { \\mathrm { o s } } ( x ) \\ \\in \\ S , J _ { k } \\ = \\ j | g _ { j } \\ = \\ g )$ and $\\mathbb { P } ( \\mathcal { M } ^ { \\mathrm { o s } } ( x ^ { \\prime } ) \\in S , J _ { k } ^ { \\prime } = j | g _ { j } ^ { \\prime } = g )$ as $\\mathbb { P } _ { x }$ and $\\mathbb { P } _ { x ^ { \\prime } }$ respectively. Applying Lemma 4.4 to $q$ and $q ^ { \\prime }$ with parameters $\\varepsilon$ and $\\delta$ , we have ",
+        "bbox": [
+            496,
+            364,
+            885,
+            446
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} _ {x} \\leq \\mathrm {e} ^ {0. 9 7 8 5 \\varepsilon} \\mathbb {P} _ {x ^ {\\prime}} + \\delta / m.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            602,
+            454,
+            779,
+            472
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Let $l _ { g _ { j } } ( g )$ stands for the probability when the $j$ th noise is taking value of $g$ . Noting that ",
+        "bbox": [
+            496,
+            479,
+            885,
+            508
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\lambda \\geq \\frac {8 \\sqrt {C _ {0}} \\log (m / \\delta)}{\\varepsilon} \\geq \\frac {8 \\times 3 . 9 \\times \\log (2 / 0 . 0 5)}{\\varepsilon} > \\frac {1 1 5}{\\varepsilon}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            501,
+            515,
+            879,
+            547
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The conclusion is now one step away. To show that the algorithm is $( \\varepsilon , \\delta )$ -differentially private, note that ",
+        "bbox": [
+            496,
+            551,
+            885,
+            583
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbb {P} \\left(\\mathcal {M} ^ {\\mathrm {o s}} (x) \\in S\\right) = \\int \\sum_ {j = 1} ^ {m} l _ {g _ {j}} (g) \\mathbb {P} _ {x} d g \\\\ \\leq \\int \\sum_ {j = 1} ^ {m} l _ {g _ {j}} (g) \\left[ \\mathrm {e} ^ {0. 9 7 8 5 \\varepsilon} \\mathbb {P} _ {x ^ {\\prime}} + \\delta / m \\right] d g \\\\ \\leq \\mathrm {e} ^ {0. 9 7 8 5 \\varepsilon} \\int \\sum_ {j = 1} ^ {m} \\left(\\frac {l _ {g _ {j}} (g)}{l _ {g _ {j} ^ {\\prime}} (g)}\\right) \\cdot l _ {g _ {j} ^ {\\prime}} (g) \\cdot \\mathbb {P} _ {x ^ {\\prime}} d g + \\delta \\\\ = \\mathrm {e} ^ {0. 9 7 8 5 \\varepsilon} \\int \\sum_ {j = 1} ^ {m} \\left(e ^ {\\frac {| g - x _ {j} ^ {\\prime} | - | g - x _ {j} |}{\\lambda}}\\right) \\cdot l _ {g _ {j} ^ {\\prime}} (g) \\cdot \\mathbb {P} _ {x ^ {\\prime}} d g + \\delta \\\\ \\leq \\mathrm {e} ^ {0. 9 7 8 5 \\varepsilon + \\frac {1}{\\lambda}} \\int \\sum_ {j = 1} ^ {m} l _ {g _ {j} ^ {\\prime}} (g) \\mathbb {P} _ {x ^ {\\prime}} d g + \\delta \\\\ \\leq \\mathrm {e} ^ {0. 9 7 8 5 \\varepsilon + \\frac {\\varepsilon}{1 1 5}} \\int \\sum_ {j = 1} ^ {m} l _ {g _ {j} ^ {\\prime}} (g) \\mathbb {P} _ {x ^ {\\prime}} d g + \\delta \\\\ <   \\mathrm {e} ^ {0. 9 9 \\varepsilon} \\mathbb {P} \\left(\\mathcal {M} ^ {\\mathrm {o s}} \\left(x ^ {\\prime}\\right) \\in S\\right) + \\delta . \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            511,
+            589,
+            874,
+            869
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Therefore, Theorem 2.2 is proved given the completion of the proof of Lemma 4.1. ",
+        "bbox": [
+            496,
+            875,
+            885,
+            905
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5. Discussion ",
+        "text_level": 1,
+        "bbox": [
+            84,
+            83,
+            200,
+            99
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we provide a theoretical study of the classical top- $k$ problem in the regime of differential privacy. We propose a fast, low-distortion, statistically accurate, and differentially private algorithm to tackle this question, which we refer to as the oneshot Laplace mechanism. We provide a novel coupling technique in proving its privacy without taking advantage of the advanced composition theorems, thereby circumventing the linear dependence on $k$ in the privacy loss compared to the existing results in the literature. We further provide the applications of the oneshot Laplace mechanism in multiple hypothesis testing and pairwise comparison. Our contributions in the theoretical framework have the potential to impact many essential areas in machine learning in both theory and practice. ",
+        "bbox": [
+            84,
+            109,
+            475,
+            321
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "This study leaves a number of open questions that we hope will inspire further work. Through the proof of differential privacy on the oneshot Laplace mechanism, there is nothing to prevent us from achieving better bounds for $\\lambda$ . From a different angle, we wonder if the coupling technique would lead to tighter privacy analysis using other notions of privacy such as concentrated differential privacy, Rényi differential privacy, and Gaussian differential privacy (Dwork & Rothblum, 2016; Bun & Steinke, 2016; Mironov, 2017; Dong et al., 2021; Bu et al., 2020). Finally, an important direction for further research is to obtain sharp asymptotic properties of the oneshot mechanism and use the results to give a more comprehensive comparison between the oneshot Laplace mechanism and existing approaches in the literature. ",
+        "bbox": [
+            84,
+            328,
+            477,
+            554
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgments ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            574,
+            243,
+            590
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "We are very grateful to Cynthia Dwork for encouragement and discussions on an early version of the manuscript. This work was supported in part by NSF through CAREER DMS-1847415 and CCF-1763314, a Facebook Faculty Research Award, and an Alfred Sloan Research Fellowship. ",
+        "bbox": [
+            84,
+            599,
+            475,
+            676
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            695,
+            181,
+            710
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Abadi, M., Chu, A., Goodfellow, I., McMahan, H. B., Mironov, I., Talwar, K., and Zhang, L. Deep learning with differential privacy. In Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security, pp. 308–318. ACM, 2016. ",
+            "Bafna, M. and Ullman, J. The price of selection in differential privacy. arXiv preprint arXiv:1702.02970, 2017. ",
+            "Banerjee, S., Hegde, N., and Massoulié, L. The price of privacy in untrusted recommendation engines. In 2012 50th Annual Allerton Conference on Communication, "
+        ],
+        "bbox": [
+            86,
+            718,
+            475,
+            905
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Control, and Computing (Allerton), pp. 920–927. IEEE, 2012. ",
+            "Bradley, R. A. and Terry, M. E. Rank analysis of incomplete block designs: I. the method of paired comparisons. Biometrika, 39(3/4):324–345, 1952. ",
+            "Bu, Z., Dong, J., Long, Q., and Su, W. J. Deep learning with gaussian differential privacy. Harvard Data Science Review, 2020(23), 2020. ",
+            "Bun, M. and Steinke, T. Concentrated differential privacy: Simplifications, extensions, and lower bounds. In Theory of Cryptography Conference, pp. 635–658. Springer, 2016. ",
+            "Chen, Y., Fan, J., Ma, C., and Wang, K. Spectral method and regularized MLE are both optimal for top- $k$ ranking. arXiv preprint arXiv:1707.09971, 2017. ",
+            "Cho, G. E. and Meyer, C. D. Comparison of perturbation bounds for the stationary distribution of a markov chain. Linear Algebra and its Applications, 335(1-3):137–150, 2001. ",
+            "Dong, J., Durfee, D., and Rogers, R. Optimal differential privacy composition for exponential mechanisms and the cost of adaptivity. arXiv preprint arXiv:1909.13830, 2019. ",
+            "Dong, J., Roth, A., and Su, W. J. Gaussian differential privacy. Journal of the Royal Statistical Society, Series B, 2021. to appear. ",
+            "Durfee, D. and Rogers, R. M. Practical differentially private top-k selection with pay-what-you-get composition. In Advances in Neural Information Processing Systems, pp. 3527–3537, 2019. ",
+            "Dwork, C. and Roth, A. The Algorithmic Foundations of Differential Privacy. Foundations and Trends in Theoretical Computer Science. Now Publishers, 2014. ",
+            "Dwork, C. and Rothblum, G. N. Concentrated differential privacy. arXiv preprint arXiv:1603.01887, 2016. ",
+            "Dwork, C., Kenthapadi, K., McSherry, F., Mironov, I., and Naor, M. Our data, ourselves: Privacy via distributed noise generation. In Annual International Conference on the Theory and Applications of Cryptographic Techniques, pp. 486–503. Springer, 2006a. ",
+            "Dwork, C., McSherry, F., Nissim, K., and Smith, A. Calibrating noise to sensitivity in private data analysis. In Theory of cryptography conference, pp. 265–284. Springer, 2006b. "
+        ],
+        "bbox": [
+            500,
+            84,
+            885,
+            905
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Dwork, C., Rothblum, G. N., and Vadhan, S. Boosting and differential privacy. In Foundations of Computer Science (FOCS), 2010 51st Annual IEEE Symposium on, pp. 51– 60. IEEE, 2010. ",
+            "Dwork, C., Su, W., and Zhang, L. Private false discovery rate control. arXiv preprint arXiv:1511.03803, 2015. ",
+            "Dwork, C., Su, W. J., and Zhang, L. Differentially private false discovery rate control. arXiv preprint arXiv:1807.04209, 2018. ",
+            "Erdos, P. and Rényi, A. On the evolution of random graphs. Publ. Math. Inst. Hung. Acad. Sci, 5(1):17–60, 1960. ",
+            "Friedman, A. and Schuster, A. Data mining with differential privacy. In Proceedings of the 16th ACM SIGKDD international conference on Knowledge discovery and data mining, pp. 493–502. ACM, 2010. ",
+            "Hardt, M. and Roth, A. Beyond worst-case analysis in private singular vector computation. In Proceedings of the forty-fifth annual ACM symposium on Theory of computing, pp. 331–340. ACM, 2013. ",
+            "Ipsen, I. C. and Selee, T. M. Ergodicity coefficients defined by vector norms. SIAM Journal on Matrix Analysis and Applications, 32(1):153–200, 2011. ",
+            "Kairouz, P., Oh, S., and Viswanath, P. The composition theorem for differential privacy. IEEE Transactions on Information Theory, 63(6):4037–4049, 2017. ",
+            "Luce, R. D. Individual choice behavior: A theoretical analysis. Courier Corporation, 2012. ",
+            "McSherry, F. and Mironov, I. Differentially private recommender systems: Building privacy into the netflix prize contenders. In Proceedings of the 15th ACM SIGKDD international conference on Knowledge discovery and data mining, pp. 627–636. ACM, 2009. ",
+            "McSherry, F. D. and Mironov, I. Differential privacy preserving recommendation, December 31 2013. US Patent 8,619,984. ",
+            "Mironov, I. Rényi differential privacy. In 2017 IEEE 30th Computer Security Foundations Symposium (CSF), pp. 263–275. IEEE, 2017. ",
+            "Qin, Z., Yang, Y., Yu, T., Khalil, I., Xiao, X., and Ren, K. Heavy hitter estimation over set-valued data with local differential privacy. In Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security, pp. 192–203. ACM, 2016. ",
+            "Seneta, E. Perturbation of the stationary distribution measured by ergodicity coefficients. Advances in Applied Probability, 20(1):228–230, 1988. "
+        ],
+        "bbox": [
+            86,
+            84,
+            475,
+            905
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Shen, Y. and Jin, H. Privacy-preserving personalized recommendation: An instance-based approach via differential privacy. In 2014 IEEE International Conference on Data Mining, pp. 540–549. IEEE, 2014. ",
+            "Steinke, T. and Ullman, J. Tight lower bounds for differentially private selection. In 2017 IEEE 58th Annual Symposium on Foundations of Computer Science (FOCS), pp. 552–563. IEEE, 2017. "
+        ],
+        "bbox": [
+            500,
+            84,
+            885,
+            217
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "A. Supplementary Material ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            83,
+            321,
+            101
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "A.1. Proof of Theorem 2.1 ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            109,
+            272,
+            125
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Proof of Theorem 2.1. We prove this theorem with a standard coupling argument. Without loss of generality, we assume $\\begin{array} { r l r } { s _ { f } } & { { } = } & { 1 } \\end{array}$ . Let $\\boldsymbol { x } ~ = ~ \\left( x _ { 1 } , \\ldots , x _ { m } \\right)$ and $\\begin{array} { r l } { x ^ { \\prime } } & { { } = } \\end{array}$ $( x _ { 1 } ^ { \\prime } , \\ldots , x _ { m } ^ { \\prime } )$ be adjacent, i.e., $\\| x - x ^ { \\prime } \\| _ { \\infty } \\leq 1$ . Let $S$ be an arbitrary $k$ -subset of $\\{ 1 , \\ldots , m \\}$ and $\\mathcal { G }$ consist of all $\\left( g _ { 1 } , \\ldots , g _ { m } \\right)$ such that $\\mathcal { M } ^ { \\mathrm { o s } }$ with input $x$ reports $S$ . Similarly we have $\\mathcal { G } ^ { \\prime }$ for $x ^ { \\prime }$ . It is clear that $\\mathcal { G } - 2 { \\cdot } \\mathbf { 1 } _ { S } \\subset \\mathcal { G } ^ { \\prime }$ , where $\\mathbf { 1 } _ { S } \\in \\{ 0 , 1 \\} ^ { m }$ satisfies $\\mathbf { 1 } _ { S } ( i ) = 1$ if and only if $i \\in S$ . Here $\\{ 0 , 1 \\} ^ { m }$ stands for the set of $m$ -elements sets which only contain 0 and 1 as elements. Therefore, the standard coupling argument gives ",
+        "bbox": [
+            84,
+            132,
+            475,
+            299
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbb {P} (\\mathcal {M} ^ {\\mathrm {o s}} (x) = S) = \\int_ {\\mathcal {G}} \\frac {1}{2 ^ {m} \\lambda^ {m}} \\mathrm {e} ^ {- \\frac {\\| g \\| _ {1}}{\\lambda}} d g \\\\ \\geq \\int_ {\\mathcal {G} ^ {\\prime} + 2 \\cdot \\mathbf {1} _ {S}} \\frac {1}{2 ^ {m} \\lambda^ {m}} \\mathrm {e} ^ {- \\frac {\\| g \\| _ {1}}{\\lambda}} d g = \\int_ {\\mathcal {G} ^ {\\prime}} \\frac {1}{2 ^ {m} \\lambda^ {m}} \\mathrm {e} ^ {- \\frac {\\| g + 2 \\cdot \\mathbf {1} _ {S} \\| _ {1}}{\\lambda}} d g \\\\ \\geq \\int_ {\\mathcal {G} ^ {\\prime}} \\frac {\\mathrm {e} ^ {- 2 k / \\lambda}}{2 ^ {m} \\lambda^ {m}} \\mathrm {e} ^ {- \\frac {\\| g \\| _ {1}}{\\lambda}} d g = \\mathrm {e} ^ {- \\varepsilon} \\mathbb {P} (\\mathcal {M} ^ {\\mathrm {o s}} (x ^ {\\prime}) = S). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            94,
+            308,
+            470,
+            412
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "On the opposite side, we have $\\mathbb { P } ( \\mathcal { M } ^ { \\mathrm { o s } } ( x ) ~ = ~ S ) ~ \\leq$ $\\mathrm { e } ^ { \\varepsilon } \\mathbb { P } ( \\mathcal { M } ^ { \\mathrm { o s } } ( x ^ { \\prime } ) = S )$ , which completes the proof since $S$ is arbitrary. □ ",
+        "bbox": [
+            84,
+            425,
+            475,
+            472
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "A.2. Proof of Theorem 2.3 ",
+        "text_level": 1,
+        "bbox": [
+            86,
+            488,
+            272,
+            502
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "We begin by proving the following lemma. ",
+        "bbox": [
+            84,
+            512,
+            372,
+            527
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Lemma A.1. Let $X$ and $Y$ be independent identically $\\mathrm { L a p } ( \\lambda )$ distributions and $Z = X - Y$ , then the density function of random variable $Z$ has the form ",
+        "bbox": [
+            83,
+            529,
+            473,
+            575
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {Z} (z) = \\frac {\\lambda + | z |}{4 \\lambda^ {2}} \\cdot \\exp \\left(- \\frac {| z |}{\\lambda}\\right).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            168,
+            580,
+            390,
+            614
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Proof of Lemma A.1. Notice that ",
+        "bbox": [
+            86,
+            627,
+            307,
+            642
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {Z} (z) = \\int_ {- \\infty} ^ {\\infty} f _ {X} (x) f _ {Y} (x - z) d x,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            160,
+            647,
+            398,
+            681
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "by applying the convolution formula above, when $z \\geq 0$ we have ",
+        "bbox": [
+            84,
+            686,
+            473,
+            715
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} 4 \\lambda^ {2} f _ {Z} (z) \\\\ = \\int_ {- \\infty} ^ {\\infty} \\exp \\left(- \\frac {| x |}{\\lambda}\\right) \\exp \\left(- \\frac {| x - z |}{\\lambda}\\right) d x \\\\ = \\int_ {- \\infty} ^ {0} \\exp \\left(\\frac {x}{\\lambda}\\right) \\exp \\left(\\frac {x - z}{\\lambda}\\right) d x + \\\\ \\int_ {0} ^ {z} \\exp \\left(- \\frac {x}{\\lambda}\\right) \\exp \\left(\\frac {x - z}{\\lambda}\\right) d x + \\\\ \\int_ {z} ^ {\\infty} \\exp \\left(- \\frac {x}{\\lambda}\\right) \\exp \\left(- \\frac {x - z}{\\lambda}\\right) d x + \\\\ = (\\lambda + z) \\exp \\left(- \\frac {z}{\\lambda}\\right). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            138,
+            719,
+            421,
+            909
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Therefore, with $z \\geq 0$ , we have ",
+        "bbox": [
+            496,
+            84,
+            709,
+            99
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {Z} (z) = \\frac {\\lambda + z}{4 \\lambda^ {2}} \\exp \\left(- \\frac {z}{\\lambda}\\right).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            596,
+            106,
+            785,
+            137
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Since the pdfs of random variables $X$ and $Y$ are symmetric around the origin, the pdf of $Z$ must be symmetric around the origin. From this we get that ",
+        "bbox": [
+            496,
+            142,
+            885,
+            188
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {Z} (z) = \\frac {\\lambda + | z |}{4 \\lambda^ {2}} \\exp \\left(- \\frac {| z |}{\\lambda}\\right).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            584,
+            195,
+            795,
+            229
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "image",
+        "img_path": "images/0b3fccc59511db6d59bac6fc2c2a14ae9cd00130ed1ee273ca4af64b17ff6dde.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            867,
+            236,
+            885,
+            250
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "With the lemma above, we start to prove Theorem 2.3. Let $g _ { 1 } , g _ { 2 } , \\cdots , g _ { m }$ be i.i.d. $\\mathrm { L a p } ( \\lambda )$ distributions. We define the event ",
+        "bbox": [
+            496,
+            267,
+            885,
+            311
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "$A = \\{ \\mathcal { M } _ { o n e s h o t }$ reports the index set of true top- $k$ elements} ",
+        "bbox": [
+            496,
+            321,
+            901,
+            339
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "and consider the extreme case when $y _ { i }$ ’s follow the exact same order as $f _ { i } ( D )$ ’s, i.e., ",
+        "bbox": [
+            496,
+            347,
+            885,
+            378
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {(1)} (D) + g _ {1} \\leq f _ {(2)} (D) + g _ {2} \\leq \\dots \\leq f _ {(m)} (D) + g _ {m}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            508,
+            386,
+            874,
+            405
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Thus we can lower bound $P ( A )$ by the extreme case above, ",
+        "bbox": [
+            496,
+            412,
+            885,
+            426
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbb {P} (A) \\geq \\mathbb {P} \\left(f _ {(1)} (D) + g _ {1} \\leq \\dots \\leq f _ {(m)} (D) + g _ {m}\\right) \\\\ = \\mathbb {P} (f _ {(1)} (D) + g _ {1} \\leq f _ {(2)} (D) + g _ {2}, \\\\ f _ {(2)} (D) + g _ {2} \\leq f _ {(3)} (D) + g _ {3}, \\dots , \\\\ f _ {(m - 1)} (D) + g _ {m - 1} \\leq f _ {(m)} (D) + g _ {m}) \\\\ = \\mathbb {P} \\left(g _ {1} - g _ {2} \\leq f _ {(2)} (D) - f _ {(1)} (D), \\right. \\\\ g _ {2} - g _ {3} \\leq f _ {(3)} (D) - f _ {(2)} (D), \\dots , \\\\ g _ {m - 1} - g _ {m} \\leq f _ {(m)} (D) - f _ {(m - 1)} (D)) \\\\ \\geq \\mathbb {P} (g _ {1} - g _ {2} \\leq \\Delta , g _ {2} - g _ {3} \\leq \\Delta , \\dots , \\\\ \\left. g _ {m - 1} - g _ {m} \\leq \\Delta\\right). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            524,
+            436,
+            854,
+            603
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Recall the Bonferroni lower bound that for events $X _ { 1 } , \\cdots , X _ { n }$ , we have ",
+        "bbox": [
+            496,
+            611,
+            885,
+            642
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} \\left(X _ {1}, \\dots , X _ {n}\\right) \\geq \\max  \\left\\{0, 1 - \\sum_ {i = 1} ^ {m} \\left(1 - \\mathbb {P} \\left(X _ {i}\\right)\\right) \\right\\}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            514,
+            648,
+            864,
+            691
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Combining the calculation above, we have ",
+        "bbox": [
+            496,
+            696,
+            781,
+            713
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbb {P} (A) \\geq 1 - \\sum_ {i = 1} ^ {m - 1} \\left(1 - \\mathbb {P} \\left(g _ {i} - g _ {i + 1} \\leq \\Delta\\right)\\right) \\\\ = 1 - \\sum_ {i = 1} ^ {m - 1} \\mathbb {P} \\left(g _ {i} - g _ {i + 1} \\leq - \\Delta\\right) \\\\ = 1 - \\sum_ {i = 1} ^ {m - 1} \\int_ {- \\infty} ^ {- \\Delta} f _ {Z} (z) d z \\\\ = 1 - \\frac {(m - 1) (2 \\lambda + \\Delta) \\mathrm {e} ^ {- \\Delta / \\lambda}}{4 \\lambda}, \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            549,
+            720,
+            831,
+            883
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "this completes the proof of Theorem 2.3. ",
+        "bbox": [
+            496,
+            890,
+            767,
+            906
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "A.3. Proof of Theorem 3.5 ",
+        "text_level": 1,
+        "bbox": [
+            84,
+            84,
+            272,
+            99
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Proof of Theorem 3.5. We only need to prove the sensitivity part $\\begin{array} { r } { s = \\frac { 2 } { d \\underline { { L } } ( 1 , - \\underline { { \\rho } } ) } } \\end{array}$ . For two adjacent databases $D$ , $D ^ { \\prime }$ where they only differ in only one data item, we assume their corresponding sufficient statistics are $\\textbf {  { y } }$ and $\\tilde { y }$ . To capture the definition of adjacent databases, we assume one sample yi0,j0 $y _ { i _ { 0 } , j _ { 0 } } ^ { ( l _ { 0 } ) }$ of the edge $( i _ { 0 } , j _ { 0 } )$ in database $D$ and $D ^ { \\prime }$ is different. Without loss of generality, we assume that yi0,j0 $y _ { i _ { 0 } , j _ { 0 } } ^ { ( l _ { 0 } ) } = 0$ in $D$ and y˜i0,j0 $\\tilde { y } _ { i _ { 0 } , j _ { 0 } } ^ { ( l _ { 0 } ) } = 1$ in $D ^ { \\prime }$ . Note that ",
+        "bbox": [
+            84,
+            108,
+            475,
+            236
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP _ {i j} = \\left\\{ \\begin{array}{l l} \\frac {1}{d} y _ {i, j} & \\text {i f} (i, j) \\in E, \\\\ 1 - \\frac {1}{d} \\sum_ {k: (i, k) \\in E} y _ {i, k} & \\text {i f} i = j, \\\\ 0 & \\text {o t h e r w i s e}, \\end{array} \\right.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            125,
+            244,
+            433,
+            301
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "two transition matrices $_ { r }$ and $\\tilde { P }$ only differ in four elements in positions $( i _ { 0 } , j _ { 0 } ) , ( j _ { 0 } , i _ { 0 } ) , ( i _ { 0 } , i _ { 0 } )$ $( i _ { 0 } , j _ { 0 } )$ $( i _ { 0 } , i _ { 0 } )$ and $( j _ { 0 } , j _ { 0 } )$ . To find the maximum possible value of $| | \\boldsymbol { P } - \\tilde { \\boldsymbol { P } } | | _ { \\infty }$ , for $i \\neq i _ { 0 }$ and $i \\neq j _ { 0 }$ , ",
+        "bbox": [
+            84,
+            311,
+            473,
+            371
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sum_ {j = 1} ^ {m} \\left| P _ {i j} - \\tilde {P} _ {i j} \\right| = 0.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            207,
+            371,
+            349,
+            411
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "In the case when $i = i _ { 0 }$ , ",
+        "bbox": [
+            84,
+            414,
+            250,
+            429
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\sum_ {j = 1} ^ {m} \\left| P _ {i j} - \\tilde {P} _ {i j} \\right| \\\\ = \\frac {\\left| y _ {i _ {0} , j _ {0}} - \\tilde {y} _ {i _ {0} , j _ {0}} \\right|}{d} + \\left| P _ {i _ {0} i _ {0}} - \\tilde {P} _ {i _ {0} i _ {0}} \\right| \\\\ = \\frac {\\left| y _ {i _ {0} , j _ {0}} - \\tilde {y} _ {i _ {0} , j _ {0}} \\right|}{d} + \\\\ \\left| \\left(1 - \\frac {1}{d} \\sum_ {k: (i _ {0}, k) \\in E} y _ {i _ {0}, k}\\right) - \\left(1 - \\frac {1}{d} \\sum_ {k: (i _ {0}, k) \\in E} \\tilde {y} _ {i _ {0}, k}\\right) \\right| \\\\ = \\frac {\\left| y _ {i _ {0} , j _ {0}} - \\tilde {y} _ {i _ {0} , j _ {0}} \\right|}{d} + \\frac {1}{d} \\left| y _ {i _ {0}, j _ {0}} - \\tilde {y} _ {i _ {0}, j _ {0}} \\right| \\\\ = \\frac {2}{d} | y _ {i _ {0}, j _ {0}} - \\tilde {y} _ {i _ {0}, j _ {0}} | \\\\ = \\frac {2}{d L}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            88,
+            436,
+            475,
+            684
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "get When $\\begin{array} { r } { \\sum _ { j = 1 } ^ { m } \\left| \\boldsymbol { \\bar { P } } _ { i j } - \\boldsymbol { \\tilde { P } } _ { i j } \\right| = \\frac { 2 } { d L } } \\end{array}$ $i = j _ { 0 }$ , we can follow the exact same calculation and . Therefore, ",
+        "bbox": [
+            84,
+            690,
+            473,
+            724
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left| \\left| \\boldsymbol {P} - \\tilde {\\boldsymbol {P}} \\right| \\right| _ {\\infty} = \\max  _ {1 \\leq i \\leq m} \\sum_ {j = 1} ^ {m} \\left| P _ {i j} - \\tilde {P} _ {i j} \\right| = \\frac {2}{d L}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            127,
+            731,
+            433,
+            771
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "By the definition of sensitivity, we have s = 2dL(1 ρ) . $\\begin{array} { r } { s = \\frac { 2 } { d L \\left( 1 - \\rho \\right) } } \\end{array}$ ",
+        "bbox": [
+            84,
+            779,
+            473,
+            801
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "A.4. Proof of Lemma 4.3 ",
+        "text_level": 1,
+        "bbox": [
+            84,
+            814,
+            263,
+            829
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Proof of Lemma 4.3. By mean value theorem, there exists a point $\\tilde { z }$ between $z$ and $z ^ { \\prime }$ such that ",
+        "bbox": [
+            84,
+            838,
+            473,
+            868
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n| g (\\tilde {z}) | = \\left| \\frac {G (z ^ {\\prime}) - G (z)}{z ^ {\\prime} - z} \\right|,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            187,
+            875,
+            370,
+            910
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "where $g$ denotes the density function of the standard Laplace distribution. Hence, we only need to prove ",
+        "bbox": [
+            496,
+            84,
+            885,
+            114
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {| g (\\tilde {z}) |}{G (z) (1 - G (z))} \\leq 2 \\mathrm {e} ^ {| z ^ {\\prime} - z |}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            591,
+            126,
+            790,
+            161
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Now we prove this inequality in different cases. ",
+        "bbox": [
+            496,
+            171,
+            813,
+            186
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Case 1: when $\\operatorname* { m a x } ( z , z ^ { \\prime } ) \\leq 0$ . In this case, ",
+        "bbox": [
+            496,
+            196,
+            782,
+            213
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {| g (\\tilde {z}) |}{G (z) (1 - G (z))} = \\frac {\\mathrm {e} ^ {\\tilde {z} - z}}{1 - \\frac {1}{2} \\mathrm {e} ^ {z}} \\leq 2 \\mathrm {e} ^ {| \\tilde {z} - z |} \\leq 2 \\mathrm {e} ^ {| z ^ {\\prime} - z |}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            517,
+            224,
+            864,
+            261
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Case 2: when $\\operatorname* { m i n } ( z , z ^ { \\prime } ) \\ge 0$ . With a similar argument in Case 1, we have ",
+        "bbox": [
+            496,
+            272,
+            885,
+            303
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {| g (\\tilde {z}) |}{G (z) (1 - G (z))} = \\frac {\\mathrm {e} ^ {z - \\tilde {z}}}{1 - \\frac {1}{2} \\mathrm {e} ^ {- z}} \\leq 2 \\mathrm {e} ^ {| z - \\tilde {z} |} \\leq 2 \\mathrm {e} ^ {| z ^ {\\prime} - z |}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            513,
+            314,
+            870,
+            351
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Case 3: when $\\operatorname* { m i n } ( z , z ^ { \\prime } ) < 0 < \\operatorname* { m a x } ( z , z ^ { \\prime } )$ . The triangle inequality gives ",
+        "bbox": [
+            496,
+            362,
+            885,
+            393
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {| g (\\tilde {z}) |}{G (z) (1 - G (z))} = \\frac {\\mathrm {e} ^ {| z | - | \\tilde {z} |}}{1 - \\frac {1}{2} \\mathrm {e} ^ {- | z |}} \\leq 2 \\mathrm {e} ^ {| z - \\tilde {z} |} \\leq 2 \\mathrm {e} ^ {| z ^ {\\prime} - z |}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            509,
+            404,
+            874,
+            441
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "In summary, combining all the cases above gives the lemma. □ ",
+        "bbox": [
+            496,
+            460,
+            885,
+            489
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "A.5. Proof of Lemma 4.5 ",
+        "text_level": 1,
+        "bbox": [
+            496,
+            507,
+            673,
+            520
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "The proof of the Lemma 4.5 is based on the classical Bennett’s inequality stated below. ",
+        "bbox": [
+            496,
+            530,
+            885,
+            561
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Bennett’s inequality: Let $Z _ { 1 } \\ldots , Z _ { n }$ be independent random variables with all means being zero. In addition, assume $| Z _ { i } | ~ \\le ~ a$ almost surely for all $i$ . Denoting by $\\begin{array} { r } { \\sigma ^ { 2 } = \\sum _ { i = 1 } ^ { n } { \\mathrm { V a r } } ( Z _ { i } ) } \\end{array}$ , we have ",
+        "bbox": [
+            496,
+            568,
+            885,
+            630
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} \\left(\\sum_ {i = 1} ^ {n} Z _ {i} > t\\right) \\leq \\exp \\left(- \\frac {\\sigma^ {2} h (a t / \\sigma^ {2})}{a ^ {2}}\\right)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            549,
+            642,
+            831,
+            683
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "for any $t \\geq 0$ , where $h ( u ) = ( 1 + u ) \\log ( 1 + u ) - u .$ . ",
+        "bbox": [
+            496,
+            694,
+            852,
+            712
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Proof of Lemma 4.5. By the Bennett’s inequality stated above, we have ",
+        "bbox": [
+            496,
+            731,
+            885,
+            760
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbb {P} (\\sum_ {i} Z _ {i} \\leq k) \\\\ = \\mathbb {P} \\left(\\sum_ {i} Z _ {i} - \\sum_ {i} q _ {i} \\leq - t k\\right) \\leq \\mathrm {e} ^ {- \\sigma^ {2} h \\left(t k / \\sigma^ {2}\\right)}, \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            531,
+            773,
+            852,
+            848
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Note thaspect to $t ) k$ i=1 i. In this case, we have $\\textstyle \\sum _ { i = 1 } ^ { m } q _ { i }$ $\\mathbb { P } ( \\sum _ { i } Z _ { i } \\leq k )$ is a decreasing we can assume $\\begin{array} { r } { \\sigma ^ { 2 } = \\sum _ { i = 1 } ^ { m } q _ { i } ( 1 - \\overline { { q _ { i } } } ) \\leq ( 1 + t ) k } \\end{array}$ $\\textstyle \\sum _ { i = 1 } ^ { m } q _ { i } = ( 1 +$ ",
+        "bbox": [
+            496,
+            859,
+            885,
+            907
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            71
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Making use of the fact that $\\sigma ^ { 2 } h ( t k / \\sigma ^ { 2 } )$ is a monotonically decreasing function with respect to $\\sigma ^ { 2 }$ gives ",
+        "bbox": [
+            84,
+            84,
+            473,
+            116
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbb {P} \\left(\\sum_ {i} Z _ {i} \\leq k\\right) \\leq \\mathrm {e} ^ {- \\sigma^ {2} h \\left(t k / \\sigma^ {2}\\right)} \\\\ \\leq \\exp \\left(- (1 + t) k h \\left(\\frac {t}{t + 1}\\right)\\right). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            169,
+            127,
+            392,
+            194
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Hence, the first part of Lemma 4.5 is proved. In order to prove the second part of the lemma, we need to take advantage of the conclusion from the first part. Note that $h ( u ) / u ^ { 2 }$ is a decreasing function of $u$ , by setting $t = c \\sqrt { \\frac { \\log ( m / \\delta ) } { k } } \\leq$ √cC0 , we get $\\frac { c } { \\sqrt { C _ { 0 } } }$ ",
+        "bbox": [
+            84,
+            204,
+            473,
+            292
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} (1 + t) k h \\left(\\frac {t}{t + 1}\\right) \\\\ \\geq (1 + t) k \\left(\\frac {t}{t + 1}\\right) ^ {2} \\frac {h (\\frac {c}{c + \\sqrt {C _ {0}}})}{(\\frac {c}{c + \\sqrt {C _ {0}}}) ^ {2}} \\\\ \\geq k \\left(c \\sqrt {\\frac {\\log (m / \\delta)}{k}}\\right) ^ {2} \\frac {1}{1 + \\frac {c}{\\sqrt {C _ {0}}}} \\frac {h (\\frac {c}{c + \\sqrt {C _ {0}}})}{(\\frac {c}{c + \\sqrt {C _ {0}}}) ^ {2}} \\\\ \\geq 1. 0 9 9 \\log \\left(\\frac {m}{\\delta}\\right) \\\\ > \\log \\left(\\frac {m}{\\delta}\\right). \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            135,
+            301,
+            426,
+            479
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Therefore, when $\\textstyle \\sum _ { i = 1 } ^ { m } q _ { i } \\geq ( 1 + t ) k$ , we have ",
+        "bbox": [
+            84,
+            489,
+            395,
+            506
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbb {P} (\\sum_ {i} Z _ {i} \\leq k) \\leq \\exp \\left(- (1 + t) k h \\left(\\frac {t}{t + 1}\\right)\\right) \\leq \\frac {\\delta}{m}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            99,
+            516,
+            460,
+            554
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "image",
+        "img_path": "images/a92a1a6128786fbf3d7246c29e09fc580707dc02969edacf6c1d8a995fe0ff72.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            455,
+            565,
+            473,
+            577
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "header",
+        "text": "Oneshot Differentially Private Top-k Selection ",
+        "bbox": [
+            339,
+            56,
+            633,
+            70
+        ],
+        "page_idx": 12
+    }
+]

@@ -1,0 +1,6906 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Discriminative Region-based Multi-Label Zero-Shot Learning "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        130,
+        799,
+        152
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Sanath Narayan* 1 Akshita Gupta* 1 Salman Khan2 Fahad Shahbaz Khan2,3 Ling Shao1 Mubarak Shah4 "
+          }
+        ]
+      },
+      "bbox": [
+        158,
+        179,
+        808,
+        215
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "1Inception Institute of Artificial Intelligence, UAE 2Mohamed Bin Zayed University of AI, UAE 3Linkoping University, Sweden ¨ 4University of Central Florida, USA "
+          }
+        ]
+      },
+      "bbox": [
+        96,
+        215,
+        875,
+        252
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        233,
+        286,
+        313,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-label zero-shot learning (ZSL) is a more realistic counter-part of standard single-label ZSL since several objects can co-exist in a natural image. However, the occurrence of multiple objects complicates the reasoning and requires region-specific processing of visual features to preserve their contextual cues. We note that the best existing multi-label ZSL method takes a shared approach towards attending to region features with a common set of attention maps for all the classes. Such shared maps lead to diffused attention, which does not discriminatively focus on relevant locations when the number of classes are large. Moreover, mapping spatially-pooled visual features to the class semantics leads to inter-class feature entanglement, thus hampering the classification. Here, we propose an alternate approach towards region-based discriminabilitypreserving multi-label zero-shot classification. Our approach maintains the spatial resolution to preserve regionlevel characteristics and utilizes a bi-level attention module (BiAM) to enrich the features by incorporating both region and scene context information. The enriched region-level features are then mapped to the class semantics and only their class predictions are spatially pooled to obtain imagelevel predictions, thereby keeping the multi-class features disentangled. Our approach sets a new state of the art on two large-scale multi-label zero-shot benchmarks: NUS-WIDE and Open Images. On NUS-WIDE, our approach achieves an absolute gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP for ZSL, compared to the best published results. Source code is available at https://github.com/akshitac8/BiAM. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        318,
+        472,
+        758
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        787,
+        209,
+        803
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-label classification strives to recognize all the categories (labels) present in an image. In the standard multilabel classification [33, 40, 16, 5, 22, 41, 42] setting, the category labels in both the train and test sets are identical. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        813,
+        468,
+        875
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In contrast, the task of multi-label zero-shot learning (ZSL) is to recognize multiple new unseen categories in images at test time, without having seen the corresponding visual examples during training. In the generalized ZSL (GZSL) setting, test images can simultaneously contain multiple seen and unseen classes. GZSL is particularly challenging in the large-scale multi-label setting, where several diverse categories occur in an image (e.g., maximum of 117 labels per image in NUS-WIDE [6]) along with a large number of unseen categories at test time (e.g., 400 unseen classes in Open Images [17]). Here, we investigate this challenging problem of multi-label (generalized) zero-shot classification. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        287,
+        893,
+        468
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Existing multi-label (G)ZSL methods tackle the problem by using global image features [21, 47], structured knowledge graph [18] and attention schemes [14]. Among these, the recently introduced LESA [14] proposes a shared attention scheme based on region-based feature representations and achieves state-of-the-art results. LESA learns multiple attention maps that are shared across all categories. The region-based image features are weighted by these shared attentions and then spatially aggregated. Subsequently, the aggregated features are projected to the label space via a joint visual-semantic embedding space. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        469,
+        895,
+        635
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "While achieving promising results, LESA suffers from two key limitations. Firstly, classification is performed on features obtained using a set of attention maps that are shared across all the classes. In such a shared attention framework, many categories are observed to be inferred from only a few dominant attention maps, which tend to be diffused across an image rather than discriminatively focusing on regions likely belonging to a specific class (see Fig. 1). This is problematic for large-scale benchmarks comprising several hundred categories, e.g., more than "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 k"
+          },
+          {
+            "type": "text",
+            "content": "seen classes in Open Images [17] with significant inter and intra-class variations. Secondly, attended features are spatially pooled before projection to the label space, thus entangling the multi-label information in the collapsed imagelevel feature vectors. Since multiple diverse labels can appear in an image, the class-specific discriminability within such a collapsed representation is severely hampered. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        635,
+        895,
+        892
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2108.09301v1 [cs.CV] 20 Aug 2021 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        260,
+        60,
+        705
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "*Equal contribution "
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        887,
+        202,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a44f2c01ec5f643634a28d90a727911ea5b1ccfdbb090beba822b4381430f8b0.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        99,
+        88,
+        861,
+        203
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/afccc53e890784065d8457327d513f6ae95f1e5ebc483d10a131e8e9bc7ccb58.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1. Comparison, in terms of attention visualization, between shared attention-based LESA [14] and our approach on example NUS-WIDE test images. For each image, the visualization of attentions of positive labels within that image are shown for LESA (top row) and our approach (bottom row). In the case of LESA, all classes in these examples are inferred from the eighth shared attention module except for dog class in (b), which is inferred from the ninth module. As seen in these examples, these dominant attention maps struggle to discriminatively focus on relevant (class-specific) regions. In contrast, our proposed approach based on a bi-level attention module (BiAM) produces attention maps by preserving class-specific discriminability, leading to an enriched feature representation. Our BiAM effectively captures region-level semantics as well as global scene-level context, thereby enabling it to accurately attend to object class (e.g., window class in (a)) and abstract concepts (e.g., reflection class in (a)). Best viewed zoomed in. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        78,
+        205,
+        890,
+        318
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1.1. Contributions "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        452,
+        220,
+        465
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To address the aforementioned problems, we pose largescale multi-label ZSL as a region-level classification problem. We introduce a simple yet effective region-level classification framework that maintains the spatial resolution of features to keep the multi-class information disentangled for dealing with large number of co-existing classes in an image. Our framework comprises a bi-level attention module (BiAM) to contextualize and obtain highly discriminative region-level feature representations. Our BiAM contains region and global (scene) contextualized blocks and enables reasoning about all the regions together using pair-wise relations between them, in addition to utilizing the holistic scene context. The region contextualized block enriches each region feature by attending to all regions within the image whereas the scene contextualized block enhances the region features based on their congruence to the scene feature representation. The resulting discriminative features, obtained through our BiAM, are then utilized to perform region-based classification through a compatibility function. Afterwards, a spatial top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "pooling is performed over each class to obtain the final predictions. Experiments are performed on two challenging large-scale multi-label zeroshot benchmarks: NUS-WIDE [6] and Open Images [17]. Our approach performs favorably against existing methods, setting a new state of the art on both benchmarks. Particularly, on NUS-WIDE, our approach achieves an absolute gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "in terms of mAP for the ZSL task, over the best published results [14]. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        478,
+        472,
+        900
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Proposed Method "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        450,
+        671,
+        468
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we introduce a region-based discriminabilitypreserving multi-label zero-shot classification framework aided by learning rich features that explicitly encodes both region as well as global scene contexts in an image. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        477,
+        890,
+        537
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Problem Formulation: Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x } \\in \\mathcal { X }"
+          },
+          {
+            "type": "text",
+            "content": "denote the feature instances of a multi-label image "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i \\in \\mathcal { Z }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { y } \\in \\{ 0 , 1 \\} ^ { S }"
+          },
+          {
+            "type": "text",
+            "content": "the corresponding multi-hot labels from the set of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "seen class labels "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { C } ^ { s }"
+          },
+          {
+            "type": "text",
+            "content": ". Further, let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { A } _ { S } { \\in } \\mathbb { R } ^ { S \\times d _ { a } }"
+          },
+          {
+            "type": "text",
+            "content": "denote the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { a }"
+          },
+          {
+            "type": "text",
+            "content": "-dimensional attribute embeddings, which encode the semantic relationships between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "seen classes. With "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { p }"
+          },
+          {
+            "type": "text",
+            "content": "as the number of positive labels in an image, we denote the set of attribute embeddings for the image as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "a _ { \\mathbf { y } } = \\{ \\mathbf { A } _ { j } , \\forall j : \\mathbf { y } [ j ] = 1 \\}"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| a _ { \\mathbf { y } } | { = } n _ { p }"
+          },
+          {
+            "type": "text",
+            "content": ". The goal in (generalized) zero-shot learning is to learn a mapping "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f ( \\mathbf { x } ) : \\mathcal { X } \\mathrm {  } \\{ 0 , 1 \\} ^ { S }"
+          },
+          {
+            "type": "text",
+            "content": "aided by the attribute embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "a _ { \\mathbf { y } }"
+          },
+          {
+            "type": "text",
+            "content": ", such that the mapping can be adapted to include the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "U"
+          },
+          {
+            "type": "text",
+            "content": "unseen classes (with embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { A } _ { U } \\mathbf { \\bar { \\in } } \\mathbb { R } ^ { U \\times d _ { a } } )"
+          },
+          {
+            "type": "text",
+            "content": "at test time, i.e., "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f ( \\mathbf { x } ) : \\mathcal { X } \\overset { } {  } \\{ 0 , 1 \\} ^ { U }"
+          },
+          {
+            "type": "text",
+            "content": "for ZSL and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f ( \\mathbf { x } )"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { X } \\mathrm {  } \\{ 0 , 1 \\} ^ { C }"
+          },
+          {
+            "type": "text",
+            "content": "for the GZSL setting. Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C { = } S + U"
+          },
+          {
+            "type": "text",
+            "content": "represents the total number of seen and unseen classes. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        537,
+        892,
+        763
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1. Region-level Multi-label ZSL "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        771,
+        759,
+        786
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As discussed earlier, recognizing diverse and wide range of category labels in images under the (generalized) zeroshot setting is challenging. The problem arises, primarily, due to the entanglement of features of the various different classes present in an image. Fig. 2(a) illustrates this feature entanglement in the shared attention-based classification pipeline [14] that integrates multi-label features by "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        795,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d36bf088bf7ea16bb6caa7c7f3f863bdfdb65f900bde0467e6f741310a454378.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Shared attention-based classification pipeline "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        147,
+        102,
+        395,
+        162
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f0f98503f48702cdf1da4c64436929bbed5717747775d762d2d8481771981222.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) Proposed region-based classification framework "
+          },
+          {
+            "type": "text",
+            "content": "Figure 2. Comparison of our region-level classification framework (b) with the shared attention-based classification pipeline (a) in [14]. The shared attention-based pipeline performs an attention-weighted spatial averaging of the region-based features to generate a feature vector per shared attention. These (spatially pooled) features are then classified to obtain "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "class scores per shared attention, which are max-pooled to obtain image-level class predictions. In contrast, our framework minimizes inter-class feature entanglement by enhancing the region-based features through a feature enrichment mechanism, which preserves the spatial resolution of the features. Each region-based enriched feature representation is then classified to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "seen classes. Afterwards, per class top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "activations are aggregated to obtain image-level predictions. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        89,
+        183,
+        455,
+        256
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "performing a weighted spatial averaging of the region-based features based on the shared-attention maps. In this work, we argue that entangled feature representations are suboptimal for multi-label classification and instead propose to alleviate this issue by posing large-scale multi-label ZSL as a region-level classification problem. To this end, we introduce a simple but effective region-level classification framework that first enriches the region-based features by the proposed feature enrichment mechanism. It then classifies the enriched region-based features followed by spatially pooling the per-class region-based scores to obtain the final image-level class predictions (see Fig. 2(b)). Consequently, our framework minimizes inter-class feature entanglement and enhances the classification performance. Fig. 3 shows our overall proposed framework. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": "be the output region-based features, which are to be classified, from our proposed enrichment mechanism (i.e., BiAM). Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h , w"
+          },
+          {
+            "type": "text",
+            "content": "denote the spatial extent of the region-based features with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textit { h } \\cdot \\textit { w }"
+          },
+          {
+            "type": "text",
+            "content": "regions. These features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f }"
+          },
+          {
+            "type": "text",
+            "content": "are first aligned with the class-specific attribute embeddings of the seen classes. This alignment is performed, i.e., a joint visual-semantic space is learned, so that the classifier can be adapted to the unseen classes at test time. The aligned region-based features are classified to obtain class-specific response maps "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { m } \\in \\mathbb { R } ^ { h \\times w \\times S }"
+          },
+          {
+            "type": "text",
+            "content": "given by, "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        458,
+        472,
+        835
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {m} = \\mathbf {e} _ {f} \\mathbf {W} _ {a} \\mathbf {A} _ {S} ^ {\\top}, \\quad \\text {s . t . ,} \\mathbf {A} _ {S} \\in \\mathbb {R} ^ {S \\times d _ {a}}, \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a467da4d6fc7f95a2926da6b6a47ab22e595730728d7fa8379c3b9697e1d95e3.jpg"
+        }
+      },
+      "bbox": [
+        135,
+        843,
+        468,
+        862
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { W } _ { a } \\in \\mathbb { R } ^ { d _ { r } \\times d _ { a } }"
+          },
+          {
+            "type": "text",
+            "content": "is a learnable weight matrix that is used to reshape the visual features to attribute embeddings "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        869,
+        468,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "of seen classes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { A } _ { S } )"
+          },
+          {
+            "type": "text",
+            "content": ". The response maps are then top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "pooled along the spatial dimensions to obtain image-level per-class scores "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { s } \\in \\mathbb { R } ^ { S }"
+          },
+          {
+            "type": "text",
+            "content": ", which are then utilized for training the network (in Sec. 2.3). Such a region-level classification, followed by a score-level pooling, helps to preserve the discriminability of the features in each of the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h \\cdot w"
+          },
+          {
+            "type": "text",
+            "content": "regions by minimizing the feature entanglement of different positive classes occurring in the image. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        210
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The aforementioned region-level multi-label ZSL framework relies on discriminative region-based features. Standard region-based features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x }"
+          },
+          {
+            "type": "text",
+            "content": "only encode local regionspecific information and do not explicitly reason about all the regions together. Moreover, region-based features do not possess image-level holistic scene information. Next, we introduce a bi-level attention module (BiAM) to enhance feature discriminability and generate enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        212,
+        892,
+        333
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2. Bi-level Attention Module "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        340,
+        733,
+        354
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we present a bi-level attention module (BiAM) that enhances region-based features by incorporating both region and scene context information, without sacrificing the spatial resolution. Our BiAM comprises region and scene contextualized blocks, which are described next. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        364,
+        890,
+        439
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2.1 Region Contextualized Block "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        457,
+        754,
+        472
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The region-contextualized block (RCB) enriches the regionbased latent features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "by capturing the contexts from different regions in the image. We observe encoding the individual contexts of different regions in an image to improve the discriminability of standard region-based features, e.g., the context of a region with window can aid in identifying other possibly texture-less regions in the image as house or building. Thus, inspired by the multi-headed self-attention [31], our RCB allows the features in different regions to interact with each other and identify the regions to be paid more attention to for enriching themselves (see Fig. 3(b)). To this end, the input features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x } _ { r } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": "are first processed by a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 { \\times } 3"
+          },
+          {
+            "type": "text",
+            "content": "convolution layer to obtain latent features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": ". These latent features are then projected to a low-dimensional space "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( d _ { r } ^ { \\prime } =  \\begin{array} { r l } \\end{array} | _ { \\cal F } )"
+          },
+          {
+            "type": "text",
+            "content": "to create query-keyvalue triplets using a total of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": "projection heads, "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        481,
+        890,
+        723
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {q} _ {h} ^ {r} = \\mathbf {h} _ {r} \\mathbf {W} _ {h} ^ {Q}, \\quad \\mathbf {k} _ {h} ^ {r} = \\mathbf {h} _ {r} \\mathbf {W} _ {h} ^ {K}, \\quad \\mathbf {v} _ {h} ^ {r} = \\mathbf {h} _ {r} \\mathbf {W} _ {h} ^ {V}, \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/b48d46d8fc52ec85626e403ab58566690fe83632aad9e1e818ba5a408c56f880.jpg"
+        }
+      },
+      "bbox": [
+        522,
+        729,
+        890,
+        750
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h { \\in } \\{ 1 , 2 , . . , H \\}"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { W } _ { h } ^ { Q } , \\mathbf { W } _ { h } ^ { K } , \\mathbf { W } _ { h } ^ { V }"
+          },
+          {
+            "type": "text",
+            "content": "are learnable weights of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\times 1"
+          },
+          {
+            "type": "text",
+            "content": "convolution layers with input and output channels as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r } ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": ", respectively. The query vector (of length "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r } ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": ") derived from each region feature1 is used to find its correlation with the keys obtained from all the region features, while the value embedding holds the status of the current form of each region feature. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        757,
+        890,
+        864
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1Query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { q } _ { h } ^ { r } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } ^ { \\prime } }"
+          },
+          {
+            "type": "text",
+            "content": "can be considered as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h \\cdot w"
+          },
+          {
+            "type": "text",
+            "content": "queries represented by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r } ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": "features each. Similar observation holds for keys, values, etc. "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        873,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/70eb1f2c3c311016195aac8677b33086a454c9af008117a6a3c9d18852983d1f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Overall Proposed Framework "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        112,
+        101,
+        859,
+        195
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/03a55d3e8dbeb6544f161788c04fed32ae5411f379d8b48131826504a427d435.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) Region Contextualized Block (RCB) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        112,
+        198,
+        549,
+        301
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/86fd9dcca08b3d19055651ea055940f56961667129b7a290b8b3fead04f6bba4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(c) Scene Contextualized Block (SCB) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        566,
+        202,
+        859,
+        301
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c302fbe5addbc3f3a6f9973c3b95292736eac167a74810e301a6fdf80e3e68a6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3. Our region-level multi-label (G)ZSL framework: The top row shows an overview of our network architecture. Given an image, the region-level features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf x } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "are first obtained using a backbone. The region features are enriched using a Bi-level Attention Module (BiAM). This module incorporates region (b) and scene (c) contextualized blocks which learn to aggregate region-level and scene-specific context, respectively, which is in turn used to enhance the region features. The enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f }"
+          },
+          {
+            "type": "text",
+            "content": "are mapped to the joint visual-semantic space to relate them with class semantics, obtaining m. Per-class region-based prediction scores are then spatially pooled to generate final image-level predictions. Notably, our design ensures region-level feature enrichment while preserving the spatial resolution uptil class predictions are made, which minimizes inter-class feature entanglement, a key requisite for large-scale multi-label (G)ZSL. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        93,
+        321,
+        874,
+        344
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given these triplets for each head, first, an intra-head processing is performed by relating each query vector with ‘keys’ derived from the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h \\cdot w"
+          },
+          {
+            "type": "text",
+            "content": "region features. The resulting normalized relation scores "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { r } _ { h } \\in \\mathbb { R } ^ { h w \\times h w } )"
+          },
+          {
+            "type": "text",
+            "content": "from the softmax function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": "are used to reweight the corresponding ‘value’ vectors. Without loss of generality1, the attended features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { \\alpha } _ { h } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } ^ { \\prime } }"
+          },
+          {
+            "type": "text",
+            "content": "are given by, "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        465,
+        468,
+        570
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {\\alpha} _ {h} = \\mathbf {r} _ {h} \\mathbf {v} _ {h} ^ {r}, \\quad \\text {w h e r e} \\mathbf {r} _ {h} = \\sigma \\left(\\frac {\\mathbf {q} _ {h} ^ {r} \\mathbf {k} _ {h} ^ {r \\top}}{\\sqrt {d _ {r} ^ {l}}}\\right). \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/e4df59caddfa42ea73e5981c1618a8a0ff30afdbc871e999b76ccdd96581b37a.jpg"
+        }
+      },
+      "bbox": [
+        135,
+        575,
+        468,
+        612
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next, these low-dimensional self-attended features from each head are channel-wise concatenated and processed by a convolution layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { W } _ { o }"
+          },
+          {
+            "type": "text",
+            "content": "to generate output "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { o } _ { r } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        616,
+        468,
+        662
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {o} _ {r} = \\left[ \\alpha_ {1}; \\alpha_ {2}; \\dots \\alpha_ {H} \\right] \\mathbf {W} _ {o}. \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/65a59255621ac01c16dec6c37278bf0764413bffb236a7be9fbad0240e22d621.jpg"
+        }
+      },
+      "bbox": [
+        179,
+        667,
+        468,
+        685
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To encourage the network to selectively focus on adding complimentary information to the ‘source’ latent feature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ", a residual branch is added to the attended features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { o } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "and further processed with a small residual sub-network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c ^ { r } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": ", comprising two "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\times 1"
+          },
+          {
+            "type": "text",
+            "content": "convolution layers, to help the network first focus on the local neighbourhood and then progressively pay attention to the other-level features. The enriched region-based features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { r } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": "from the RCB are given by, "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        690,
+        468,
+        825
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {e} _ {r} = c ^ {r} \\left(\\mathbf {h} _ {r} + \\mathbf {o} _ {r}\\right) + \\left(\\mathbf {h} _ {r} + \\mathbf {o} _ {r}\\right). \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/372fa3fc7e8d94bd51e32994e5266297622281d22360b472722f63075f309bd2.jpg"
+        }
+      },
+      "bbox": [
+        163,
+        833,
+        468,
+        849
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Consequently, the discriminability of the latent features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "is enhanced by self-attending to the context of different regions in the image, resulting in enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        854,
+        468,
+        901
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2.2 Scene Contextualized Block "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        465,
+        746,
+        478
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As discussed earlier, the RCB captures the regional context in the image, enabling reasoning about all regions together using pair-wise relations between them. In this way, RCB enriches the latent feature inputs "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ". However, such a region-based contextual attention does not effectively encode the global scene-level context of the image, which is necessary for understanding abstract scene concepts like night-time, protest, clouds, etc. Understanding such labels from local regional contexts is challenging due to their abstract nature. Thus, in order to better capture the holistic scene-level context, we introduce a scene contextualized block (SCB) within our BiAM. Our SCB attends to the region-based latent features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ", based on their congruence with the global image feature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x } _ { g }"
+          },
+          {
+            "type": "text",
+            "content": "(see Fig. 3(c)). To this end, the learnable weights "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { W } ^ { g }"
+          },
+          {
+            "type": "text",
+            "content": "project the features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x } _ { g }"
+          },
+          {
+            "type": "text",
+            "content": "to a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "-dimensional space to obtain the global ‘key’ vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k } ^ { g } \\in \\mathbb { R } ^ { d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": ", while the latent features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "are spatially average pooled to create the ‘query’ vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { q } ^ { g } \\in \\mathbb { R } ^ { d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        488,
+        890,
+        760
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {q} ^ {g} = \\operatorname {G A P} \\left(\\mathbf {h} _ {r}\\right), \\quad \\mathbf {k} ^ {g} = \\mathbf {x} _ {g} \\mathbf {W} ^ {g}, \\quad \\mathbf {v} ^ {g} = \\mathbf {h} _ {r}. \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/13633d510a1cff4dde1703ec46eb545af5ba90b6177f3c1484bd8791b90e50ec.jpg"
+        }
+      },
+      "bbox": [
+        544,
+        766,
+        890,
+        782
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The region-based latent features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "are retained as ‘value’ features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { v } ^ { g }"
+          },
+          {
+            "type": "text",
+            "content": ". Given these query-key-value triplets, first, the query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf q } ^ { g }"
+          },
+          {
+            "type": "text",
+            "content": "is used to find its correlation with the key "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf k } ^ { g }"
+          },
+          {
+            "type": "text",
+            "content": ". The resulting relation score vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { r } ^ { g } \\in \\mathbb { R } ^ { d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": "are then used to reweight the corresponding channels in value features to obtain the attended features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { \\alpha } ^ { g } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": ", given by, "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        787,
+        890,
+        878
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {\\alpha} ^ {g} = \\mathbf {v} ^ {g} \\otimes \\mathbf {r} ^ {g}, \\quad \\text {w h e r e} \\mathbf {r} ^ {g} = \\operatorname {s i g m o i d} \\left(\\mathbf {q} ^ {g} * \\mathbf {k} ^ {g}\\right), \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f636c1054c22985d65bbb40f85d18ee17b19bfb034706207c22433190bc31ace.jpg"
+        }
+      },
+      "bbox": [
+        517,
+        883,
+        890,
+        901
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/17f332c191cf97722c921d4e30dbafb47f6ed4c84731d981d0542e7035a088c2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "RCB alone "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        99,
+        151,
+        155
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1376b559336283ee2ea4a5d2bcac4bc313bdd346e1d055420d60b809ae2396c1.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        153,
+        98,
+        228,
+        155
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/00f6aa948dc6d484774f7be8aa77f83dc74eaed4881e529b55e2e19fd45917f7.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        230,
+        98,
+        305,
+        155
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a41566f4a3db59d696efcdfeb0466fbfe9ea14d45201a0a018606a492d150b0c.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "BiAM "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        313,
+        98,
+        388,
+        155
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/997ce1143bb40c084459bec2bc62a58efce4efde06721d205524e5f10fda1b87.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        388,
+        98,
+        464,
+        155
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e188d9e128aae1bba77b5cb2aa57c20579a6bde29432fd70fffbba719f06f02e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        162,
+        151,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ec42e3639ef9d88d86ecd54bf324eadf3cbd3fd3352df9b84fe2b09faf825687.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        153,
+        162,
+        228,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/91c278c3c13a703e7d35f9a995b5741ca27663c4a54effc86c69e3f36a2f6418.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        230,
+        162,
+        305,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f1832f9bb1baf7968312c176bc95fc578e4c41610bb9c9c50033129a0ff9004a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        313,
+        155,
+        387,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/967e62bc6d6b36c9cd2e27457bd2f5eb411a413ac81c1d6388deef29054ea189.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4. Effect of enhancing the region-based features through our feature enrichment mechanism: BiAM. The two complementary RCB and SCB blocks in BiAM integrate region-level semantics and global scene-level context, leading to a more discriminative feature representation. While RCB alone (on the left) is able to capture the region-level semantics of person class, it confuses those related to protest label. However, encoding the global scene-level context from the SCB in BiAM (on the right) improves the semantic recognition of scene-level concepts like protest. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        388,
+        162,
+        462,
+        220
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\otimes"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ *"
+          },
+          {
+            "type": "text",
+            "content": "denote channel-wise and element-wise multiplications. The channel-wise operation is chosen here since we want to use the global contextualized features to dictate kernel-wise importance of the feature channels for aggregating relevant contextual cues without disrupting the local filter signature. Similar to RCB, to encourage the network to selectively focus on adding complimentary information to the ‘source’ "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ", a residual branch is added after processing the attended features through a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 { \\times } 3"
+          },
+          {
+            "type": "text",
+            "content": "convolution layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c ^ { g } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": ". The scene-context enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { g } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": "from the SCB are given by, "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        369,
+        467,
+        537
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {e} _ {g} = c ^ {g} \\left(\\boldsymbol {\\alpha} ^ {g}\\right) + \\mathbf {h} _ {r}. \\tag {8}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/329db6ed7cd458ca6a4e11c9b925ef8bce4bbecbd557909cfa015a4907cba90b.jpg"
+        }
+      },
+      "bbox": [
+        205,
+        547,
+        468,
+        564
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In order to ensure the enrichment due to both region and global contexts are well captured, the enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { e } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { g }"
+          },
+          {
+            "type": "text",
+            "content": ") from both region and scene contextualized blocks are channel-wise concatenated and processed through a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\times 1"
+          },
+          {
+            "type": "text",
+            "content": "channel-reducing convolution layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c ^ { f } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": "to obtain the final enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f } \\in \\mathbb { R } ^ { h \\times w \\times d _ { r } }"
+          },
+          {
+            "type": "text",
+            "content": ", given by, "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        574,
+        467,
+        665
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {e} _ {f} = c ^ {f} \\left(\\left[ \\mathbf {e} _ {r}; \\mathbf {e} _ {g} \\right]\\right). \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/fc32049b98c3e3699a086cffdf2e7f4c72c2daf3a11f270276a257ea36c1998d.jpg"
+        }
+      },
+      "bbox": [
+        209,
+        674,
+        468,
+        691
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fig. 4 shows that encoding scene context into the regionbased features improves the attention maps of scene level labels (e.g., protest), which were hard to attend to using only the region context. Consequently, our bi-level attention module effectively reasons about all the image regions together using pair-wise relations between them, while being able to utilize the whole image (holistic) scene as context. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        702,
+        467,
+        808
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.3. Training and Inference "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        816,
+        290,
+        832
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As discussed earlier, discriminative region-based features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f }"
+          },
+          {
+            "type": "text",
+            "content": "are learned and region-wise classified to obtain class-specific response maps "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { m } \\in \\mathbb { R } ^ { h \\times w \\times S }"
+          },
+          {
+            "type": "text",
+            "content": "(using Eq. 1). The response maps m are further top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "pooled spatially to "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        839,
+        467,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "compute the image-level per-class scores "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { s } \\in \\mathbb { R } ^ { S }"
+          },
+          {
+            "type": "text",
+            "content": ". The network is trained using a simple, yet effective ranking loss "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L } _ { r a n k }"
+          },
+          {
+            "type": "text",
+            "content": "on the predicted scores s, given by, "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        90,
+        890,
+        136
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\text {r a n k}} = \\sum_ {i} \\sum_ {p \\in \\mathbf {y} _ {p}, n \\notin \\mathbf {y} _ {p}} \\max  (\\mathbf {s} _ {i} [ n ] - \\mathbf {s} _ {i} [ p ] + 1, 0). \\tag {10}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/505b1078a53facaf22137b1d17e76cb11f3db1a0ffdc2a062c64fadebebf0aa6.jpg"
+        }
+      },
+      "bbox": [
+        513,
+        142,
+        890,
+        178
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { y } _ { p } = \\{ j : \\mathbf { y } [ j ] = 1 \\}"
+          },
+          {
+            "type": "text",
+            "content": "denotes the positive labels in image i. The ranking loss ensures that the predicted scores of the positive labels present in the image rank ahead, by a margin of at least 1, of the negative label scores. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        183,
+        890,
+        243
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "At test time, for the multi-label ZSL task, the unseen class attribute embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { A } _ { U } \\in \\mathbb { R } ^ { U \\times d _ { a } }"
+          },
+          {
+            "type": "text",
+            "content": "of the respective unseen classes are used (in place of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { A } _ { S }"
+          },
+          {
+            "type": "text",
+            "content": ") for computing the class-specific response maps "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { m } \\in \\mathbb { R } ^ { h \\times w \\times U }"
+          },
+          {
+            "type": "text",
+            "content": "in Eq. 1. As in training, these response maps are then top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "pooled spatially to compute the image-level per-class scores "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { s } \\in \\mathbb { R } ^ { U }"
+          },
+          {
+            "type": "text",
+            "content": ". Similarly, for the multi-label GZSL task, the concatenated embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { A } _ { C } \\in \\mathbb { R } ^ { C \\times d _ { a } } )"
+          },
+          {
+            "type": "text",
+            "content": "of all the classes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C = S + U"
+          },
+          {
+            "type": "text",
+            "content": "are used to classify the multi-label images. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        244,
+        890,
+        380
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        392,
+        630,
+        407
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Datasets: We evaluate our approach on two benchmarks: NUS-WIDE [6] and Open Images [17]. The NUS-WIDE dataset comprises nearly 270K images with 81 humanannotated categories, in addition to the 925 labels obtained from Flickr user tags. As in [14, 47], the 925 and 81 labels are used as seen and unseen classes, respectively. The Open Images (v4) is a large-scale dataset comprising nearly 9 million training images along with 41,620 and 125,456 images in validation and test sets. It has annotations with human and machine-generated labels. Here, 7,186 labels, with at least 100 training images, are selected as seen classes. The most frequent 400 test labels that are absent in the training data are selected as unseen classes, as in [14]. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        417,
+        890,
+        613
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Evaluation Metrics: We use F1 score at top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "predictions and mean Average Precision (mAP) as evaluation metrics, as in [32, 14]. The model’s ability to correctly rank labels in each image is measured by the F1, while the its image ranking accuracy for each label is captured by the mAP. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        613,
+        890,
+        688
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Implementation Details: Pretrained VGG-19 [29] is used to extract features from multi-label images, as in [47, 14]. The region-based features (of size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h , w { = } 1 4"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r } { = } 5 1 2"
+          },
+          {
+            "type": "text",
+            "content": ") from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C o n \\nu _ { 5 }"
+          },
+          {
+            "type": "text",
+            "content": "are extracted along with the global features of size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { g } { = } 4 { , } 0 9 6"
+          },
+          {
+            "type": "text",
+            "content": "from FC7. As in [14], "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "-normalized 300- dimensional GloVe [26] vectors of the class names are used as the attribute embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { A } _ { C }"
+          },
+          {
+            "type": "text",
+            "content": ". The two "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 { \\times } 3"
+          },
+          {
+            "type": "text",
+            "content": "convolutions (input and output channels are set to 512) are followed by ReLU and batch normalization layers. The "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "for top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "pooling is set to 10, while the heads "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H { = } 8"
+          },
+          {
+            "type": "text",
+            "content": ". For training, we use the ADAM optimizer with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\beta _ { 1 } , \\beta _ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": "as (0.5, 0.999) and a gradual warm-up learning rate scheduler with an initial "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l r"
+          },
+          {
+            "type": "text",
+            "content": "of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 e ^ { - 3 }"
+          },
+          {
+            "type": "text",
+            "content": ". Our model is trained with a mini-batch size of 32 for 40 epochs on NUS-WIDE and 2 epochs on Open Images. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        688,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/cbd86392f88cebf8d44991602d8cfd5082ac530e6d6ca1d33f562627802dc867.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1. State-of-the-art comparison for multi-label ZSL and GZSL tasks on NUS-WIDE. We report the results in terms of mAP and F1 score at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K \\in \\{ 3 , 5 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". Our approach outperforms the state-of-the-art for both ZSL and GZSL tasks, in terms of mAP and F1 score. Best results are in bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>Task</td><td>mAP</td><td>F1 (K = 3)</td><td>F1 (K = 5)</td></tr><tr><td rowspan=\"2\">CONSE [24]</td><td>ZSL</td><td>9.4</td><td>21.6</td><td>20.2</td></tr><tr><td>GZSL</td><td>2.1</td><td>7.0</td><td>8.1</td></tr><tr><td rowspan=\"2\">LabelEM [1]</td><td>ZSL</td><td>7.1</td><td>19.2</td><td>19.5</td></tr><tr><td>GZSL</td><td>2.2</td><td>9.5</td><td>11.3</td></tr><tr><td rowspan=\"2\">Fast0Tag [47]</td><td>ZSL</td><td>15.1</td><td>27.8</td><td>26.4</td></tr><tr><td>GZSL</td><td>3.7</td><td>11.5</td><td>13.5</td></tr><tr><td rowspan=\"2\">Attention per Label [15]</td><td>ZSL</td><td>10.4</td><td>25.8</td><td>23.6</td></tr><tr><td>GZSL</td><td>3.7</td><td>10.9</td><td>13.2</td></tr><tr><td rowspan=\"2\">Attention per Cluster [14]</td><td>ZSL</td><td>12.9</td><td>24.6</td><td>22.9</td></tr><tr><td>GZSL</td><td>2.6</td><td>6.4</td><td>7.7</td></tr><tr><td rowspan=\"2\">LESA [14]</td><td>ZSL</td><td>19.4</td><td>31.6</td><td>28.7</td></tr><tr><td>GZSL</td><td>5.6</td><td>14.4</td><td>16.8</td></tr><tr><td rowspan=\"2\">Our Approach</td><td>ZSL</td><td>26.3</td><td>33.1</td><td>30.7</td></tr><tr><td>GZSL</td><td>9.3</td><td>16.1</td><td>19.0</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        81,
+        155,
+        467,
+        371
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1. State-of-the-art Comparison "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        392,
+        331,
+        407
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NUS-WIDE: The state-of-the-art comparison for zero-shot (ZSL) and generalized zero-shot (GZSL) classification is presented in Tab. 1. The results are reported in terms of mAP and F1 score at top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "predictions "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( K \\in \\{ 3 , 5 \\} )"
+          },
+          {
+            "type": "text",
+            "content": "). The approach of Fast0Tag [47], which finds principal directions in the attribute embedding space for ranking the positive tags ahead of negative tags, achieves 15.1 mAP on the ZSL task. The recently introduced LESA [14], which employs a shared multi-attention mechanism to recognize labels in an image, improves the performance over Fast0Tag, achieving "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 9 . 4 \\ \\mathrm { m A P } ."
+          },
+          {
+            "type": "text",
+            "content": "Our approach outperforms LESA with an absolute gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP. Furthermore, our approach achieves consistent improvement over the state-of-the-art in terms of F1 "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( K \\in \\{ 3 , 5 \\} )"
+          },
+          {
+            "type": "text",
+            "content": "), achieving gains as high as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 . 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": "at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 5"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        415,
+        468,
+        627
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Similarly, on the GZSL task, our approach achieves an mAP score of 9.3, outperforming LESA with an absolute gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 . 7 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". Moreover, consistent performance improvement in terms of F1 is achieved over LESA by our approach, with absolute gains of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 . 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 3"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 5"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        628,
+        468,
+        702
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Open Images: Tab. 2 shows the state-of-the-art comparison for multi-label ZSL and GZSL tasks. The results are reported in terms of mAP and F1 score at top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "predictions "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( K \\in \\{ 1 0 , 2 0 \\} )"
+          },
+          {
+            "type": "text",
+            "content": "). We follow the same evaluation protocol as in the concurrent work of SDL [2]. Since Open Images has significantly larger number of labels, in comparison to NUS-WIDE, ranking them within an image is more challenging. This is reflected by the lower F1 scores in the table. Among existing methods, LESA obtains an mAP of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "4 1 . 7 \\%"
+          },
+          {
+            "type": "text",
+            "content": "for the ZSL task. In comparison, our approach outperforms LESA by achieving "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 3 . 6 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP with an absolute gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 1 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". Furthermore, our approach performs favorably against the best existing approach with F1 scores of 8.3 "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        704,
+        470,
+        901
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/a15fb6df470d9a30cf3de24d6eee52d22170b266a35fb527967f6c9784981ba5.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2. State-of-the-art comparison for multi-label ZSL and GZSL tasks on Open Images. Results are reported in terms of mAP and F1 score at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { \\in } \\{ 1 0 , 2 0 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". Our approach sets a new state of the art for both tasks, in terms of mAP and F1 score. Best results are in bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>Task</td><td>mAP</td><td>F1 (K = 10)</td><td>F1 (K = 20)</td></tr><tr><td rowspan=\"2\">CONSE [24]</td><td>ZSL</td><td>40.4</td><td>0.4</td><td>0.3</td></tr><tr><td>GZSL</td><td>43.5</td><td>2.6</td><td>2.4</td></tr><tr><td rowspan=\"2\">LabelEM [1]</td><td>ZSL</td><td>40.5</td><td>0.5</td><td>0.4</td></tr><tr><td>GZSL</td><td>45.2</td><td>5.2</td><td>5.1</td></tr><tr><td rowspan=\"2\">Fast0Tag [47]</td><td>ZSL</td><td>41.2</td><td>0.7</td><td>0.6</td></tr><tr><td>GZSL</td><td>45.2</td><td>16.0</td><td>12.9</td></tr><tr><td rowspan=\"2\">Attention per Cluster [14]</td><td>ZSL</td><td>40.7</td><td>1.2</td><td>0.9</td></tr><tr><td>GZSL</td><td>44.9</td><td>16.9</td><td>13.5</td></tr><tr><td rowspan=\"2\">LESA [14]</td><td>ZSL</td><td>41.7</td><td>1.4</td><td>1.0</td></tr><tr><td>GZSL</td><td>45.4</td><td>17.4</td><td>14.3</td></tr><tr><td rowspan=\"2\">Our Approach</td><td>ZSL</td><td>73.6</td><td>8.3</td><td>5.5</td></tr><tr><td>GZSL</td><td>84.5</td><td>19.1</td><td>15.9</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        504,
+        154,
+        888,
+        335
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/de6bbfacf0efd9ff7b308cf5efd4370b52f6c6661d76f8263afbea22e0000292.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5. Impact of region-based classification for the ZSL task on NUS-WIDE, in terms of mAP and F1 at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K \\in \\{ 3 , 5 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". Classifying spatially pooled features (blue bars) entangles the features of the different classes resulting in sub-optimal performance. In contrast, our proposed approach, which classifies each region individually and then spatially pools the per region class scores (red bars), minimizes the inter-class feature entanglement and achieves superior classification performance. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        516,
+        342,
+        861,
+        450
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "and 5.5 at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 1 0"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 2 0"
+          },
+          {
+            "type": "text",
+            "content": ". It is worth noting that the ZSL task is challenging due to the high number of unseen labels (400). As in ZSL, our approach obtains a significant gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 9 . 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP over the best published results for GZSL and also achieves favorable performance in F1. Additional details and results are presented in Appendix A. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        577,
+        890,
+        670
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2. Ablation Study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        680,
+        653,
+        696
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Impact of region-based classification: To analyse this impact, we train our proposed framework without regionbased classification, where the enriched features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f }"
+          },
+          {
+            "type": "text",
+            "content": "are spatially average-pooled to a single feature representation (of size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ") per image and then classified. Fig. 5 shows the performance comparison between our frameworks trained with and without region-based classification in terms of mAP and F1. Since images have large and diverse set of positive labels, spatially aggregating features without the regionbased classification (blue bars), leads to inter-class feature entanglement, as discussed in Sec. 2.1. Instead, preserving the spatial dimension by classifying the region-based features, as in the proposed framework (red bars), mitigates the "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        703,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/c41269e7e8627ab01e149fdb95758d28a668157335b791da6348d9e2129c2fde.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3. Impact of the proposed BiAM comprising RCB and SCB blocks. Note that all results here are reported with the same region-level classification framework and only the features utilized within the classification framework differs. Both RCB alone and SCB alone achieve consistently improved performance over standard region features. For both ZSL and GZSL tasks, the best performance is obtained when utilizing the discriminative features obtained from the proposed BiAM. Best results are in bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>Task</td><td>mAP</td><td>F1 (K = 3)</td><td>F1 (K = 5)</td></tr><tr><td>Standard</td><td>ZSL</td><td>21.1</td><td>28.0</td><td>26.9</td></tr><tr><td>region features</td><td>GZSL</td><td>6.8</td><td>12.0</td><td>14.5</td></tr><tr><td rowspan=\"2\">RCB alone</td><td>ZSL</td><td>23.7</td><td>31.9</td><td>29.0</td></tr><tr><td>GZSL</td><td>7.6</td><td>14.7</td><td>17.6</td></tr><tr><td rowspan=\"2\">SCB alone</td><td>ZSL</td><td>23.2</td><td>29.4</td><td>27.8</td></tr><tr><td>GZSL</td><td>8.6</td><td>14.0</td><td>16.7</td></tr><tr><td rowspan=\"2\">BiAM (RCB + SCB)</td><td>ZSL</td><td>26.3</td><td>33.1</td><td>30.7</td></tr><tr><td>GZSL</td><td>9.3</td><td>16.1</td><td>19.0</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        81,
+        198,
+        465,
+        335
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/123673e81225808064fabd8d545d057562d5d996b48018a83ccdeb8e58fff780.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4. ZSL comparison on NUS-WIDE with attention variants: our attention (left) and other attentions [34, 13] (right). "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>mAP</td><td>Method</td><td>mAP</td></tr><tr><td>BiAM: RCB w/ LayerNorm</td><td>25.0</td><td>Non-Local [34]</td><td>23.1</td></tr><tr><td>BiAM: RCB w/ sigmoid</td><td>24.6</td><td>Criss-Cross Atn [13]</td><td>23.9</td></tr><tr><td>BiAM: SCB w/ softmax</td><td>24.3</td><td>BiAM (Ours)</td><td>26.3</td></tr><tr><td>BiAM: Final</td><td>26.3</td><td></td><td></td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        81,
+        376,
+        450,
+        440
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "inter-class feature entanglement to a large extent. This leads to a superior performance for the region-based classification on both multi-label ZSL and GZSL tasks. These results suggest the importance of region-based classification for learning discriminative features in large-scale multi-label (G)ZSL tasks. Furthermore, Fig. 6 presents a t-SNE visualization showing the impact of our region-level classification framework on 10 unseen classes from NUS-WIDE. Impact of the proposed BiAM: Here, we analyse the impact of our feature enrichment mechanism (BiAM) to obtain discriminative feature representations. Tab. 3 presents the comparison between region-based classification pipelines based on standard features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { h } _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "and discriminative features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { f }"
+          },
+          {
+            "type": "text",
+            "content": "obtained from our BiAM on NUS-WIDE. We also present results of our RCB and SCB blocks alone. Both RCB alone and SCB alone consistently improve the (G)ZSL performance over the standard region-based features. This shows that our region-based classification pipeline benefits from the discriminative features obtained through the two complementary attention blocks. Furthermore, best results are obtained with our BiAM that comprises both RCB and SCB blocks, demonstrating the importance of encoding both region and scene context information. Fig. 8 shows a comparison between the standard features-based classification and the proposed classification framework utilizing BiAM on example unseen class images. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        460,
+        468,
+        853
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Varying the attention modules: Tab. 4 (left) shows the comparison on NUS-WIDE when ablating RCB and SCB modules in our BiAM. Including LayerNorm in RCB or re-"
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        854,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b84c971e13ea98be56014b956cae185ec93b66f6481361355fbb1be3d97110da.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        524,
+        90,
+        689,
+        186
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/78335a7648c777a93df6e9fa165b5c5baadd9dd310a4413bab244ac492168ed0.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6. t-SNE visualization showing the impact of the proposed region-level classification framework on the inter-class feature entanglement. We present the comparison on 10 unseen classes of NUS-WIDE. On left: the single feature representationbased classification pipeline, where the enriched features are spatially aggregated to obtain a feature vector (of length "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ") and then classified. On right: the proposed region-level classification framework, which classifies the region-level features first and then spatially pools the class scores to obtain image-level predictions. Our classification framework maintains the spatial resolution to preserve the region-level characteristics, thereby effectively minimizing the inter-class feature entanglement. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        700,
+        90,
+        866,
+        186
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c727111b3068b1b779f74e0621e9567cd72d308c0f8461dc7bf0652564ba7d05.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        500,
+        368,
+        630,
+        438
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c6c68ef5d6e66c4d679d8b08e17d4c15f5303d73971507b5e97dca6754c61459.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        630,
+        369,
+        756,
+        438
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/72f65a667cc9197393257f4533f7a79029af0ba4d33e76a5a629ed6696664dd2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7. ZSL comparison on NUS-WIDE when varying "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": "top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h { \\cdot } w"
+          },
+          {
+            "type": "text",
+            "content": "regions. Results improve slightly as heads "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": "increases till 8 and drops beyond 8, likely due to overfitting to seen classes. A similar trend is observed when top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "increases. Decreasing h·w regions from 14x14 to 9x9 does not affect much. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        759,
+        369,
+        885,
+        438
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "placing its softmax with sigmoid or replacing sigmoid with softmax in SCB result in sub-optimal performance compared to our final BiAM. Similarly, replacing our BiAM with existing Non-Local [34] and Criss-cross [13] attention blocks also results in reduced performance (see Tab. 4 (right)). This shows the efficacy of BiAM, which integrates both region and holistic scene context. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        523,
+        890,
+        627
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Varying the hyperparameters: Fig. 7 shows the ZSL performance of our framework when varying heads "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "in top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "and number of regions "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( h \\cdot w )"
+          },
+          {
+            "type": "text",
+            "content": ". Performance improves as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": "is increased till 8 and drops beyond 8, likely due to overfitting to seen classes. Similarly, as top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "increases beyond 10, features of spatially-small classes entangle and reduce the discriminability. Furthermore, decreasing the regions leads to multiple classes overlapping in the same regions causing feature entanglement and performance drop. Compute and run-time complexity: Tab. 5 shows that our approach achieves significant performance gains of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 . 7 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 1 . 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "over LESA with comparable FLOPs, memory cost, training and inference run-times, on NUS-WIDE and Open Images, respectively. For a fair comparison, both methods are run on the same Tesla V100. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        628,
+        890,
+        853
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additional examples w.r.t. failure cases of our model such as confusing abstract classes (e.g., sunset vs. sunrise) and fine-grained classes are provided in Appendix B. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        854,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/afdefc3a2bcb4f96c69629648fd560fdd87f19fef02cb4f8c04b4eb68c755a69.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5. Comparison of our BiAM with LESA in terms of ZSL performance (mAP), train and inference time, FLOPs and memory cost on NUS-WIDE (NUS) and Open Images (OI). Our BiAM achieves significant gain in performance with comparable compute and run-time complexity, over LESA. "
+          },
+          {
+            "type": "text",
+            "content": "Figure 8. Qualitative comparison on four test examples from NUS-WIDE, between the standard region features and our discriminative features. Top-3 predictions per image for both approaches are shown with true positives and false positives. Compared to the standard region-based features, our approach learns discriminative region-based features and performs favorably. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>mAP (NUS / OI)</td><td>Train (NUS / OI)</td><td>Inference</td><td>FLOPs</td><td>Memory</td></tr><tr><td>LESAL [10]</td><td>19.4 / 41.7</td><td>9.1 hrs / 35 hrs</td><td>1.4 ms</td><td>0.46 G</td><td>2.6 GB</td></tr><tr><td>BiAM (Ours)</td><td>26.1 / 73.0</td><td>7.5 hrs / 26 hrs</td><td>2.3 ms</td><td>0.59 G</td><td>2.8 GB</td></tr><tr><td></td><td>Standard features</td><td>Our Approach</td><td></td><td>Standard features</td><td>Our Approach</td></tr><tr><td></td><td>birds</td><td>birds</td><td></td><td>sky</td><td>ocean</td></tr><tr><td></td><td>snow</td><td>animal</td><td></td><td>beach</td><td>sky</td></tr><tr><td></td><td>whales</td><td>grass</td><td></td><td>buildings</td><td>sunset</td></tr><tr><td></td><td>Standard features</td><td>Our Approach</td><td></td><td>Standard features</td><td>Our Approach</td></tr><tr><td></td><td>person</td><td>person</td><td></td><td>sky</td><td>clouds</td></tr><tr><td></td><td>Mountain</td><td>sky</td><td></td><td>sunset</td><td>sky</td></tr><tr><td></td><td>Wedding</td><td>Wedding</td><td></td><td>nighttime</td><td>sunset</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        80,
+        156,
+        468,
+        314
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3. Standard Multi-label Classification "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        414,
+        382,
+        429
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In addition to multi-label (generalized) zero-shot classification, we evaluate our proposed region-based classification framework on the standard multi-label classification task. Here, image instances for all the labels are present in training. The state-of-the-art comparison for the standard multi-label classification on NUS-WIDE with 81 human annotated labels is shown in Tab. 6. Among existing methods, the work of [15] and LESA [14] achieve mAP scores of 32.6 and 31.5, respectively. Our approach outperforms all published methods and achieves a significant gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 5 . 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP over the state of the art. Furthermore, our approach performs favorably against existing methods in terms of F1. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        436,
+        468,
+        619
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        632,
+        218,
+        648
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Several works [39, 28, 19, 20, 43, 23, 45] have researched the conventional single-label ZSL problem. In contrast, a few works [21, 47, 18, 14, 12] have investigated the more challenging problem of multi-label ZSL. Mensink et al. [21] propose an approach based on using co-occurrence statistics for multi-label ZSL. Zhang et al. [47] introduce a method that utilizes linear mappings and non-linear deep networks to approximate principal direction from an input image. The work of [18] investigates incorporating knowledge graphs to reason about relationships between multiple labels. Recently, Huynh and Elhamifar [14] introduce a shared attention-based multi-label ZSL approach, where the shared attentions are label-agnostic and are trained to focus on relevant foreground regions by utilizing a formulation based on multiple loss terms. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        657,
+        468,
+        883
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Context is known to play a crucial role in several vision "
+          }
+        ]
+      },
+      "bbox": [
+        96,
+        885,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/a9fd01fffa7f1d8626d56d37f030a8549464546c7309670027b7fb4c4439928d.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6. State-of-the-art performance comparison for the standard multi-label classification on NUS-WIDE. The results are reported in terms of mAP and F1 score at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K \\in \\{ 3 , 5 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". Our proposed approach achieves superior performance compared to existing methods, with gains as high as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 5 . 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "in terms of mAP. Best results are in bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>mAP</td><td>F1 (K = 3)</td><td>F1 (K = 5)</td></tr><tr><td>WARP [11]</td><td>3.1</td><td>54.4</td><td>49.4</td></tr><tr><td>WSABIE [36]</td><td>3.1</td><td>53.8</td><td>49.2</td></tr><tr><td>Logistic [30]</td><td>21.6</td><td>51.1</td><td>46.1</td></tr><tr><td>Fast0Tag [47]</td><td>22.4</td><td>53.8</td><td>48.6</td></tr><tr><td>CNN-RNN [33]</td><td>28.3</td><td>55.2</td><td>50.8</td></tr><tr><td>LESA [14]</td><td>31.5</td><td>58.0</td><td>52.0</td></tr><tr><td>Attention per Cluster [14]</td><td>31.7</td><td>56.6</td><td>50.7</td></tr><tr><td>Attention per Label [15]</td><td>32.6</td><td>56.8</td><td>51.3</td></tr><tr><td>Our Approach</td><td>47.8</td><td>59.6</td><td>53.4</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        504,
+        169,
+        890,
+        316
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "problems, such as object recognition [25, 9, 37, 46]. Studies [10, 3] have shown that deep convolutional networksbased visual recognition models implicitly rely on contextual information. Recently, self-attention models have achieved promising performance for machine translation and natural language processing [31, 38, 7, 8]. This has inspired studies to investigate self-attention and related ideas for vision tasks, such as object recognition [27], image synthesis [44] and video prediction [35]. Self-attention strives to learn the relationships between elements of a sequence by estimating the relevance of one item to other items. Motivated by its success in several vision tasks, we introduce a multi-label zero-shot region-based classification approach that utilizes self-attention in the proposed bi-level attention module to reason about all regions together using pair-wise relations between these regions. To complement the selfattentive region features with the holistic scene context information, we integrate a global scene prior which enables us to enrich the region-level features with both region and scene context information. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        339,
+        890,
+        641
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5. Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        661,
+        617,
+        676
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We proposed a region-based classification framework comprising a bi-level attention module for large-scale multilabel zero-shot learning. The proposed classification framework design preserves the spatial resolution of features to retain the multi-class information disentangled. This enables to effectively deal with large number of co-existing categories in an image. To contextualize and enrich the region features in our classification framework, we introduced a bi-level attention module that incorporates both region and scene context information, generating discriminative feature representations. Our simple but effective approach sets a new state of the art on two large-scale benchmarks and obtains absolute gains as high as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 1 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "ZSL mAP, compared to the best published results. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        688,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        78,
+        89,
+        173,
+        104
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[1] Zeynep Akata, Florent Perronnin, Zaid Harchaoui, and Cordelia Schmid. Label-embedding for image classification. TPAMI, 2015. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[2] Avi Ben-Cohen, Nadav Zamir, Emanuel Ben Baruch, Itamar Friedman, and Lihi Zelnik-Manor. Semantic diversity learning for zero-shot multi-label classification. arXiv preprint arXiv:2105.05926, 2021. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[3] Wieland Brendel and Matthias Bethge. Approximating cnns with bag-of-local-features models works surprisingly well on imagenet. In ICLR, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[4] Mathilde Caron, Hugo Touvron, Ishan Misra, Herve J ´ egou, ´ Julien Mairal, Piotr Bojanowski, and Armand Joulin. Emerging properties in self-supervised vision transformers. arXiv preprint arXiv:2104.14294, 2021. 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[5] Zhao-Min Chen, Xiu-Shen Wei, Peng Wang, and Yanwen Guo. Multi-label image recognition with graph convolutional networks. In CVPR, 2019. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[6] Tat-Seng Chua, Jinhui Tang, Richang Hong, Haojie Li, Zhiping Luo, and Yantao Zheng. Nus-wide: a real-world web image database from national university of singapore. In CIVR, 2009. 1, 2, 5, 11, 13 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[7] Zihang Dai, Zhilin Yang, Yiming Yang, Jaime Carbonell, Quoc Le, and Ruslan Salakhutdinov. Transformer-xl: Attentive language models beyond a fixed-length context. In ACL, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[8] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. Bert: Pre-training of deep bidirectional transformers for language understanding. In NAACL-HLT, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[9] Carolina Galleguillos and Serge Belongie. Context based object categorization: A critical survey. CVIU, 2010. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[10] Robert Geirhos, Patricia Rubisch, Claudio Michaelis, Matthias Bethge, Felix Wichmann, and Wieland Brendel. Imagenet-trained cnns are biased towards texture; increasing shape bias improves accuracy and robustness. In ICLR, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[11] Yunchao Gong, Yangqing Jia, Thomas Leung, Alexander Toshev, and Sergey Ioffe. Deep convolutional ranking for multilabel image annotation. arXiv preprint arXiv:1312.4894, 2013. 8, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[12] Akshita Gupta, Sanath Narayan, Salman Khan, Fahad Shahbaz Khan, Ling Shao, and Joost van de Weijer. Generative multi-label zero-shot learning. arXiv preprint arXiv:2101.11606, 2021. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[13] Zilong Huang, Xinggang Wang, Lichao Huang, Chang Huang, Yunchao Wei, and Wenyu Liu. Ccnet: Criss-cross attention for semantic segmentation. In ICCV, 2019. 7 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[14] Dat Huynh and Ehsan Elhamifar. A shared multi-attention framework for multi-label zero-shot learning. In CVPR, 2020. 1, 2, 3, 5, 6, 8, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[15] Jin-Hwa Kim, Jaehyun Jun, and Byoung-Tak Zhang. Bilinear attention networks. In NeurIPS, 2018. 6, 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[16] Thomas N Kipf and Max Welling. Semi-supervised classification with graph convolutional networks. arXiv preprint arXiv:1609.02907, 2016. 1 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        114,
+        468,
+        898
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[17] Alina Kuznetsova, Hassan Rom, Neil Alldrin, Jasper Uijlings, Ivan Krasin, Jordi Pont-Tuset, Shahab Kamali, Stefan Popov, Matteo Malloci, Tom Duerig, et al. The open images dataset v4: Unified image classification, object detection, and visual relationship detection at scale. arXiv preprint arXiv:1811.00982, 2018. 1, 2, 5, 11, 14 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[18] Chung-Wei Lee, Wei Fang, Chih-Kuan Yeh, and Yu-Chiang Frank Wang. Multi-label zero-shot learning with structured knowledge graphs. In CVPR, 2018. 1, 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[19] Jingren Liu, Haoyue Bai, Haofeng Zhang, and Li Liu. Nearreal feature generative network for generalized zero-shot learning. In ICME), 2021. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[20] Devraj Mandal, Sanath Narayan, Sai Kumar Dwivedi, Vikram Gupta, Shuaib Ahmed, Fahad Shahbaz Khan, and Ling Shao. Out-of-distribution detection for generalized zero-shot action recognition. In CVPR, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[21] Thomas Mensink, Efstratios Gavves, and Cees GM Snoek. Costa: Co-occurrence statistics for zero-shot classification. In CVPR, 2014. 1, 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[22] Jinseok Nam, Eneldo Loza Menc´ıa, Hyunwoo J Kim, and Johannes Furnkranz. Maximizing subset accuracy with recur-¨ rent neural networks in multi-label classification. NeurIPS, 2017. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[23] Sanath Narayan, Akshita Gupta, Fahad Shahbaz Khan, Cees GM Snoek, and Ling Shao. Latent embedding feedback and discriminative features for zero-shot classification. In ECCV, 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[24] Mohammad Norouzi, Tomas Mikolov, Samy Bengio, Yoram Singer, Jonathon Shlens, Andrea Frome, Greg S Corrado, and Jeffrey Dean. Zero-shot learning by convex combination of semantic embeddings. arXiv preprint arXiv:1312.5650, 2013. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[25] Aude Oliva and Antonio Torralba. The role of context in object recognition. Trends Cogn Sci, 7, 2007. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[26] Jeffrey Pennington, Richard Socher, and Christopher D Manning. Glove: Global vectors for word representation. In EMNLP, 2014. 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[27] Prajit Ramachandran, Niki Parmar, Ashish Vaswani, Irwan Bello, Anselm Levskaya, and Jonathon Shlens. Stand-alone self-attention in vision models. In NeurIPS, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[28] Yuming Shen, Jie Qin, Lei Huang, Li Liu, Fan Zhu, and Ling Shao. Invertible zero-shot recognition flows. In ECCV, 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[29] Karen Simonyan and Andrew Zisserman. Very deep convolutional networks for large-scale image recognition. arXiv preprint arXiv:1409.1556, 2014. 5, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[30] Grigorios Tsoumakas and Ioannis Katakis. Multi-label classification: An overview. IJDWM, 2007. 8, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[31] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. Attention is all you need. In NeurIPS, 2017. 3, 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[32] Andreas Veit, Neil Alldrin, Gal Chechik, Ivan Krasin, Abhinav Gupta, and Serge Belongie. Learning from noisy largescale datasets with minimal supervision. In CVPR, 2017. 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[33] Jiang Wang, Yi Yang, Junhua Mao, Zhiheng Huang, Chang Huang, and Wei Xu. Cnn-rnn: A unified framework for multi-label image classification. In CVPR, 2016. 1, 8, 11 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        890,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[34] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He. Non-local neural networks. In CVPR, 2018. 7 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[35] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He. Non-local neural networks. In CVPR, 2018. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[36] Jason Weston, Samy Bengio, and Nicolas Usunier. Wsabie: Scaling up to large vocabulary image annotation. In IJCAI, 2011. 8, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[37] Sanghyun Woo, Jongchan Park, Joon-Young Lee, and In So Kweon. Cbam: Convolutional block attention module. In ECCV, 2018. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[38] Felix Wu, Angela Fan, Alexei Baevski, Yann Dauphin, and Michael Auli. Pay less attention with lightweight and dynamic convolutions. In ICLR, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[39] Yongqin Xian, Tobias Lorenz, Bernt Schiele, and Zeynep Akata. Feature generating networks for zero-shot learning. In CVPR, 2018. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[40] Vacit Oguz Yazici, Abel Gonzalez-Garcia, Arnau Ramisa, Bartlomiej Twardowski, and Joost van de Weijer. Orderless recurrent models for multi-label classification. In CVPR, 2020. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[41] Jin Ye, Junjun He, Xiaojiang Peng, Wenhao Wu, and Yu Qiao. Attention-driven dynamic graph convolutional network for multi-label image recognition. In ECCV, 2020. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[42] Renchun You, Zhiyao Guo, Lei Cui, Xiang Long, Yingze Bao, and Shilei Wen. Cross-modality attention with semantic graph embedding for multi-label classification. In AAAI, 2020. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[43] Haofeng Zhang, Haoyue Bai, Yang Long, Li Liu, and Ling Shao. A plug-in attribute correction module for generalized zero-shot learning. PR, 2021. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[44] Han Zhang, Ian Goodfellow, Dimitris Metaxas, and Augustus Odena. Self-attention generative adversarial networks. In ICML, 2019. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[45] Haofeng Zhang, Li Liu, Yang Long, Zheng Zhang, and Ling Shao. Deep transductive network for generalized zero shot learning. PR, 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[46] Mengmi Zhang, Claire Tseng, and Gabriel Kreiman. Putting visual object recognition in context. In CVPR, 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[47] Yang Zhang, Boqing Gong, and Mubarak Shah. Fast zeroshot image tagging. In CVPR, 2016. 1, 5, 6, 8, 11 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        467,
+        661
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A. Additional Quantitative Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        89,
+        370,
+        107
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1. Standard Multi-Label Learning "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        114,
+        362,
+        131
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Similar to Sec. 3.3, where we evaluate our approach for the standard multi-label classification on the NUS-WIDE dataset [6], here, we also evaluate on the large-scale Open Images dataset [17]. Tab. 7 shows the state-of-the-art comparison for the standard multi-label classification on Open Images. Here, 7, 186 classes are used for both training and evaluation. Test samples with missing labels for these 7, 186 classes are removed during evaluation, as in [14]. Due to significantly larger number of labels in Open Images, ranking the labels within an image is more challenging. This is reflected by the lower F1 scores in the table. Among existing methods, Fast0Tag [47] and LESA [14] achieve an F1 score of 13.1 and 14.5 at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 2 0"
+          },
+          {
+            "type": "text",
+            "content": ". Our approach achieves favorable performance against the existing approaches, achieving an F1 score of 17.3 at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { = } 2 0"
+          },
+          {
+            "type": "text",
+            "content": ". The proposed approach also achieves superior performance in terms of mAP score, compared to existing methods and obtains an absolute gain of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 5 . 6 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP over the best existing method. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        137,
+        472,
+        424
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2. Robustness to Backbone Variation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        431,
+        380,
+        448
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Sec. 3, for a fair comparison with existing works such as Fast0Tag [47] and LESA [14], we employed a pretrained VGG-19 [29] as the backbone for extracting region-level and global-level features of images. However, such supervisedly pretrained backbone will not strictly conform with the zero-shot paradigm if there is any overlap between the unseen classes and the classes used for pretraining. To avoid using a supervisedly pre-trained network, we conduct an experiment by using the recent self-supervised DINO [4] ResNet-50 backbone trained on ImageNet without any labels. Tab. 8 shows that our approach (BiAM) significantly outperforms LESA [14] even with a self-supervised pretrained backbone on both benchmarks: NUS-WIDE [6] and Open Images [17]. Absolute gains as high as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "mAP are obtained for NUS-WIDE on the ZSL task. Similar favorable gains are also obtained for the GZSL task on both datasets. These results show that irrespective of the backbone used for extracting the image features, our BiAM approach performs favorably against existing methods, achieving significant gains across different datasets on both ZSL and GZSL tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        455,
+        472,
+        772
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B. Additional Qualitative Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        784,
+        359,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-label zero-shot classification: Fig. 9 shows the qualitative results for multi-label (generalized) zero-shot learning. Nine example images from the test set of the NUS-WIDE dataset [6] are presented in each figure. The comparison is shown between the standard regionbased features and our discriminative region-based fea-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        809,
+        470,
+        902
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/026fd518ce0a5d0c7b9949a0367b68729b4135c303ce85ea4ab1d99edcfd7ee5.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 7. State-of-the-art performance comparison for the standard multi-label classification on Open Images. The results are reported in terms of mAP and F1 score at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K { \\in } \\{ 1 0 , 2 0 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". In comparison to existing approaches, our approach achieves favorable performance in terms of both mAP and F1. Best results are in bold. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>mAP</td><td>F1 (K = 10)</td><td>F1 (K = 20)</td></tr><tr><td>WARP [11]</td><td>46.0</td><td>7.7</td><td>7.4</td></tr><tr><td>WSABIE [36]</td><td>47.2</td><td>2.2</td><td>2.2</td></tr><tr><td>CNN-RNN [33]</td><td>41.0</td><td>9.6</td><td>10.5</td></tr><tr><td>Logistic [30]</td><td>49.4</td><td>13.3</td><td>11.8</td></tr><tr><td>Fast0Tag [47]</td><td>45.4</td><td>16.2</td><td>13.1</td></tr><tr><td>One Attention per Cluster [14]</td><td>45.1</td><td>16.3</td><td>13.0</td></tr><tr><td>LESA [14]</td><td>45.6</td><td>17.8</td><td>14.5</td></tr><tr><td>Our Approach</td><td>85.0</td><td>20.4</td><td>17.3</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        504,
+        167,
+        893,
+        291
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/b61992aea9f756f0917ad98e92cfa6efa6359a373671e8234b1b9ea2e49ece3a.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 8. ZSL/GZSL performance comparison with LESA on NUS-WIDE and Open Images, when using the recent DINO ResNet-50 backbone pretrained on ImageNet without any labels. Our BiAM outperforms LESA [14] with a large margin on both datasets. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Backbone</td><td rowspan=\"2\">Task</td><td colspan=\"2\">NUS-WIDE (mAP)</td><td colspan=\"2\">Open Images (mAP)</td></tr><tr><td>LESALeSA</td><td>BiAM (Ours)</td><td>LESALeSA</td><td>BiAM (Ours)</td></tr><tr><td rowspan=\"2\">DINO ResNet-50 [4]</td><td>ZSL</td><td>20.5</td><td>27.4</td><td>41.9</td><td>74.0</td></tr><tr><td>GZSL</td><td>6.4</td><td>10.2</td><td>45.5</td><td>84.8</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        503,
+        362,
+        892,
+        414
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tures. Alongside each image, top-5 predictions for both approaches are shown with true positives and false positives. In general, our approach learns discriminative regionbased features and achieves increased true positive predictions along with reduced false positives, compared to the standard region-based features. E.g., categories such as reflection and water in Fig. 9(b), ocean and sky in Fig. 9(g), boat and sky in Fig. 9(j) along with graveyard and england in Fig. 9(k) are correctly predicted. Both approaches predict a few confusing classes such as beach and surf in Fig. 9(d) in addition to sunrise and sunset that are hard to differentiate using visual cues alone in Fig. 9(l). Moreover, false positives that are predicted by the standard region-based features, are reduced by our discriminative region-based features, e.g., vehicle in Fig. 9(g), soccer in Fig. 9(h), balloons in Fig. 9(j), and ocean in Fig. 9(k). These results suggest that our approach based on discriminative region features achieves promising performance against the standard features, for multi-label (generalized) zero-shot classification. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        429,
+        893,
+        717
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Visualization of attention maps: Fig. 10 and 11 show the visualizations of attention maps for the ground truth classes in example test images from NUS-WIDE and Open Images, respectively. Alongside each example, class-specific maps for the unseen classes are shown with the corresponding labels on top. In general, we observe that these maps focus reasonably well on the desired classes. E.g., promising class-specific attention is captured for zebra in Fig. 10(a), vehicle in Fig. 10(b), buildings in Fig. 10(d), Keelboat in Fig. 11(c), Boeing 717 in Fig. 11(e) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "E x ."
+          },
+          {
+            "type": "text",
+            "content": "- ercise in Fig. 11(i). Although we observe that the atten-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        734,
+        895,
+        902
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/de1b79d7fdd9cb900ca2f92e32c4518e8267f6dd1d9946c8c6c620ad5e720784.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        88,
+        232,
+        204
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our eaturesApproach "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        99,
+        344,
+        119
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "person person "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        122,
+        344,
+        130
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "lake lake "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        135,
+        344,
+        143
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sky water "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        147,
+        344,
+        157
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset sky "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        162,
+        344,
+        171
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "nighttime sunset "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        175,
+        326,
+        185
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b9b5f5c0c94a02c3e118b7c97e3c296369961e7a157ac69c76e90cdfa93f7e2e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        349,
+        88,
+        504,
+        204
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our features Approach "
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        99,
+        616,
+        119
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "birds birds "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        122,
+        616,
+        130
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "lake lake "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        135,
+        614,
+        143
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "fish reflection "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        148,
+        614,
+        157
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "plane water "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        162,
+        596,
+        171
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "whales fish "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        175,
+        584,
+        185
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5751d92991703564196ee7c5dcdf02164a59cf9c7ecb82853248f87bcf422a64.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        620,
+        88,
+        774,
+        204
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our features Approach "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        99,
+        888,
+        118
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "buildings buildings "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        121,
+        880,
+        130
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "lake castle "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        135,
+        866,
+        143
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "reflection lake "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        150,
+        880,
+        157
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "water reflection "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        162,
+        880,
+        172
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "bridge water "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        176,
+        890,
+        186
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a552eb9c3917d61234e093d9526ceee1b84284e783bfe5f5280ad1412b7d10a5.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        219,
+        232,
+        333
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our eatures Approach "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        229,
+        344,
+        247
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "′boats boats "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        250,
+        344,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ocean ocean "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        263,
+        344,
+        273
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "beach sky "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        277,
+        344,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset beach "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        292,
+        344,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "surf surf "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        305,
+        344,
+        315
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/72a96fc8b0747af205c23471c0817618fb3f4427089c111bdc50701b1766307a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        349,
+        219,
+        504,
+        333
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our features Approach "
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        229,
+        619,
+        247
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "valley sky "
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        250,
+        617,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "beach beach "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        265,
+        599,
+        275
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ocean person "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        279,
+        599,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "rocks mountain "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        292,
+        614,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "surf rocks "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        305,
+        591,
+        313
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a7825627d2703059c981be9dafeb754a1e06dc1bb35bb9b414c7d59cd4762b62.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(f) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        622,
+        219,
+        776,
+        333
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our  features Approach "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        228,
+        888,
+        247
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sky sky "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        250,
+        854,
+        260
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "mountainmountain "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        265,
+        883,
+        275
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "buildingsbuildings "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        277,
+        880,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset snow "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        292,
+        890,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tower sunset "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        305,
+        895,
+        314
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/99a765590d1c6497ccb9a3f939338598979561d63cd3f1e686740d81a4a29dcd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        349,
+        232,
+        465
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our features Approach "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        359,
+        344,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sky beach "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        381,
+        344,
+        391
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "beach boats "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        395,
+        323,
+        404
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "plane ocean "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        409,
+        323,
+        417
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "cars sky "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        422,
+        312,
+        431
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "vehicle water "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        436,
+        344,
+        445
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1f80d8ba703ed589976017d8f8b276df151f4ac5fe8ff1cfef6f2ffdbd2e8a8f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        359,
+        335,
+        493,
+        465
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our eatures Approach "
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        359,
+        616,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "flowers flowers "
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        381,
+        599,
+        390
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "garden garden "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        395,
+        598,
+        405
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "′tree tree "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        407,
+        584,
+        417
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "leaf grass "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        422,
+        591,
+        431
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "soccer lake "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        435,
+        586,
+        444
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2cfad415a030ed176b36e981877bff1e90a7a24bc25c9c4775d87401a7877ecf.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(i) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        622,
+        349,
+        776,
+        465
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our Our  features Approach proach "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        359,
+        888,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "beach beach beach "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        381,
+        867,
+        390
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        395,
+        812,
+        404
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sky ocean ocean "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        407,
+        867,
+        417
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "nighttime "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        422,
+        823,
+        431
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "surf sky sky "
+          }
+        ]
+      },
+      "bbox": [
+        777,
+        435,
+        854,
+        444
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        857,
+        359,
+        888,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        836,
+        381,
+        867,
+        390
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "person "
+          }
+        ]
+      },
+      "bbox": [
+        836,
+        395,
+        867,
+        404
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        836,
+        409,
+        867,
+        417
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset "
+          }
+        ]
+      },
+      "bbox": [
+        836,
+        422,
+        867,
+        431
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        836,
+        436,
+        854,
+        445
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/809bc4c7ac30a0774ecde938702f29325c48f8436199e88f41194a876aadfd33.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(j) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        482,
+        232,
+        597
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our eaturesApproach "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        494,
+        344,
+        513
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "blue blue "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        517,
+        344,
+        526
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "red sea "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        530,
+        344,
+        539
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sea boat "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        542,
+        344,
+        553
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "orange sky "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        556,
+        344,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "balloons sunset "
+          }
+        ]
+      },
+      "bbox": [
+        236,
+        570,
+        328,
+        579
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f492d89b8a67d76e67c72ce830be44197900fc82845a07e4deb3511fd87b1640.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        349,
+        482,
+        504,
+        597
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our feprach "
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        493,
+        619,
+        508
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "trees trees "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        512,
+        589,
+        521
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "′river england "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        526,
+        604,
+        536
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "florida cemetery "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        540,
+        612,
+        549
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "fence graveyard "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        554,
+        612,
+        563
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ocean stone "
+          }
+        ]
+      },
+      "bbox": [
+        508,
+        566,
+        591,
+        577
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/edcf0bddc8f0535443b19936c517364a808951067160c77769348f7a609810df.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 9. Qualitative comparison for multi-label zero-shot classification on nine example images from the NUS-WIDE test set, between the standard region-based features and our discriminative features. Top-5 predictions per image for both approaches are shown with true positives and false positives. Generally, in comparison to the standard region-based features, our approach learns discriminative region-based features and results in increased true positive predictions along with reduced false positives. E.g., reflection and water in (b), ocean and sky in (g), boat and sky in (j) along with graveyard and england in (k) are correctly predicted. Though a few confusing classes are predicted (e.g., beach and surf in (d)), the obvious false positives such as vehicle in (g), soccer in (h), balloons in (j) and ocean in (k) which are predicted by the standard region-based features, are reduced by our discriminative region-based features. These qualitative results suggest that our approach based on discriminative region features achieves promising performance in comparison to the standard features, for the task of multi-label (generalized) zero-shot classification. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        622,
+        481,
+        776,
+        599
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(1) "
+          }
+        ]
+      },
+      "bbox": [
+        689,
+        599,
+        707,
+        614
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Standard Our Our features Approach oroach "
+          }
+        ]
+      },
+      "bbox": [
+        779,
+        492,
+        888,
+        508
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset bravo bravo "
+          }
+        ]
+      },
+      "bbox": [
+        779,
+        512,
+        866,
+        521
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "iceland "
+          }
+        ]
+      },
+      "bbox": [
+        779,
+        527,
+        813,
+        536
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "seascape "
+          }
+        ]
+      },
+      "bbox": [
+        779,
+        541,
+        823,
+        550
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunrise "
+          }
+        ]
+      },
+      "bbox": [
+        779,
+        555,
+        813,
+        564
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "australia "
+          }
+        ]
+      },
+      "bbox": [
+        779,
+        568,
+        823,
+        577
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        857,
+        492,
+        888,
+        508
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        836,
+        512,
+        866,
+        521
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        836,
+        527,
+        854,
+        536
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunset "
+          }
+        ]
+      },
+      "bbox": [
+        836,
+        541,
+        870,
+        550
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sunrise "
+          }
+        ]
+      },
+      "bbox": [
+        836,
+        555,
+        870,
+        564
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "silhouette "
+          }
+        ]
+      },
+      "bbox": [
+        836,
+        568,
+        885,
+        577
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tion maps of visually similar classes overlap for sky and clouds in Fig. 10(d), these abstract categories, including reflection in Fig. 10(a) and nighttime in Fig. 10(c) are well captured. These qualitative results show that our proposed approach (BiAM) generates promising class-specific attention maps, leading to improved multi-label (generalized) zero-shot classification. "
+          }
+        ]
+      },
+      "bbox": [
+        73,
+        766,
+        468,
+        869
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/38f6d9fcb8f83a433935cd7e102d890a677fc3d21bbec64e39f80c00eee4a2ce.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        107,
+        88,
+        233,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ba889ce3c8f0fc744e199e503c5de297daf8550d409a8d8b11c88f01a3c09516.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        236,
+        88,
+        366,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2c331de53a638cc58ca673e22471c42015cc071d94536bfdadd8552d690464b2.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        370,
+        88,
+        496,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e8ab8e96e90b13791f20c8436aca6063ae458b52732d2da1a47c3afd4f3a9b1d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        88,
+        629,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b3836cbf18a845acacc158fdc795e88a74e9e4e5994a92bf5b2de928a140d9df.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        633,
+        88,
+        759,
+        194
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6ebe68b35b6d13ccb909fd69e1e44e9d4e0714d9488cf48e23dd5b4e2a0fe1d6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        107,
+        207,
+        233,
+        306
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/df63425c29b36ac2b7bdfd720de06b1f9e27f1d006e2182d5bdae365e9b9542a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        238,
+        199,
+        366,
+        306
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8b7a8ef3e0b3fb92b1f356e2b29eeb8536eb24cf34e7c1758bf70a9e31f97ff0.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        370,
+        199,
+        496,
+        306
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/51d50dd0db97465b5f5834c7846d0dcc6baed65b6dbb6ce4b8b1620e3d2b1b8f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        199,
+        629,
+        306
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2268459c5f73d7613262a18fa5abf98a19d8d8813ee4ed5c9dafece19e7ab1c0.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(c) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        107,
+        319,
+        233,
+        417
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1b8e458086ef193839906be860709d77bca97744c979105abe590dc0bb526ee4.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        238,
+        310,
+        366,
+        417
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5c85c35236893b704bc939e7a2d16d777caff332b7d04092f86f91fff4f503c0.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        370,
+        310,
+        496,
+        417
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9a1f11557d60af0d3abf30225b11723dd1a59ac155824596ec1c426243f8e97a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        311,
+        629,
+        417
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/86563ebacb300495617b80a9baafa57a6e360917e3759f98e1c4b0ff18498a45.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(d) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        107,
+        431,
+        233,
+        529
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d356049ecb403eb24c2f57ba26e807dec720fb3c939573716a8fa920ffb4f6db.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        238,
+        421,
+        366,
+        529
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/289596042ebc33c6ccd0aa52be36f9d67d591f5e13583913b8eb18f8e2d2b3da.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        370,
+        421,
+        496,
+        529
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9d3e5854a4f922580d1ab0f90df83cad7510728558cc5ed610accc026b72084f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        422,
+        629,
+        529
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bbae0e703a7a75f8e1632237a47adcc2fda1f9e1eb00cbb5595feed464b20c80.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        633,
+        422,
+        759,
+        529
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9ee995173de96f18e52cb70a72ffa1e4c0769f77e461978a80effa030c3072ee.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        764,
+        422,
+        893,
+        529
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a6987da4c2c17e3f4261a9a1f54573776bd530ba75bfcab433a30c14989693cd.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(e) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        107,
+        540,
+        233,
+        640
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/43289e4fc07bfa96405c2d3752e57c2486eccb158b9c470bd727065cabd10332.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        238,
+        534,
+        366,
+        640
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c0511052d7950acf15748f170b40ecd5a19e16326f174f41f42a145c9f898462.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        370,
+        534,
+        496,
+        640
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f46440efe3c4c18feea9c761096035a927ead624bbc7f53db40191c0c016a551.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(f) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        107,
+        654,
+        233,
+        752
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3c2a3d98777cc14fe815ac9bd9431f3ecbb58dff4e3ef42eee639d628ca231f1.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        238,
+        645,
+        366,
+        752
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/da924d7a85d331dc06d63464ef0fec60c77027842f8af530392f1809bf8ad1fe.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        370,
+        645,
+        496,
+        752
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/025c0b7b41b6e4ba4a6fd331e4ef32b5f74ced453971ca8304a41bab62414af3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        645,
+        629,
+        752
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7a30a9b2949fef2366dba9cfafe38f075e3e98675a737d29856529af8192c5c4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 10. Qualitative results with attention maps generated by our proposed approach, on example test images from the NUS-WIDE [6] dataset. For each image, class-specific maps for the ground truth unseen classes are shown with the corresponding labels on top. Generally, we observe that these maps focus reasonably well on the desired classes. E.g., promising attention/focus is observed on classes such as zebra in (a), vehicle in (b), buildings in (d) and statue in (f). Although we observe that the attention maps of visually similar classes such as sky and clouds overlap, as in (d), these abstract classes, including reflection in (a), (d) and nighttime in (c) are well captured. These qualitative results show that our proposed approach generates promising class-specific attention maps, leading to improved multi-label (generalized) zero-shot classification. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        633,
+        645,
+        759,
+        752
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4a9cd692d4ad5d3520bc813350bc358d84244264840692b0d4c38fc1258150ff.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        135,
+        217,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ddf58736f8bde227af11f8050c3c69c6eaa9977eda99f6d6c97383b585a5fb20.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        218,
+        141,
+        321,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c57a0da6086163807233fbf8e2c5b23ed23d051cf5552e32cc4da11cbf9e223d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        133,
+        424,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/fb41bb5d704e80bdd79943a13229ab43f34907b9753345f0624a2ed1484d40d4.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        426,
+        133,
+        527,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/28db778e1f525b78f678baa17e9688719b8a5a3a73511f27203571ae1a728b00.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        531,
+        133,
+        633,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1cb5b8edefa9a3a429666193afab441f8617a87920cc9c9e0944a10c13a25d33.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        635,
+        133,
+        736,
+        220
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6da38d807d8057c259b7c94bdf43beeb3318602e6c3005777f38e7933d461637.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        224,
+        218,
+        311
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1e286052736fc88cfd2e10e7e6bf7391f9d6ae4e9ecb19a4d7b1311b49e68bfc.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        224,
+        320,
+        311
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/09ab71cc6ddde3055ad032953c7147af170b16ed27bbd7ec77cd73851bdfe73d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        224,
+        424,
+        311
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f46ede0d0d7143e4f515a46455ad38cd6dc535cf4719243af5908e119cdf5afa.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(c) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        477,
+        224,
+        578,
+        311
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/81f79d5fa847d7a45d3739255d0e98d07ee7ad2829edf90190f7d020cdd3d47c.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        580,
+        224,
+        683,
+        311
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6c8daa88342ed7a7fc5b82d02bd6b2eae9a3991a97d4b6b8c1d0f02bbc193c1e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        684,
+        224,
+        785,
+        311
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4cfcbf10098919bc362d163629cc11734cc97043d226e35f1c70e809e4225e37.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(d) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        321,
+        217,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/924234afc864e6f5ead695c57f5d52ce81229f2a0237c9d85fbb3d295015ce80.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        321,
+        321,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/69c78c985f57f0aaeb4b8b237f949f912d03c4aad245388ceda9521c01a4688a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        315,
+        424,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9ea3c06bc1998a2eb1393cb2e03985452becd86d0db83a4dad4fd0e4d345a3d5.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(e) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        477,
+        321,
+        578,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/58559a3a790ec54c1ba16e162623dab25a441bbc7f1936eb970d6548366bfda3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        580,
+        321,
+        681,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1857485bf379ea172e6eaaeb19d5c77f486f5061fba1010d5bfbf2fe503cd6d7.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        684,
+        311,
+        785,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9815e0d8fe32ab6655042b945a71df793bc11a16d9d4e187582e12900a1be9c3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(f) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        414,
+        218,
+        494
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6babf230aad4dae58e41b4d784f9d758e4b67e1448dfb7924f171d61b845f3b8.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        414,
+        321,
+        494
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/590934d5d77a2c5b7c8343a3e999ffd83b41c68cc7084dd7c2ca9ab89d955f5e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        407,
+        424,
+        494
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5c321973728c0f04341d0423d93c4eab969badeea7439f88df830a0fa77a336d.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(g) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        477,
+        415,
+        578,
+        493
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/85d009b12da1d417fffa2978814deb57cb7f61e3adbe7158c93ecc99631d5f37.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        580,
+        407,
+        681,
+        493
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/deb7b4e925901e6e4674fd91e5fb26f84095bf6eda33dbf7522b2386205a73d0.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Floating production storage and offloading "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        684,
+        414,
+        785,
+        493
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6c2ec851f7508e07aec3eb4ebf36c75bf2f6cf55590f91906e54182b03f30e4b.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        506,
+        217,
+        585
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/eaecc27dd612d9b16125ebc90cf6ae406422e6b79801dbc8035696da259acfb0.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        505,
+        321,
+        585
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e1a4f4888cd91e5ae4f07464c63c1ed959621d7d2a28ee63ffe6574bca92efa3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        505,
+        424,
+        585
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4d9758f869bde9e371f0d185454b95dbcd664db48f651e8e5e5df5622cef9f16.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        426,
+        500,
+        527,
+        585
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/360fc090fe8d3667ac3f013c6cdc6884c24a658d72c9d2b002ece01c5dc93290.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(i) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        576,
+        506,
+        681,
+        585
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ec537c0681fa87a33da4f35ca0822d0e65e1aefea24f1b26da079c5a732f8be2.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        684,
+        500,
+        785,
+        585
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9d5dffb0afb23336d70c516e809669306e557dfd7516f03e7450b6af3600711b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(j) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        589,
+        217,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/70911ea591b14b46889ef553ac2c16107a54b89e9e1cf3c20eb1e7a8511cce17.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        589,
+        321,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4d6eeeb6c9d8fdde131336b0f3e352e804f1506c785ab87ed24d65d5670763fd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        589,
+        424,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ad10c7ce40389f5caa221f41aa6b62e6d8d8ef42ff9d4e40345ecb959899e237.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        426,
+        589,
+        527,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/255ccc566b7d4b94b12421f54e96ad1fafa359956dba4da7efaa33aa4dfec022.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        529,
+        589,
+        633,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9edf914e2c90636723957103b9132113f349c07f4ba9201286363aa93d5197b1.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(k) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        684,
+        590,
+        785,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6b5e7b20bbbf436d5cfb86552d76c6f76d9f890c84d08d2e06654e6fdb3fa785.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        787,
+        589,
+        890,
+        676
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5ad0ba6f1de0fe68764176142adffe85257f63ccb50f623533ac2afc7f9e2382.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(1) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        114,
+        686,
+        217,
+        766
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b7bfa1002569eedf52fa614e332eaa7b679edb5e426beb858ba9720ee7a50195.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        679,
+        321,
+        766
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/291ed39ea4e5d6a21b6be5b63d5bdc7d388563a292fa5c8f0be1b156c05959fd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        680,
+        424,
+        766
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ef3931c6bb906114a313449597741000f40925eee462b803d6010af432128ad1.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        426,
+        680,
+        527,
+        766
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ed79ab86158d27e418a1f2d4291c471f98acef275eca2c7980e767364c500af2.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        529,
+        680,
+        633,
+        766
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a260cb2dcf46c8b44d4e77e547db4195cb4c9e8b6490d17487259be95edd8278.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        684,
+        679,
+        787,
+        766
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3331175e6cdb6b8893b40554e3607dd385dd532cb72ecfd95ca3a83aa513fb13.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Freestyle swimming "
+          },
+          {
+            "type": "text",
+            "content": "Figure 11. Qualitative results with attention maps generated by our proposed approach, on example test images from the Open Images [17] dataset. For each image, class-specific maps for the ground truth unseen classes are shown with the corresponding labels on top. Although there are overlapping attention regions for visually similar and fine-grained classes (e.g., Caridean shrimp and Fried prawn in (f), Canaan dog and Akita inu in (j)), generally, these maps focus reasonably well on the desired classes. E.g., promising class-specific attention is captured for Keelboat in (c), Boeing 717 in (e) and Exercise in (i). These qualitative results show that our proposed approach generates promising class-specific attention maps, resulting in improved multi-label (generalized) zero-shot classification. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        787,
+        689,
+        890,
+        766
+      ]
+    }
+  ]
+]

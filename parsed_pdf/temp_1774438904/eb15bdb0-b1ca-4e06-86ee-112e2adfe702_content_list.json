@@ -1,0 +1,1207 @@
+[
+    {
+        "type": "text",
+        "text": "Disentangled Lifespan Face Synthesis ",
+        "text_level": 1,
+        "bbox": [
+            294,
+            130,
+            674,
+            152
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Sen $\\mathrm { H e } ^ { 1 , 2 }$ *, Wentong Liao3*, Michael Ying Yang4, Yi-Zhe Song1,2, Bodo Rosenhahn3, Tao Xiang1,2 1CVSSP, University of Surrey, 2iFlyTek-Surrey Joint Research Centre on Artificial Intelligence, 3TNT, Leibniz University Hannover, 4SUG, University of Twente ",
+        "bbox": [
+            99,
+            179,
+            869,
+            234
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/2e6c4aca68d2f7b55c0c9ce889fdb70e67a278083c20c89b72804859851a3f1a.jpg",
+        "image_caption": [
+            "Figure 1: Examples of generated face images using our lifespan face synthesis model and two state-of-the-art alternatives. InGAN [43] generates valid texture transformation but fails in shape transformation and identity preservation. LATS [24] improves on shape transformation and identity preservation, but is poor in reconfiguration (the re-generated image in the same age group 5 as the reference looks very different). In contrast, our model overcomes all these limitations, yielding the most plausible effects of aging whilst being identity-preserving. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            200,
+            268,
+            769,
+            470
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            233,
+            566,
+            313,
+            583
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "A lifespan face synthesis (LFS) model aims to generate a set of photo-realistic face images of a person’s whole life, given only one snapshot as reference. The generated face image given a target age code is expected to be agesensitive reflected by bio-plausible transformations of shape and texture, while being identity preserving. This is extremely challenging because the shape and texture characteristics of a face undergo separate and highly nonlinear transformations w.r.t. age. Most recent LFS models are based on generative adversarial networks (GANs) whereby age code conditional transformations are applied to a latent face representation. They benefit greatly from the recent advancements of GANs. However, without explicitly disentangling their latent representations into the texture, shape and identity factors, they are fundamentally limited in modeling the nonlinear age-related transformation on texture and shape whilst preserving identity. In this work, a novel LFS model is proposed to disentangle the ",
+        "bbox": [
+            75,
+            599,
+            472,
+            875
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "key face characteristics including shape, texture and identity so that the unique shape and texture age transformations can be modeled effectively. This is achieved by extracting shape, texture and identity features separately from an encoder. Critically, two transformation modules, one conditional convolution based and the other channel attention based, are designed for modeling the nonlinear shape and texture feature transformations respectively. This is to accommodate their rather distinct aging processes and ensure that our synthesized images are both age-sensitive and identity preserving. Extensive experiments show that our LFS model is clearly superior to the state-of-the-art alternatives. Codes and demo are available on our project website: https://senhe.github.io/projects/ iccv_2021_lifespan_face. ",
+        "bbox": [
+            496,
+            569,
+            893,
+            797
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1. Introduction ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            813,
+            632,
+            829
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "What would a young adult look like as an infant and what will she/he resemble in 20 or even 40 years time? Lifespan face synthesis or face aging and rejuvenation aims to answer these questions by synthesizing the face of a person’s whole ",
+        "bbox": [
+            496,
+            839,
+            893,
+            902
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2108.02874v2 [cs.CV] 13 Aug 2021 ",
+        "bbox": [
+            19,
+            258,
+            58,
+            705
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_footnote",
+        "text": "*Equal contribution ",
+        "bbox": [
+            94,
+            886,
+            202,
+            898
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "life given only a snapshot. It is an intriguing problem but also has many applications, e.g. cross-age face recognition [25] and finding lost children [36]. It has therefore attracted a great deal of attention recently [38, 37, 7, 31, 43, 24]. ",
+        "bbox": [
+            78,
+            90,
+            467,
+            151
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Lifespan face synthesis (LFS) is a challenging face attribute editing problem. Compared to other face attribute editing works [9, 21, 40] where many attributes such as glasses, hair style and smiling are manipulated with a single model, LFS focuses on one attribute only, namely age. However, age editing is arguably the hardest task out of all the attributes. It is thus typically studied on its own. This is because aging is an extremely complex face transformation process. In particular, over the lifespan of a person, the face experiences changes in both shape and texture [20]. Further, such changes are nonlinear over time and rather different for shape and texture: a face’s appearance changes are first dominated by shape deformation from baby to young adult because of the growth of bones of skull; such changes then primarily take the form of texture transformation when an adult grows older, e.g. colors of beard and hair, wrinkles. ",
+        "bbox": [
+            78,
+            154,
+            467,
+            395
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Therefore, an ideal LFS model must meet three requirements [7, 31, 43, 24]: (1) Age-sensitive reflected by bioplausible shape and texture transformations: Given a reference face image and a random target age, the generated face image should have valid shape deformation as well as texture transformation compared to the reference face image. In particular, the highly nonlinear transformations mentioned above need to be respected. (2) Identitypreserving: no matter how large the age gap is between the target and reference, the generated image must depict the same person. (3) Reconfigurable: When the target age is the same as the age of the reference face image, the generated face image should be as similar to the reference image as possible. ",
+        "bbox": [
+            78,
+            398,
+            467,
+            609
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "However, despite the best efforts of researchers in the past two decades, none of the existing LFS models can meet all three requirements. Before the deep learning era, LFS models are either ‘prototype’ based [35, 34, 14] modeling mean age appearance for different age groups, or ‘physical’ based [33, 34] with explicitly modeling of the underlying biological aging mechanism. The former omits personalized information. While the later one requires images of same persons over the whole lifespan which is infeasible to scale. More recent methods [36, 22, 1, 42, 38, 37, 7, 31, 43, 24] benefit from the advancements in deep generative adversarial networks (GANs) [5, 2]. Using these methods, a latent face representation encompassing information of shape, texture and identity is transformed conditional on the target age before being fed into an image generator. Thanks to the recent breakthroughs in GANs such as Style-GAN [12, 13], these models can now generate incredibly high quality face images. But as shown in Fig. 1, they still fail in one or more of the three requirements. ",
+        "bbox": [
+            78,
+            613,
+            467,
+            898
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "This is because none of these models can effectively disentangle a face representation into shape, texture and identity related parts. Such a disentanglement is crucial for LFS because without the disentanglement, it is impossible to apply different age-conditional manipulations to these different representations to model the aforementioned nonlinear transformations in shape and texture appearance, whilst being identity-preserving. As a result, it is difficult to avoid unwanted editing. For example, identity can be changed as illustrated in the first row in Fig. 1. Furthermore, some incompatible transformation may occur, yielding unrealistic effects in the generated images (glasses start to appear in age group 2 of the middle row example). ",
+        "bbox": [
+            503,
+            90,
+            888,
+            286
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In this work, for the first time we propose a LFS model that explicitly disentangles a learned latent face representation into shape, texture and identity. Our model is a conditional GAN with an encoder-decoder architecture. First, features of different layers of a shared CNN encoder are extracted and subject to different feature extraction modules. Second, to model the distinct nonlinear transformations on shape and texture with respect to age, two novel feature transformation modules are developed for shape and texture. They are based on conditional convolution and channel attention respectively to reflect the intrinsically different aging effects on shape and texture. Last but not least, to facilitate the disentanglement of shape and texture, a regularization loss is introduced on shape based on the intuition that shape changes are small when an adult is growing older [30]. As shown in Fig. 1, our disentanglement LFS model can effectively overcome the limitations of the state-of-theart competitors and meet all three requirements simultaneously. ",
+        "bbox": [
+            503,
+            287,
+            888,
+            573
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "The contributions of this paper are as follows: (1) for the first time, we explicitly model the face’s shape, texture and identity characteristics in an end-to-end trained lifespan face synthesis (LFS) model. (2) To model the separate nonlinear aging processes on shape and texture, we propose separate shape and texture transformation modules based on conditional convolution and channel attention respectively, as well as a shape regularization loss to facilitate the disentanglement. (3) Extensive experiments are carried out to demonstrate that our model is much superior to the state-ofthe-art alternatives. ",
+        "bbox": [
+            503,
+            574,
+            888,
+            738
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2. Related Works ",
+        "text_level": 1,
+        "bbox": [
+            503,
+            753,
+            645,
+            768
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Generative adversarial networks Generative adversarial networks (GANs) [5] are used by most recent image generation and manipulation methods. The developments of GANs can be mainly divided into two groups since the vanilla GANs [5]. One group tries to better measure the distribution divergence between the generated images and the original images [2]. The other group focuses on the architecture design, which has evolved from the original ",
+        "bbox": [
+            503,
+            780,
+            888,
+            898
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "fully connected networks to multi-scale convolutional architectures [11]. The most recent architectures is the style-GAN architecture [12, 13], where a random noise is first projected into a latent space and then used for convolution modulation. Style-GAN architecture has also been adopted in the recent state-of-the-art lifespan face synthesis models [31, 24, 43] as well as the proposed model in this work. ",
+        "bbox": [
+            75,
+            90,
+            470,
+            196
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Face manipulation Face manipulation aims to edit a reference face image by changing some attributes, e.g., age, smile and pose. The manipulated image is expected to contain intended attribute changes whilst preserving other attributes and identity. Recently, face manipulation has been studied intensively [9, 21, 40, 31, 8, 17, 43]. AttGAN [9] uses an attribute classification constraint to regularize the manipulated image. STGAN [21] selectively transfers the required attribute while keeping other factors unchanged. [31] learns the direction of each attribute in the latent space of style-GAN [12, 13], and then manipulates the exact latent code [43] of the reference image accordingly. Note that some generic face manipulation models do support age editing. However, they only manipulate a face image to be either younger or older (i.e., binary manipulation), an easier task than LFS. ",
+        "bbox": [
+            75,
+            208,
+            468,
+            450
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Lifespan face synthesis Lifespan face synthesis (LFS) is the most challenging face manipulation task. Classical ‘prototype’ based methods [35, 34, 14] divide the continuous ages into several discrete age clusters, and then compute the mean face in each cluster for reference. In contrast, ‘physical’ based methods model the change of each aging factor in a parametric manner. [18] explored different parametric models (linear, quadratic and cubic) for the aging function. [32] uses a concatenational graph to model the aging process. Both groups of methods are based on manually designed rules, which is impossible to approximate the complex and nonlinear aging process. Further, they usually require images of the same person at different ages, which are very difficult to collect. ",
+        "bbox": [
+            75,
+            460,
+            468,
+            672
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "More Recent methods use conditional GANs for image generation. Yang et al. [38] propose a pyramid discriminator to penalize different factors in the aging progress. IP-GAN [37] uses AlexNet [16] pre-trained on ImageNet [29] to enhance the identity preservation in the aging process. S2GAN [7] learns different transformation basis for different age groups. LATS [24] employs style-GAN architecture, in which the input is the encoded reference image and the style code is the embedded age representation. All these methods apply age-conditional transformation on an entangled latent representation of the reference image. They are thus intrinsically limited in modeling the distinct nonlinear transformations of shape and texture over ages. This limitation motivates the proposed disentanglement LFS approach. ",
+        "bbox": [
+            75,
+            674,
+            470,
+            886
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Face disentanglement There are many existing efforts on disentangling the face into different latent factors, e.g., identity, pose, shape and texture. Peng et al. [27] propose to disentangle face into identity and pose by reconstruction. Shen et al. [31] propose to disentangle the learned latent space into different attributes by supervised projection. Nitzan et al. [23] disentangle the identity information via latent space mapping. In this work, we propose to disentangle face into two aging-related factors, i.e., shape and texture, as well as age-insensitive factor, namely identity. The key novelties over existing face disentanglement works are the two separate transformation modules designed to capture the distinct aging effects on shape and texture, and a shape regularization loss. These are crucial for effective age-sensitive disentanglement. ",
+        "bbox": [
+            496,
+            90,
+            890,
+            318
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Dataset for lifespan face synthesis is hard to collect because ideally it should contain face images of the same person from baby to pensioner age. Most existing datasets miss face images of the 0 to 10 years age range. For example, the popular MORPH dataset [28] only has an age range of 16 to 77. The only dataset covering the whole range is the recently re-annotated FFHQ dataset [24], which contains ages ranging from 0 to 70 years old. It is thus used in this work. Overall existing LFS datasets are relatively small and insufficient for fine-grained age synthesis. ",
+        "bbox": [
+            496,
+            324,
+            890,
+            474
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3. Method ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            489,
+            591,
+            506
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.1. Problem definition ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            516,
+            679,
+            531
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Due to the dataset limitation, we follow [24] and divide the age range into 6 discrete groups (0 to 5). Each group has an age code $z _ { i } \\in \\mathbb { R } ^ { | 6 N | }$ , which is computed as: ",
+        "bbox": [
+            496,
+            539,
+            890,
+            585
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\nz _ {i} = \\mathbf {1} _ {i} + \\mathbf {n}, \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            650,
+            599,
+            890,
+            614
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { 1 } _ { i }$ contains all ones on elements through $i N$ to $( i +$ $1 ) N$ and zeros elsewhere, $\\mathbf { n } \\in \\mathbb { R } ^ { | 6 N | }$ is a Gaussian noise. ",
+        "bbox": [
+            500,
+            627,
+            888,
+            657
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Given a reference face image $I _ { r } \\in \\mathbb { R } ^ { H \\times W \\times 3 }$ from the $r _ { t h }$ age group and a target age code $z _ { t }$ for the $t _ { t h }$ age group, a lifespan face synthesis model $\\mathcal { F }$ aims to generate a target face image $I _ { t }$ , where $I _ { t } = \\mathcal { F } ( I _ { r } , z _ { t } )$ . The generated face image should have the same identity as the reference image but exhibit age-sensitive texture and shape changes according to the target age. Discrete lifespan face synthesis is done by traversing the age code of all age groups. To synthesize faces in a more fine-grained manner, the corresponding age code can be obtained by linear interpolation between the age codes of the neighboring two age groups. ",
+        "bbox": [
+            496,
+            657,
+            890,
+            824
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "As illustrated in Fig. 2, our model consists of five parts, an encoder $( \\mathcal { E } )$ , a shape transformation module $( S _ { t } )$ , a texture transformation module $( \\mathcal { T } _ { t } )$ , an age embedding module $( \\boldsymbol { \\mathcal { A } } _ { \\boldsymbol { \\mathcal { E } } } )$ , a generator $( { \\mathcal { G } } )$ and a discriminator $( \\mathcal { D } )$ . Each of them will be detailed in the following sections. ",
+        "bbox": [
+            496,
+            825,
+            890,
+            900
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/d865adb8638ffa274a6cbc1f1aa698c094c758e00e1700cb8e9df8f4e7ce4905.jpg",
+        "image_caption": [
+            "Figure 2: A schematic of our model. A latent representation of a reference image is disentangled into shape and texture relevant features, which are then transformed through separate transformation modules, conditioned on the target age. The transformed shape and texture feature are then fed into a style-GAN generator for the target image generation. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            81,
+            87,
+            885,
+            314
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "3.2. Feature extraction ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            388,
+            256,
+            404
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Previous methods [37, 43, 24] extract entangled representation of face image and transform it according to the target age. Without factorizing the latent representation into shape, texture and identity relevant factors, it is impossible to model the transformations on shape and texture separately whilst preserving identity. Latent representation disentanglement is thus the key to effect LFS meeting all three requirements. To that end, we use our encoder $( \\mathcal { E } )$ to extract 3 distinct sets of features, i.e., shape $( f _ { s } )$ , texture $( f _ { t } )$ and identity $( f _ { i d } )$ . Inspired by the neural style transfer works [4, 10] which suggest that structure information can be extracted from the middle layers of a CNN and texture information from the deeper layers, we also propose to extract these three features from different layers of the encoder CNN $( \\mathcal { E } )$ . ",
+        "bbox": [
+            75,
+            412,
+            472,
+            636
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Concretely, the shape features $( f _ { s } \\in \\mathbb { R } ^ { \\frac { H } { 4 } \\times \\frac { W } { 4 } \\times C } )$ are extracted from the middle part of our encoder $( \\mathcal { E } _ { m } )$ : ",
+        "bbox": [
+            76,
+            637,
+            470,
+            670
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {s} = \\mathcal {R} _ {s} \\left(\\mathcal {E} _ {m} \\left(I _ {r}\\right)\\right), \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            207,
+            675,
+            468,
+            691
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathcal { R } _ { s }$ is a residual block [6] to extract shape information for the raw features from the middle part of CNN. Both texture and identity features are extracted from the last layer of our encoder $( \\mathcal { E } _ { d } )$ . Specifically, the texture features $( \\boldsymbol { \\dot { f } } _ { t } \\in \\mathbb { R } ^ { | C | } )$ are computed as: ",
+        "bbox": [
+            76,
+            698,
+            468,
+            773
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {t} = \\mathcal {T} \\left(\\mathcal {E} _ {d} \\left(I _ {r}\\right)\\right), \\tag {3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            215,
+            780,
+            468,
+            797
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $T$ is a convolutional projection module that extracts the texture information and pools it into a vector. In the meanwhile, the identity features $( f _ { i d } ~ \\in ~ \\mathbb { R } ^ { \\frac { H } { 8 } \\times \\frac { W } { 8 } \\times 2 C } )$ are extracted by another convolutional projection module $( \\mathcal { T } \\mathcal { D } )$ with one downsampling layer: ",
+        "bbox": [
+            76,
+            803,
+            470,
+            878
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {i d} = \\mathcal {I D} \\left(\\mathcal {E} _ {d} \\left(I _ {r}\\right)\\right). \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            207,
+            885,
+            468,
+            902
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "3.3. Shape and texture transformation ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            388,
+            797,
+            405
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "After feature extraction, we model the age-conditioned shape and texture transformation in a different way. For the shape transformation, we use conditional convolutions, where the convolution filters are modulated by the target age information: ",
+        "bbox": [
+            496,
+            412,
+            893,
+            488
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} f _ {s} \\left(z _ {t}\\right) = \\mathcal {S} _ {t} \\left(f _ {s}, z _ {t}\\right) \\tag {5} \\\\ = \\operatorname {c o n v} \\left(f _ {s}, \\mathcal {M} \\left(\\mathbf {w} _ {s}, \\mathcal {P} _ {s} \\left(\\mathcal {A} _ {\\mathcal {E}} \\left(z _ {t}\\right)\\right)\\right)\\right), \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            555,
+            498,
+            890,
+            532
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { w _ { s } }$ is the filter weights, $\\mathcal { A } _ { \\mathcal { E } } ( z _ { t } ) \\in \\mathbb { R } ^ { | C | }$ encodes the target age code into a latent space, which is used for convolution modulation $( \\mathcal { M } )$ , and $\\mathcal { P } _ { s }$ is a linear projection layer. With our formulation, the target age information will modulate the filter’s weights and thus implicitly change shape information accordingly. Conditional convolution is adopted because shape transformation over age is often global and progressive; age code conditioned convolutional filters are well suited for capturing such transformation. Further, it is also flexible enough for learning at what age group shape changes become minimal. ",
+        "bbox": [
+            496,
+            545,
+            890,
+            710
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "For texture transformation, we use the age-conditioned channel attention, defined as: ",
+        "bbox": [
+            498,
+            712,
+            893,
+            742
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {t} \\left(z _ {t}\\right) = \\mathcal {T} _ {t} \\left(f _ {t}, z _ {t}\\right) = f _ {t} \\circ \\mathcal {P} _ {t} \\left(\\mathcal {A} _ {\\varepsilon} \\left(z _ {t}\\right)\\right), \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            563,
+            752,
+            890,
+            770
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $\\circ$ is element-wise multiplication and $\\mathcal { P } _ { t }$ is a linear projection layer. Again, this is determined by the nature of the texture changes caused by aging. In particular, as shown in [31, 43], different elements in face features $f _ { t }$ represent different attributes, e.g., hair color and wrinkles. These attribute are present across ages but with different strengths. With age-conditioned channel attention, different aging attributes can be easily amplified or suppressed. For example, ",
+        "bbox": [
+            496,
+            779,
+            893,
+            901
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "the attention module will learn that wrinkles need to be suppressed by younger ages while amplified by older ages. ",
+        "bbox": [
+            75,
+            90,
+            468,
+            119
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The transformed shape and texture information are then fed into a style-GAN [13] based generator $\\mathcal { G }$ for target image generation: ",
+        "bbox": [
+            75,
+            121,
+            468,
+            167
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\nI _ {t} = \\mathcal {G} \\left(f _ {s} \\left(z _ {t}\\right), f _ {t} \\left(z _ {t}\\right)\\right). \\tag {7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            194,
+            180,
+            468,
+            196
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "3.4. Shape regularization ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            208,
+            272,
+            224
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Inspired by the previous finding [20] that the shape of an adult face usually remains unchanged, we propose a shape regularization to enforce this observation. This regularization would indirectly ensure that the extracted features $f _ { s }$ is indeed shape related and disentangled from the texture feature $f _ { t }$ which changes significantly when an adult is getting older. Concretely, for transforming a reference face image $I _ { r _ { e } }$ in an adult group $r _ { e }$ (e.g. 40 years old) into an older age group $t _ { e }$ (e.g. 60 years old), the transformed face image $I _ { t _ { e } }$ should have the same shape information: ",
+        "bbox": [
+            75,
+            232,
+            468,
+            383
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {s} = \\left\\| \\mathcal {R} _ {s} \\left(\\mathcal {E} _ {m} \\left(I _ {r _ {\\epsilon}}\\right)\\right) - \\mathcal {R} _ {s} \\left(\\mathcal {E} _ {m} \\left(I _ {t _ {\\epsilon}}\\right)\\right) \\right\\| ^ {2}, \\tag {8}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            137,
+            395,
+            468,
+            414
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathcal { L } _ { s }$ measures shape difference and will be minimized. ",
+        "bbox": [
+            76,
+            425,
+            467,
+            440
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "3.5. Objectives ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            450,
+            194,
+            467
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "There are 5 learning objectives in our model’s training. To ensure the identity preservation, an identity loss $\\mathcal { L } _ { i d }$ is computed using the identity information between the reference image and the generated target image: ",
+        "bbox": [
+            75,
+            474,
+            468,
+            536
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {i d} = \\left\\| \\mathcal {I D} \\left(\\mathcal {E} _ {d} \\left(I _ {r}\\right)\\right) - \\mathcal {I D} \\left(\\mathcal {E} _ {d} \\left(I _ {t}\\right)\\right) \\right\\| ^ {2}. \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            143,
+            546,
+            468,
+            566
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Meanwhile, a cycle consistency loss is applied to enhance the identity preservation: ",
+        "bbox": [
+            76,
+            577,
+            468,
+            607
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {c y c} = \\left\\| I _ {r} - \\mathcal {F} \\left(I _ {t}, z _ {r}\\right) \\right\\| ^ {2}. \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            179,
+            618,
+            468,
+            638
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "To maintain the model’s reconfiguration, a reconstruction loss is used when the target age is the same as the reference age: ",
+        "bbox": [
+            75,
+            648,
+            468,
+            694
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {r} = \\left\\| I _ {r} - \\mathcal {G} \\left(f _ {s} \\left(z _ {r}\\right), f _ {t} \\left(z _ {r}\\right)\\right) \\right\\| ^ {2}. \\tag {11}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            160,
+            694,
+            468,
+            712
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Furthermore, a conditional adversarial loss is used to improve the realism of the generated images: ",
+        "bbox": [
+            75,
+            720,
+            468,
+            750
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathcal {L} _ {a d v} = \\mathbb {E} _ {I _ {i m} ^ {r} \\sim p _ {d a t a} ^ {r} \\left(I _ {i m} ^ {r}\\right)} [ l o g (\\mathcal {D} (I _ {i m} ^ {r} | z) ] \\tag {12} \\\\ + \\mathbb {E} _ {I _ {i m} ^ {g} \\sim p _ {d a t a} ^ {g} (I _ {i m} ^ {g})} [ 1 - \\log (\\mathcal {D} (I _ {i m} ^ {g} | z) ]. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            102,
+            762,
+            468,
+            803
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The overall training objectives are summed together: ",
+        "bbox": [
+            76,
+            813,
+            424,
+            828
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} = \\lambda_ {a d v} \\mathcal {L} _ {a d v} + \\lambda_ {r} \\mathcal {L} _ {r} + \\lambda_ {c y c} \\mathcal {L} _ {c y c} + \\lambda_ {i d} \\mathcal {L} _ {i d} + \\lambda_ {s} \\mathcal {L} _ {s}, \\tag {13}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            84,
+            840,
+            468,
+            858
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where $\\lambda _ { a d v }$ , $\\lambda _ { r }$ , λcyc, $\\lambda _ { i d }$ , and $\\lambda _ { s }$ denote the hyperparameters for balancing the 5 objectives. ",
+        "bbox": [
+            75,
+            869,
+            468,
+            900
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "4. Experiments ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            90,
+            632,
+            107
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Datasets We train our model on the current largest face age dataset, i.e. FFHQ dataset [12], with age annotations covering all age groups. Due to label noise in the annotation, the original dataset with 70000 images is pruned to 28701 images [24]. The pruned dataset has 14232 training images and 198 testing images for male, and 14066 training images and 205 testing images for female. As per standard, we train male’s model and female’s model separately. Ages are divided into 6 discrete age groups (0-2, 3-6, 7-9 , 15- 19, 30-39, 50-59) in the training dataset. The last two age groups are used to apply the shape regularization in Eq. (8). Following [24], the non-face regions in the input images are masked out using off-the-shelve face parsing model [3] trained on CelebAMask-HQ [19]. ",
+        "bbox": [
+            496,
+            108,
+            890,
+            319
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Implementation Details Our model is implemented in PyTorch. Each input image is resized to $2 5 6 \\times 2 5 6$ , the same size as in [24]. We set the batch size to 2 given the hardware available to us (a single Nvidia RTX 2080-Ti GPU). The length of age code is set to 300 ( $N = 5 0$ ). The latent space dimension $C = 2 5 6$ . The encoder $\\mathcal { E }$ has two pooling layers in the first two blocks. And the generator $\\mathcal { G }$ has two upsampling layers in the last two blocks. All parameters are trained using Adam optimizer [15]. The initial learning rate is set to 0.001, and decayed by 0.1 at epoch 50 and 100. The whole model is trained with 300 epochs. EMA [39] is used in the model training. ",
+        "bbox": [
+            496,
+            321,
+            890,
+            503
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Evaluation Metrics We evaluate our model both automatically and manually (user study). In automatic evaluation, we use the off-the-shelve VGG-face [26] to evaluate the model’s identity preservation. We also use LPIPS [41] to evaluate model’s reconfiguration between the reference image and the re-generated image in the same age group. For manual evaluation, we run perceptual study on Amazon Mechanical Turk (AMT) to compare the quality of the generated lifespan face images from different models. Given a reference image, the generated images using different models are evaluated from 6 perspectives, namely, identity preservation, shape transformation, texture transformation, reconfiguration, age error and age accuracy. For identity preservation, the AMT workers were asked to judge how well the generated images preserved the identity in the reference image. For shape and texture transformation, they scored how plausible the transformations are. For reconfiguration, a worker was asked to score how similar the generated image in the same age group is to the reference image. For these 4 metrics, the scores are in 5 levels (1-5, higher being better). For age error and age accuracy, each worker was asked to evaluate whether the generated image belongs to the target age group and estimate the age difference to that group. Each AMT worker was randomly allocated 30 reference images. 10 workers participated in the evaluation for all 6 metrics. ",
+        "bbox": [
+            496,
+            508,
+            890,
+            900
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/9a24c8fbd881190cfc8ae32d1c5c87c6ee1e524fef604ee4356fa29ade53353e.jpg",
+        "image_caption": [
+            "Figure 3: Qualitative results comparing our model against recent state-of-the-art models InGan [43] and LATS [24]. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            76,
+            87,
+            890,
+            500
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/82e55b9858bd51a0d256e68704b46bad59f2b9bb87182d1003171d1007370915.jpg",
+        "table_caption": [
+            "Table 1: User study results for different compared models. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Methods</td><td>Identity preservation↑</td><td>Shape transformation↑</td><td>Texture transformation↑</td><td>Reconfiguration↑</td><td>Age error↓</td><td>Age accuracy↑</td></tr><tr><td>IPGAN [37]</td><td>3.92±0.17</td><td>2.38±0.42</td><td>2.50±0.12</td><td>3.93±0.01</td><td>11.33±0.89</td><td>27.0%</td></tr><tr><td>InGAN [43]</td><td>2.74±0.17</td><td>2.51±0.22</td><td>2.37±0.16</td><td>3.56±0.35</td><td>8.64±2.80</td><td>39.4%</td></tr><tr><td>LATS [24]</td><td>3.18±0.13</td><td>2.89±0.44</td><td>3.22±0.17</td><td>3.49±0.25</td><td>5.67±3.61</td><td>60.0%</td></tr><tr><td>Ours</td><td>3.07±0.19</td><td>3.18±0.35</td><td>3.30±0.21</td><td>4.07±0.27</td><td>3.53±2.81</td><td>65.6%</td></tr></table>",
+        "bbox": [
+            96,
+            525,
+            874,
+            631
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Baselines We compare our model with two state-of-theart lifespan face synthesis models, i.e., LATS [24] and In-GAN [43], both using styel-GAN based generators as ours. To synthesize lifespan faces in InGAN, the aging parameter is adjusted according to the reference images’ age. We also compare with IPGAN [37], which uses a standard convolutional neural network as generator with a focus on identity preservation. ",
+        "bbox": [
+            75,
+            674,
+            470,
+            796
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4.1. Main results ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            813,
+            210,
+            829
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "The results of user study and automatic evaluation are shown in in Tables 1 and 2, respectively. It can be seen that our model achieves significantly better overall performance using all evaluation metrics. It is noted that IPGAN [37] has ",
+        "bbox": [
+            75,
+            839,
+            470,
+            902
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "very good identity preservation but fails completely at the main task, i.e., generating age-sensitive bio-plausible shape and texture transformations. As a result, its reconfiguration results are very strong in both tables. However, this is due to the fact that it hardly changes the face regardless what the target age is. LATS [24] is capable of good texture transformation, but is poor on reconfiguration and yields much lower age accuracy than our model. Note that for LFS, the identity preservation objective is often contradictory to those of shape and texture transformation. Table 1 shows that our model’s identity preservation is marginally lower than LATS, but this is more then compensated by the much more superior performance on the other 5 metrics. We can see from the qualitative comparison in Fig. 3 that our model ",
+        "bbox": [
+            496,
+            674,
+            893,
+            888
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/7e80fa65bae342cdbad76c689e42b0d91ffaa441e3d82e048046d124b89ccb08.jpg",
+        "image_caption": [
+            "Figure 4: Validation of the disentanglement of shape and texture features in our model. In the first row of each example, the reference’s texture information is fixed. Only shape information is transformed to synthesize the face images in different age groups. In the second row of each example, texture transformation is added to contrast its aging effects against shape. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            196,
+            88,
+            751,
+            554
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "table",
+        "img_path": "images/1982e610fd41bc9b8badd964aa0eaf3e4a6c4d2640d0a68c466ad822fdd3941b.jpg",
+        "table_caption": [
+            "Table 2: Automatic evaluation on identity preservation (ID) and reconfiguration (Reconfig). "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Methods</td><td>ID (↑)</td><td>Reconfig (↓)</td></tr><tr><td>IPGAN [37]</td><td>99.18%</td><td>0.03 ± 0.01</td></tr><tr><td>InGAN [43]</td><td>92.35%</td><td>0.17± 0.09</td></tr><tr><td>LATS [24]</td><td>96.68%</td><td>0.11 ± 0.03</td></tr><tr><td>Ours</td><td>96.47%</td><td>0.07 ± 0.02</td></tr></table>",
+        "bbox": [
+            142,
+            613,
+            400,
+            698
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "can synthesize lifespan face with (1) more significant shape deformation among young groups and better texture transformation among older groups, (2) better reconfiguration, and (3) more realistic images (e.g., baby’s face and glasses). ",
+        "bbox": [
+            75,
+            758,
+            468,
+            821
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "4.2. Ablation study ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            833,
+            227,
+            849
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Disentangled Representations Our main idea is to learn disentangled representations. Did our model learn it? In this section, we qualitatively check, from two perspectives, ",
+        "bbox": [
+            75,
+            854,
+            470,
+            902
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "whether the learned shape and texture representations have indeed been disentangled. First, we generate lifespan face images by only transforming $f _ { s }$ while keeping $f _ { t }$ fixed, i.e., $I _ { t } = \\mathcal { G } ( f _ { s } ( z _ { t } ) , f _ { t } )$ . We then transform both $f _ { s }$ and $f _ { t }$ to contrast their functionalities, i.e., ${ \\cal I } _ { t } = \\mathcal { G } ( f _ { s } ( z _ { t } ) , f _ { t } ( z _ { t } ) )$ . The result is shown in Fig. 4. It can be seen that the transformation of $f _ { s }$ yields significant shape deformation in the generated faces. However, it has little impact on the texture of the generated faces. Once the transformation of $f _ { t }$ is added in, we can see then significant texture changes from young to older adults (age group 4 to 5). Interestingly, the added $f _ { t }$ has little impact on the shape of the generated images. These results therefore validate the design that $f _ { s }$ and $f _ { t }$ are learning shape and texture information, respectively. More importantly, shape transformation is indeed more significant in younger groups (age group 0 to 3) while the added texture transformation mostly influences the texture ",
+        "bbox": [
+            496,
+            633,
+            893,
+            891
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/0074f2842c39d611e2396f3a9fe1ef5aea1bd5fd339bf508f509de4ec7986f01.jpg",
+        "image_caption": [
+            "Figure 5: Qualitative comparison between entangled and disentangled lifespan face synthesis. In each example, the top row is the entangled model while the bottom row is disentangled. Red dotted boxes indicate that the generated images are within the same age group as the reference image. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            69,
+            459,
+            234
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/c32dfe5739cb94c0e7a2643825548062869bfa38aa2d359e4e5ceac938ddbd6c.jpg",
+        "image_caption": [
+            "Figure 6: Qualitative comparison between model w/o and w/ shape regularization $( \\mathcal { L } _ { s } )$ . "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            327,
+            460,
+            489
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "in the older groups (age group 4 to 5). In other words, the nonlinear aging process has been learned in our proposed shape and texture transformation. ",
+        "bbox": [
+            75,
+            545,
+            468,
+            590
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Disentangled vs. Entangled Representation How important is disentanglement for lifespan face synthesis? To answer this question, we use the same encoder in our model to extract an entangled feature representation $f _ { e n }$ for the reference image. We then generate the target image using the same generator, conditioned on the target age, i.e., $I _ { t } = \\mathcal { G } ( f _ { e n } , \\mathcal { A } _ { \\mathcal { E } } ( z _ { t } ) )$ . From Fig. 5, it is clear that disentangled representation gives (1) better image quality, (2) more significant shape deformation in the younger groups, (3) better texture transformation for older age groups, and (4) better reconfiguration. ",
+        "bbox": [
+            75,
+            594,
+            468,
+            760
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The Effectiveness of Shape Regularization To validate the effectiveness of shape regularization in Eq. (8), we trained a model without shape regularization. For comparison, we then generate the lifespan face images by only transforming $f _ { s }$ . As we can see from Fig. 6, without shape regularization, there are still significant texture transformation (wrinkles) among older groups, albeit only $f _ { s }$ is transformed and $f _ { t }$ is fixed. On the contrary, with shape regularization, the transformation of $f _ { s }$ has nearly no effect on the ",
+        "bbox": [
+            75,
+            763,
+            470,
+            902
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/121bf7a06e40c62e641735eafb7a4351d67126c92be9293a3528fdccdcb246b8.jpg",
+        "image_caption": [
+            "Figure 7: Texture swap. In the example, the shape information $( f _ { s } )$ of reference image is fixed while the texture information $( f _ { t } )$ is swapped with another image. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            545,
+            80,
+            849,
+            267
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "texture among older groups. This suggests that our shape regularization helps to clean the texture information in $f _ { s }$ , thus improves disentanglement of shape and texture. ",
+        "bbox": [
+            498,
+            342,
+            890,
+            388
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Limitations Beyond the ablation study of the disentangled representations $f _ { s }$ and $f _ { t }$ in controlling the aging effects as shown in Fig. 4, we further examine their limitations. A texture swap experiment is conducted, where we use one image’s $f _ { s }$ and the swapped $f _ { t }$ from another image to generate a new image. As we can see from the result in Fig. 7, $f _ { t }$ seems to be dominated by skin color, which is a key defining age-agnostic texture characteristic. As for agerelated texture characteristic, e.g., wrinkles, it is not directly disentangled in $f _ { t }$ . However, as we can see from Fig. 4, the transformation of $f _ { t }$ can amplify or suppress wrinkles. ",
+        "bbox": [
+            498,
+            402,
+            892,
+            570
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5. Conclusion ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            582,
+            617,
+            598
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we proposed a novel lifespan face synthesis model based on latent representation disentanglement. In contrast to previous methods that learn entangled face representation, our method disentangles a face representation into shape and texture. We proposed age-conditioned convolution and channel attention for shape and texture transformation, respectively to reflect the distinct aging effects on shape and texture. Extensive experiments and evaluations show the superiority of our method compared to previous state-of-the-art models. ",
+        "bbox": [
+            496,
+            609,
+            890,
+            760
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgment ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            773,
+            651,
+            791
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "This work has been supported by the Federal Ministry of Education and Research (BMBF), Germany, under the project LeibnizKILabor (grant no. 01DD20003), the Center for Digital Innovations (ZDIN) and the Deutsche Forschungsgemeinschaft (DFG) under Germany’s Excellence Strategy within the Cluster of Excellence PhoenixD (EXC 2122). ",
+        "bbox": [
+            496,
+            794,
+            890,
+            900
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            78,
+            89,
+            173,
+            104
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] Grigory Antipov, Moez Baccouche, and Jean-Luc Dugelay. Face aging with conditional generative adversarial networks. In ICIP, 2017. 2 ",
+            "[2] Martin Arjovsky, Soumith Chintala, and Leon Bottou. ´ Wasserstein generative adversarial networks. In ICML, 2017. 2 ",
+            "[3] Liang-Chieh Chen, George Papandreou, Florian Schroff, and Hartwig Adam. Rethinking atrous convolution for semantic image segmentation. arXiv preprint arXiv:1706.05587, 2017. 5 ",
+            "[4] Leon A Gatys, Alexander S Ecker, and Matthias Bethge. A neural algorithm of artistic style. In NeurIPS, 2015. 4 ",
+            "[5] Ian J Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and Yoshua Bengio. Generative adversarial networks. In NeurIPS, 2014. 2 ",
+            "[6] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In CVPR, 2016. 4 ",
+            "[7] Zhenliang He, Meina Kan, Shiguang Shan, and Xilin Chen. S2gan: Share aging factors across ages and share aging trends among individuals. In ICCV, 2019. 2, 3 ",
+            "[8] Zhenliang He, Meina Kan, Jichao Zhang, and Shiguang Shan. Pa-gan: Progressive attention generative adversarial network for facial attribute editing. arXiv preprint arXiv:2007.05892, 2020. 3 ",
+            "[9] Zhenliang He, Wangmeng Zuo, Meina Kan, Shiguang Shan, and Xilin Chen. Attgan: Facial attribute editing by only changing what you want. TIP, 28(11), 2019. 2, 3 ",
+            "[10] Justin Johnson, Alexandre Alahi, and Li Fei-Fei. Perceptual losses for real-time style transfer and super-resolution. In ECCV, 2016. 4 ",
+            "[11] Tero Karras, Timo Aila, Samuli Laine, and Jaakko Lehtinen. Progressive growing of gans for improved quality, stability, and variation. In ICLR, 2018. 3 ",
+            "[12] Tero Karras, Samuli Laine, and Timo Aila. A style-based generator architecture for generative adversarial networks. In CVPR, 2019. 2, 3, 5 ",
+            "[13] Tero Karras, Samuli Laine, Miika Aittala, Janne Hellsten, Jaakko Lehtinen, and Timo Aila. Analyzing and improving the image quality of stylegan. In CVPR, 2020. 2, 3, 5 ",
+            "[14] Ira Kemelmacher-Shlizerman, Supasorn Suwajanakorn, and Steven M Seitz. Illumination-aware age progression. In CVPR, 2014. 2, 3 ",
+            "[15] Diederik P Kingma and Jimmy Ba. Adam: A method for stochastic optimization. In ICLR, 2015. 5 ",
+            "[16] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E Hinton. Imagenet classification with deep convolutional neural networks. In NeurIPS, 2012. 3 ",
+            "[17] Jeong-gi Kwak, David K Han, and Hanseok Ko. Cafe-gan: Arbitrary face attribute editing with complementary attention feature. In ECCV, 2020. 3 ",
+            "[18] Andreas Lanitis, Christopher J. Taylor, and Timothy F Cootes. Toward automatic simulation of aging effects on face images. TPAMI, 24(4), 2002. 3 "
+        ],
+        "bbox": [
+            78,
+            114,
+            467,
+            898
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[19] Cheng-Han Lee, Ziwei Liu, Lingyun Wu, and Ping Luo. Maskgan: Towards diverse and interactive facial image manipulation. In CVPR, 2020. 5 ",
+            "[20] L.G.Farkas. Anthropometry of the Head and Face. 2007. 2, 5 ",
+            "[21] Ming Liu, Yukang Ding, Min Xia, Xiao Liu, Errui Ding, Wangmeng Zuo, and Shilei Wen. Stgan: A unified selective transfer network for arbitrary image attribute editing. In CVPR, 2019. 2, 3 ",
+            "[22] Chi Nhan Duong, Kha Gia Quach, Khoa Luu, Ngan Le, and Marios Savvides. Temporal non-volume preserving approach to facial age-progression and age-invariant face recognition. In ICCV, 2017. 2 ",
+            "[23] Yotam Nitzan, Amit Bermano, Yangyan Li, and Daniel Cohen-Or. Face identity disentanglement via latent space mapping. TOG, 39(6), 2020. 3 ",
+            "[24] Roy Or-El, Soumyadip Sengupta, Ohad Fried, Eli Shechtman, and Ira Kemelmacher-Shlizerman. Lifespan age transformation synthesis. In ECCV, 2020. 1, 2, 3, 4, 5, 6, 7 ",
+            "[25] Unsang Park, Yiying Tong, and Anil K Jain. Age-invariant face recognition. TPAMI, 32(5), 2010. 2 ",
+            "[26] Omkar M Parkhi, Andrea Vedaldi, and Andrew Zisserman. Deep face recognition. In BMVC, 2015. 5 ",
+            "[27] Xi Peng, Xiang Yu, Kihyuk Sohn, Dimitris N Metaxas, and Manmohan Chandraker. Reconstruction-based disentanglement for pose-invariant face recognition. In CVPR, 2017. 3 ",
+            "[28] Karl Ricanek and Tamirat Tesafaye. Morph: A longitudinal image database of normal adult age-progression. In FGR06, 2006. 3 ",
+            "[29] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, Sanjeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy, Aditya Khosla, Michael Bernstein, et al. Imagenet large scale visual recognition challenge. IJCV, 115(3), 2015. 3 ",
+            "[30] Rosy Setiawati and Paulus Rahardjo. Bone development and growth. Osteogenesis and bone regeneration, 10, 2019. 2 ",
+            "[31] Yujun Shen, Jinjin Gu, Xiaoou Tang, and Bolei Zhou. Interpreting the latent space of gans for semantic face editing. In CVPR, 2020. 2, 3, 4 ",
+            "[32] Jinli Suo, Xilin Chen, Shiguang Shan, Wen Gao, and Qionghai Dai. A concatenational graph evolution aging model. IEEE transactions on pattern analysis and machine intelligence, 34(11):2083–2096, 2012. 3 ",
+            "[33] Jinli Suo, Song-Chun Zhu, Shiguang Shan, and Xilin Chen. A compositional and dynamic model for face aging. TPAMI, 32(3), 2009. 2 ",
+            "[34] Yusuke Tazoe, Hiroaki Gohara, Akinobu Maejima, and Shigeo Morishima. Facial aging simulator considering geometry and patch-tiled texture. In SIGGRAPH, pages 1–1. 2012. 2, 3 ",
+            "[35] Bernard Tiddeman, Michael Burt, and David Perrett. Prototyping and transforming facial textures for perception research. CGA, 21(5), 2001. 2, 3 ",
+            "[36] Wei Wang, Zhen Cui, Yan Yan, Jiashi Feng, Shuicheng Yan, Xiangbo Shu, and Nicu Sebe. Recurrent face aging. In CVPR, 2016. 2 "
+        ],
+        "bbox": [
+            501,
+            92,
+            890,
+            898
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[37] Zongwei Wang, Xu Tang, Weixin Luo, and Shenghua Gao. Face aging with identity-preserved conditional generative adversarial networks. In CVPR, 2018. 2, 3, 4, 6, 7 ",
+            "[38] Hongyu Yang, Di Huang, Yunhong Wang, and Anil K Jain. Learning face age progression: A pyramid architecture of gans. In CVPR, 2018. 2, 3 ",
+            "[39] Yasin Yazici, Chuan-Sheng Foo, Stefan Winkler, Kim-Hui Yap, Georgios Piliouras, and Vijay Chandrasekhar. The unusual effectiveness of averaging in gan training. In ICLR, 2019. 5 ",
+            "[40] Weidong Yin, Ziwei Liu, and Chen Change Loy. Instancelevel facial attributes transfer with geometry-aware flow. In AAAI, 2019. 2, 3 ",
+            "[41] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman, and Oliver Wang. The unreasonable effectiveness of deep features as a perceptual metric. In CVPR, 2018. 5 ",
+            "[42] Zhifei Zhang, Yang Song, and Hairong Qi. Age progression/regression by conditional adversarial autoencoder. In CVPR, 2017. 2 ",
+            "[43] Jiapeng Zhu, Yujun Shen, Deli Zhao, and Bolei Zhou. Indomain gan inversion for real image editing. In ECCV, 2020. 1, 2, 3, 4, 6, 7 "
+        ],
+        "bbox": [
+            78,
+            90,
+            468,
+            402
+        ],
+        "page_idx": 9
+    }
+]

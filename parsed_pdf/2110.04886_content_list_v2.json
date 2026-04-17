@@ -1,0 +1,3753 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Multi-Class Cell Detection Using Spatial Context Representation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        158,
+        130,
+        810,
+        152
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Shahira Abousamra, David Belinsky, John Van Arnam, Felicia Allard, Eric Yee, Rajarsi Gupta, Tahsin Kurc, Dimitris Samaras, Joel Saltz, Chao Chen Stony Brook University Stony Brook, NY 11794, USA "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        180,
+        799,
+        252
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        233,
+        286,
+        313,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In digital pathology, both detection and classification of cells are important for automatic diagnostic and prognostic tasks. Classifying cells into subtypes, such as tumor cells, lymphocytes or stromal cells is particularly challenging. Existing methods focus on morphological appearance of individual cells, whereas in practice pathologists often infer cell classes through their spatial context. In this paper, we propose a novel method for both detection and classification that explicitly incorporates spatial contextual information. We use the spatial statistical function to describe local density in both a multi-class and a multi-scale manner. Through representation learning and deep clustering techniques, we learn advanced cell representation with both appearance and spatial context. On various benchmarks, our method achieves better performance than state-of-the-arts, especially on the classification task. We also create a new dataset for multi-class cell detection and classification in breast cancer and we make both our code and data publicly available. "
+          }
+        ]
+      },
+      "bbox": [
+        73,
+        316,
+        472,
+        604
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        633,
+        209,
+        648
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We propose the first joint cell detection and classification method that explicitly learns a spatial-context-aware representation of cells. We demonstrate that incorporating spatial context will significantly improve the performance, especially for the classification task. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        657,
+        468,
+        734
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Identification of various types of cells such as tumor cells, lymphocytes, and stromal cells from whole-slide histology images is an important step towards automatic diagnosis and prognosis in digital pathology. The spatial arrangement of different cells can comprehensively characterize the interaction between tumor and immune cells and be correlated with clinical outcomes [30, 49, 24]. One good example is the detection and measurement of tumor infiltrating lymphocytes (TILs), i.e., lymphocytes residing within the border of invasive tumors [37]. The prevalence of TILs has been shown to be associated with better clinical out-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        734,
+        470,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "comes [38, 39, 42]. Aside from lymphocytes, the presence of isolated or small clusters of tumor cells at the invasive tumor front, a phenomenon known as tumor budding, is a prognosis biomarker associated with an increased risk of lymph node metastasis in colorectal carcinoma and other solid malignancies [29]. Other examples include the assessment of lymphovascular invasion and perineural invasion [28] and the identification and measurement of intraepithelial lymphocytes for the diagnosis of celiac disease [35]. All these studies necessitate an effective algorithm to accurately identify cells of different types. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        287,
+        893,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-class cell identification involves both cell detection and cell classification. Cell detection has been studied extensively in the past few decades [41, 22, 46]. Existing approaches either adopt the object detection algorithm from computer vision [21, 48], or treat the problem as an instance segmentation problem and segment nuclei one-byone [19, 20, 33, 26, 31]. Although segmentation methods provide detailed nuclei morphology, their training requires highly detailed and thus time-consuming nuclei mask annotation. To circumvent this bottleneck, one may use weaklysupervised methods [32, 47, 44, 12] to segment nuclei based only on point annotations, i.e., points placed at the centers of nuclei. Point annotation is a much more affordable annotation for large scale training. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        457,
+        893,
+        671
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Despite the success in the cell detection, our progress on cell classification is not as advanced. Indeed, classification is a challenging task even for human experts. Cells of different kinds can manifest with similar appearance. Meanwhile, cells of the same type may exhibit large variation of morphology and texture in regions of neoplasia and inflammation. To correctly classify cells in such challenging scenarios, pathologists not only use appearance, but also rely on the contextual information of surrounding cells, their spatial relationships and tissue architecture. For example, degenerating or apoptotic cells often cluster together within the luminal spaces of gland forming tumors and can be readily identified in this context despite the spectrum of morphologic features they display; a context which can be identified through cellular architectural patterns in a larger scale. Sim-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        674,
+        895,
+        902
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2110.04886v2 [cs.CV] 5 Jun 2022 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        272,
+        57,
+        700
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/489b9f3f5f1b7144227cb2c4c46d33596a7ad031a99e9a41129c51a885cb5a76.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        94,
+        173,
+        172
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/477e22cb4cc44207a12624ef93231b171fb037bdd9e516ef35f4add390ed7316.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "w/o Spatial Context "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        178,
+        101,
+        271,
+        172
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c83aea113476e5f95d7acf34afbe2beb5bc559c0e794237188967fa8f185c022.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "MCSpatNet (Ours) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        276,
+        101,
+        369,
+        171
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6acd3c3e37f6aa9530b229d7e9fb513299e35b360a46f2088816e4bbcbff9662.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Ground Truth "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        372,
+        101,
+        467,
+        171
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d42279a57cc3c6c4485bf37ae49be84df9d2672ea06b8176e813f08fbe5917ed.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        78,
+        181,
+        171,
+        255
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4a9101c6aa4e20a572887d9d1e46c1da721e3215579d3fa7e9e002b2714751c2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "w/o Spatial Context "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        178,
+        183,
+        271,
+        255
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/682339ca4e51e1389ecf395e2e8c27c453b3d8a0fa7419613f8eae228ef29320.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "MCSpatNet (Ours) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        276,
+        184,
+        369,
+        255
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a0c3edd5a5d2b70ba27c019f4485d0e16bb1840dbcf7dc9a882f6ed940d4a2c6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Ground Truth "
+          },
+          {
+            "type": "text",
+            "content": "Figure 1. Sample results with and without spatial contexts. Blue, red, and green dots represent inflammatory, epithelial, and stromal cells, respectively. From left to right: original patches, detection and classification results without spatial contexts, our method using spatial contexts, ground truth point annotation. Our method better classify cells using spatial contexts. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        374,
+        184,
+        467,
+        255
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ilarly, architectural patterns can be used to help distinguish reactive stromal cells from tumor cells when their shape and chromatin pattern are indistinguishable. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        382,
+        468,
+        426
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To design an ideal classification algorithm, it is essential to imitate a pathologist’s thought process and incorporate the spatial context into the decision making. Unlike existing methods which only learns the context implicitly [20, 41], we propose a novel algorithm that explicitly leverages spatial context. To model the spatial context, we introduce the classic Ripley’s K-function [16] from spatial statistics [6]. The K-function encodes spatial relationship between cells in a multi-class, multi-scale manner. It has been shown to be a powerful descriptor of cellular architectures [49, 8]. However, existing studies use the K-function mainly for downstream analysis, not for better cell identification as we do. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        429,
+        468,
+        609
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our major challenge is that the spatial context is not available at inference time; one cannot infer the K-function without first identifying cells and their classes. To address this challenge, we assume a deep neural network has sufficient learning power and propose to learn a spatial-context-aware representation through a multitask learning framework. We train a deep neural net that jointly performs cell detection, cell classification and spatial context prediction (i.e., predicting K-functions). Through training, the network learns a representation that incorporates both appearance and spatial context. At inference stage, only the detection and classification modules are used. But the spatial-context-aware representation ensures a superior performance. See Figure 1 for an illustration. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        612,
+        468,
+        823
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To learn with such a multi-task framework is challenging, because the tasks are very different in nature. The cell classification/detection modules predict class labels. Whereas the spatial context prediction module needs to predict K-functions, which are high-dimensional continuous-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        825,
+        468,
+        898
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "valued vectors. To better learn with these tasks, we introduce a deep clustering module, inspired by works in unsupervised and weakly-supervised learning [11, 14]. In this module, we introduce pseudo-labels generated by clustering of the deep representation. These pseudo-labels serve as a connection between cell class labels and K-functions, thus facilitate the collaboration of different modules and the fusion of appearance and spatial information. See Figure 2 for an overview of our model. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        224
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We apply our method, called MCSpatNet, to a joint cell detection and classification task. We evaluate our method on three benchmark datasets (breast cancer, colorectal cancer and lung cancer), all of which with multi-class point annotations.1 Our method outperforms various SOTA baselines, demonstrating the power of the spatial-context-aware representation. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        227,
+        890,
+        330
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To summarize, our contributions are as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        517,
+        333,
+        834,
+        347
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We propose a novel cell detection and classification method which, for the first time, explicitly learns a spatial-context-aware representation of cells via multitask learning. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We introduce spatial statistical functions (K-function) as an effective descriptor of cells’ spatial context. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We utilize spatial context prediction module and deep clustering module to facilitate learning of the representation. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We create a new dataset for multi-class cell detection and classification in H&E images of breast cancer (BRCA-M2C). The dataset is available here: https: //github.com/TopoXLab/MCSpatNet "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• Our code is available here: https://github. com/TopoXLab/MCSpatNet "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        517,
+        354,
+        890,
+        618
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1.1. Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        626,
+        643,
+        641
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Most cell detection from point annotation methods operate by training a regression network to predict a probability density map that has high values at the ground truth points and the probability attenuates as you go further away. The detected cells are then the peaks in the regressed maps [41, 22]. In [46, 25] a patch-wise classification is performed of whether a patch contains a cell nucleus in the center. [21, 48] use faster-RCNN object detection algorithm [34]. One can naturally extend the method by using other similar object detection algorithms [9, 15, 10]. Our proposed method learns to detect cells by pixel-wise binary classification. It is trained with ground truth binary maps where "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        650,
+        890,
+        830
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1Our model can naturally be extended to mask annotations. In this paper, we focus on point annotations as they are much more affordable. Indeed, our experiments reveal that our spatial-context-aware model trained with point annotations can be as good as segmentation-based models trained with mask annotations w.r.t. detection and classification. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        838,
+        890,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "each connected component represents a cell nucleus and the components are restricted to not overlap so as to respect the boundaries between cells. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        468,
+        135
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When nuclei segmentation masks are available, fully supervised instance segmentation methods can be trained to predict nuclei contours [51, 20, 31]. Alternatively, weakly supervised nucleus segmentation methods learn to segment nuclei using ground truth point annotations [32, 47, 44, 12]. These methods mostly implement some form of detection followed by refinement to get more accurate boundaries. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        136,
+        467,
+        241
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "There are fewer methods that target cell classification, mostly operating in 2-stages. [41] has a 2-stage detection and patch-wise classification, where the patches are small windows centered at the detected cells. [13, 49] perform a 2-stage segmentation and patch-wise classification. [49] further applies spatial kernel smoothing and cancer region detection to improve the classification accuracy. [52] also applies a classification smoothing on top of [41] using conditional random field (CRF) built on cells and superpixels. [50] classifies readily available patches that are coarsely centered around the nuclei. [20] proposes a fully supervised segmentation and pixel-wise cell classification method using 3 network branches for segmentation, boundary detection, and classification tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        242,
+        467,
+        450
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Deep clustering [11, 4, 27, 23] has been known to enhance feature representation in unsupervised and weakly supervised learning [23, 45, 14]. Mostly, deep clustering methods generate clusters from feature representations and learn to predict the cluster for each input instance [11, 27]. Other methods try to learn clusters that maximize the information across classes [4, 23]. Similar to [11, 14], we iteratively generate pseudo labels for sub-classifying cells by deep clustering. We use features encoding the spatial statistics functions and the class texture features thus combining the spatial and visual contexts for a better representation. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        453,
+        467,
+        619
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Method "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        631,
+        168,
+        646
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We propose a method for joint cell detection and classification on H&E stained images. The prediction and the ground truth are in the form of multi-class point annotations; one point is positioned in the approximate center of each nucleus, with specific cell class labels: inflammatory, epithelial2, and stromal cells. See Fig. 3 for an illustration. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        656,
+        467,
+        747
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our model has several different modules corresponding to different tasks. These modules share the same input and the same feature extractor. But they have their own blocks of convolutional layers for their own different prediction tasks. This way these tasks learn and benefit from a common representation without conflicts. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        748,
+        467,
+        837
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The architecture is shown in Fig. 2. Aside from the cell detection and classification modules, our method has two "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        838,
+        467,
+        867
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "additional modules. First, we introduce a spatial distribution prediction module, which learns to predict the cells’ associated spatial statistics functions. As a result, it learns to pool features that describe the spatial context. To further improve the feature representation, we introduce a cell-level deep clustering module. The module iteratively cluster cells based on the feature representation and predict their clusters. It integrates both appearance and spatial contexts into a better feature representation. "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        90,
+        890,
+        226
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Sec. 2.1, we formulate the spatial context information, and illustrate its intuition. In Sec. 2.2, we provide details of all four modules and the common feature extractor. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        227,
+        890,
+        271
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1. Cellular spatial context "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        281,
+        714,
+        297
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We define the spatial context of a cell as the distributions of cells of different classes in its surrounding neighborhood. To describe the spatial context, we introduce Ripley’s Kfunction, a spatial statistics function that describes point patterns [16, 6]. For a cell of interest, called the source, we can measure the number of neighbors (called targets) within a distance "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": "from the source. Aggregating over all observed points, we have the K-function as the cumulative distribution function that represents the expected number of neighbors within increasing distances "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "from the source. See the illustration in Fig. 4. Formally, given a 2D point set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "of size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": ", the K-function is: "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        304,
+        890,
+        484
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "K (r) = \\frac {1}{\\lambda} \\sum_ {s \\in X} \\sum_ {t \\in X \\backslash \\{s \\}} \\frac {1}{n - 1} [   [ d (s, t) <   r ]   ] \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/60ee5af632b82f1201f7cdac48a9741b7f805386353d2faf9ac87197e205f5b3.jpg"
+        }
+      },
+      "bbox": [
+        516,
+        494,
+        890,
+        525
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { d } ( s , t )"
+          },
+          {
+            "type": "text",
+            "content": "is the Euclidean distance between the source and target points "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s"
+          },
+          {
+            "type": "text",
+            "content": "and t. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ [ \\cdot ] ]"
+          },
+          {
+            "type": "text",
+            "content": "is the Iverson bracket, which is one if the condition inside it is true, and zero otherwise. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda"
+          },
+          {
+            "type": "text",
+            "content": "is the intensity function used to normalize w.r.t. the density of the source points. Depending on the assumption, the intensity function can be a constant, i.e., "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\frac { A r e a } { n }"
+          },
+          {
+            "type": "text",
+            "content": ", (homogeneous n setting) or location dependent (inhomogeneous). "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        534,
+        890,
+        638
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We can compare the calculated K-function with the baseline, i.e., the K-function of a random point process (Poisson point process). When the K-function of interest is above the baseline at a certain range of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": ", we know there are more target points than one would expect from a random point process, and thus the points are clustered. When the Kfunction is below the baseline, we have less target points than one would expect from a random point process, hence the points are dispersed. For multi-class point sets, we extend the K-function so that the source and target can be from different classes of points. In such case, the K-function is also called the K-cross function. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        640,
+        890,
+        820
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cell-specific K-functions and vectorization. In cell detection and classification, we focus on individual cells and inspect the spatial context of each cell rather than at the population level. For a given cell "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s"
+          },
+          {
+            "type": "text",
+            "content": "as the source, we restrict to a fixed-size region surrounding it. We only consider target "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        824,
+        890,
+        900
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "2Our patches are selected from cancerous regions, in which epithelial cells are tumor cells. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        875,
+        467,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bf6d0116c9e18b78ec302235d911e8731be750a442e6b61591f21769435676f7.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2. Model architecture. The feature extractor generates shared features for all four following modules: cell detection, classification, spatial context, and deep clustering. Each module has its own layers to generate its own task-specific representation. The spatial context module learns the K-function of each cell. The deep clustering module performs dynamic clustering based on spatial context representations and cell classification representations. The model is trained end-to-end and thus learns a spatial-context-aware feature representation. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        76,
+        89,
+        893,
+        272
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c15bd4796f026730814398322b850afa0496bcc8fc1ba3a709b88df6f6ae5769.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        78,
+        362,
+        472,
+        455
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2dd808390e105562d206d2714563acdfa2813a2b8f1fc8e4d9d6630669be97f8.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3. Input and ground truth (GT) training maps. (A) Sample training patch. (B) The GT point annotation. (C) The detection GT mask. (D) The classification GT masks. Blue, red, and green indicate inflammatory, epithelial, and stromal cells/channels, respectively. "
+          },
+          {
+            "type": "text",
+            "content": "Figure 4. Ripley’s K function. Left: The K-function considers the number of neighboring target points (cells) of different classes at increasing radii from a source (cell) s. The sources and targets can each be points from a specific class. Right: Plot of an observed K-function together with the baseline from a Poisson point process. The dashed lines are the confidence interval envelopes for the random process function. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        96,
+        551,
+        449,
+        670
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "cells falling within this local region or patch. We consider target cells of different classes one-by-one. For class "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": ", denote by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { s } ^ { c }"
+          },
+          {
+            "type": "text",
+            "content": "all class- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "cells within the local patch centered at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s"
+          },
+          {
+            "type": "text",
+            "content": ". The K-function of class "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "is "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        806,
+        470,
+        867
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "K _ {s} ^ {c} (r) = \\frac {1}{n _ {m a x}} \\sum_ {t \\in X _ {s} ^ {c} \\setminus \\{s \\}} [   [ d (s, t) <   r ]   ] \\qquad (2)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/003bbcc00b5b633ca1e3a1fe770b49db8a0a128b0fa654cc986f48625b6007fc.jpg"
+        }
+      },
+      "bbox": [
+        133,
+        873,
+        468,
+        906
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { n _ { m a x } = \\operatorname* { m a x } _ { s } \\sum _ { c } | X _ { s } ^ { c } | } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "denotes the maximum number of target cells for any local patch. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        364,
+        890,
+        395
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In practice, we set the patch size to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 8 0 \\times 1 8 0"
+          },
+          {
+            "type": "text",
+            "content": ". We also vectorize the K-function by uniform sampling at a finite set of radii: "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r = 1 5 , 3 0 , 4 5 , \\ldots , 9 0"
+          },
+          {
+            "type": "text",
+            "content": "pixels. In total, we have three classes, each with six dimension. We call this 18 dimensional vector the K-function vector of s. By learning to predict this K-function vector, our model learns the spatial representation. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        396,
+        892,
+        501
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "K-functions and cells’ spatial behavior. We finalize this subsection by providing real examples to illustrate how Kfunctions can help refine cells’ spatial representation. In Fig. 5, we visualize different classes of cells and their Kfunctions. Since K-function is high dimensional, we cannot directly show their values. Instead, we cluster cells of each class into sub-categories based on their K-function vectors, and then visualize different sub-categories with different colors (from dark blue to light blue for inflammatory cells, from dark green to light green for stromal cells, from dark red to light red / pink for epithelial cells). "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        507,
+        893,
+        672
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We observe that different sub-categories clearly exhibit distinct spatial behavior. For epithelial cells, cells clustered within a tumor nest often belong to the pink sub-category, whereas those that are more dispersed and closer to stromal cells belong to the red sub-category. For stromal cells, the ones from the light green sub-category are often closer to other classes (inflammatory or epithelial cells). Meanwhile, other stromal cells that are far from inflammatory/epithelial cells tend to belong to the dark green sub-category. Similar behavior can be observed for inflammatory cells: light blue cells are clustered while dark blue cells are dispersed. Moreover, Fig. 6, shows the average K-functions for the different pairs of source and target cell classes. It is obvious that different pairs of cells classes exhibit different spatial behavior. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        674,
+        895,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/409e82866b2f1095166c501b0a730378b7539fa03d4f5ee47d512cbcec21997f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        117,
+        93,
+        429,
+        196
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2c30660f3a832639d7dcddec7c6551dbeb9a506a8a03cada3841d3d71f5c686c.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5. Visualization of cells with distinct K-functions. We group cells into sub-categories based on their K-function vectors. Different sub-categories exhibit different spatial behavior. Please note that the choice of darker to lighter colors does not imply a sequential relationship between sub-categories. "
+          },
+          {
+            "type": "text",
+            "content": "Figure 6. Average K-functions when the centers are inflammatory (left), epithelial (center), and stromal cells (right). In each plot, blue, red, and green curves represent different neighboring cell types. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        78,
+        292,
+        467,
+        388
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This demonstrates that K-functions do stratify cells into sub-categories with distinct spatial behavior. It motivates us to learn the spatial representation via K-functions. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        484,
+        467,
+        530
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2. Multi-task learning for a spatial-context-aware representation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        540,
+        467,
+        570
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our proposed model has four modules for four different tasks: cell detection, cell classification, deep clustering, and spatial context prediction. The four modules share a common feature extractor that learns a shared feature representation. The deep clustering module and the spatial context prediction module are only used in training. They help learn a spatial-context-aware representation which improves the performance of cell detection and classification. Please see Fig. 2 for the model architecture. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        579,
+        467,
+        715
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Feature extractor. The feature extractor is a variant of U-Net model [36] with a VGG-16 [40] backbone. The output of the feature extractor has 96 channels and the same spatial resolution as the input. The output feature representation is shared by all four task-specific modules. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        719,
+        467,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Each of the task-specific modules also has its own block of convolutional layers. For all the task-specific blocks, the spatial resolution of the input and output are the same as the input image. But the number of output channels are different for different tasks. This allows different task-specific blocks to tune the features to better suit their own tasks without conflict. The tasks are very different; involving "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        795,
+        467,
+        900
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "both classification and regression. The deep clustering task is very dynamic in nature. Without its own task-specific block, it will destabilize the feature extractor and affects other tasks negatively. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        150
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next, we explain different task-specific modules. "
+          }
+        ]
+      },
+      "bbox": [
+        517,
+        152,
+        841,
+        166
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cell detection and classification modules. For cell detection, the model predicts a single channel likelihood map over all pixels and compare it with a binary ground truth mask. The ground truth mask is generated by dilating the point annotation slightly. For cells close to each other, we use smaller dilation radii to avoid overlapping. Each connected component in the mask corresponds to one cell. See Fig. 3 for an illustration. The output of the cell-detection block has a single channel with sigmoid activation. The training for this module uses DICE loss as it tends to preserve small objects in the image. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        169,
+        890,
+        335
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For the classification task, we create a similar ground truth mask as the detection ground truth mask, except that pixels in each connected component has a specific cell class. The cell-classification block output has three channels, corresponding to the three cell classes. We use a softmax activation and use DICE loss for training. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        335,
+        890,
+        426
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "During inference, we only use the detection and classification branches. We threshold the cell-detection block output and use the centroids of all connected components as the predicted cell locations. We classify each cell using the cell-classification block output at its predicted location. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        426,
+        890,
+        501
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Spatial context prediction module. The spatial context prediction module predicts cell-specific K-function vectors (as defined in Eq. 2 ). The intuition is that by predicting spatial context, the learnt feature representation is spatial-context-aware and can help detection and classification modules. This will be verified in the experimental section via an ablation study. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        505,
+        890,
+        609
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We predict an 18 dimensional K-function vector for each cell. For ground truth, we use the ground truth cell detection mask generated for the cell detection task. For each positive pixel, i.e., the pixels within the dilated components, we compute the K-function vector. Our spatial-contextprediction block output has the same spatial resolution as the input image, and has 18 channels corresponding to the 18 dimensional K-function vectors. No additional activation is needed. Only the predictions at the positive pixels are compared with the ground truth K-function vectors. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        609,
+        890,
+        761
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To compare two K-function vectors, we can use the Kolmogorov–Smirnov test [7] for comparing sample estimates of cumulative distribution functions. Formally, it is the supreme norm of the difference between the prediction and ground truth: "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        761,
+        890,
+        835
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "K M \\left(K _ {p r e d}, K _ {g t}\\right) = \\sup  _ {r} \\left| K _ {p r e d} (r) - K _ {g t} (r) \\right|.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/450fde22360c1de2b8f1ac5c9f7da3af05eb3875b7f58e4455a184a58d2f277d.jpg"
+        }
+      },
+      "bbox": [
+        532,
+        845,
+        854,
+        863
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In practice, we found out that the supreme norm is less efficient and we use L1 norm as a surrogate loss. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        869,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Deep clustering module. The spatial context prediction module learns representations of spatial context. However, in practice, we observe that it does not collaborate well with the detection and classification modules. We hypothesize that the appearance feature and the spatial context feature do not fuse well. This could be due to the very different natures of different tasks. The detection and classification tasks are per-pixel classification tasks with a small number of classes. Whereas the spatial context prediction task is a regression problem of high dimensional output. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        472,
+        241
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In order to re-calibrate the appearance features and spatial features learnt from these different tasks, we propose a deep clustering module, which plays the role of selfsupervision and lies in the mid-ground between the other modules. The deep clustering module executes a per-pixel classification task, but with a higher number of pseudoclasses derived from both spatial and appearance information. Deep clustering is known to enhance feature representation [11, 14] especially for unsupervised and weaklysupervised tasks. This also fits our setting; we do not have a golden standard of sub-categories of cells. Instead, we derive the sub-classes dynamically based on the feature representation and train the model to predict them. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        242,
+        472,
+        439
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In particular, we apply k-means clustering on the intermediate feature representation to obtain pseudo-sub-classes that further divide cells of each class. Each class of cells is stratified into 5 pseudo-sub-classes. The deep-clustering block then learns to predict these pseudo labels. The design of this block is similar to the cell classification module. We note that the intermediate feature representation for clustering is a concatenation of the features from the deepclustering block and the spatial-context-prediction block. This ensures that the clustering, and thus the learnt feature representation, integrates both spatial and appearance information in a well-calibrated way. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        439,
+        472,
+        619
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The clustering and derived pseudo-sub-class labels are re-generated on the start of every epoch. When running kmeans clustering, the clusters’ centroids are initialized with the previous epoch’s centroids to avoid excess jumping between cluster mapping. The training is very similar to the cell classification task, using DICE loss. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        621,
+        472,
+        712
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The overall loss of our model is the weighted sum of losses from all four modules: "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        715,
+        470,
+        747
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} = \\lambda_ {1} \\mathcal {L} _ {\\mathrm {D e t}} + \\lambda_ {2} \\mathcal {L} _ {\\mathrm {C l a s s}} + \\lambda_ {3} \\mathcal {L} _ {\\mathrm {S p a t i a l}} + \\lambda_ {4} \\mathcal {L} _ {\\mathrm {D e e p C l u s t e r}}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/eca37985504998e91acca4ff7e8949653d93e69a2e92707988106dc9ac8b7565.jpg"
+        }
+      },
+      "bbox": [
+        99,
+        761,
+        447,
+        777
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In practice, we simply set all weights to one. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        789,
+        375,
+        806
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Technical details. We finalize this subsection with a few more details of our model architecture. The feature extractor has VGG-16 encoder and has 4 decoder blocks. The last decoder block is a single deconvolution layer with 96 output channels. The detection, classification, deep clustering, and spatial context blocks, all have a similar architecture: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        809,
+        470,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "two "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 \\times 3"
+          },
+          {
+            "type": "text",
+            "content": "convolutions with 64 channels output, followed by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\times 1"
+          },
+          {
+            "type": "text",
+            "content": "convolution to give the final output. Each convolution except for last is followed by a ReLU activation. More details are in Section E and supplementary material. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        893,
+        152
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        167,
+        633,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We evaluate our method, MCSpatNet, on three datasets of different cancer types: breast cancer, lung cancer, and colorectal cancer. The breast cancer dataset, BRCA-M2C, consists of 120 patches belonging to 113 patients, collected from TCGA [43]. The lung cancer dataset, SEER-Lung, is a collection of 57 patches from the SEER cohort [17]. Each patch is sampled from different whole slide images or tissue samples to maximize the generalizability. The colorectal cancer dataset, Consep [20], is publicly available. It has 41 patches. The patches from all 3 datasets are of size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\approx 5 0 0 \\times 5 0 0"
+          },
+          {
+            "type": "text",
+            "content": "at 20x magnification; they are large enough to provide spatial context. The lung and breast cancer datasets are annotated by pathologists with ground truth points at approximate centers of cells with an associated class: inflammatory, epithelial, or stromal. It is worth mentioning that all the epithelial cells in these patches are tumor cells. The Consep dataset additionally has nuclei contour masks. Details of these datasets are in the supplemental material. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        193,
+        893,
+        467
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Implementation details of MCSpatNet. We train the model on patches taken at 20x magnification, which is around 0.5 microns per pixel. We use dilated ground truth dot masks with dilation up to 9 pixels In all datasets, the model is trained on the 3 major classes: inflammatory, epithelial, and stromal cells. For the deep clustering, we use kmeans. Each cell class has "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf k } { = } 5"
+          },
+          {
+            "type": "text",
+            "content": "clusters (15 in total). "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        470,
+        893,
+        575
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To train the spatial context module, we use an R-package to generate the ground truth K-functions with border correction. These K-functions only need to be computed once before training starts. It takes around "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 1 \\ \\mathrm { m i n }"
+          },
+          {
+            "type": "text",
+            "content": "per patch. The radius "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": "’s range "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { \\partial } = [ 0 , 9 0 ]"
+          },
+          {
+            "type": "text",
+            "content": "with step "
+          },
+          {
+            "type": "equation_inline",
+            "content": "= 1 5"
+          },
+          {
+            "type": "text",
+            "content": "pixels. To get the formula as in Eq. 1, the returned K-function is multiplied by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\frac { \\mathrm { n u m b e r ~ o f ~ c e l l s ~ i n ~ r e g i o n } } { a r e a \\times n _ { m a x } }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { m a x }"
+          },
+          {
+            "type": "text",
+            "content": "is a constant set to 100. area×nmax During inference, we apply a threshold "
+          },
+          {
+            "type": "equation_inline",
+            "content": "= 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": "on the detection output and get rid of tiny connected components with area less than 5 pixels. The location of the predicted cells are then the centroids of the resulting connected components. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        578,
+        893,
+        744
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Evaluation. We train and evaluate our method against state-of-the-arts on all three datasets. We split each training dataset into train and validation sets and evaluate all methods on the same split. The performance is evaluated with the F-score metric. We report the F-scores on the detection and classification tasks. Similar to existing approaches [20, 41], we say a predicted cell is true positive (TP) if it is within 6 pixels (around 3 microns) from one of the ground truth points. Otherwise it is a false positive (FP). A ground truth point is false negative (FN) if it does not have a nearby "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        750,
+        895,
+        902
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/e49ee954dd29006c82cba18d8fcc51e27916676bfb464bc4e65cdd71efcb6507.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1. Results on all three datasets. For each dataset, we report five scores: F-scores for individual classes (inflammatory, epithelial, stromal), mean F-score over all three classes (Mean), and detection F-score over all cells (Det.). For each score, the best method is highlighted with bold fonts. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td colspan=\"5\">BRCA-M2C</td><td colspan=\"5\">Consep</td><td colspan=\"5\">SEER-Lung</td></tr><tr><td>Method</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td></tr><tr><td>U-Net</td><td>0.498</td><td>0.744</td><td>0.476</td><td>0.572</td><td>0.838</td><td>0.681</td><td>0.613</td><td>0.561</td><td>0.618</td><td>0.724</td><td>0.779</td><td>0.809</td><td>0.571</td><td>0.720</td><td>0.856</td></tr><tr><td>Faster-RCNN [34]</td><td>0.572</td><td>0.718</td><td>0.490</td><td>0.594</td><td>0.806</td><td>0.259</td><td>0.523</td><td>0.446</td><td>0.410</td><td>0.492</td><td>0.192</td><td>0.769</td><td>0.411</td><td>0.457</td><td>0.616</td></tr><tr><td>Cascade RCNN [9]</td><td>0.564</td><td>0.708</td><td>0.505</td><td>0.592</td><td>0.796</td><td>0.644</td><td>0.633</td><td>0.515</td><td>0.597</td><td>0.682</td><td>0.710</td><td>0.793</td><td>0.454</td><td>0.653</td><td>0.759</td></tr><tr><td>PointSeg[32]</td><td>0.249</td><td>0.407</td><td>0.300</td><td>0.319</td><td>0.538</td><td>0.104</td><td>0.603</td><td>0.210</td><td>0.306</td><td>0.435</td><td>0.748</td><td>0.773</td><td>0.537</td><td>0.686</td><td>0.848</td></tr><tr><td>HoverNet-Weakly</td><td>0.582</td><td>0.702</td><td>0.513</td><td>0.599</td><td>0.817</td><td>0.549</td><td>0.377</td><td>0.365</td><td>0.431</td><td>0.518</td><td>0.823</td><td>0.808</td><td>0.535</td><td>0.722</td><td>0.846</td></tr><tr><td>HoverNet [20]</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>0.633</td><td>0.651</td><td>0.624</td><td>0.636</td><td>0.730</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>MCSpatNet</td><td>0.635</td><td>0.785</td><td>0.553</td><td>0.658</td><td>0.849</td><td>0.724</td><td>0.695</td><td>0.628</td><td>0.682</td><td>0.762</td><td>0.799</td><td>0.817</td><td>0.600</td><td>0.739</td><td>0.860</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        78,
+        138,
+        901,
+        271
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/f4cef5c3be4c73b1423545a53b1bb87801fc830ced885fbee06c2c761eb3c07b.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2. Ablation study on the 3 datasets. The metrics and the highlight convention are the same as in Table 1. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td colspan=\"5\">BRCA-M2C</td><td colspan=\"5\">Consep</td><td colspan=\"5\">SEER-Lung</td></tr><tr><td>Method</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td></tr><tr><td>U-Net</td><td>0.498</td><td>0.744</td><td>0.476</td><td>0.572</td><td>0.838</td><td>0.681</td><td>0.613</td><td>0.561</td><td>0.618</td><td>0.724</td><td>0.779</td><td>0.809</td><td>0.571</td><td>0.720</td><td>0.856</td></tr><tr><td>U-Net+Deep Clus.</td><td>0.593</td><td>0.763</td><td>0.505</td><td>0.620</td><td>0.851</td><td>0.613</td><td>0.644</td><td>0.504</td><td>0.587</td><td>0.714</td><td>0.768</td><td>0.804</td><td>0.576</td><td>0.716</td><td>0.849</td></tr><tr><td>U-Net+Spat. Pred.</td><td>0.597</td><td>0.771</td><td>0.507</td><td>0.625</td><td>0.853</td><td>0.682</td><td>0.650</td><td>0.522</td><td>0.618</td><td>0.761</td><td>0.787</td><td>0.809</td><td>0.587</td><td>0.728</td><td>0.851</td></tr><tr><td>Using NN Dist.</td><td>0.641</td><td>0.698</td><td>0.447</td><td>0.595</td><td>0.829</td><td>0.656</td><td>0.616</td><td>0.568</td><td>0.613</td><td>0.719</td><td>0.752</td><td>0.808</td><td>0.558</td><td>0.706</td><td>0.848</td></tr><tr><td>Using Density</td><td>0.563</td><td>0.753</td><td>0.525</td><td>0.614</td><td>0.851</td><td>0.686</td><td>0.687</td><td>0.624</td><td>0.666</td><td>0.764</td><td>0.797</td><td>0.807</td><td>0.572</td><td>0.725</td><td>0.850</td></tr><tr><td>MCSpatNet</td><td>0.635</td><td>0.785</td><td>0.553</td><td>0.658</td><td>0.849</td><td>0.724</td><td>0.695</td><td>0.628</td><td>0.682</td><td>0.762</td><td>0.799</td><td>0.817</td><td>0.600</td><td>0.739</td><td>0.860</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        78,
+        316,
+        901,
+        434
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "\\frac { T P } { T P + 0 . 5 ( F P + F N ) }"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        469,
+        460,
+        488
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The detection F-score is computed over all detected cells regardless of their class. The classification F-score is evaluated on cells of each class (inflammatory F-score, epithelial F-score and stromal F-score). We also report the mean F-score over the three classes as an overall metric for the classification performance. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        488,
+        468,
+        578
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Baselines. We compare with several SOTA methods which can jointly segment/detect and classify cells. U-Net is a baseline method for joint detection and classification. It uses a U-Net architecture with VGG-16 backbone. It is essentially our method (MCSpatNet) without the spatial prediction and deep clustering modules. We also compare against SOTA computer vision multi-class detection algorithms, e.g., Faster-RCNN [34] and Cascade RCNN [9]. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        582,
+        468,
+        703
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Aside from detection based methods, segmentationbased methods can also be applied. Since the ground truth nuclei masks are not available, we apply a SOTA weakly supervised nuclei segmentation method (PointSeg) [32], which only requires point annotation for training. To classify the segmentation results, we train a CNN classifier (SSPP) [41] on local patches enclosing each predicted cell segment. We also apply HoverNet [20], a SOTA joint segmentation and classification method. Training HoverNet requires fully annotated nucleus masks, which is only available for Consep dataset. We only apply the full Hover-Net on Consep. Meanwhile, for all three datasets, we apply a weakly-supervised HoverNet (HoverNet-Weakly) by "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        704,
+        470,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "training on pseudo-masks acquired from point-annotationanchored superpixels. More details can be found in the supplemental material. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        470,
+        890,
+        515
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Results and discussions. Table 1 shows the results of our method and all baselines on all three datasets. Our method consistently outperform all baselines on different metrics. Generally, we observe a bigger advantage in the classification task (inflammatory, epithelial, stromal F-scores and mean F-score) than in the detection task (Det. F-score). This is expected as spatial context is used by pathologists to help determine cell classes in ambiguous situation, whereas appearance is the main cue for detection. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        518,
+        892,
+        654
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 7 shows the qualitative results of our method and different baselines. In all patches, the appearance of cells are not very discriminating and baseline models are unable to correctly classify them. Our model is able to differentiate epithelial vs. stromal cells and epithelial vs. inflammable cells. More results are in the supplemental material. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        655,
+        893,
+        746
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Ablation study. We evaluate our proposed method against a few variations to show the efficacy of different components. In all the runs we use the same experimental setting as above. We first evaluate the efficacy of the proposed two novel modules: spatial prediction and deep clustering. To this end, we evaluate 3 baselines: U-Net (the model with both modules removed), U-Net plus deep clustering module, and U-Net plus spatial prediction module. See Table 2 for the results. Comparing U-Net with the second and third baselines, we observe both modules contribute to perfor-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        750,
+        893,
+        901
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e2936391b5e0dd7e82e2cbd971fc94142915a978104d2cf40380f2d6cf155b2d.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7. Qualitative Results. Blue, red, and green dots represent inflammatory, epithelial, and stromal cells, respectively. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        76,
+        89,
+        893,
+        354
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "mance improvement. Furthermore, the full version of our model, MCSpatNet, outperforms all three baselines. This establishes the necessity of both modules. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        406,
+        470,
+        450
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To further investigate the efficacy of the proposed Kfunction, we compare with using different spatial context descriptors: nearest neighbor distance function and density function. For the first baseline, in the spatial prediction module, we replace the K-function vector with the distance to the nearest neighbor cell of each of the 3 classes. For the second baseline, we replace the K-function vector with the density of the cells from each of the 3 classes within the neighborhood area. As shown in Table 2, K-function based spatial prediction outperforms both of these baselines. This demonstrates that the K-function provides richer spatial information and helps the model learn a spatial-context-aware representation that best suits the cell detection and classification tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        450,
+        468,
+        661
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "More ablation studies are in the supplemental material. "
+          }
+        ]
+      },
+      "bbox": [
+        96,
+        662,
+        459,
+        678
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Statistical significance. To verify that the benefit of our method is robust, we ran our method and two top baselines: UNet and HoverNet-Weakly, for three more splits on BRCA-M2C (Table 3). Our method is consistently the best over all scores. Furthermore, we ran a paired T-test comparing our method with these baselines. We highlight a baseline result if it is not statistically significantly different from ours (i.e., p-value "
+          },
+          {
+            "type": "equation_inline",
+            "content": "> 0 . 0 5"
+          },
+          {
+            "type": "text",
+            "content": "). These “close second” results often have much lower average, but high standard deviation; they are very unstable. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        680,
+        468,
+        832
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        845,
+        194,
+        859
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper, we propose a novel method for joint cell detection and classification. The novel contribution is to ex-"
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        869,
+        468,
+        898
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/9c1c7ae97de450ca17b1fccccfc0d796d0efd1e17f49b30286dcc6c25db0bf66.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3. Average and standard deviation of scores on four random splits of BRCA-M2C. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>MCSpatNet</td><td>U-Net</td><td>Hovernet-Weakly</td></tr><tr><td>Infl.</td><td>0.71 ± 0.07</td><td>0.58 ± 0.22</td><td>0.54 ± 0.04</td></tr><tr><td>Epi.</td><td>0.76 ± 0.03</td><td>0.72 ± 0.02</td><td>0.55 ± 0.19</td></tr><tr><td>Stro.</td><td>0.56 ± 0.08</td><td>0.51 ± 0.09</td><td>0.49 ± 0.08</td></tr><tr><td>Mean</td><td>0.67 ± 0.04</td><td>0.60 ± 0.10</td><td>0.53 ± 0.06</td></tr><tr><td>Det.</td><td>0.85 ± 0.02</td><td>0.84 ± 0.01</td><td>0.78 ± 0.03</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        527,
+        429,
+        861,
+        531
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "plicitly introduce spatial context information and train the model to learn a spatial-context-aware cell representation of cells. We also use a deep clustering method to better recalibrate the spatial and appearance features. The proposed method outperforms different SOTA methods, demonstrating the significance of spatial context. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        547,
+        890,
+        638
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the future, we will extend the method to other forms of contextual information, e.g., topology [5, 2], and other stainings, e.g., multiplex immunohistochemistry [1, 18]. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        640,
+        890,
+        686
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Acknowledgement. We thank anonymous reviewers for their constructive feedback. This work was partially supported by grants NSF IIS-1909038, CCF-1855760, NCI 1R01CA253368-01, NCI UH3-CA225021 and NCI U24CA215109 as well as generous donor funding from Betsy and Bob Barton. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        693,
+        890,
+        784
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        804,
+        596,
+        819
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[1] Shahira Abousamra, Danielle Fassler, Le Hou, Yuwei Zhang, Rajarsi Gupta, Tahsin Kurc, Luisa F Escobar-Hoyos, Dimitris Samaras, Beatrice Knudson, Kenneth Shroyer, Joel Saltz, and Chao Chen. Weakly-supervised deep stain decomposition for multiplex ihc images. In 2020 IEEE 17th Inter-"
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        830,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "national Symposium on Biomedical Imaging (ISBI), pages 481–485. IEEE, 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[2] Shahira Abousamra, Minh Hoai, Dimitris Samaras, and Chao Chen. Localization in the crowd with topological constraints. In AAAI, 2021. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[3] R. Achanta, A. Shaji, K. Smith, A. Lucchi, P. Fua, and S. Susstrunk. Slic superpixels compared to state-of-the-art su-¨ perpixel methods. IEEE Transactions on Pattern Analysis and Machine Intelligence, 34(11):2274–2282, 2012. 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[4] Yuki M. Asano, Christian Rupprecht, and Andrea Vedaldi. Self-labelling via simultaneous clustering and representation learning. In International Conference on Learning Representations, 2020. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[5] Andrew Aukerman, Mathieu Carriere, Chao Chen, Kevin ` Gardner, Raul Rabad ´ an, and Rami Vanguri. Persistent ´ homology based characterization of the breast cancer immune microenvironment: a feasibility study. In 36th International Symposium on Computational Geometry (SoCG 2020). Schloss Dagstuhl-Leibniz-Zentrum fur Informatik,¨ 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[6] Adrian Baddeley, Ege Rubak, and Rolf Turner. Spatial Point Patterns: Methodology and Applications with R. Chapman and Hall/CRC Press, 2015. 2, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[7] Vance W. Berger and YanYan Zhou. Kolmogorov–Smirnov Test: Overview. American Cancer Society, 2014. 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[8] Joshua A Bull, Philip S Macklin, Tom Quaiser, Franziska Braun, Sarah L Waters, Chris W Pugh, and Helen M Byrne. Combining multiple spatial statistics enhances the description of immune cell localisation within tumours. Scientific reports, 10(1):1–12, 2020. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[9] Zhaowei Cai and Nuno Vasconcelos. Cascade r-cnn: Delving into high quality object detection. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2018. 2, 7, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[10] Zhaowei Cai and Nuno Vasconcelos. Cascade r-cnn: High quality object detection and instance segmentation. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(5):1483–1498, 2021. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[11] Mathilde Caron, Piotr Bojanowski, Armand Joulin, and Matthijs Douze. Deep clustering for unsupervised learning of visual features. In European Conference on Computer Vision, 2018. 2, 3, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[12] A. Chamanzar and Y. Nie. Weakly supervised multi-task learning for cell detection and segmentation. In IEEE International Symposium on Biomedical Imaging, 2020. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[13] Y. H. Chang, G. Thibault, O. Madin, V. Azimi, C. Meyers, B. Johnson, J. Link, A. Margolin, and J. W. Gray. In Annual International Conference of the IEEE Engineering in Medicine and Biology Society. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[14] Yu-Ting Chang, Qiaosong Wang, Wei-Chih Hung, Robinson Piramuthu, Yi-Hsuan Tsai, and Ming-Hsuan Yang. Weaklysupervised semantic segmentation via sub-category exploration. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2020. 2, 3, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[15] Bowen Cheng, Yunchao Wei, Honghui Shi, Rogerio Feris, Jinjun Xiong, and Thomas Huang. Revisiting RCNN: On awakening the classification power of faster RCNN. In European Conference on Computer Vision, 2018. 2 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        468,
+        900
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[16] Philip M Dixon. Ripley’s k function. Wiley StatsRef: Statistics Reference Online, 2014. 2, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[17] Kemi M. Doll, Alfred Rademaker, and Julie A. Sosa. Practical Guide to Surgical Data Sets: Surveillance, Epidemiology, and End Results (SEER) Database. JAMA Surgery, 153(6):588–589, 06 2018. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[18] Danielle J Fassler, Shahira Abousamra, Rajarsi Gupta, Chao Chen, Maozheng Zhao, David Paredes, Syeda Areeha Batool, Beatrice S Knudsen, Luisa Escobar-Hoyos, Kenneth R Shroyer, Dimitris Samaras, Tahsin Kurc, and Joel Saltz. Deep learning-based image analysis methods for brightfieldacquired multiplex immunohistochemistry images. Diagnostic pathology, 15(1):1–11, 2020. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[19] S. Graham, D. Epstein, and N. Rajpoot. Dense steerable filter cnns for exploiting rotational symmetry in histology images. IEEE Transactions on Medical Imaging, 39(12):4124–4136, 2020. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[20] Simon Graham, Quoc Dang Vu, Shan E Ahmed Raza, Ayesha Azam, Yee Wah Tsang, Jin Tae Kwak, and Nasir Rajpoot. Hover-net: Simultaneous segmentation and classification of nuclei in multi-tissue histology images. Medical Image Analysis, 58:101563, 2019. 1, 2, 3, 6, 7 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[21] Jane Hung, Allen Goodman, Deepali Ravel, Stefanie Lopes, Gabriel Rangel, Odailton Nery, Benoˆıt Malleret, Francois Nosten, Marcus Lacerda, Marcelo Ferreira, Laurent Renia, Manoj Duraisingh, Fabio Costa, Matthias Marti, and Anne Carpenter. Keras r-cnn: library for cell detection in biological images using deep neural networks. BMC Bioinformatics, 21:300, 2020. 1, 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[22] Henning Hofener, Andr ¨ e Homeyer, Nick Weiss, Jesper ´ Molin, Claes F. Lundstrom, and Horst K. Hahn. Deep learn-¨ ing nuclei detection: A simple approach can deliver state-ofthe-art results. Computerized Medical Imaging and Graphics, 70:43–52, 2018. 1, 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[23] Xu Ji, Joao F. Henriques, and Andrea Vedaldi. Invariant information clustering for unsupervised image classification and segmentation. In International Conference on Computer Vision, 2019. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[24] M. Kavianpour, M. Saleh, and J. Verdi. The role of mesenchymal stromal cells in immune modulation of COVID-19: focus on cytokine storm. Stem Cell Research & Therapy, 11(1):404, 09 2020. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[25] Mina Khoshdeli, Richard Cong, and Bahram Parvin. Detection of nuclei in H&E stained sections using convolutional neural networks. In IEEE-EMBS International Conference on Biomedical and Health Informatics, 2017. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[26] N. Kumar, R. Verma, S. Sharma, S. Bhargava, A. Vahadane, and A. Sethi. A dataset and a technique for generalized nuclear segmentation for computational pathology. IEEE Transactions on Medical Imaging, 36(7):1550–1560, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[27] Junnan Li, Pan Zhou, Caiming Xiong, and Steven C.H. Hoi. Prototypical contrastive learning of unsupervised representations. International Conference on Learning Representations, 2021. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[28] Peng Li, Hao-Qiang He, Chong-Mei Zhu, Yi-Hong Ling, Wan-Ming Hu, Xin-Ke Zhang, Rong-Zhen Luo, Jing-Ping "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        890,
+        901
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yun, Dan Xie, Yuan-Fang Li, et al. The prognostic significance of lymphovascular invasion in patients with resectable gastric cancer: a large retrospective study from southern china. BMC Cancer, 15:370, 2015. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[29] Alessandro Lugli, Inti Zlobec, Martin D Berger, Richard Kirsch, and Iris D Nagtegaal. Tumour budding in solid cancers. Nature Reviews Clinical Oncology, 18(2):101–115, 2021. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[30] Sidra Nawaz and Yinyin Yuan. Computational pathology: Exploring the spatial dimension of tumor ecology. Cancer letters, 380(1):296–303, 2016. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[31] Peter Naylor, Marick Lae, Fabien Reyal, and Thomas Walter. ´ Segmentation of nuclei in histopathology images by deep regression of the distance map. IEEE Transactions on Medical Imaging, 38(2):448–459, 2019. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[32] Hui Qu, Pengxiang Wu, Qiaoying Huang, Jingru Yi, Gregory M. Riedlinger, Subhajyoti De, and Dimitris N. Metaxas. Weakly supervised deep nuclei segmentation using points annotation in histopathology images. In International Conference on Medical Imaging with Deep Learning, 2019. 1, 3, 7, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[33] Shan E Ahmed Raza, Linda Cheung, Muhammad Shaban, Simon Graham, David Epstein, Stella Pelengaris, Michael Khan, and Nasir M. Rajpoot. Micro-Net: A unified model for segmentation of various objects in microscopy images. Medical Image Analysis, 52:160–173, 2019. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[34] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun. Faster r-cnn: Towards real-time object detection with region proposal networks. In Neural Information Processing Systems, 2015. 2, 7, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[35] Marie E Robert, Sheila E Crowe, Lawrence Burgart, Rhonda K Yantiss, Benjamin Lebwohl, Joel K Greenson, Stefano Guandalini, and Joseph A Murray. Statement on best practices in the use of pathology as a diagnostic tool for celiac disease. The American journal of surgical pathology, 42(9):e44–e58, 2018. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[36] O. Ronneberger, P.Fischer, and T. Brox. U-Net: Convolutional networks for biomedical image segmentation. In Medical Image Computing and Computer-Assisted Intervention, 2015. 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[37] Roberto Salgado, Carsten Denkert, S Demaria, N Sirtaine, F Klauschen, Giancarlo Pruneri, S Wienert, Gert Van den Eynden, Frederick L Baehner, Frederique Penault-Llorca, et al. ´ The evaluation of tumor-infiltrating lymphocytes (TILs) in breast cancer: recommendations by an international tils working group 2014. Annals of oncology, 26(2):259–271, 2015. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[38] Joel Saltz, Rajarsi Gupta, Le Hou, Tahsin Kurc, Pankaj Singh, Vu Nguyen, Dimitris Samaras, Kenneth R Shroyer, Tianhao Zhao, Rebecca Batiste, et al. Spatial organization and molecular correlation of tumor-infiltrating lymphocytes using deep learning on pathology images. Cell Reports, 23(1):181–193, 2018. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[39] M. Shibutani, K. Maeda, H. Nagahara, T. Fukuoka, Y. Iseki, S. Matsutani, S. Kashiwagi, H. Tanaka, K. Hirakawa, and M. Ohira. Tumor-infiltrating Lymphocytes Predict the Chemotherapeutic Outcomes in Patients with Stage IV Colorectal Cancer. In Vivo, 32(1):151–158, 2018. 1 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        468,
+        898
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[40] Karen Simonyan and Andrew Zisserman. Very deep convolutional networks for large-scale image recognition. In International Conference on Learning Representations, 2015. 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[41] K. Sirinukunwattana, S. E. A. Raza, Y. Tsang, D. R. J. Snead, I. A. Cree, and N. M. Rajpoot. Locality sensitive deep learning for detection and classification of nuclei in routine colon cancer histology images. IEEE Transactions on Medical Imaging, 35(5):1196–1206, 2016. 1, 2, 3, 6, 7, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[42] Sasha E. Stanton and Mary L. Disis. Clinical significance of tumor-infiltrating lymphocytes in breast cancer. Journal for ImmunoTherapy of Cancer, 4(1), 2016. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[43] TCGA development team. The Cancer Genome Atlas. https://tcga-data.nci.nih.gov/docs/ publications/tcga/. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[44] Kuan Tian, Jun Zhang, Haocheng Shen, Kezhou Yan, Pei Dong, Jianhua Yao, Shannon Che, Pifu Luo, and Xiao Han. Weakly-supervised nucleus segmentation based on point annotations: A coarse-to-fine self-stimulated learning strategy. In Medical Image Computing and Computer-Assisted Intervention, 2020. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[45] Xiang Wang, Huimin Ma, and Shaodi You. Deep clustering for weakly-supervised semantic segmentation in autonomous driving scenes. Neurocomputing, 381:20–28, 2020. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[46] J. Xu, L. Xiang, Q. Liu, H. Gilmore, J. Wu, J. Tang, and A. Madabhushi. Stacked sparse autoencoder (ssae) for nuclei detection on breast cancer histopathology images. IEEE Transactions on Medical Imaging, 35(1):119–130, 2016. 1, 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[47] Inwan Yoo, Donggeun Yoo, and Kyunghyun Paeng. Pseudoedgenet: Nuclei segmentation only with point annotations. In Medical Image Computing and Computer-Assisted Intervention, 2019. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[48] S. Yousefi and Y. Nie. Transfer learning from nucleus detection to classification in histopathology images. In IEEE International Symposium on Biomedical Imaging, 2019. 1, 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[49] Yinyin Yuan, Henrik Failmezger, Oscar M. Rueda, H. Raza Ali, Stefan Graf, Suet-Feung Chin, Roland F. Schwarz, ¨ Christina Curtis, Mark J. Dunning, Helen Bardwell, Nicola Johnson, Sarah Doyle, Gulisa Turashvili, Elena Provenzano, Sam Aparicio, Carlos Caldas, and Florian Markowetz. Quantitative image analysis of cellular heterogeneity in breast tumors complements genomic profiling. Science Translational Medicine, 4(157):157ra143–157ra143, 2012. 1, 2, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[50] L. Zhang, Le Lu, I. Nogues, R. M. Summers, S. Liu, and J. Yao. Deeppap: Deep convolutional networks for cervical cell classification. IEEE Journal of Biomedical and Health Informatics, 21(6):1633–1643, 2017. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[51] Yanning Zhou, Omer Fahri Onder, Qi Dou, Efstratios Tsougenis, Hao Chen, and Pheng-Ann Heng. Cia-net: Robust nuclei instance segmentation with contour-aware information aggregation. In International Conference on Information Processing in Medical Imaging, 2019. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[52] Konstantinos Zormpas-Petridis, Henrik Failmezger, Shan E Ahmed Raza, Ioannis Roxanis, Yann Jamin, and Yinyin Yuan. Superpixel-based conditional random fields (Super-CRF): Incorporating global and local context for enhanced "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        890,
+        898
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "deep learning in melanoma histopathology. Frontiers in Oncology, 9:1045, 2019. 3 "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        90,
+        467,
+        119
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A. Model Architecture "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        135,
+        269,
+        150
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fig. 8 shows details of the proposed deep neural network architecture. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        161,
+        467,
+        191
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B. Datasets "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        207,
+        174,
+        223
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We provide more statistics of the datasets in Table 4. In Figure 9, we provide sample patches and annotations from the three datasets. It should be noted that even point annotation is expensive. It takes around 30 minutes to annotate a patch by our pathologist annotator. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        233,
+        467,
+        309
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "C. Baselines "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        324,
+        184,
+        340
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We provide details of the baseline algorithms. "
+          }
+        ]
+      },
+      "bbox": [
+        96,
+        349,
+        398,
+        366
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "HoverNet-Weakly. Our weakly-supervised HoverNet baseline is trained on pseudo nuclei masks generated using superpixels. We apply the SLIC [3] algorithm to partition the input image into superpixels. Each superpixel that contains an annotation point is considered the mask of a nucleus. In order to account for the variation in cell size and shape across different classes, we fine-tune the superpixel algorithm parameters in a class-specific manner. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        371,
+        467,
+        491
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Figure 10, we visualize the superpixels for different classes of the Consep dataset. For reference, we also show the ground truth segmentation mask which was provided in Consep dataset. We observe that the superpixel-based pseudo-masks reasonably capture the scale and shape of the cells, but lose details along the boundary. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        492,
+        467,
+        583
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Faster-RCNN. For the baseline Faster-RCNN, we use the standard C4 architecture [34] with a ResNet101 feature encoder. All models were trained for 50,000 iterations. The only significant modification was in the maximal number of predicted instances, which we set to 1000 to allow for patches with a large number of cells, and the test ROI confidence threshold, which we set to 0.7 during inference. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        587,
+        467,
+        694
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cascade-RCNN For the baseline Cascade-RCNN, we use the same encoder as in the paper [9], which is a Resnet101 based feature pyramid network. All models were trained for 50,000 iterations. To tune the model for this data domain, we set the anchor sizes to [8, 16, 32, 64, 128]. We find that the iterative process of detecting the bounding boxes used by Cascade-RCNN results in too many correct predictions failing the confidence threshold. As such, we both increase the maximum number of detections per image to 10000 and decrease the test ROI confidence threshold to 0.6. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        698,
+        467,
+        849
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "PointSeg. The PointSeg baseline is based on the weaklysupervised segmentation model from [32]. We use this model to segment nuclei from an input patch. Next, we "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        854,
+        467,
+        900
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "use the SSPP classification network [41] to perform classification. As in the original paper this network is trained on 27x27 20x magnification patches based on the point annotations. To account for variance in detected center, each point has up to 9 training patches selected, one centered at the point, and the other eight with centers up to 6 pixels away from the annotation point in varying directions. At inference stage, we use the weakly supervised segmentation network to predict segments of nuclei. For each segment, we use its centroid as the predicted cell location, extract a patch centered at the location, and apply the classification network to predict its class. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        272
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "D. Average K-function Curves "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        286,
+        756,
+        303
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Fig. 11, the average pairwise K-curves are plotted for each pair of classes in each cluster. It shows how different clusters demonstrate different spatial behavior across pairs of cell classes. This also shows that the K-function across clusters is able to capture the variation in the spatial context. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        311,
+        890,
+        402
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "E. Additional Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        417,
+        728,
+        434
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We provide additional ablation studies on the hyperparameters selection for the maximum radius of the Kfunction and the number of clusters in the deep clustering module. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        443,
+        890,
+        502
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Varying K-function radius. Table 5 shows the results of varying the maximum radius of the K-function on the BRCA-M2C dataset. We experiment with radii of 60, 90, and 120 pixels. There is practically no difference in the detection F-score but there is a clear difference in the classification F-scores, which again shows the advantage of the spatial context learning to the classification task. 60 and 120 appear to be too small and too large radii. The best performance is at 90 pixels which is the setting we used in our experiments. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        523,
+        890,
+        675
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Varying number of clusters. Table 6 shows the results of varying the number of clusters in the deep clustering module. We experiment on the BRCA-M2C dataset with 3, 5, and 7 clusters. Again, the variation has no effect on the detection task. There are slight differences on the classification results with the best being at 5 clusters, which is the setting used in our experiments. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        694,
+        890,
+        800
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "F. Additional Qualitative Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        814,
+        779,
+        830
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We provide more qualitative examples to demonstrate the benefit of our proposed method, MCSpatNet, in Figures 12 and 13. Both figures show that MCSpatNet has better classification accuracy. Figure 12 demonstrates how "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        839,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "MCSpatNet "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        455,
+        95,
+        540,
+        109
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Feature Extraction Module "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        279,
+        119,
+        450,
+        132
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/a41e7dab3b992077be3858f00e864d317305840f633d6d197fb2eb4c7b5e813a.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Encoder "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Layer Type</td><td>Output Channels</td><td>Activation</td><td>Feed Direction</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>MaxPool2D</td><td>64</td><td></td><td>↓</td></tr><tr><td>Dropout</td><td></td><td></td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>128</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>128</td><td>ReLU</td><td>↓</td></tr><tr><td>MaxPool2D</td><td>128</td><td></td><td>↓</td></tr><tr><td>Dropout</td><td></td><td></td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>256</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>256</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>256</td><td>ReLU</td><td>↓</td></tr><tr><td>MaxPool2D</td><td>256</td><td></td><td>↓</td></tr><tr><td>Dropout</td><td></td><td></td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td>↓</td></tr><tr><td>MaxPool2D</td><td>512</td><td></td><td>↓</td></tr><tr><td>Dropout</td><td></td><td></td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td>—</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        114,
+        152,
+        367,
+        376
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/5428ca7160d9efa945d05894ec1c5609563d7b93ad985d6f80e906957fcc8ec2.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Decoder "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Layer Type</td><td>Output Channels</td><td>Activation</td><td>Feed Direction</td></tr><tr><td>ConvTranspose2d</td><td>96</td><td></td><td></td></tr><tr><td>Conv2D (3x3)</td><td>128</td><td>ReLU</td><td></td></tr><tr><td>Conv2D (3x3)</td><td>128</td><td>ReLU</td><td></td></tr><tr><td>ConvTranspose2d</td><td>128</td><td></td><td></td></tr><tr><td>Conv2D (3x3)</td><td>256</td><td>ReLU</td><td></td></tr><tr><td>Conv2D (3x3)</td><td>256</td><td>ReLU</td><td></td></tr><tr><td>ConvTranspose2d</td><td>256</td><td></td><td></td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td></td></tr><tr><td>Conv2D (3x3)</td><td>512</td><td>ReLU</td><td></td></tr><tr><td>ConvTranspose2d</td><td>512</td><td></td><td></td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        388,
+        164,
+        609,
+        345
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Task Specific Modules "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        691,
+        119,
+        833,
+        133
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/6e526df80ae0a3cea99c96fe1a63f43e19de255ac4d67137f539cdbaaa60b3ca.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Detection Block "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Layer Type</td><td>Output Channels</td><td>Activation</td><td>Feed Direction</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (1x1)</td><td>1</td><td>Sigmoid</td><td></td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        651,
+        164,
+        874,
+        232
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/98903d586b0892e7dd3dd647b6107d2d5b0576598bfb59a928cc7df4611959fc.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Classification Block "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Layer Type</td><td>Output Channels</td><td>Activation</td><td>Feed Direction</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (1x1)</td><td>n_classeses</td><td>Softmax</td><td></td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        651,
+        257,
+        872,
+        325
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/b4622593096b27c3a5c8887d1df21f9ce43b4414897ad01dad0216bf515686ab.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Deep Clustering Block "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Layer Type</td><td>Output Channels</td><td>Activation</td><td>Feed Direction</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (1x1)</td><td>n_clusters</td><td>Softmax</td><td></td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        651,
+        356,
+        872,
+        425
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/96da1ece750f2a92f7b73bbe73f01d4c8928f3953474aa03425ea538114b8f6f.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Spatial Context Block "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Layer Type</td><td>Output Channels</td><td>Activation</td><td>Feed Direction</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (3x3)</td><td>64</td><td>ReLU</td><td>↓</td></tr><tr><td>Conv2D (1x1)</td><td colspan=\"2\">Len(K-vector)</td><td></td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        651,
+        455,
+        872,
+        523
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 8. Model architecture details. "
+          }
+        ]
+      },
+      "bbox": [
+        372,
+        555,
+        589,
+        569
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/dca030bc738cf1becd5b79733274dab78c413005051ea41ba80fbbe5f351e080.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4. Datasets statistics. For each dataset, we report number of training/validation/test patches. For each class, we also report numbers of cells in training/validation/test sets. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>N Patches</td><td>Inflam.</td><td>Epi.</td><td>Stroma</td></tr><tr><td>BRCA-M2C</td><td>80 / 10 / 30</td><td>3541 / 1358 / 960</td><td>9956 / 733 / 6109</td><td>5150 / 1042 / 1789</td></tr><tr><td>SEER-Lung</td><td>37 / 5 / 15</td><td>5499 / 726 / 3085</td><td>10875 / 1601 / 4906</td><td>5708 / 407 / 1871</td></tr><tr><td>Consep</td><td>22 / 5 / 14</td><td>2982 / 652 / 1537</td><td>4987 / 376 / 3113</td><td>4394 / 1343 / 3640</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        101,
+        607,
+        867,
+        667
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/1af1ab53cb1e10de86e09e4c91037b0a189f065839a08c2a406c841dd031869d.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5. Ablation study: Varying the K-function maximum radius on the BRCA-M2C dataset. Evaluation with F-scores per class, mean F-score over classes and detection F-score over all cells. Infl.: Inflammatory cells, Epi.: Epithelial cells, Stro.: Stromal cells, Mean: the mean F-score over the 3 classes, Det.: detection F-score. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Radius</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td></tr><tr><td>60</td><td>0.612</td><td>0.777</td><td>0.526</td><td>0.638</td><td>0.851</td></tr><tr><td>90</td><td>0.635</td><td>0.785</td><td>0.553</td><td>0.658</td><td>0.849</td></tr><tr><td>120</td><td>0.594</td><td>0.761</td><td>0.507</td><td>0.621</td><td>0.854</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        114,
+        825,
+        431,
+        883
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/187618431ec875a215c106383e393f3d283389de98241147c4d86600fc8197b7.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6. Ablation study: Varying the number of clusters in the deep clustering module on the BRCA-M2C dataset. Evaluation with F-scores per class, mean F-score over classes and detection F-score over all cells. Infl.: Inflammatory cells, Epi.: Epithelial cells, Stro.: Stromal cells, Mean: the mean F-score over the 3 classes, Det.: detection F-score. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Clusters</td><td>Infl.</td><td>Epi.</td><td>Stro.</td><td>Mean</td><td>Det.</td></tr><tr><td>3</td><td>0.622</td><td>0.760</td><td>0.508</td><td>0.630</td><td>0.850</td></tr><tr><td>5</td><td>0.635</td><td>0.785</td><td>0.553</td><td>0.658</td><td>0.849</td></tr><tr><td>7</td><td>0.630</td><td>0.776</td><td>0.526</td><td>0.644</td><td>0.850</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        537,
+        781,
+        854,
+        840
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/890e407b6d9e5a951d59dfb73dbb7c76b2fdd8c4cf5b707926b5ca08fca6df9f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Consep Dataset "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        80,
+        104,
+        207,
+        205
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b9b76b8a8d2e08eaf8a02dcfe02229c23160fd9cef318613aeb9f1eeb2413030.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        210,
+        104,
+        341,
+        205
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/eaba6efd32da26e5294579a322bc796a2289b864cd1c0ec0faa7298cb5c4d160.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "TCGA-BRCA Dataset "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        354,
+        104,
+        483,
+        205
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2165cee308ce76c39b46f4acb49ba4a9ea321ee2bdbd9d3b606e4cd5ebb758ae.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        486,
+        104,
+        617,
+        205
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7644cc1925e919d3cb818e0afb5bc11352e2ae641044eceb897fc7b019d2bf5a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "SEER-Lung Dataset "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        627,
+        104,
+        758,
+        205
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4ff4711f27c8f9556baa936b9f2f6760892609a8485949c3dc45fbd117dbf3c0.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 9. Sample patches and the corresponding point annotation. Colors indicate cell types: red=epithelial cells, blue=inflammatory cells, green=stromal cells. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        761,
+        104,
+        890,
+        205
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/23162f8707432e9e05e16015750136fa94dae9f603292e489cfe428099f8bc3a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Image "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        166,
+        277,
+        330,
+        656
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2a88fe5fe0325bee09638da2beb72ab6d7b3327da84be59ca27f42cd145afbfa.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Exact Contours "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        403,
+        277,
+        566,
+        655
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ba9ab7761da36ab1e7d4c133c374887061977da73f1ddee41a26bee6fabdb925.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Superpixel Contours "
+          },
+          {
+            "type": "text",
+            "content": "Figure 10. Sample images from Consep dataset, the exact segmentation masks (exact contours) provided by the original dataset, and superpixel-based pseudo masks (superpixel contours). "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        638,
+        277,
+        802,
+        655
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "MCSpatNet can better detect and classify cells even in very dense tumor nest regions. Figure 13 shows that MCSpatNet performs equally well in various tissue regions. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        728,
+        468,
+        773
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bbe3073e6970d24178ea036d4bb3fcd67667d0b5feba3d2ff6b5c3891100eec3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 11. Average K-curves per cell type pair in each cluster. Each plot is for a pair of cell classes. The colored curves represent the K-curve for that pair in the different clusters. This clearly shows that different clusters demonstrate different cellular spatial behavior. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        83,
+        227,
+        890,
+        712
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/eb405c82c184f4b23ce994ec84d1b3051967047b0dd95d3012bd416a33990e8a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 12. Qualitative results comparing against baseline methods in dense tumor regions. Top row are the original image patches. Bottom row are the ground truths. (Blue "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { \\equiv }"
+          },
+          {
+            "type": "text",
+            "content": "inflammatory cells, Red=epithelial cells, Green "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\equiv"
+          },
+          {
+            "type": "text",
+            "content": "stromal cells.) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        86,
+        87,
+        893,
+        868
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/4dce0bc4713e029a75bfdf35a60cbd7a68c214541422a4c20a6f5cf49a74da0d.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 13. Qualitative results comparing against baseline methods in various tissue regions. Top row are the original image patches. Bottom row are the ground truths. (Blue "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { \\equiv }"
+          },
+          {
+            "type": "text",
+            "content": "inflammatory cells, Red=epithelial cells, Green "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| = _ { \\ l }"
+          },
+          {
+            "type": "text",
+            "content": "stromal cells.) "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        86,
+        85,
+        893,
+        869
+      ]
+    }
+  ]
+]

@@ -1,0 +1,1525 @@
+[
+    {
+        "type": "text",
+        "text": "Width-based Lookaheads with Learnt Base Policies and Heuristics Over the Atari-2600 Benchmark ",
+        "text_level": 1,
+        "bbox": [
+            189,
+            122,
+            810,
+            170
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Stefan O’Toole ",
+        "text_level": 1,
+        "bbox": [
+            292,
+            222,
+            400,
+            234
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Computing and Information Systems University of Melbourne, Australia stefan@student.unimelb.edu.au ",
+        "bbox": [
+            222,
+            236,
+            470,
+            277
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Miquel Ramirez ",
+        "text_level": 1,
+        "bbox": [
+            292,
+            299,
+            406,
+            311
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Electrical and Electronic Engineering University of Melbourne, Australia miquel.ramirez@unimelb.edu.au ",
+        "bbox": [
+            222,
+            313,
+            473,
+            354
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Nir Lipovetzky ",
+        "text_level": 1,
+        "bbox": [
+            596,
+            222,
+            704,
+            236
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Computing and Information Systems University of Melbourne, Australia nir.lipovetzky@unimelb.edu.au ",
+        "bbox": [
+            524,
+            237,
+            776,
+            277
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Adrian R. Pearce ",
+        "text_level": 1,
+        "bbox": [
+            589,
+            299,
+            712,
+            311
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Computing and Information Systems University of Melbourne, Australia adrianrp@unimelb.edu.au ",
+        "bbox": [
+            529,
+            313,
+            772,
+            354
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            459,
+            390,
+            537,
+            406
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "We propose new width-based planning and learning algorithms inspired from a careful analysis of the design decisions made by previous width-based planners. The algorithms are applied over the Atari-2600 games and our best performing algorithm, Novelty guided Critical Path Learning (N-CPL), outperforms the previously introduced width-based planning and learning algorithms $\\pi$ -IW(1), $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and ??-HIW(n, 1). Furthermore, we present a taxonomy of the Atari-2600 games according to some of their defining characteristics. This analysis of the games provides further insight into the behaviour and performance of the algorithms introduced. Namely, for games with large branching factors, and games with sparse meaningful rewards, N-CPL outperforms $\\pi$ -IW, $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and ??-HIW(n, 1). ",
+        "bbox": [
+            228,
+            422,
+            767,
+            561
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 Introduction ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            585,
+            313,
+            602
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The Atari-2600 games provide useful environments for benchmarking autonomous agents due to the diversity of behaviour required across the different games. The Atari-2600 games can be accessed through the Arcade Learning Environment (ALE) (1) which provides a typical Reinforcement Learning (RL) environment interface where given a state, the agent selects an action and receives a resulting state and reward. The two main approaches that have been used by autonomous agents applied to the Atari-2600 games have been RL methods (2; 3; 4) and Planning methods (5; 6). The RL approaches have had great success surpassing the performance of human players for many of the Atari-2600 games. However, RL approaches require long training times in order to train the Neural Networks (NN) used for policy and value functions. Planning agents do not require training time and instead use a bounded, fixed computational budget to decide which action to take at each time step of the game. The budget allowed for planning for each action is set as part of the experimental setting and can be set in such a way that the agent can play a game in real-time. Through the ALE interface, the agent is not provided a description of the transition or reward functions as is the case of models described through languages such as the Planning Domain Description Language (PDDL) (7). Instead, planning agents applied to the Atari-2600 games are required to work with a simulator, treating the environment’s transition and reward functions as a black-box (5). ",
+        "bbox": [
+            169,
+            617,
+            826,
+            839
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Width-based planning agents have been shown to be particularly successful on the Atari-2600 games when compared to other planning agents (5; 6). Width-based planners prioritise search effort on states deemed to be novel. The novelty of a state can be defined in a number of ways. Previously, novelty tests have been obtained from the RAM of the game (5), handcrafted features computed from screen ",
+        "bbox": [
+            169,
+            844,
+            823,
+            902
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2106.12151v2 [cs.AI] 28 Oct 2021 ",
+        "bbox": [
+            22,
+            276,
+            57,
+            707
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "footer",
+        "text": "Preprint. Under review. ",
+        "bbox": [
+            171,
+            922,
+            315,
+            936
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "pixels (6) and learnt features extracted from the screen pixels through a NN (8; 9; 10). In this paper we consider planners with a novelty measure that does not require extensive feature engineering, or the internal state of the simulator, but is instead defined directly over the values of screen pixels. ",
+        "bbox": [
+            169,
+            90,
+            823,
+            133
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Recent approaches have combined the RL and planning methods into single agents that are applied to the Atari-2600 games (8; 11; 10). Junyent et al. (8) combined a width-based planner with a learnt policy defined over a NN in order to guide the planner to promising areas of the search space. The learnt NN was also used to extract features from which the novelty of states were defined over. In this paper we introduce new width-based planning and learning methods that learn both policy and value networks using a methodical learning schedule. ",
+        "bbox": [
+            169,
+            138,
+            823,
+            223
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Through analysing previous width-based methods we construct and benchmark new width-based approaches for the Atari-2600 games. We also classify the Atari-2600 games according to their particular characteristics. The resulting game taxonomy helps us to gain insight into the performance of the algorithms we propose and benchmark. The paper contributions are: (1) an analysis of the previous width-based planning methods that have been applied to the Atari-2600 games, (2) introducing new width-based planning and learning approaches for playing the Atari-2600 games, (3) defining a methodical learning schedule for planning and learning methods, and (4) identifying characteristics of the Atari-2600 games that influence the performance of different planning approaches. ",
+        "bbox": [
+            169,
+            229,
+            826,
+            340
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2 Background ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            359,
+            308,
+            376
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2.1 MDPs ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            388,
+            258,
+            402
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We model the Atari games as Markov Decision Processes (MDPs). We formalise MDPs, as described by Geffner and Bonet (12), as the tuple of $M = ( S , s _ { 0 } , A , T , R )$ , where $S \\subseteq \\mathbb { R } ^ { d }$ , $s _ { 0 } \\in S$ is the initial state, $A$ provides the sets of applicable actions such that $A ( s )$ is a set of actions applicable in $s \\in S , T$ is a set of distributions such that $T ( s , a , s ^ { \\prime } )$ gives the probability of the transition from state $s \\in S$ to state $s ^ { \\prime } \\in S$ given action $a \\in A ( s )$ , and $R$ is the reward function such that $R ( s , a )$ returns the reward for performing action $a \\in A ( s )$ from state $s \\in S$ . In this work we will be considering a special case, finite-horizon MDPs, where accumulated rewards need to be maximised over a given number of stages $k = 1 , \\dots , H$ , starting at a fixed initial state, $s _ { 0 }$ . Terminal states in finite-horizon MDPs are absorbing states. That is, if $s$ is a terminal state and we are at time step $k$ , every action ?? will map (??, $k$ ) into $( s , k + 1 )$ and will be reward-free i.e. $R ( s , a ) = 0$ . Our goal is to produce a policy, $\\pi$ , that maps any given state into an action, such that it maximises the expected accumulated reward received for an episode of the MDP, ",
+        "bbox": [
+            169,
+            415,
+            826,
+            582
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {a r g m a x} _ {\\pi} E \\left\\{\\sum_ {k = 0} ^ {H - 1} R \\left(s _ {k}, \\pi \\left(s _ {k}\\right)\\right) \\right\\} \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            393,
+            588,
+            823,
+            630
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "where the expectation is over $s _ { k + 1 } \\sim T ( s _ { k } , \\pi ( s _ { k } ) , s _ { k + 1 } )$ . ",
+        "bbox": [
+            169,
+            636,
+            539,
+            652
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We assume that we have access to a simulator of the environment that given any state-action pair $( s , a )$ , where $s \\in S$ and $a \\in A ( s )$ , the simulator returns the reward $R ( s , a )$ , a resulting state $s ^ { \\prime }$ following the probability distribution $T ( s , a , s ^ { \\prime } )$ and whether $s ^ { \\prime }$ is a terminal state. In line with previous work (6; 8; 10), we consider only discrete action sets and states that represent the internal state of the Atari environment such that action transitions are deterministic, that is $T ( s , a , s ^ { \\prime } )$ can only equal 1 for one state $s ^ { \\prime }$ and 0 for any other state $s ^ { \\prime \\prime } , s , s ^ { \\prime } , s ^ { \\prime \\prime } \\in S , s ^ { \\prime } \\neq s ^ { \\prime \\prime }$ $s ^ { \\prime \\prime }$ $s ^ { \\prime } \\neq s ^ { \\prime \\prime }$ and $a \\in A ( s )$ . Note that while the agent can use the internal Atari game state to set the state of the simulator, it can only directly observe the Atari screen’s pixel value for any given state. ",
+        "bbox": [
+            169,
+            657,
+            826,
+            768
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2.2 Online Planning over simulators ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            784,
+            439,
+            799
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In this paper we explore online planning over simulators by considering width-based lookahead algorithms for the Atari-2600 games. Lookaheads use a simulator of the environment to consider rewards from different action trajectories from the current state into the future. An example of this is shown in Figure 1 where a lookahead is illustrated. We define the notion of lookahead as, ",
+        "bbox": [
+            169,
+            809,
+            823,
+            864
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Definition 1 (Lookahead). A lookahead is defined as $\\mathrm { L } = ( N , C , s _ { r } )$ where $N$ is a set of nodes defined as state-action paths starting at the root state of the lookahead $s _ { r }$ , and $C$ is a function that given a node $n \\in N$ and an action $a \\in A ( s )$ returns the children of $n$ , that is $n _ { c } \\in C ( n , a )$ and $n _ { c } \\in N$ . ",
+        "bbox": [
+            169,
+            869,
+            823,
+            912
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "2 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "image",
+        "img_path": "images/d3649dfbb1cbccb74ceea5ff24b9e3e3d59819e7d47069d9b7b07a7d30dbeb7e.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            178,
+            85,
+            408,
+            244
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/de776a12803534044e69111e3cfe186cd4ed5884e6aafde1d1772a7d1bd032d2.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            413,
+            85,
+            571,
+            244
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/0dcd6cfabbf78d747ed56f56fd2ee2f2ee742fd687ae369ea4b9758dee0fde13.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            573,
+            85,
+            715,
+            244
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/a2e29ac9e7076d60f28320660e68b8be04da27989e39a110b343abe000e588da.jpg",
+        "image_caption": [
+            "Figure 1: Example lookahead showing the action selection process for the root node $s _ { 0 }$ following Definition 2. On the left, we have a fully built lookahead. From left to right, we show the recursive process to determine what is the action to be executed. The transition with action $a _ { 1 }$ from $s _ { 0 }$ shown in green in the last diagram on the right is the transition added to the lookahead’s critical path (Definition 3). The ??, ??, and $V ^ { T }$ functions are as defined in Definition 2. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            715,
+            85,
+            823,
+            244
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Through backing up the rewards for each node in the lookahead, as shown in Figure 1, an expected value can be found for each action applicable at the current state. That is, where $n ^ { s }$ is the last state along the state-action path of node $n$ , the operation of backing up the rewards and selecting which action to execute is, ",
+        "bbox": [
+            169,
+            348,
+            823,
+            402
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Definition 2 (Action selection of lookahead). Given a lookahead $\\mathrm { L } { = } ( N , C , s _ { r } )$ (Definition 1) the action to execute $a$ is selected at the root $n _ { r }$ , where $n _ { r } ^ { s } = s _ { r }$ , by $\\operatorname { a r g m a x } _ { a \\in A ( n _ { r } ^ { s } ) } \\{ Q ( n _ { r } , a ) \\}$ , where $Q ( n _ { r } , a ) =$ $\\begin{array} { r } { R ( n _ { r } ^ { s } , a ) + \\sum _ { n \\in C ( n _ { r } , a ) } T ( n _ { r } ^ { s } , a , n ^ { s } ) V ( n ) } \\end{array}$ , and $V ( n ) = V ^ { T } ( n )$ , with $V ^ { T } ( n )$ being a termination cost, when $\\textstyle \\bigcup _ { a \\in A ( n ^ { s } ) } C ( n , a ) = 0$ , otherwise $\\begin{array} { r } { V ( n ) = \\operatorname* { m a x } _ { a } \\{ R ( n ^ { s } , a ) + \\sum _ { n ^ { \\prime } \\in C ( n , a ) } T ( n ^ { s } , a , n ^ { \\prime s } ) V ( n ^ { \\prime } ) \\} } \\end{array}$ . ",
+        "bbox": [
+            169,
+            407,
+            826,
+            469
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Once an action is selected for execution, the lookahead is updated to have its root at the selected action’s resulting node and the lookahead continues being constructed from the new root node. We define the action selected by the agent as a part of its critical path. That is, ",
+        "bbox": [
+            169,
+            478,
+            823,
+            520
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Definition 3 (Critical Path). Given the action selected $a _ { t }$ at each time step $t = 0 , 1 , \\ldots , m$ following Definition 2, the critical path $\\rho$ is the sequence of states and actions $\\rho = ( s _ { 0 } , a _ { 0 } , s _ { 1 } , a _ { 1 } , \\ldots , a _ { m - 1 } , s _ { m } )$ , such that $s _ { i + 1 } \\sim T \\bigl ( s _ { i } , a _ { i } , \\cdot \\bigr )$ for $i = 0 , \\ldots , m - 1$ . ",
+        "bbox": [
+            169,
+            523,
+            826,
+            566
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3 Related Work ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            585,
+            321,
+            599
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.1 MuZero ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            614,
+            272,
+            628
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Schrittwieser et al. (11) followed up on the AlphaGo (13) and AlphaZero (14) algorithms with MuZero. AlphaZero is a planning and learning agent that achieved state-of-the-art performance on the games of Go, Chess and Shogi (15). AlphaZero learns a policy and value network that are used within a Monte Carlo Tree Search (MCTS) lookahead through sampling actions according to the policy network and evaluating the states within the lookahead with the value function. Unlike AlphaZero, MuZero does not require a simulator or model of the game environment but instead learns a model of the environment through interaction. MuZero achieved state-of-the-art performance in the Atari-2600 games when compared to existing model-free RL algorithm performances. We also explore using learnt value and policy networks within a lookahead but consider width-based methods as opposed to MCTS. MuZero’s experimental setting is different to the one considered in this paper as we require access to a simulator in the planning phase and use significantly less computing power. ",
+        "bbox": [
+            169,
+            640,
+            826,
+            794
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.2 Width-based Planners on Atari ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            809,
+            431,
+            823
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Here we will provide an overview of the different width-based planners which have been applied to the Atari-2600 problems. In the next Section we go into the design and implementation details that each of the following planners use. ",
+        "bbox": [
+            169,
+            835,
+            823,
+            877
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Width-based planners (16) prioritise adding states to the lookahead with novel valuations of features that are defined over the states. IW(1) is a width-based breadth-first search that is guaranteed to run in ",
+        "bbox": [
+            169,
+            883,
+            823,
+            912
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "linear time and space as it only expands novel states. IW(1) considers a state in the lookahead as novel if it is the first state within the lookahead to make a particular feature within the feature set true. Width-based planners were first applied to the Atari-2600 games by Lipovetzky et al. (5), where they applied IW(1) over the RAM values of the game state as features. Lipovetzky et al., and subsequent works that use IW(1) (17; 18), show that it outperforms breadth-first search and UCT (19) planners. ",
+        "bbox": [
+            169,
+            90,
+            826,
+            161
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "code",
+        "sub_type": "algorithm",
+        "code_caption": [
+            "Algorithm 1: Overview of the RIW(1) Algorithm "
+        ],
+        "code_body": "Input:A lookahead $L = (N,C,s_r)$ ,and a base policy $\\pi_{b}$ OutputUpdated lookahead $L$ 1 while $\\neg$ has-solving_label(sr) do 2 s←sr//complete depth-first rollout from the root node's state 3 while is_novel(s) $\\wedge \\neg$ is-terminal(s)do 4 s,a--sample_unsolved_child(s, $\\pi_{b})$ 5 L- update lookahead(L,s,a,s'),s← s' 6 end 7 updateSolver_labels(s)   \n8end ",
+        "bbox": [
+            158,
+            196,
+            704,
+            349
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Bandres et al. (6) introduced a depth-first version of the IW(1) planner, named Rollout-IW(1) (RIW). RIW(1) aims to contain the same nodes that are expanded by the IW(1) planner. As RIW(1) performs depth-first search it was argued by Bandres et al. that it has better any-time performance than IW(1). The hypothesis for the better any-time performance of RIW(1) is that its search visits states that are further away from the initial state earlier in the search than its breadth-first search counter-part IW(1). Algorithm 1 provides an overview of RIW(1) using the base policy $\\pi _ { b }$ . RIW(1) was originally defined to use a random uniform base policy $\\pi _ { b }$ , however any given policy can be used instead. The function sample_unsolved_child, samples an action $a \\sim \\pi _ { b } ( s )$ and a transition $s ^ { \\prime } \\sim T ( s , a , \\cdot ) $ provided that $s ^ { \\prime }$ has not been marked as solved. If the selected transition does not already exist in the lookahead update_lookahead adds it. The update_solved_labels function adds a solved label to the given state and back-propagates the solved label to its parents if the parent’s children have all been marked as solved. Bandres et al. results showed that RIW(1) outperformed IW(1) greatly when almost real-time budgets for planning were applied. ",
+        "bbox": [
+            169,
+            369,
+            826,
+            551
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Junyent et al. (8) follow up on Bandres et al.’s (6) use of a random policy for the base policy $( \\pi _ { b } )$ of RIW with $\\pi$ -IW(1), an algorithm that replaces $\\pi _ { b }$ with a trained policy defined over a NN. The intended effect is to orient the lookahead to promising areas of the state space. The NN from the trained policy is also used to extract features from the screen pixels for the computation of state novelty. Recently Junyent et al. (10) introduced $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and ??-HIW(n, 1) as follow ups of $\\pi$ -IW(1). $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ modifies $\\pi$ -IW(1)’s random breaking of ties for the action selection (Definition 2) to select the action with the branch of the lookahead that contains the most nodes. $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ also adds a learnt value function, $\\tilde { V }$ , which is used in the action selection (Definition 2) by modifying $V ( s )$ to be $\\operatorname* { m a x } \\{ \\tilde { V } ( s ) , V ^ { * } ( s ) \\}$ , where $V ^ { * } ( s )$ is $V ( s )$ as described in Definition 2. ??-HIW(n, 1) is a hierarchical algorithm that has a high-level planner which uses a coarse down-sampling of the screen pixels as a feature set and a low-level planner which uses $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ with the feature set defined through the policy network as previously described. The high-level planner uses a modified stochastic exploration policy, that selects actions with probability inversely proportional to state visitation counts. ",
+        "bbox": [
+            169,
+            556,
+            826,
+            737
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4 Width-based Planning and Learning for the Atari Games ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            755,
+            684,
+            772
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "In this Section we step through different design considerations when constructing a width-based planning and learning algorithm. We compare the design decisions made by previous works and propose new algorithms to test over the Atari-2600 games. ",
+        "bbox": [
+            169,
+            786,
+            823,
+            829
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4.1 Novelty Definitions: Classic and Depth-based ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            844,
+            527,
+            859
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The novelty definition of a width-based lookahead dictates which states to prune. In Algorithm 1 the novelty definition determines the output of the is_novel function. We refer to IW(1)’s novelty definition as the \"Classic\" definition and define it as, ",
+        "bbox": [
+            169,
+            869,
+            823,
+            911
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Definition 4 (\"Classic\" Novelty). Given a feature set $F = \\left\\{ f _ { 1 } , \\dots , f _ { i } , \\dots , f _ { k } \\right\\}$ s.t. $f _ { i } : S \\to \\{ \\top , \\bot \\}$ and a lookahead $\\mathrm { L } { = } \\left( N , C , s _ { r } \\right)$ , a node $n$ is novel, if $n$ contains the first state generated s.t. $f ( n ^ { s } ) = \\top$ for some $f \\in F$ , that is, $\\forall n ^ { \\prime } \\in N$ , $f ( n ^ { \\prime s } ) = \\bot$ and $n ^ { \\prime } \\neq n$ . ",
+        "bbox": [
+            169,
+            90,
+            823,
+            133
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The \"Depth\" novelty definition introduced for RIW(1) by Bandres et al. (6) is, ",
+        "bbox": [
+            169,
+            146,
+            683,
+            161
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Definition 5 (\"Depth\" Novelty). Given a lookahead $\\mathrm { L } { = } ( N , C , s _ { r } )$ , a newly generated node, $n \\not \\in N$ reached after doing $d ( n )$ actions from $s _ { r }$ , is novel, if $f ( n ^ { s } ) = \\top$ for some $f \\in F$ , and $\\forall n ^ { \\prime } \\in N$ , such that $d ( n ^ { \\prime } ) \\leq d ( n )$ , $f ( n ^ { \\prime s } ) = \\bot$ . ",
+        "bbox": [
+            169,
+            166,
+            823,
+            209
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Later we show that in a width-based planning and learning algorithm based upon the RIW(1) algorithm the original \"Classic\" novelty is competitive and can sometimes outperform the depth-based one over the Atari-2600 games. In what follows, we refer to Bandres et al.’s original configuration of RIW(1) as $\\mathsf { R I W } _ { D }$ and refer to RIW(1) where one replaces the \"Depth\" novelty definition with the \"Classic\" one as ${ \\mathrm { R I W } } _ { C }$ . ",
+        "bbox": [
+            169,
+            220,
+            823,
+            291
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "4.2 Features for Novelty from Graphical Game Outputs ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            310,
+            571,
+            325
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Width-based methods require a feature set $F$ to be defined over the observable state-space ??. There are two types of observations that can be used for the Atari-2600 games, the internal states of the Atari-2600 machine (the RAM), and the colours of screen pixels. Either of these enable features to be defined, as arbitrary Boolean functions over the observable variables. For the internal state observables we have $\\mathbf { b } \\times \\mathbf { x }$ variables, where b is the size of the Atari memory word (8 bits) and x is the size of the physical RAM given by the number of distinct memory addresses (128 addresses). There are $\\mathrm { { c } } \\times \\mathrm { { w } } \\times \\mathrm { { h } }$ screen observable variables, where c is 128, w is 160, and h is 210, corresponding to the colour depth, and the number of screen pixels along the horizontal and vertical directions. ",
+        "bbox": [
+            169,
+            335,
+            823,
+            446
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "When RIW(1) was introduced (6), Bandres et al. stated that features capturing \"meaningful structure\" would yield better results than using raw features. Hence, Bandres et al. mapped the observable screen variables into the feature set B-PROST, first proposed by Liang et al. (3). The B-PROST feature set attempts to capture temporal and spatial relationships between the past and present screen pixel values. In order to compute the set of B-PROST features there are a number of steps required. First a set of basic features needs to be computed through dividing the screen into $1 6 \\times 1 4$ tiles comprised of $1 0 \\times 1 5$ pixels. For each tile, $( w , h )$ , where $w \\in \\{ 1 , \\ldots , 1 6 \\}$ and $h \\in \\{ 1 , \\ldots , 1 4 \\}$ , there are $K$ features where $K$ is equal to the colour depth of the Atari-2600 pixels (128). The basic feature in the B-PROST set is $f _ { w , h , c }$ , where $c \\in \\{ 1 , \\ldots , K \\}$ is true if the tile $( w , h )$ contains at least one pixel with the colour value $c$ . A second tier of features, the Basic Pairwise Relative Offsets in Space (B-PROS) set, is computed from the basic ones. A B-PROS feature $f _ { c _ { 1 } , c _ { 2 } , i , j }$ , is true if $f _ { w , h , c _ { 1 } } \\wedge f _ { w + i , h + j , c _ { 2 } }$ for any ??, ℎ. Finally, a third tier of features, the Basic Pairwise Relative Offsets in Time (B-PROT) set, puts tile PROT feature con so that a feature e current sis true if $( w , h )$ d the prefor any s gamewhere $( w ^ { \\prime } , h ^ { \\prime } )$ $f _ { c _ { 1 } , c _ { 2 } , i , j } ^ { t }$ $f _ { w , h , c _ { 1 } } \\wedge f _ { w ^ { \\prime } + i , h ^ { \\prime } + j , c _ { 2 } }$ $w , h$ $w ^ { \\prime } = w$ $h ^ { \\prime } = h$ ",
+        "bbox": [
+            169,
+            453,
+            825,
+            662
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The feature set can also be defined dynamically through a NN (8). $\\pi$ -IW, $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and the lower level planner of $\\pi$ -HIW(n, 1) use a feature set that is defined as the output values of the rectified linear units from the last hidden layer of the policy NN treating zero values as ⊥ and positive as >. The policy NN input are the last four screens, processed to map colours to a suitably defined grayscale, and down sampled to a size of $8 4 \\times 8 4$ . While the policy network is being trained the features extracted through it will also change. This is similar to Dittadi et al. (9), who use Variational Autoencoders (VAE) to learn a set of features from the Atari game screen using a training set of game screens created from a RIW(1) execution using B-PROST. RIW(1) using the VAE features was shown to outperform RIW(1) using the B-PROST features. ",
+        "bbox": [
+            169,
+            669,
+            823,
+            794
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "While width-based planning methods using both the BPROST and NN extracted feature sets have been shown to perform well over the Atari games, previous width-based methods have not tested simpler feature sets defined directly over the screen pixel values. With the motivation of presenting a simpler width-based algorithm, we define our feature set directly over the values of the current down sampled $8 4 \\times 8 4$ , 8-bit grayscaled, observable screen variables. Each feature is defined as $f _ { i , j , c }$ and is true if the downsampled pixel $( i , j )$ has the grayscaled colour c, where ?? $, j \\in \\{ 1 , \\dots , 8 4 \\}$ and $c \\in \\{ 1 , \\ldots , 2 5 6 \\}$ . Despite using a simpler feature set than previous work, in the next Section we show that our algorithm outperforms the methods that use dynamically defined NN based features. ",
+        "bbox": [
+            169,
+            800,
+            823,
+            911
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "code",
+        "sub_type": "algorithm",
+        "code_caption": [
+            "Algorithm 2: Novelty guided Critical Path Learning (N-CPL) "
+        ],
+        "code_body": "// Perform $K$ training iterations   \n1 for $i = 0,\\dots ,K$ do   \n2 $\\mathcal{T}^i\\gets \\emptyset ,E^i\\gets \\emptyset$ //Iteration's critical path transitions and episode rewards   \n3 while $\\neg$ train_interval_exhausted() do   \n4 s←s0,R←0,L←initialise lookahead(s0)   \n5 while $\\neg$ is-terminal(s) do   \n6 L←RIW(L,pi// Algorithm 1   \n7 a,r,s',L←select_next_transition(L,Vt)// Selected using Def.2   \n8 T'←T'U(s,a,r,s'),s←s',R←R+r   \n9 end   \n10 E'←E'uR//Episode rewards from current iteration   \n11 end   \n12 // Train and update network parameters according to learning schedule   \n13 $\\pi_b,V^t\\gets$ update_network_parameters(T',E') ",
+        "bbox": [
+            153,
+            112,
+            787,
+            329
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4.3 Learning Base Policies and Termination Costs ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            367,
+            532,
+            382
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "AlphaGo (13) and $\\pi$ -IW (8) showed the power of using a learnt base policy defined through a NN in order to guide a lookahead search. Similarly, AlphaGo and $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ (10) also use a learnt value function defined through a NN. $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ used its learnt value function to modify the definition of $V ( n )$ (Definition 2) allowing the rewards received from the transitions in the lookahead to sometimes be ignored in preference of the value network’s valuation. ",
+        "bbox": [
+            169,
+            393,
+            823,
+            463
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "We propose a new algorithm based on Algorithm 1, Novelty guided Critical Path Learning or N-CPL for short, that incorporates both a learnt policy and value function network. An outline of N-CPL is shown in Algorithm 2. Like $\\pi$ -IW does, N-CPL defines the base policy used by Algorithm 1 to be a policy network. Besides that, N-CPL uses a cost-to-go approximation which we implement with a NN as a value function, which is evaluated at the non-terminal leaf nodes of the lookahead. Using cost-go-approximations has been shown to significantly improve the performance of width-based lookaheads over stochastic shortest paths (20), but rather than using simulations to obtain the cost-to-go estimates, we rely on a learnt heuristic function. That is, instead of assigning termination costs, $\\hat { V } ^ { T }$ , of 0 as done by previous width-based methods, if the state is not terminal the valuation of the learnt value function network is used. We note that unlike $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ we do not use the learnt value function to modify the $V ( s )$ definition as defined in Definition 2. ",
+        "bbox": [
+            169,
+            469,
+            826,
+            622
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4.4 Learning from Critical Paths ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            641,
+            415,
+            655
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "The policy network of N-CPL uses the state action pairs, $( s _ { j } , a _ { j } )$ for $j = 0 , \\ldots , H - 1$ , of previous episodes performed by N-CPL with NN parameters, ${ < \\theta _ { i } ^ { \\pi } , \\theta _ { i } ^ { V } > }$ , in order to train new NN parameters $\\theta _ { i + 1 } ^ { \\pi }$ . This is similar to how $\\pi$ -IW(1) trains its policy function, except for the fact that $\\pi$ -IW(1) uses the Q values within the lookahead tree. If multiple actions in $\\pi$ -IW’s lookahead have the same Q value for a given state, instead of the training vector assigning a probability of one to the executed action, $\\pi$ -IW uniformly distributes the probability across the actions with the same Q values. We have taken the simpler approach of just using 1-hot encodings for the single selected action along the critical path (Definition 3) of the N-CPL algorithm. Curating the training dataset in this way also means N-CPL does not need access to the internal data structures of the planning agent itself but instead can externally observe any agent interacting with the environment in order to acquire the training data. ",
+        "bbox": [
+            169,
+            667,
+            823,
+            808
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Influential deep RL algorithms such as DQN (2) which have been applied to the Atari-2600 games rely on evaluating an $\\epsilon$ -greedy policy defined over the parameters of its network in order to sample transitions and use Q-learning updates on the parameters of the network. We follow this strategy and perform Temporal Differential (TD) (21) learning to train the value network. The selection of the transitions that are used for the TD learning determines what the value function is estimating. That is, TD’s task is to estimate the expected accumulated rewards from the given state following the policy which underlies the transitions that it is trained on. In N-CPL the transitions within the ",
+        "bbox": [
+            169,
+            813,
+            826,
+            912
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            936,
+            503,
+            946
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/033528690090ddfb523e3d08dbc8822533168fd6d9e39f6863148dc566047a57.jpg",
+        "image_caption": [
+            "Figure 2: Illustration of the schedule for the network parameter updates, $< \\theta ^ { \\pi } , \\theta ^ { V } >$ , of N-CPL. The $E$ arrays contain episodes executed by N-CPL and each episode in the array is represented by a square in the diagram. The t_test function returns the p-value for Welch’s t-test (22) of the episode rewards executed with the old $i - 1$ parameters being better than the new ones. $\\delta _ { i } ^ { \\pi }$ and $\\delta _ { i } ^ { V }$ are real vectors of the same dimensions as $\\theta _ { i } ^ { \\pi }$ and $\\theta _ { i } ^ { V }$ respectively. $\\delta _ { i } ^ { \\pi }$ and $\\delta _ { i } ^ { V }$ are functions over $E _ { i }$ . "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            259,
+            85,
+            715,
+            204
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "lookahead follow the base policy, $\\pi _ { b }$ which is being learnt by aiming to mimic the policy induced from the N-CPL lookahead, $\\pi _ { \\mathrm { N - C P L } }$ . The N-CPL lookahead through selecting actions according to Definition 2 can be seen as a policy improvement operator over $\\pi _ { b }$ and hence the execution of $\\pi _ { \\mathrm { N - C P L } }$ is not necessarily equivalent to the $\\pi _ { b }$ . Therefore it does not make sense to approximate the expected accumulated reward of the lookahead with the expected accumulated reward of $\\pi _ { b }$ . Instead, as shown in Line 8 of Algorithm 2, N-CPL trains only the transitions on the critical path of the lookahead (Definition 3), that is, the transitions selected by $\\pi _ { \\mathrm { N - C P L } }$ . This results in the value function approximating the expected accumulated reward of executing $\\pi _ { \\mathrm { N - C P L } }$ from a given state. ",
+        "bbox": [
+            169,
+            316,
+            826,
+            429
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "4.5 Adding a Learning schedule ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            444,
+            410,
+            459
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "The previous width-based planning and learning methods continuously learn and update their policy and value networks, while a key mechanism of the Alpha-Zero algorithm (14) is the use of a learning schedule. Alpha-Zero evaluates each new set of network parameters $\\theta ^ { \\prime }$ that are trained against the current set of network parameters $\\theta$ to ensure $\\theta ^ { \\prime }$ improves AlphaZero’s performance. Here we introduce a general learning schedule mechanism that is applicable to sequentially executed and trained planning and learning methods applied to single-player domains, that N-CPL uses for updating its network parameters for its policy network, $\\theta ^ { \\pi }$ and value function network, $\\theta ^ { V }$ . As illustrated in Figure 2, the learning schedule determines whether network parameter updates ${ < \\theta _ { i } ^ { \\pi } , \\theta _ { i } ^ { V } > }$ can be accepted or if the ${ < \\theta _ { i - 1 } ^ { \\pi } , \\theta _ { i - 1 } ^ { V } > }$ parameters are kept, by evaluating their performance when used within N-CPL. This test is implemented in the update_network_parameters function shown in Algorithm 2. For the test N-CPL performs a Welch’s t-test (22) on its performance with the new ?? parameters vs. the old $i - 1$ parameters. The update is rejected if the t-test suggests, with a $p$ -value of less than 0.1, that performance could deteriorate if the new parameters were accepted. This training and parameter update schedule allows learning steps to be completed at each time step like done by $\\pi$ -IW (8), except that the updated parameters are not used for data generation by N-CPL until they have been accepted by the proposed learning schedule. ",
+        "bbox": [
+            169,
+            469,
+            826,
+            694
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5 Experimental Study ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            713,
+            375,
+            729
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We benchmark width-based planning and learning methods with variations of the design decisions explained in the previous section. Here we explain our experimental methodology and provide results across the different algorithms over the Atari-2600 games. ",
+        "bbox": [
+            169,
+            744,
+            825,
+            787
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5.1 Methodology ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            801,
+            305,
+            816
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Given vast compute resources it would be preferable to conduct a full ablation study over the Atari-2600 benchmark on each element of a width-based planning and learning algorithm discussed in the previous Section. However, due to computational constraints we instead select five planners which will provide the most insight. Two of the planners we evaluate are based on RIW(1) without learnt policy or value function networks. One of the planners uses the \"Depth\" definition of novelty (Definition 5) and the other uses the \"Classic\" definition (Definition 4), we name these version $\\mathsf { R I W } _ { D }$ ",
+        "bbox": [
+            169,
+            828,
+            825,
+            912
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "and ${ \\mathrm { R I W } } _ { C }$ respectively. Note that $\\mathsf { R I W } _ { D }$ is as described in Bandres et al.(6), except that the features are defined directly over the screen’s pixel values as discussed in the previous Section. The other 2 width-based planners we benchmark are two versions of N-CPL, as previously described. Again we test both the \"Classic\" and \"Depth\" novelty definitions (Definitions 4, 5), and refer to them as N-CPL and $\\mathrm { N - C P L } _ { D }$ respectively. For the policy networks of N-CPL and ${ \\mathrm { N } } { \\mathrm { - C P L } } _ { D }$ we use the same architecture used by Mnih et al. (2). The value network uses the same architecture as the policy network except that instead of the output layer being a dense softmax layer with an output for each action, the output layer of the value network is a dense linear layer with a single output value. Additionally we test a version of N-CPL that does not prune for novelty, we refer to as CPL, i.e. for CPL the is_novel function in Algorithm 1 always returns true. ",
+        "bbox": [
+            169,
+            90,
+            826,
+            231
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We compare $\\mathsf { R I W } _ { D }$ , ${ \\mathrm { R I W } } _ { C }$ , CPL, N-CPL, and $\\mathrm { N - C P L } _ { D }$ to the $\\pi$ -IW, $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ $\\pi$ and $\\pi$ -HIW(n, 1) planners with the results as given by Junyent et al. (10). We do not directly compare our results to those given in the original RIW(1) planner as Bandres et al. (6) use a different experimental design. That is, Bandres et al. and previous works such as Lipovetzky et al. (5) benchmarked their width-based planners over the Atari-2600 games all using the full action set of 18 actions per state. We found in the code provided for the $\\pi$ -IW(1) work that it was benchmarked against the games using the minimal action set for each game. Using the minimal action set results in many games having much smaller branching factors, for example, instead of Breakout having a branching factor of 18, it has a branching factor of just 4. Additionally it is worth noting that the true average branching factor of each game is often much smaller than the minimal action set (23) and learning the minimal action set can help avoid unnecessary simulator interactions (18). Due to computational constraints we could not benchmark our algorithms over the games with full, minimal and learnt minimal actions sets. Instead, we decided to benchmark using the minimal action set as Junyent et al. (10) do. ",
+        "bbox": [
+            173,
+            234,
+            826,
+            417
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The results are also not directly compared with those from MuZero due to discrepancies in the evaluation protocols and computing resource requirements. For example, MuZero uses a smaller frameskip for the environment time steps and uses a longer allowed episode length of 108,000 frames compared to the 18,000 frame maximum episode length we impose. While our experiments run on a single vCPU for each trial for both training and evaluation, MuZero required 40 third generation Google Cloud TPUs for each run, 8 for training and 32 for its self-play. Furthermore the results for MuZero on each domain were only made available for a 20 billion frame training budget. We do however provide comparisons with the RL algorithms DQN (2) and Rainbow (4), along with all the necessary caveats about differences in evaluation protocols, in the Supplementary Material. ",
+        "bbox": [
+            169,
+            422,
+            823,
+            547
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "For the evaluation of each algorithm on each game we run 5 independent trials. Once training has completed we evaluate each trial over 10 episodes. Following previous width-based planning papers (6; 8; 10) we use a frameskip of 15. We keep our experimental settings the same as Junyent et al. (10) including a training budget of $2 \\times 1 0 ^ { 7 }$ simulator interactions and allowing 100 simulator interactions at each planning time step, which allows almost real-time planning. Note that previous width-based algorithms have varied in how they apply planning budgets, Lipovetzky et al. enforce a budget of 30,000 simulator interactions with a frameskip of 5, while Bandres et al. enforce time budgets of 0.5 and 32 seconds with a frameskip of 15. We ran 80 independent trials at once over 80 Intel Xeon 2.10GHz processors with 720GB of shared RAM, limiting each trial to run on a single vCPU. The average vCPU run-time per time step needed across both the planning and learning steps were 1.28 and 1.11 seconds for N-CPL, and ${ \\mathrm { N } } { \\mathrm { - C P L } } _ { D }$ respectively, resulting in each trial taking just under 3 days to complete. For ${ \\mathrm { R I W } } _ { C }$ and ${ \\mathrm { R I W } } _ { D }$ , which do not require any learning steps or evaluation of NNs, the average run-times per step were 0.55 and 0.54 seconds respectively. Note that given Atari operates at 60 frames per second and we use a frameskip of 15 a real-time planner would be required to execute with a run-time of 0.25 seconds per time step. ",
+        "bbox": [
+            169,
+            551,
+            826,
+            760
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The transitions within the lookahead are cached inline with previous width-based planners (5; 6; 8; 10). That is, when the search revisits a transition between two nodes of the lookahead within the same episode, the simulator does not need to be recalled and hence does not affect the simulator budget. Also following previous work, transitions that are cached from previous time steps are not considered by the novelty Definitions 4, and 5, and hence will never be pruned. ",
+        "bbox": [
+            169,
+            766,
+            826,
+            835
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5.2 Results ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            856,
+            264,
+            869
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Table 1 summarises the results of N-CPL, $\\mathrm { N - C P L } _ { D }$ , CPL, ${ \\mathrm { R I W } } _ { C }$ , $\\mathsf { R I W } _ { D }$ , $\\pi$ -IW(1), $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ and $\\pi$ -HIW(n, 1). Using the pairwise comparison of the different algorithms across the 53 games it is ",
+        "bbox": [
+            169,
+            883,
+            823,
+            912
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "table",
+        "img_path": "images/55611c8de8a1e8d36f09405212eb6c64e8111169b317fdf8b2f11ed458fb9024.jpg",
+        "table_caption": [
+            "Table 1: A pairwise comparison of the width-based planning algorithms over the full benchmark set made up of 53 Atari Games. Numbers represent the number of games an algorithm had a higher average evaluation score over the 5 learning trials than the algorithm it is being compared to. ",
+            "Number of games with higher average score than "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>N-CPL</td><td>N-CPLD</td><td>CPL</td><td>RIWC</td><td>RIWD</td><td>π-IW</td><td>π-IW+</td><td>π-HIW</td><td>Total (ave. win %)</td></tr><tr><td>N-CPL</td><td></td><td>26</td><td>35</td><td>49</td><td>47</td><td>32</td><td>39</td><td>32</td><td>260 (70.1%)</td></tr><tr><td>N-CPLD</td><td>26</td><td></td><td>29</td><td>48</td><td>46</td><td>32</td><td>38</td><td>30</td><td>249 (67.1%)</td></tr><tr><td>CPL</td><td>18</td><td>24</td><td></td><td>43</td><td>45</td><td>31</td><td>39</td><td>27</td><td>227 (61.2%)</td></tr><tr><td>RIWC</td><td>3</td><td>4</td><td>10</td><td></td><td>23</td><td>19</td><td>18</td><td>17</td><td>94 (25.3%)</td></tr><tr><td>RIWD</td><td>5</td><td>6</td><td>8</td><td>29</td><td></td><td>20</td><td>18</td><td>17</td><td>103 (27.8%)</td></tr><tr><td>π-IW</td><td>20</td><td>20</td><td>22</td><td>33</td><td>32</td><td></td><td>30</td><td>25</td><td>182 (49.1%)</td></tr><tr><td>π-IW+</td><td>14</td><td>15</td><td>14</td><td>35</td><td>35</td><td>23</td><td></td><td>23</td><td>159 (42.9%)</td></tr><tr><td>π-HIW</td><td>21</td><td>23</td><td>26</td><td>36</td><td>36</td><td>28</td><td>30</td><td></td><td>200 (53.9%)</td></tr></table>",
+        "bbox": [
+            199,
+            148,
+            792,
+            247
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "table",
+        "img_path": "images/644923c8b471c10621e12ef0067b88f149712b276f861972ab86227cd10d6c55.jpg",
+        "table_caption": [
+            "Table 2: Same as Table 1 but for games with a Branching Factor $\\geq 1 0$ (33 Games). ",
+            "Number of games with higher average score than "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>N-CPL</td><td>N-CPLD</td><td>CPL</td><td>RIWC</td><td>RIWD</td><td>π-IW</td><td>π-IW+</td><td>π-HIW</td><td>Total (ave. win %)</td></tr><tr><td>N-CPL</td><td></td><td>14</td><td>22</td><td>30</td><td>29</td><td>23</td><td>28</td><td>22</td><td>168 (72.7%)</td></tr><tr><td>N-CPLD</td><td>18</td><td></td><td>18</td><td>31</td><td>29</td><td>23</td><td>27</td><td>21</td><td>167 (72.3%)</td></tr><tr><td>CPL</td><td>11</td><td>15</td><td></td><td>26</td><td>28</td><td>23</td><td>28</td><td>21</td><td>152 (65.8%)</td></tr><tr><td>RIWC</td><td>2</td><td>1</td><td>7</td><td></td><td>16</td><td>15</td><td>16</td><td>13</td><td>70 (30.3%)</td></tr><tr><td>RIWD</td><td>3</td><td>3</td><td>5</td><td>16</td><td></td><td>16</td><td>16</td><td>13</td><td>72 (31.2%)</td></tr><tr><td>π-IW</td><td>9</td><td>9</td><td>10</td><td>17</td><td>16</td><td></td><td>19</td><td>14</td><td>94 (40.7%)</td></tr><tr><td>π-IW+</td><td>5</td><td>6</td><td>5</td><td>17</td><td>17</td><td>14</td><td></td><td>11</td><td>75 (32.5%)</td></tr><tr><td>π-HIW</td><td>11</td><td>12</td><td>12</td><td>20</td><td>20</td><td>19</td><td>22</td><td></td><td>116 (50.2%)</td></tr></table>",
+        "bbox": [
+            199,
+            297,
+            792,
+            395
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "clear that $\\mathrm { N - C P L } _ { D }$ and N-CPL are the most performant. Comparing the \"Depth\" vs. \"Classic\" novelty definition methods as $\\mathsf { R I W } _ { D }$ vs. ${ \\mathrm { R I W } } _ { C }$ , the former performs better than the latter. The superiority of the \"Depth\" over the \"Classic\" definition of novelty does not follow when using our CPL method. The \"Classic\" method of N-CPL slightly outperforms the \"Depth\" method $\\mathrm { N - C P L } _ { D }$ , with Table 1 indeed showing that N-CPL is the best performing algorithm overall. Interestingly our CPL method that does not use novelty pruning, still outperforms all previous methods which shows the large contribution learning and using the policy and value function networks, as described in the previous Section, has on performance. ",
+        "bbox": [
+            169,
+            428,
+            823,
+            540
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "To better understand the performance of the algorithms we segment the benchmark set according to a couple of different characteristics. The game characteristics we examine are the branching factor, and the sparseness of meaningful reward feedback (SMRF). We consider rewards as meaningful when they provide information to a player about how to maximise the accumulated reward of an episode. For a given game, SMRF is determined by executing a random policy and a Real-Time Dynamic Planner (RTDP) (24) over each of the games. RTDP is an online planner that uses a one step lookahead (Definition 1) and an approximation for the termination cost $V ^ { t }$ at each of the leaf nodes. For the approximation of $V ^ { t } { \\left( s ^ { \\prime } \\right) }$ we use the accumulated reward from a random policy executed from $s ^ { \\prime }$ for 10 time steps. We run both the random policy and RTDP for 50 time steps (750 frames). If the results from the RTDP planner are not better than the random policy according to Welch’s t-test (22) with $\\mathsf { p } < 0 . 1$ , the game is classified as having SMRFs. The results of the random policy vs. RTDP can be found in the Supplementary Material. For example, in the game of Pong, RTDP will be able to discover states through its 10 step approximation of $V ^ { t } { \\left( s ^ { \\prime } \\right) }$ where either player has scored. Using information from $V ^ { t } { \\left( s ^ { \\prime } \\right) }$ about which players have scored, RTDP will be able to have a better informed policy than the random policy, so Pong would not be considered a SMRF game. In a game like Skiing, where a skier is required to ski down a mountain and pass through gates on its path down, RTDP will not discover any meaningful rewards in its 10 step rollouts. This is because in Skiing, despite a constant negative reward at each time step, there is no meaningful reward feedback until the skier reaches the bottom of the mountain where a negative reward is applied for each gate the skier missed. ",
+        "bbox": [
+            169,
+            545,
+            826,
+            809
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Table 2 groups the games according to their branching factor. Comparing Table 2 and 1 we can see that for games with larger branching factors, the relative performance gap between our $\\mathrm { N - C P L } _ { D }$ and N-CPL planners and Junyent et al.’s $\\pi$ -IW(1), $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and $\\pi$ -HIW(n, 1) increases as the branching factor increases. For example N-CPL and ${ \\mathrm { N } } { \\mathrm { - C P L } } _ { D }$ perform better than $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ in 28/33 $( 8 4 . 8 \\% )$ games and 27/33 $( 8 1 . 8 \\% )$ games respectively for the games with a branching factor greater or equal to 10. However, for games with a branching factor less than 10, N-CPL and $\\mathrm { N - C P L } _ { D }$ only perform better than $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ in 11/20 $( 5 5 \\% )$ and 11/21 $( 5 5 \\% )$ games respectively. ",
+        "bbox": [
+            169,
+            814,
+            823,
+            912
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "table",
+        "img_path": "images/0e59ef1a357a8f888125642fc56c5e37adf7f95b9bd89c74a2d2b7ca56e4bd28.jpg",
+        "table_caption": [
+            "Table 3: Same as Table 1 but for SMRF games (12 Games). ",
+            "Number of games with higher average score than "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>N-CPL</td><td>N-CPLD</td><td>CPL</td><td>RIWC</td><td>RIWD</td><td>π-IW</td><td>π-IW+</td><td>π-HIW</td><td>Total (ave. win %)</td></tr><tr><td>N-CPL</td><td></td><td>7</td><td>5</td><td>10</td><td>10</td><td>7</td><td>9</td><td>7</td><td>55 (65.5%o)</td></tr><tr><td>N-CPLD</td><td>4</td><td></td><td>3</td><td>9</td><td>9</td><td>7</td><td>9</td><td>6</td><td>47 (56%o)</td></tr><tr><td>CPL</td><td>7</td><td>9</td><td></td><td>11</td><td>11</td><td>8</td><td>9</td><td>7</td><td>62 (73.8%o)</td></tr><tr><td>RIWC</td><td>1</td><td>2</td><td>1</td><td></td><td>6</td><td>6</td><td>3</td><td>4</td><td>23 (27.4%o)</td></tr><tr><td>RIWD</td><td>1</td><td>2</td><td>1</td><td>5</td><td></td><td>6</td><td>3</td><td>4</td><td>22 (26.2%o)</td></tr><tr><td>π-IW</td><td>4</td><td>4</td><td>4</td><td>5</td><td>5</td><td></td><td>4</td><td>3</td><td>29 (34.5%o)</td></tr><tr><td>π-IW+</td><td>3</td><td>3</td><td>3</td><td>9</td><td>9</td><td>8</td><td></td><td>5</td><td>40 (47.6%o)</td></tr><tr><td>π-HIW</td><td>5</td><td>6</td><td>5</td><td>8</td><td>8</td><td>9</td><td>7</td><td></td><td>48 (57.1%o)</td></tr></table>",
+        "bbox": [
+            199,
+            119,
+            789,
+            218
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Table 3 compares the pairwise performance for games classified as SMRF games. Table 3 clearly shows that the dominant method for the SMRF games is CPL, that is, the algorithm without novelty pruning. Table 3 also shows that the \"Classic\" novelty (Definition 4) methods outperform \"Depth\" novelty (Definition 5). These observations, that contradict previous claims in the literature, required careful analysis. We observed that the \"Classic\" method prunes states more aggressively, meaning it is more likely to reach states that are further away from the root node compared with the \"Depth\" definition. Similarly, as the CPL method does not prune any states due to novelty, CPL’s depth-first lookahead trajectories will always reach the lookahead search horizon of 100 time steps at least once, given that the lookahead simulator budget is 100 time steps. This results in CPL on average searching for states that are further away from the root node than any of the novelty pruning methods. By definition, high rewards for SMRF games have a higher probability of being further away than games with dense rewards. Therefore, CPL and the \"Classic\" novelty methods are more likely to discover the meaningful rewards by searching deeper in the lookahead. Interestingly CPL and N-CPL still outperform, yet are close to $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and $\\pi { \\mathrm { - } } \\mathrm { H I W } ( \\mathrm { n } , 1 )$ on the SMRF games, despite $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ and $\\pi$ -HIW(n, 1) being motivated by such domains. ",
+        "bbox": [
+            169,
+            243,
+            826,
+            454
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "6 Discussion ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            472,
+            294,
+            488
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "We have found significant discrepancies in the experimental settings used in the previous width-based planning papers for evaluating their algorithms over the Atari-2600 games. We believe a clear and consistent evaluation protocol should be set out for planning based algorithms applied to the Atari-2600 games to facilitate the direct comparison of their results. This could be similar to the evaluation protocol for the Atari-2600 games set out by Machado et al. (25), which was mainly focused towards RL agents and included recommendations on episode termination, setting of hyper-parameters, measuring training data, summarising learning performance and injecting stochasticity. However Machado et al. do not discuss evaluation settings that are vital to the deterministic planning setting we have explored in this paper, such as planning budgets, and caching of transitions within lookaheads. We hope that by having identified some of the discrepancies in the experimental settings of previous width-based algorithms, such as the size of the action set and the planning budget used, future research in planning agents for the Atari-2600 games can be more easily assessed. We were able to observe interesting patterns in the relative performance of algorithms through segmenting the Atari-2600 games by their different game characteristics. We are not aware of other works that analyse the performance of agents in regards to the characteristics of specific Atari-2600 games. We believe this taxonomy will provide useful insights into the behaviour of agents on the Atari-2600 games. ",
+        "bbox": [
+            169,
+            503,
+            826,
+            726
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "In this paper we have focused on width-based planning methods that have been applied over the Atari-2600 games. It is important to note though that these algorithms are defined in a general way to operate over MDPs. We proposed new width-based planning and learning algorithms through the examination of different design decisions made by previous implementations of width-based planners. These new algorithms, particularly N-CPL, are simpler implementations than the previously introduced width-based planning and learning algorithms $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) + $ and $\\pi$ -HIW(n, 1). N-CPL defines its features directly over the grayscaled pixel colours of the game screen and uses a simplified novelty definition. Furthermore, N-CPL learns a value function which is only used for cost-to-go approximations at the leafs of the lookahead search tree. N-CPL also uses a methodical learning schedule we introduced for training both its policy and value networks. We found N-CPL to outperform $\\pi$ -IW(1), $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ $\\pi$ and $\\pi$ -HIW(n, 1) not only across the Atari-2600 benchmark, but also over subsets of games with large branching factors and games with sparse meaningful rewards. These results show that N-CPL’s integration of planning and learning pays off for almost real-time planning over hard problems. ",
+        "bbox": [
+            169,
+            731,
+            828,
+            912
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            490,
+            935,
+            509,
+            946
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "7 Acknowledgements and Funding Disclosure ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            568,
+            107
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Funding in direct support of this work: Australian Government Research Training Program Scholarship provided by the Australian Commonwealth Government and the University of Melbourne; the Defence Science Institute, an initiative of the State Government of Victoria; and computing resources provided by the University of Melbourne through the Melbourne Research Cloud. ",
+        "bbox": [
+            169,
+            119,
+            826,
+            178
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            173,
+            196,
+            267,
+            213
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] M. G. Bellemare, Y. Naddaf, J. Veness, and M. Bowling. The arcade learning environment: An evaluation platform for general agents. Journal of Artificial Intelligence Research, 47:253–279, 2013. ",
+            "[2] Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Andrei A Rusu, Joel Veness, Marc G Bellemare, Alex Graves, Martin Riedmiller, Andreas K Fidjeland, Georg Ostrovski, et al. Human-level control through deep reinforcement learning. Nature, 518:529, 2015. ",
+            "[3] Yitao Liang, Marlos C. Machado, Erik Talvitie, and Michael H. Bowling. State of the art control of atari games using shallow reinforcement learning. In Proc. of Int’l Conf. on Autonomous Agents and Multiagent Systems (AAMAS), pages 485–493. ACM, 2016. ",
+            "[4] Matteo Hessel, Joseph Modayil, Hado Van Hasselt, Tom Schaul, Georg Ostrovski, Will Dabney, Dan Horgan, Bilal Piot, Mohammad Azar, and David Silver. Rainbow: Combining improvements in deep reinforcement learning. In Proc. of the National Conference on Artificial Intelligence (AAAI), pages 3215–3222, 2018. ",
+            "[5] Nir Lipovetzky, Miquel Ramirez, and Hector Geffner. Classical planning with simulators: results on the atari video games. In Proc. of Int’l Joint Conf. in Artificial Intelligence (ĲCAI), pages 1610–1616, 2015. ",
+            "[6] Wilmer Bandres, Blai Bonet, and Hector Geffner. Planning with pixels in (almost) real time. In Proc. of the National Conference on Artificial Intelligence (AAAI), volume 32, pages 6102–6109. AAAI Press, 2018. ",
+            "[7] Patrik Haslum, Nir Lipovetzky, Daniele Magazzeni, and Christian Muise. An introduction to the planning domain definition language. Synthesis Lectures on Artificial Intelligence and Machine Learning, 13(2):1–187, 2019. ",
+            "[8] Miquel Junyent, Anders Jonsson, and Vicenc Gomez. Deep policies for width–based planning. In Proc. of the Int’l Conf. in Automated Planning and Scheduling (ICAPS), volume 29, pages 646–654, 2019. ",
+            "[9] Andrea Dittadi, Frederik K Drachmann, and Thomas Bolander. Planning from pixels in atari with learned symbolic representations. In Proc. of the National Conference on Artificial Intelligence (AAAI), volume 35, pages 4941–4949, 2021. ",
+            "[10] Miquel Junyent, Vicenç Gómez, and Anders Jonsson. Hierarchical width-based planning and learning. In Proc. of the Int’l Conf. in Automated Planning and Scheduling (ICAPS), volume 31, pages 519–527, 2021. ",
+            "[11] Julian Schrittwieser, Ioannis Antonoglou, Thomas Hubert, Karen Simonyan, Laurent Sifre, Simon Schmitt, Arthur Guez, Edward Lockhart, Demis Hassabis, Thore Graepel, et al. Mastering atari, go, chess and shogi by planning with a learned model. Nature, 588(7839):604–609, 2020. ",
+            "[12] Hector Geffner and Blai Bonet. A concise introduction to models and methods for automated planning. Synthesis Lectures on Artificial Intelligence and Machine Learning, 8(1):1–141, 2013. ",
+            "[13] David Silver, Aja Huang, Chris J. Maddison, Arthur Guez, Laurent Sifre, George Van Den Driessche, Julian Schrittwieser, Ioannis Antonoglou, Veda Panneershelvam, Marc Lanctot, and others. Mastering the game of go with deep neural networks and tree search. Nature, 529:484–489, 2016. "
+        ],
+        "bbox": [
+            171,
+            220,
+            826,
+            910
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[14] David Silver, Julian Schrittwieser, Karen Simonyan, Ioannis Antonoglou, Aja Huang, Arthur Guez, Thomas Hubert, Lucas Baker, Matthew Lai, Adrian Bolton, and others. Mastering the game of Go without human knowledge. Nature, 550(7676):354, 2017. ",
+            "[15] David Silver, Thomas Hubert, Julian Schrittwieser, Ioannis Antonoglou, Matthew Lai, Arthur Guez, Marc Lanctot, Laurent Sifre, Dharshan Kumaran, Thore Graepel, et al. A general reinforcement learning algorithm that masters chess, shogi, and go through self-play. Science, 362(6419):1140–1144, 2018. ",
+            "[16] Nir Lipovetzky and Héctor Geffner. Width and serialization of classical planning problems. In Proc. of European Conference in Artificial Intelligence (ECAI), pages 540–545, 2012. ",
+            "[17] Alexander Shleyfman, Alexander Tuisov, and Carmel Domshlak. Blind search for atari-like online planning revisited. In Proc. of Int’l Joint Conf. in Artificial Intelligence (ĲCAI), pages 3251–3257, 2016. ",
+            "[18] Yuu Jinnai and Alex Fukunaga. Learning to prune dominated action sequences in online black-box planning. In Proc. of the National Conference on Artificial Intelligence (AAAI), volume 31, pages 839–845, 2017. ",
+            "[19] Levente Kocsis and Csaba Szepevari. Bandit based monte carlo planning. In Proc. of European Conference in Machine Learning (ECML), pages 282–293, 2006. ",
+            "[20] Stefan O’Toole, Miquel Ramirez, Nir Lipovetzky, and Adrian Pearce. Width-based lookaheads augmented with base policies for stochastic shortest paths. In ICAPS Workshop on Heuristics and Domain Independent Planning (HSDIP), pages 37–45, 2019. ",
+            "[21] Richard S Sutton. Learning to predict by the methods of temporal differences. Machine learning, 3(1):9–44, 1988. ",
+            "[22] B. L. Welch. The generalization of ‘student’s’ problem when several different population variances are involved. Biometrika, 34(1/2):28–35, 1947. ",
+            "[23] Mark J Nelson. Estimates for the branching factors of atari games. In Proc. of the IEEE Conference on Games., 2021. ",
+            "[24] Andy G. Barto, S. J. Bradtke, and S. P. Singh. Real–time learning and control using asynchronous dynamic programming. Artificial Intelligence Journal, 72:81–138, 1995. ",
+            "[25] Marlos C Machado, Marc G Bellemare, Erik Talvitie, Joel Veness, Matthew Hausknecht, and Michael Bowling. Revisiting the arcade learning environment: Evaluation protocols and open problems for general agents. Journal of Artificial Intelligence Research, 61:523–562, 2018. "
+        ],
+        "bbox": [
+            173,
+            90,
+            826,
+            630
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Additional results ",
+        "text_level": 1,
+        "bbox": [
+            173,
+            89,
+            326,
+            106
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "table",
+        "img_path": "images/563fbdbf1dae09a20de3626d6415b384f4c0e50702b85f29fc3d829bf9d0ec0d.jpg",
+        "table_caption": [
+            "Table 4: Comparing averages directly over 53 Atari-2600 games, as no confidence interval or standard deviation data is provided for the results of $\\pi$ -IW(1), $\\pi { \\mathrm { - } } \\operatorname { I W } ( 1 ) +$ , $\\pi$ -HIW(n, 1). The highest average score is highlighted in green. Freeway is excluded from this table as Junyent et al. (10) do not report the results for it due to its slow simulator time. See Table 5 for the Freeway results of $\\mathsf { R I W } _ { D }$ , ${ \\mathrm { R I W } } _ { C }$ , $\\mathrm { N - C P L } _ { D }$ , and N-CPL. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>GAME</td><td>RIW_D</td><td>RIW_C</td><td>CPL</td><td>N-CPL_D</td><td>N-CPL</td><td>π-IW</td><td>π-IW+</td><td>π-HIW(n,1)</td></tr><tr><td>Alien</td><td>4,365.20</td><td>4,478.40</td><td>6,209.00</td><td>7,640.60</td><td>6,943.40</td><td>3,969.78</td><td>2,585.77</td><td>4,609.18</td></tr><tr><td>Amidar</td><td>1,014.84</td><td>897.00</td><td>1,433.68</td><td>2,404.60</td><td>2,118.32</td><td>950.45</td><td>374.20</td><td>1,076.17</td></tr><tr><td>Assault</td><td>764.80</td><td>768.00</td><td>3,222.98</td><td>3,185.44</td><td>3,079.92</td><td>1,574.91</td><td>922.30</td><td>2,344.28</td></tr><tr><td>Asterix</td><td>52,940.00</td><td>54,090.00</td><td>39,860.00</td><td>48,364.00</td><td>48,226.00</td><td>346,409.11</td><td>247,063.36</td><td>90,017.25</td></tr><tr><td>Asteroids</td><td>1,480.20</td><td>1,397.20</td><td>6,145.20</td><td>9,000.80</td><td>9,152.80</td><td>1,368.55</td><td>1,490.87</td><td>990.95</td></tr><tr><td>Atlantis</td><td>48,930.00</td><td>46,464.00</td><td>173,786.00</td><td>120,650.00</td><td>119,636.00</td><td>106,212.63</td><td>143,177.73</td><td>17,539.22</td></tr><tr><td>BankHeist</td><td>453.46</td><td>436.90</td><td>336.40</td><td>957.12</td><td>709.00</td><td>567.16</td><td>256.29</td><td>501.68</td></tr><tr><td>BattleZone</td><td>102,780.00</td><td>88,560.00</td><td>220,680.00</td><td>165,340.00</td><td>153,880.00</td><td>69,659.40</td><td>30,848.95</td><td>309,137.79</td></tr><tr><td>BeamRider</td><td>4,124.37</td><td>3,521.80</td><td>6,164.64</td><td>3,743.80</td><td>3,560.88</td><td>3,313.11</td><td>8,428.96</td><td>11,931.41</td></tr><tr><td>Berzerk</td><td>600.00</td><td>620.00</td><td>3,148.00</td><td>4,642.20</td><td>4,120.60</td><td>1,548.23</td><td>960.03</td><td>7,417.26</td></tr><tr><td>Bowling</td><td>65.38</td><td>63.10</td><td>161.06</td><td>101.40</td><td>103.24</td><td>26.28</td><td>78.18</td><td>50.09</td></tr><tr><td>Boxing</td><td>52.44</td><td>54.58</td><td>80.96</td><td>84.30</td><td>86.40</td><td>99.88</td><td>88.19</td><td>6.81</td></tr><tr><td>Breakout</td><td>64.34</td><td>53.36</td><td>197.82</td><td>320.64</td><td>302.04</td><td>92.07</td><td>107.64</td><td>252.88</td></tr><tr><td>Centipede</td><td>52,685.12</td><td>55,495.78</td><td>53,608.80</td><td>60,157.38</td><td>62,654.16</td><td>126,488.35</td><td>141,070.19</td><td>80,685.48</td></tr><tr><td>ChopperCommand</td><td>3,768.00</td><td>3,466.00</td><td>17,908.00</td><td>4,570.00</td><td>3,786.00</td><td>11,187.44</td><td>3,431.74</td><td>70,787.12</td></tr><tr><td>CrazyClimber</td><td>40,520.00</td><td>39,387.50</td><td>78,266.00</td><td>90,332.00</td><td>91,912.00</td><td>161,192.01</td><td>138,648.58</td><td>102,205.99</td></tr><tr><td>DemonAttack</td><td>8,499.88</td><td>8,449.00</td><td>10,560.00</td><td>10,829.90</td><td>10,876.00</td><td>26,881.13</td><td>35,022.64</td><td>16,007.64</td></tr><tr><td>DoubleDunk</td><td>6.72</td><td>6.00</td><td>19.76</td><td>23.76</td><td>23.96</td><td>4.68</td><td>-16.80</td><td>3.51</td></tr><tr><td>Enduro</td><td>1.90</td><td>1.34</td><td>231.44</td><td>250.88</td><td>220.28</td><td>506.59</td><td>63.83</td><td>44.47</td></tr><tr><td>FishingDerby</td><td>-67.76</td><td>-62.46</td><td>-23.94</td><td>-29.22</td><td>-7.62</td><td>8.89</td><td>-28.02</td><td>-53.76</td></tr><tr><td>Frostbite</td><td>280.00</td><td>273.80</td><td>9,956.80</td><td>5,255.60</td><td>6,508.00</td><td>270.00</td><td>1,636.51</td><td>7,242.60</td></tr><tr><td>Gopher</td><td>6,311.43</td><td>5,990.83</td><td>11,181.60</td><td>13,326.40</td><td>12,539.60</td><td>18,025.91</td><td>7,061.76</td><td>15,001.18</td></tr><tr><td>Gravitar</td><td>1,755.00</td><td>1,725.00</td><td>2,382.00</td><td>2,246.00</td><td>2,284.00</td><td>1,876.80</td><td>1,532.33</td><td>1,154.01</td></tr><tr><td>Hero</td><td>17,438.30</td><td>17,159.70</td><td>29,200.40</td><td>34,083.40</td><td>36,099.80</td><td>36,443.73</td><td>22,097.39</td><td>36,231.21</td></tr><tr><td>IceHockey</td><td>21.48</td><td>21.92</td><td>19.62</td><td>29.58</td><td>26.96</td><td>-9.66</td><td>-4.02</td><td>-2.36</td></tr><tr><td>Jamesbond</td><td>2,378.00</td><td>2,485.00</td><td>18,666.00</td><td>17,572.00</td><td>18,790.00</td><td>43.20</td><td>104.91</td><td>1,380.13</td></tr><tr><td>Kangaroo</td><td>1,556.00</td><td>1,504.00</td><td>5,332.00</td><td>9,222.00</td><td>9,202.00</td><td>1,847.46</td><td>2,918.98</td><td>6,861.57</td></tr><tr><td>Krull</td><td>2,176.58</td><td>2,127.60</td><td>5,631.22</td><td>4,900.90</td><td>4,422.88</td><td>8,343.30</td><td>13,014.77</td><td>4,121.81</td></tr><tr><td>KungFuMaster</td><td>5,668.00</td><td>5,886.00</td><td>27,288.00</td><td>43,520.00</td><td>42,388.00</td><td>41,609.03</td><td>24,871.94</td><td>20,680.65</td></tr><tr><td>MontezumaRevenge</td><td>0.00</td><td>0.00</td><td>2.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>810.49</td><td>5,275.89</td></tr><tr><td>MsPacman</td><td>15,697.56</td><td>15,729.28</td><td>11,922.22</td><td>16,150.08</td><td>18,285.18</td><td>14,726.33</td><td>5,916.86</td><td>4,523.47</td></tr><tr><td>NameThisGame</td><td>6,247.50</td><td>6,145.25</td><td>8,287.40</td><td>8,017.20</td><td>8,339.40</td><td>12,734.85</td><td>18,167.55</td><td>9,977.12</td></tr><tr><td>Phoenix</td><td>4,992.80</td><td>4,912.60</td><td>6,616.40</td><td>8,033.40</td><td>8,777.40</td><td>5,905.12</td><td>7,647.67</td><td>7,508.63</td></tr><tr><td>Pitfall</td><td>-44.86</td><td>-62.66</td><td>-0.48</td><td>-1.68</td><td>-0.42</td><td>-214.75</td><td>-2.46</td><td>-128.82</td></tr><tr><td>Pong</td><td>-4.52</td><td>-4.92</td><td>-12.28</td><td>6.18</td><td>10.94</td><td>-20.42</td><td>2.14</td><td>-9.70</td></tr><tr><td>PrivateEye</td><td>625.72</td><td>1,249.68</td><td>153.22</td><td>120.00</td><td>100.00</td><td>452.40</td><td>1,766.13</td><td>29,548.76</td></tr><tr><td>Qbert</td><td>4,499.50</td><td>4,426.50</td><td>28,182.50</td><td>31,625.50</td><td>30,618.50</td><td>32,529.60</td><td>23,337.90</td><td>40,449.72</td></tr><tr><td>RoadRunner</td><td>17,326.00</td><td>20,580.00</td><td>86,650.00</td><td>49,828.00</td><td>57,212.00</td><td>38,764.81</td><td>43,813.29</td><td>87,953.53</td></tr><tr><td>Robotank</td><td>31.03</td><td>31.33</td><td>31.04</td><td>37.94</td><td>36.16</td><td>15.66</td><td>9.68</td><td>10.63</td></tr><tr><td>Seaquest</td><td>1,609.60</td><td>1,576.20</td><td>3,523.00</td><td>2,878.60</td><td>3,922.80</td><td>5,916.05</td><td>559.28</td><td>867.51</td></tr><tr><td>Skiing</td><td>-31,013.00</td><td>-22,234.22</td><td>-20,510.82</td><td>-29,080.30</td><td>-20,041.24</td><td>-19,188.32</td><td>-13,852.04</td><td>-15,417.86</td></tr><tr><td>Solaris</td><td>3,110.00</td><td>3,085.00</td><td>7,741.60</td><td>3,106.40</td><td>4,704.00</td><td>3,048.78</td><td>1,832.93</td><td>3,524.69</td></tr><tr><td>SpaceInvaders</td><td>2,592.40</td><td>2,622.50</td><td>3,447.40</td><td>3,680.40</td><td>4,289.40</td><td>2,694.09</td><td>1,622.49</td><td>2,946.18</td></tr><tr><td>StarGunner</td><td>17,510.00</td><td>17,597.56</td><td>18,340.00</td><td>20,700.00</td><td>20,320.00</td><td>1,381.24</td><td>1,642.82</td><td>1,864.64</td></tr><tr><td>Tennis</td><td>1.40</td><td>-0.53</td><td>-2.80</td><td>1.24</td><td>0.00</td><td>-23.67</td><td>-8.26</td><td>-20.00</td></tr><tr><td>TimePilot</td><td>24,455.00</td><td>24,342.50</td><td>22,780.00</td><td>24,950.00</td><td>24,150.00</td><td>16,099.92</td><td>11,126.86</td><td>34,610.25</td></tr><tr><td>Tutankham</td><td>159.40</td><td>154.86</td><td>184.94</td><td>181.48</td><td>203.54</td><td>216.67</td><td>181.44</td><td>199.06</td></tr><tr><td>UpNDown</td><td>39,834.00</td><td>40,649.00</td><td>59,650.80</td><td>58,783.00</td><td>58,867.20</td><td>107,757.51</td><td>59,497.75</td><td>80,991.07</td></tr><tr><td>Venture</td><td>22.00</td><td>32.00</td><td>1,732.00</td><td>1,466.00</td><td>1,564.00</td><td>0.00</td><td>15.68</td><td>10.73</td></tr><tr><td>VideoPinball</td><td>136,531.50</td><td>138,748.35</td><td>148,995.14</td><td>134,489.58</td><td>139,799.22</td><td>514,012.51</td><td>387,308.60</td><td>184,720.01</td></tr><tr><td>WizardOfWar</td><td>26,956.25</td><td>27,991.11</td><td>54,988.00</td><td>43,556.00</td><td>43,436.00</td><td>76,533.18</td><td>30,383.68</td><td>12,027.43</td></tr><tr><td>YarsRevenge</td><td>59,779.48</td><td>60,940.90</td><td>133,647.42</td><td>142,568.26</td><td>135,089.68</td><td>102,183.67</td><td>64,544.51</td><td>159,496.20</td></tr><tr><td>Zaxxon</td><td>9,342.00</td><td>9,520.00</td><td>28,102.00</td><td>33,268.00</td><td>30,818.00</td><td>22,905.73</td><td>10,159.01</td><td>21,135.58</td></tr></table>",
+        "bbox": [
+            173,
+            199,
+            864,
+            750
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "table",
+        "img_path": "images/d8c794c951d6f7df2b0643562808ad22e669cae05a8a56dcc27c417f6933f46b.jpg",
+        "table_caption": [
+            "Table 5: Average scores with $9 0 \\%$ confidence intervals over the set of 54 Atari Games. Algorithm scores that are the best according to the Welch’s t-test (22) using $\\mathrm { p < 0 . 1 }$ are highlighted in green. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>GAME</td><td>RIW_D</td><td>RIW_C</td><td>CPL</td><td>N-CPL_D</td><td>N-CPL</td></tr><tr><td>Alien</td><td>4,365.20±471.95</td><td>4,478.40±375.51</td><td>6,209.00±415.77</td><td>7,640.60±615.52</td><td>6,943.40±507.28</td></tr><tr><td>Amidar</td><td>1,014.84±70.76</td><td>897.00±70.28</td><td>1,433.68±123.49</td><td>2,404.60±69.72</td><td>2,118.32±114.28</td></tr><tr><td>Assault</td><td>764.80±49.88</td><td>768.00±68.03</td><td>3,222.98±98.37</td><td>3,185.44±123.18</td><td>3,079.92±122.33</td></tr><tr><td rowspan=\"2\">Asterix</td><td>52,940.00</td><td>54,090.00</td><td>39,860.00</td><td>48,364.00</td><td>48,226.00</td></tr><tr><td>±1,486.56</td><td>±1,323.40</td><td>±410.25</td><td>±1,844.10</td><td>±1,184.51</td></tr><tr><td>Asteroids</td><td>1,480.20±75.48</td><td>1,397.20±113.97</td><td>6,145.20±318.23</td><td>9,000.80±143.15</td><td>9,152.80±189.24</td></tr><tr><td rowspan=\"2\">Atlantis</td><td>48,930.00</td><td>46,464.00</td><td>173,786.00</td><td>120,650.00</td><td>119,636.00</td></tr><tr><td>±4,017.54</td><td>±3,132.23</td><td>±2,343.28</td><td>±892.42</td><td>±830.95</td></tr><tr><td>BankHeist</td><td>453.46±31.86</td><td>436.90±40.51</td><td>336.40±25.25</td><td>957.12±105.73</td><td>709.00±76.09</td></tr><tr><td rowspan=\"2\">BattleZone</td><td>102,780.00</td><td>88,560.00</td><td>220,680.00</td><td>165,340.00</td><td>153,880.00</td></tr><tr><td>±22,127.98</td><td>±16,866.49</td><td>±14,274.79</td><td>±28,612.76</td><td>±28,305.50</td></tr><tr><td>BeamRider</td><td>4,124.37±384.99</td><td>3,521.80±371.92</td><td>6,164.64±287.17</td><td>3,743.80±466.05</td><td>3,560.88±415.25</td></tr><tr><td>Berzerk</td><td>600.00±32.84</td><td>620.00±32.37</td><td>3,148.00±386.38</td><td>4,642.20±367.59</td><td>4,120.60±423.64</td></tr><tr><td>Bowling</td><td>65.38±1.66</td><td>63.10±2.00</td><td>161.06±5.46</td><td>101.40±3.22</td><td>103.24±3.32</td></tr><tr><td>Boxing</td><td>52.44±2.00</td><td>54.58±2.86</td><td>80.96±2.63</td><td>84.30±2.10</td><td>86.40±0.97</td></tr><tr><td>Breakout</td><td>64.34±17.89</td><td>53.36±10.91</td><td>197.82±33.59</td><td>320.64±8.03</td><td>302.04±18.31</td></tr><tr><td rowspan=\"2\">Centipede</td><td>52,685.12</td><td>55,495.78</td><td>53,608.80</td><td>60,157.38</td><td>62,654.16</td></tr><tr><td>±2,811.22</td><td>±1,398.86</td><td>±1,567.38</td><td>±1,726.88</td><td>±1,107.16</td></tr><tr><td>ChopperCommand</td><td>3,768.00±634.47</td><td>3,466.00±378.06</td><td>17,908.00±1,432.95</td><td>4,570.00±602.78</td><td>3,786.00±601.16</td></tr><tr><td rowspan=\"2\">CrazyClimber</td><td>40,520.00</td><td>39,387.50</td><td>78,266.00</td><td>90,332.00</td><td>91,912.00</td></tr><tr><td>±550.63</td><td>±486.25</td><td>±3,572.79</td><td>±2,414.91</td><td>±2,184.99</td></tr><tr><td>DemonAttack</td><td>8,499.88±252.38</td><td>8,449.00±320.73</td><td>10,560.00±188.97</td><td>10,829.90±274.19</td><td>10,876.00±193.47</td></tr><tr><td>DoubleDunk</td><td>6.72±0.84</td><td>6.00±0.94</td><td>19.76±1.02</td><td>23.76±0.15</td><td>23.96±0.07</td></tr><tr><td>Enduro</td><td>1.90±0.57</td><td>1.34±0.38</td><td>231.44±10.04</td><td>250.88±8.23</td><td>220.28±9.71</td></tr><tr><td>FishingDerby</td><td>-67.76±1.96</td><td>-62.46±2.20</td><td>-23.94±4.32</td><td>-29.22±4.30</td><td>-7.62±5.99</td></tr><tr><td>Freeway</td><td>5.50±0.24</td><td>5.52±0.28</td><td>28.86±0.45</td><td>29.02±0.45</td><td>28.96±0.30</td></tr><tr><td>Frostbite</td><td>280.00±4.56</td><td>273.80±3.72</td><td>9,956.80±1,066.62</td><td>5,255.60±389.33</td><td>6,508.00±588.79</td></tr><tr><td>Gopher</td><td>6,311.43±440.94</td><td>5,990.83±479.70</td><td>11,181.60±72.70</td><td>13,326.40±240.79</td><td>12,539.60±158.58</td></tr><tr><td>Gravitar</td><td>1,755.00±171.35</td><td>1,725.00±192.75</td><td>2,382.00±228.46</td><td>2,246.00±201.67</td><td>2,284.00±231.37</td></tr><tr><td rowspan=\"2\">Hero</td><td>17,438.30</td><td>17,159.70</td><td>29,200.40</td><td>34,083.40</td><td>36,099.80</td></tr><tr><td>±1,011.92</td><td>±949.20</td><td>±1,804.42</td><td>±938.86</td><td>±553.32</td></tr><tr><td>IceHockey</td><td>21.48±0.73</td><td>21.92±0.83</td><td>19.62±1.09</td><td>29.58±0.90</td><td>26.96±1.03</td></tr><tr><td>Jamesbond</td><td>2,378.00±1,224.25</td><td>2,485.00±1,210.76</td><td>18,666.00±598.37</td><td>17,572.00±820.54</td><td>18,790.00±907.58</td></tr><tr><td>Kangaroo</td><td>1,556.00±203.70</td><td>1,504.00±151.18</td><td>5,332.00±727.16</td><td>9,222.00±546.79</td><td>9,202.00±572.19</td></tr><tr><td>Krull</td><td>2,176.58±89.61</td><td>2,127.60±88.85</td><td>5,631.22±272.50</td><td>4,900.90±141.45</td><td>4,422.88±149.38</td></tr><tr><td rowspan=\"2\">KungFuMaster</td><td>5,668.00</td><td>5,886.00</td><td>27,288.00</td><td>43,520.00</td><td>42,388.00</td></tr><tr><td>±425.75</td><td>±521.52</td><td>±1,908.35</td><td>±1,108.67</td><td>±643.13</td></tr><tr><td>MontezumaRevenge</td><td>0.00±0.00</td><td>0.00±0.00</td><td>2.00±3.26</td><td>0.00±0.00</td><td>0.00±0.00</td></tr><tr><td rowspan=\"2\">MsPacman</td><td>15,697.56</td><td>15,729.28</td><td>11,922.22</td><td>16,150.08</td><td>18,285.18</td></tr><tr><td>±1,148.98</td><td>±1,138.48</td><td>±1,044.99</td><td>±1,064.72</td><td>±703.36</td></tr><tr><td>NameThisGame</td><td>6,247.50±98.52</td><td>6,145.25±91.49</td><td>8,287.40±117.61</td><td>8,017.20±129.51</td><td>8,339.40±109.81</td></tr><tr><td>Phoenix</td><td>4,992.80±242.42</td><td>4,912.60±262.97</td><td>6,616.40±316.44</td><td>8,033.40±687.80</td><td>8,777.40±776.53</td></tr><tr><td>Pitfall</td><td>-44.86±22.53</td><td>-62.66±26.84</td><td>-0.48±0.78</td><td>-1.68±1.33</td><td>-0.42±0.52</td></tr><tr><td>Pong</td><td>-4.52±1.49</td><td>-4.92±1.28</td><td>-12.28±1.29</td><td>6.18±1.29</td><td>10.94±1.22</td></tr><tr><td>PrivateEye</td><td>625.72±685.72</td><td>1,249.68±938.31</td><td>153.22±22.74</td><td>120.00±9.30</td><td>100.00±0.00</td></tr><tr><td>Qbert</td><td>4,499.50±756.07</td><td>4,426.50±688.09</td><td>28,182.50±2,855.33</td><td>31,625.50±406.22</td><td>30,618.50±693.66</td></tr><tr><td rowspan=\"2\">RoadRunner</td><td>17,326.00</td><td>20,580.00</td><td>86,650.00</td><td>49,828.00</td><td>57,212.00</td></tr><tr><td>±3,626.95</td><td>±3,760.02</td><td>±3,065.43</td><td>±3,244.08</td><td>±4,094.90</td></tr><tr><td>Robotank</td><td>31.03±1.16</td><td>31.33±1.33</td><td>31.04±0.63</td><td>37.94±0.73</td><td>36.16±0.84</td></tr><tr><td>Seaquest</td><td>1,609.60±291.85</td><td>1,576.20±281.51</td><td>3,523.00±255.00</td><td>2,878.60±285.43</td><td>3,922.80±245.47</td></tr><tr><td rowspan=\"2\">Skiing</td><td>-31,013.00</td><td>-22,234.22</td><td>-20,510.82</td><td>-29,080.30</td><td>-20,041.24</td></tr><tr><td>±700.82</td><td>±872.31</td><td>±1,199.55</td><td>±1,034.25</td><td>±1,139.52</td></tr><tr><td>Solaris</td><td>3,110.00±232.31</td><td>3,085.00±532.56</td><td>7,741.60±825.51</td><td>3,106.40±169.24</td><td>4,704.00±615.29</td></tr><tr><td>SpaceInvaders</td><td>2,592.40±301.45</td><td>2,622.50±303.10</td><td>3,447.40±269.92</td><td>3,680.40±310.85</td><td>4,289.40±301.15</td></tr><tr><td>StarGunner</td><td>17,510.00±240.75</td><td>17,597.56±397.74</td><td>18,340.00±217.12</td><td>20,700.00±178.37</td><td>20,320.00±335.94</td></tr><tr><td>Tennis</td><td>1.40±1.53</td><td>-0.53±1.52</td><td>-2.80±0.93</td><td>1.24±1.45</td><td>0.00±1.51</td></tr><tr><td>TimePilot</td><td>24,455.00±615.53</td><td>24,342.50±544.82</td><td>22,780.00±839.59</td><td>24,950.00±528.00</td><td>24,150.00±670.57</td></tr><tr><td>Tutankham</td><td>159.40±4.77</td><td>154.86±4.86</td><td>184.94±4.59</td><td>181.48±3.80</td><td>203.54±4.82</td></tr><tr><td>UpNDown</td><td>39,834.00±830.87</td><td>40,649.00±822.57</td><td>59,650.80±1,078.03</td><td>58,783.00±604.10</td><td>58,867.20±752.05</td></tr><tr><td>Venture</td><td>22.00±20.96</td><td>32.00±23.00</td><td>1,732.00±49.99</td><td>1,466.00±176.15</td><td>1,564.00±149.66</td></tr><tr><td rowspan=\"2\">VideoPinball</td><td>136,531.50</td><td>138,748.35</td><td>148,995.14</td><td>134,489.58</td><td>139,799.22</td></tr><tr><td>±8,459.01</td><td>±8,349.10</td><td>±8,492.72</td><td>±7,483.99</td><td>±7,019.84</td></tr><tr><td rowspan=\"2\">WizardOfWor</td><td>26,956.25</td><td>27,991.11</td><td>54,988.00</td><td>43,556.00</td><td>43,436.00</td></tr><tr><td>±2,793.49</td><td>±2,907.59</td><td>±1,906.42</td><td>±4,275.90</td><td>±4,142.91</td></tr><tr><td rowspan=\"2\">YarsRevenge</td><td>59,779.48</td><td>60,940.90</td><td>133,647.42</td><td>142,568.26</td><td>135,089.68</td></tr><tr><td>±2,070.84</td><td>±2,234.00</td><td>±4,698.49</td><td>±3,934.50</td><td>±4,813.68</td></tr><tr><td rowspan=\"2\">Zaxxon</td><td>9,342.00</td><td>9,520.00</td><td>28,102.00</td><td>33,268.00</td><td>30,818.00</td></tr><tr><td>±944.44</td><td>±1,221.31</td><td>±1,264.90</td><td>±1,192.32</td><td>±1,722.99</td></tr><tr><td>Best algorithm (t-test, p&lt;0.1)</td><td>0</td><td>0</td><td>11</td><td>9</td><td>9</td></tr></table>",
+        "bbox": [
+            173,
+            152,
+            826,
+            872
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "table",
+        "img_path": "images/4c1f8cbb38de670a85c89570b48581f8d5ce054315aada90d691d16bf0d6462e.jpg",
+        "table_caption": [
+            "Table 6: Comparison of experimental settings used for the results of the different algorithms. Note that the train budget includes all the simulator interactions used by the lookahead algorithms even though only a small fraction of simulator interactions are used for training the networks directly. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Algorithm</td><td>Frameskip</td><td>Max. ep. length (Frames)</td><td>Train Budget (Sim. Interactions)</td><td>Lookahead Budget (Sim. Interactions)</td><td>Starts</td><td>Loss of Life signal</td></tr><tr><td>RIW_D, RIWC</td><td>15</td><td>18,000</td><td>0</td><td>100</td><td>-</td><td>No</td></tr><tr><td>N-CPL_D, N-CPL, CPL, π-IW, π-IW+, π-HIW(n,1)</td><td>15</td><td>18,000</td><td>20 × 10^6</td><td>100</td><td>-</td><td>No</td></tr><tr><td>DQN</td><td>4</td><td>18,000</td><td>50 × 10^6</td><td>NA</td><td>Rand.no-ops</td><td>Yes</td></tr><tr><td>Rainbow</td><td>4</td><td>108,000</td><td>50 × 10^6</td><td>NA</td><td>Human and Rand. no-ops</td><td>Yes</td></tr></table>",
+        "bbox": [
+            174,
+            151,
+            818,
+            260
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "table",
+        "img_path": "images/a609de07a4852b2e8c5a930500ed9b292ea7169daa5679ea3736894b0e2dd2be.jpg",
+        "table_caption": [
+            "Table 7: Comparison of N-CPL with a Human player’s scores and the model-free RL algorithm DQN scores as reported by Mnih et al.(2). Note that the experimental settings are different between N-CPL and DQN(2), in terms of training budget, frame skips, using no-op starts and loss of life signal, see Table 6 for a comparison of experimental settings. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>GAME</td><td>Human</td><td>DQN</td><td>RIW_C+CPV</td></tr><tr><td>Alien</td><td>6,875.00</td><td>3,069.00</td><td>6,943.40</td></tr><tr><td>Amidar</td><td>1,676.00</td><td>739.50</td><td>2,118.32</td></tr><tr><td>Assault</td><td>1,496.00</td><td>3,359.00</td><td>3,079.92</td></tr><tr><td>Asterix</td><td>8,503.00</td><td>6,012.00</td><td>48,226.00</td></tr><tr><td>Asteroids</td><td>13,157.00</td><td>1,629.00</td><td>9,152.80</td></tr><tr><td>Atlantis</td><td>29,028.00</td><td>85,641.00</td><td>119,636.00</td></tr><tr><td>BankHeist</td><td>734.40</td><td>429.70</td><td>709.00</td></tr><tr><td>BattleZone</td><td>37,800.00</td><td>26,300.00</td><td>153,880.00</td></tr><tr><td>BeamRider</td><td>5,775.00</td><td>6,846.00</td><td>3,560.88</td></tr><tr><td>Bowling</td><td>154.80</td><td>42.40</td><td>103.24</td></tr><tr><td>Boxing</td><td>4.30</td><td>71.80</td><td>86.40</td></tr><tr><td>Breakout</td><td>31.80</td><td>401.20</td><td>302.04</td></tr><tr><td>Centipede</td><td>11,963.00</td><td>8,309.00</td><td>62,654.16</td></tr><tr><td>ChopperCommand</td><td>9,882.00</td><td>6,687.00</td><td>3,786.00</td></tr><tr><td>CrazyClimber</td><td>35,411.00</td><td>114,103.00</td><td>91,912.00</td></tr><tr><td>DemonAttack</td><td>3,401.00</td><td>9,711.00</td><td>10,876.00</td></tr><tr><td>DoubleDunk</td><td>-15.50</td><td>-18.10</td><td>23.96</td></tr><tr><td>Enduro</td><td>309.60</td><td>301.80</td><td>220.28</td></tr><tr><td>FishingDerby</td><td>5.50</td><td>-0.80</td><td>-7.62</td></tr><tr><td>Freeway</td><td>29.60</td><td>30.30</td><td>28.96</td></tr><tr><td>Frostbite</td><td>4,335.00</td><td>328.30</td><td>6,508.00</td></tr><tr><td>Gopher</td><td>2,321.00</td><td>8,520.00</td><td>12,539.60</td></tr><tr><td>Gravitar</td><td>2,672.00</td><td>306.70</td><td>2,284.00</td></tr><tr><td>Hero</td><td>25,763.00</td><td>19,950.00</td><td>36,099.80</td></tr><tr><td>IceHockey</td><td>0.90</td><td>-1.60</td><td>26.96</td></tr><tr><td>Jamesbond</td><td>406.70</td><td>576.70</td><td>18,790.00</td></tr><tr><td>Kangaroo</td><td>3,035.00</td><td>6,740.00</td><td>9,202.00</td></tr><tr><td>Krull</td><td>2,395.00</td><td>3,805.00</td><td>4,422.88</td></tr><tr><td>KungFuMaster</td><td>22,736.00</td><td>23,270.00</td><td>42,388.00</td></tr><tr><td>MontezumaRevenge</td><td>4,367.00</td><td>0.00</td><td>0.00</td></tr><tr><td>MsPacman</td><td>15,693.00</td><td>2,311.00</td><td>18,285.18</td></tr><tr><td>NameThisGame</td><td>4,076.00</td><td>7,257.00</td><td>8,339.40</td></tr><tr><td>Pong</td><td>9.30</td><td>18.90</td><td>10.94</td></tr><tr><td>PrivateEye</td><td>69,571.00</td><td>1,788.00</td><td>100.00</td></tr><tr><td>Qbert</td><td>13,455.00</td><td>10,596.00</td><td>30,618.50</td></tr><tr><td>Riverraid</td><td>13,513.00</td><td>8,316.00</td><td>22,111.20</td></tr><tr><td>RoadRunner</td><td>7,845.00</td><td>18,257.00</td><td>57,212.00</td></tr><tr><td>Robotank</td><td>11.90</td><td>51.60</td><td>36.16</td></tr><tr><td>Seaquest</td><td>20,182.00</td><td>5,286.00</td><td>3,922.80</td></tr><tr><td>SpaceInvaders</td><td>1,652.00</td><td>1,976.00</td><td>4,289.40</td></tr><tr><td>StarGunner</td><td>10,250.00</td><td>57,997.00</td><td>20,320.00</td></tr><tr><td>Tennis</td><td>-8.90</td><td>-2.50</td><td>0.00</td></tr><tr><td>TimePilot</td><td>5,925.00</td><td>5,947.00</td><td>24,150.00</td></tr><tr><td>Tutankham</td><td>167.60</td><td>186.70</td><td>203.54</td></tr><tr><td>UpNDown</td><td>9,082.00</td><td>8,456.00</td><td>58,867.20</td></tr><tr><td>Venture</td><td>1,188.00</td><td>380.00</td><td>1,564.00</td></tr><tr><td>VideoPinball</td><td>17,298.00</td><td>42,684.00</td><td>139,799.22</td></tr><tr><td>WizardOfWor</td><td>4,757.00</td><td>3,393.00</td><td>43,436.00</td></tr><tr><td>Zaxxon</td><td>9,173.00</td><td>4,977.00</td><td>30,818.00</td></tr><tr><td># Games &gt;human</td><td></td><td>23 (47%)</td><td>37 (76%)</td></tr><tr><td>#Games &gt;75% human</td><td></td><td>27 (55%)</td><td>40 (82%)</td></tr><tr><td># Games Best</td><td>10 (20%)</td><td>8 (16%)</td><td>31 (63%)</td></tr></table>",
+        "bbox": [
+            323,
+            356,
+            671,
+            895
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "15 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "table",
+        "img_path": "images/015a219550d55b86c59088ff656ecce970412ffc8792147578f00254b5595055.jpg",
+        "table_caption": [
+            "Table 8: Comparison of N-CPL with a Human player’s scores and the model-free RL algorithm Rainbow using human starts. Note that the experimental settings are different between N-CPL and Rainbow(4), in terms of the training budget, maximum episode length, frame skips, using human starts and loss of life signal, see Table 6 for a comparison of experimental settings. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>GAME</td><td>Human</td><td>Rainbow</td><td>N-CPL</td></tr><tr><td>Alien</td><td>6875</td><td>6022.90</td><td>6943.40</td></tr><tr><td>Amidar</td><td>1676</td><td>202.80</td><td>2118.32</td></tr><tr><td>Assault</td><td>1496</td><td>14491.70</td><td>3079.92</td></tr><tr><td>Asterix</td><td>8503</td><td>280114.00</td><td>48226.00</td></tr><tr><td>Asteroids</td><td>13157</td><td>2249.40</td><td>9152.80</td></tr><tr><td>Atlantis</td><td>29028</td><td>814684.00</td><td>119636.00</td></tr><tr><td>BankHeist</td><td>734.4</td><td>826.00</td><td>709.00</td></tr><tr><td>BattleZone</td><td>37800</td><td>52040.00</td><td>153880.00</td></tr><tr><td>BeamRider</td><td>5775</td><td>21768.50</td><td>3560.88</td></tr><tr><td>Bowling</td><td>154.8</td><td>39.40</td><td>103.24</td></tr><tr><td>Boxing</td><td>4.3</td><td>54.90</td><td>86.40</td></tr><tr><td>Breakout</td><td>31.8</td><td>379.50</td><td>302.04</td></tr><tr><td>Centipede</td><td>11963</td><td>7160.90</td><td>62654.16</td></tr><tr><td>ChopperCommand</td><td>9882</td><td>10916.00</td><td>3786.00</td></tr><tr><td>CrazyClimber</td><td>35411</td><td>143962.00</td><td>91912.00</td></tr><tr><td>DemonAttack</td><td>3401</td><td>109670.70</td><td>10876.00</td></tr><tr><td>DoubleDunk</td><td>-15.5</td><td>-0.60</td><td>23.96</td></tr><tr><td>Enduro</td><td>309.6</td><td>2061.10</td><td>220.28</td></tr><tr><td>FishingDerby</td><td>5.5</td><td>22.60</td><td>-7.62</td></tr><tr><td>Freeway</td><td>29.6</td><td>29.10</td><td>28.96</td></tr><tr><td>Frostbite</td><td>4335</td><td>4141.10</td><td>6508.00</td></tr><tr><td>Gopher</td><td>2321</td><td>72595.70</td><td>12539.60</td></tr><tr><td>Gravitar</td><td>2672</td><td>567.50</td><td>2284.00</td></tr><tr><td>Hero</td><td>25763</td><td>50496.80</td><td>36099.80</td></tr><tr><td>IceHockey</td><td>0.9</td><td>-0.70</td><td>26.96</td></tr><tr><td>Kangaroo</td><td>3035</td><td>10841.00</td><td>9202.00</td></tr><tr><td>Krull</td><td>2395</td><td>6715.50</td><td>4422.88</td></tr><tr><td>KungFuMaster</td><td>22736</td><td>28999.80</td><td>42388.00</td></tr><tr><td>MontezumaRevenge</td><td>4367</td><td>154.00</td><td>0.00</td></tr><tr><td>MsPacman</td><td>15693</td><td>2570.20</td><td>18285.18</td></tr><tr><td>NameThisGame</td><td>4076</td><td>11686.50</td><td>8339.40</td></tr><tr><td>Pong</td><td>9.3</td><td>19.00</td><td>10.94</td></tr><tr><td>PrivateEye</td><td>69571</td><td>1704.40</td><td>100.00</td></tr><tr><td>Qbert</td><td>16455</td><td>18397.60</td><td>30618.50</td></tr><tr><td>RoadRunner</td><td>7845</td><td>54261.00</td><td>57212.00</td></tr><tr><td>Robotank</td><td>11.9</td><td>55.20</td><td>36.16</td></tr><tr><td>Seaquest</td><td>20182</td><td>19176.00</td><td>3922.80</td></tr><tr><td>SpaceInvaders</td><td>1652</td><td>12629.00</td><td>4289.40</td></tr><tr><td>StarGunner</td><td>10250</td><td>123853.00</td><td>20320.00</td></tr><tr><td>Tennis</td><td>-8.9</td><td>-2.20</td><td>0.00</td></tr><tr><td>TimePilot</td><td>5925</td><td>11190.50</td><td>24150.00</td></tr><tr><td>Tutankham</td><td>167.6</td><td>126.90</td><td>203.54</td></tr><tr><td>Venture</td><td>1188</td><td>45.00</td><td>1564.00</td></tr><tr><td>VideoPinball</td><td>17298</td><td>506817.20</td><td>139799.22</td></tr><tr><td>WizardOfWor</td><td>4757</td><td>14631.50</td><td>43436.00</td></tr><tr><td>Zaxxon</td><td>9173</td><td>19658.00</td><td>30818.00</td></tr><tr><td># Games &gt;human</td><td></td><td>31 (67%)</td><td>34 (74%)</td></tr><tr><td>#Games &gt;75% human</td><td></td><td>36 (78%)</td><td>37 (80%)</td></tr><tr><td># Games Best</td><td>7 (15%)</td><td>21(46%)</td><td>18 (39%)</td></tr></table>",
+        "bbox": [
+            338,
+            275,
+            655,
+            785
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "table",
+        "img_path": "images/cc95572374443bd880243852a7c83e6f2434bc1e1b4507da0b6e980046f81f8b.jpg",
+        "table_caption": [
+            "Table 9: Same as Table 8 but with Rainbow using random no-op starts. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>GAME</td><td>Human</td><td>Rainbow</td><td>N-CPL</td></tr><tr><td>Alien</td><td>6875</td><td>9491.70</td><td>6943.40</td></tr><tr><td>Amidar</td><td>1676</td><td>5131.20</td><td>2118.32</td></tr><tr><td>Assault</td><td>1496</td><td>14198.50</td><td>3079.92</td></tr><tr><td>Asterix</td><td>8503</td><td>428200.30</td><td>48226.00</td></tr><tr><td>Asteroids</td><td>13157</td><td>2712.80</td><td>9152.80</td></tr><tr><td>Atlantis</td><td>29028</td><td>826659.50</td><td>119636.00</td></tr><tr><td>BankHeist</td><td>734.4</td><td>1358.00</td><td>709.00</td></tr><tr><td>BattleZone</td><td>37800</td><td>62010.00</td><td>153880.00</td></tr><tr><td>BeamRider</td><td>5775</td><td>16850.20</td><td>3560.88</td></tr><tr><td>Bowling</td><td>154.8</td><td>30.00</td><td>103.24</td></tr><tr><td>Boxing</td><td>4.3</td><td>99.60</td><td>86.40</td></tr><tr><td>Breakout</td><td>31.8</td><td>417.50</td><td>302.04</td></tr><tr><td>Centipede</td><td>11963</td><td>8167.30</td><td>62654.16</td></tr><tr><td>ChopperCommand</td><td>9882</td><td>16654.00</td><td>3786.00</td></tr><tr><td>CrazyClimber</td><td>35411</td><td>168788.50</td><td>91912.00</td></tr><tr><td>DemonAttack</td><td>3401</td><td>111185.20</td><td>10876.00</td></tr><tr><td>DoubleDunk</td><td>-15.5</td><td>-0.30</td><td>23.96</td></tr><tr><td>Enduro</td><td>309.6</td><td>2125.90</td><td>220.28</td></tr><tr><td>FishingDerby</td><td>5.5</td><td>31.30</td><td>-7.62</td></tr><tr><td>Freeway</td><td>29.6</td><td>34.00</td><td>28.96</td></tr><tr><td>Frostbite</td><td>4335</td><td>9590.50</td><td>6508.00</td></tr><tr><td>Gopher</td><td>2321</td><td>70354.60</td><td>12539.60</td></tr><tr><td>Gravitar</td><td>2672</td><td>1419.30</td><td>2284.00</td></tr><tr><td>Hero</td><td>25763</td><td>55887.40</td><td>36099.80</td></tr><tr><td>IceHockey</td><td>0.9</td><td>1.10</td><td>26.96</td></tr><tr><td>Kangaroo</td><td>3035</td><td>14637.50</td><td>9202.00</td></tr><tr><td>Krull</td><td>2395</td><td>8741.50</td><td>4422.88</td></tr><tr><td>KungFuMaster</td><td>22736</td><td>52181.00</td><td>42388.00</td></tr><tr><td>MontezumaRevenge</td><td>4367</td><td>384.00</td><td>0.00</td></tr><tr><td>MsPacman</td><td>15693</td><td>5380.40</td><td>18285.18</td></tr><tr><td>NameThisGame</td><td>4076</td><td>13136.00</td><td>8339.40</td></tr><tr><td>Pong</td><td>9.3</td><td>20.90</td><td>10.94</td></tr><tr><td>PrivateEye</td><td>69571</td><td>4234.00</td><td>100.00</td></tr><tr><td>Qbert</td><td>16455</td><td>33817.50</td><td>30618.50</td></tr><tr><td>RoadRunner</td><td>7845</td><td>62041.00</td><td>57212.00</td></tr><tr><td>Robotank</td><td>11.9</td><td>61.40</td><td>36.16</td></tr><tr><td>Seaquest</td><td>20182</td><td>15898.90</td><td>3922.80</td></tr><tr><td>SpaceInvaders</td><td>1652</td><td>18789.00</td><td>4289.40</td></tr><tr><td>StarGunner</td><td>10250</td><td>127029.00</td><td>20320.00</td></tr><tr><td>Tennis</td><td>-8.9</td><td>0.00</td><td>0.00</td></tr><tr><td>TimePilot</td><td>5925</td><td>12926.00</td><td>24150.00</td></tr><tr><td>Tutankham</td><td>167.6</td><td>241.00</td><td>203.54</td></tr><tr><td>Venture</td><td>1188</td><td>5.50</td><td>1564.00</td></tr><tr><td>VideoPinball</td><td>17298</td><td>533936.50</td><td>139799.22</td></tr><tr><td>WizardOfWor</td><td>4757</td><td>17862.50</td><td>43436.00</td></tr><tr><td>Zaxxon</td><td>9173</td><td>22209.50</td><td>30818.00</td></tr><tr><td># Games &gt;human</td><td></td><td>37 (80%)</td><td>34 (74%)</td></tr><tr><td>#Games &gt;75% human</td><td></td><td>38 (83%)</td><td>37 (80%)</td></tr><tr><td># Games Best</td><td>6 (13%)</td><td>31(67%)</td><td>10(22%)</td></tr></table>",
+        "bbox": [
+            338,
+            256,
+            653,
+            763
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "17 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "table",
+        "img_path": "images/b09155427a60b2520575394c3037c346134497491eec1288702b31d35f469665.jpg",
+        "table_caption": [
+            "Table 10: Mean with standard deviations of 20 RTDP vs Random episodes for the SMRF test. Bold domains are classified as having SMRF. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>GAME</td><td>RTDP</td><td>Random</td></tr><tr><td>Alien</td><td>379.50 ± 180.1</td><td>135.00 ± 39.4</td></tr><tr><td>Amidar</td><td>30.90 ± 18.0</td><td>8.70 ± 15.8</td></tr><tr><td>Assault</td><td>139.65 ± 38.3</td><td>49.35 ± 27.6</td></tr><tr><td>Asterix</td><td>625.00 ± 91.5</td><td>155.00 ± 70.5</td></tr><tr><td>Asteroids</td><td>397.50 ± 137.6</td><td>74.00 ± 42.0</td></tr><tr><td>Atlantis</td><td>1350.00 ± 915.7</td><td>635.00 ± 979.9</td></tr><tr><td>BankHeist</td><td>27.50 ± 20.7</td><td>3.50 ± 4.8</td></tr><tr><td>BattleZone</td><td>3350.00 ± 2725.3</td><td>450.00 ± 669.0</td></tr><tr><td>BeamRider</td><td>121.00 ± 30.7</td><td>50.60 ± 46.7</td></tr><tr><td>Berzerk</td><td>324.00 ± 109.4</td><td>102.50 ± 68.0</td></tr><tr><td>Bowling</td><td>0.00 ± 0.0</td><td>0.00 ± 0.0</td></tr><tr><td>Boxing</td><td>12.90 ± 5.8</td><td>-2.00 ± 4.1</td></tr><tr><td>Breakout</td><td>3.10 ± 0.8</td><td>1.00 ± 0.7</td></tr><tr><td>Centipede</td><td>2189.75 ± 226.5</td><td>548.85 ± 565.0</td></tr><tr><td>ChopperCommand</td><td>790.00 ± 260.6</td><td>205.00 ± 120.3</td></tr><tr><td>CrazyClimber</td><td>715.00 ± 127.6</td><td>395.00 ± 124.4</td></tr><tr><td>DemonAttack</td><td>68.50 ± 9.6</td><td>29.50 ± 12.4</td></tr><tr><td>DoubleDunk</td><td>-0.20 ± 1.4</td><td>-1.90 ± 1.3</td></tr><tr><td>Enduro</td><td>0.15 ± 0.5</td><td>0.05 ± 0.2</td></tr><tr><td>FishingDerby</td><td>-1.70 ± 3.1</td><td>-9.70 ± 3.0</td></tr><tr><td>Freeway</td><td>0.00 ± 0.0</td><td>0.00 ± 0.0</td></tr><tr><td>Frostbite</td><td>122.00 ± 21.1</td><td>23.50 ± 16.5</td></tr><tr><td>Gopher</td><td>0.00 ± 0.0</td><td>0.00 ± 0.0</td></tr><tr><td>Gravitar</td><td>177.50 ± 195.2</td><td>0.00 ± 0.0</td></tr><tr><td>Hero</td><td>2206.50 ± 886.9</td><td>36.25 ± 41.4</td></tr><tr><td>IceHockey</td><td>0.80 ± 0.8</td><td>-0.40 ± 0.8</td></tr><tr><td>Jamesbond</td><td>15.00 ± 22.9</td><td>5.00 ± 15.0</td></tr><tr><td>Kangaroo</td><td>100.00 ± 100.0</td><td>10.00 ± 43.6</td></tr><tr><td>Krull</td><td>104.50 ± 38.4</td><td>19.50 ± 18.8</td></tr><tr><td>KungFuMaster</td><td>130.00 ± 145.3</td><td>5.00 ± 21.8</td></tr><tr><td>MontezumaRevenge</td><td>0.00 ± 0.0</td><td>0.00 ± 0.0</td></tr><tr><td>MsPacman</td><td>396.50 ± 193.9</td><td>213.00 ± 163.7</td></tr><tr><td>NameThisGame</td><td>138.00 ± 41.1</td><td>44.50 ± 35.3</td></tr><tr><td>Phoenix</td><td>346.00 ± 93.0</td><td>110.00 ± 66.8</td></tr><tr><td>Pitfall</td><td>0.00 ± 0.0</td><td>-1.10 ± 4.8</td></tr><tr><td>Pong</td><td>-0.65 ± 1.4</td><td>-3.30 ± 1.0</td></tr><tr><td>PrivateEye</td><td>0.00 ± 0.0</td><td>4.75 ± 21.9</td></tr><tr><td>Qbert</td><td>606.25 ± 50.5</td><td>77.50 ± 125.5</td></tr><tr><td>Riverraid</td><td>862.50 ± 210.2</td><td>321.50 ± 70.0</td></tr><tr><td>RoadRunner</td><td>15.00 ± 65.4</td><td>5.00 ± 21.8</td></tr><tr><td>Robotank</td><td>1.05 ± 0.7</td><td>0.30 ± 0.5</td></tr><tr><td>Sequest</td><td>73.00 ± 26.3</td><td>14.00 ± 15.6</td></tr><tr><td>Skiing</td><td>-1248.00 ± 0.0</td><td>-1248.00 ± 0.0</td></tr><tr><td>Solaris</td><td>0.00 ± 0.0</td><td>0.00 ± 0.0</td></tr><tr><td>SpaceInvaders</td><td>130.75 ± 29.5</td><td>41.00 ± 25.6</td></tr><tr><td>StarGunner</td><td>370.00 ± 95.4</td><td>60.00 ± 106.8</td></tr><tr><td>Tennis</td><td>0.10 ± 0.7</td><td>-1.90 ± 0.9</td></tr><tr><td>TimePilot</td><td>370.00 ± 134.5</td><td>105.00 ± 66.9</td></tr><tr><td>Tutankham</td><td>17.85 ± 11.8</td><td>1.95 ± 4.8</td></tr><tr><td>UpNDown</td><td>1247.50 ± 465.4</td><td>272.00 ± 285.5</td></tr><tr><td>Venture</td><td>0.00 ± 0.0</td><td>0.00 ± 0.0</td></tr><tr><td>VideoPinball</td><td>5026.10 ± 1909.3</td><td>521.10 ± 365.4</td></tr><tr><td>WizardOfWor</td><td>240.00 ± 156.2</td><td>30.00 ± 55.7</td></tr><tr><td>YarsRevenge</td><td>5527.45 ± 2895.4</td><td>274.10 ± 315.1</td></tr><tr><td>Zaxxon</td><td>20.00 ± 60.0</td><td>0.00 ± 0.0</td></tr></table>",
+        "bbox": [
+            334,
+            233,
+            655,
+            797
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "page_number",
+        "text": "18 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Additional Implementation Details ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            465,
+            107
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "The code along with the experiment result files are available at https://github.com/stefanotoole/N-CPL. ",
+        "bbox": [
+            171,
+            119,
+            825,
+            135
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "table",
+        "img_path": "images/8ebf54ff59c8891137c562529d914c48f90458624c6f8c35dbca45cd9b5fb8a9.jpg",
+        "table_caption": [
+            "Table 11: N-CPL hyperparameters. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td colspan=\"2\">Lookahed Parameters</td></tr><tr><td>Sim. Interactions Budget</td><td>100</td></tr><tr><td>Lookahead Horizon</td><td>100</td></tr><tr><td colspan=\"2\">Value and Policy Network Parameters</td></tr><tr><td>Batch size</td><td>128</td></tr><tr><td>Learning Rate</td><td>2.50 × 10-4</td></tr><tr><td>Epochs</td><td>8</td></tr><tr><td>Loss Function for Policy</td><td>Categorical crossentropy</td></tr><tr><td>Loss Function for Value Function</td><td>Huber</td></tr><tr><td>Discount factor used in TD Learning</td><td>0.99</td></tr><tr><td>Time steps between target network updates (for value network)</td><td>10,000</td></tr><tr><td>Interval size of learning schedule</td><td>1 × 106sim. interactions</td></tr></table>",
+        "bbox": [
+            272,
+            167,
+            718,
+            296
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Table 11 shows the different hyperparameters of N-CPL along with the selected values used for the experiments. Due to computational restraints we could not tune the hyperparameters of N-CPL. For the lookahead parameters the simulator budget per time step was selected to be 100 to match the budget used by Junyent et al. (10). The lookahead horizon is the maximum search depth allowed, that is the maximum number of actions allowed from the root node of the lookahead. For the value and policy network parameters both the batch size and number of epochs used affects the training time. We selected both the batch size and number of epochs such that the time spent training the networks using a single vCPU is around the same time as the planning steps of N-CPL. We used the same learning rate, loss function (for the value function) and discount factor for the TD learning as used by DQN (2). Following Junyent et al.(8) we use a crossentropy loss function for the policy network. The interval size of the learning schedule dictates the size of the data set used to update the networks and how often to reject or accept parameter updates. The interval size of the learning schedule is illustrated in Figure 2 of the main paper to be of a size of N episodes. Instead of setting the interval size to be a set number of episodes we set it as $1 \\times 1 0 ^ { 6 }$ simulator interactions. ",
+        "bbox": [
+            169,
+            310,
+            823,
+            503
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "page_number",
+        "text": "19 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 18
+    }
+]

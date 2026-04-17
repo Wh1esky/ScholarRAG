@@ -1,0 +1,9 @@
+Label,train,evaluation
+experimental results,97.3%,97.6%
+findings/assumptions,97.3%,100.0%
+previous methods,97.4%,100.0%
+methods,99.6%,91.7%
+motivation,95.8%,90.0%
+research domain,99.4%,92.3%
+experimental settings,92.0%,82.5%
+existing challenges,95.0%,93.3%

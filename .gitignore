@@ -1,0 +1,36 @@
+# ── HuggingFace 模型（用 download_models.py 下载）──
+models/
+
+# ── Router 训练模型（用 train_router.py 训练，含骨架约 2.7GB）──
+src/chunking/models/*.pt
+
+# ── FAISS 索引 & 向量（用 rebuild_index.py 重建）──
+src/embedding/output/
+
+# ── 分块中间产物（rebuild_index.py 重新生成）──
+src/chunking/output/
+
+# ── 评估结果 JSON（保留 summary CSV 即可）──
+eval_results/*.json
+
+# ── 日志 ──
+logs/
+
+# ── 环境变量（含 API key）──
+.env
+
+# ── Python 缓存 ──
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# ── 系统/IDE ──
+.DS_Store
+__MACOSX/
+Thumbs.db
+.vscode/
+.idea/
+
+# ── 参考论文（非项目代码）──
+参考论文/

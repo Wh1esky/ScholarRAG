@@ -1,0 +1,2195 @@
+[
+    {
+        "type": "text",
+        "text": "POINTNET WITH KAN VERSUS POINTNET WITH MLP FOR 3D CLASSIFICATION AND SEGMENTATION OF POINT SETS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            98,
+            825,
+            172
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Ali Kashefi ",
+        "bbox": [
+            181,
+            195,
+            264,
+            208
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Stanford University, Stanford, 94305, CA, USA ",
+        "bbox": [
+            181,
+            209,
+            500,
+            223
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "kashefi@stanford.edu ",
+        "bbox": [
+            183,
+            224,
+            383,
+            236
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "https://github.com/Ali-Stanford/PointNet_KAN_Graphic ",
+        "bbox": [
+            183,
+            238,
+            694,
+            252
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "ABSTRACT ",
+        "text_level": 1,
+        "bbox": [
+            450,
+            287,
+            545,
+            303
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Kolmogorov-Arnold Networks (KANs) have recently gained attention as an alternative to traditional Multilayer Perceptrons (MLPs) in deep learning frameworks. KANs have been integrated into various deep learning architectures such as convolutional neural networks, graph neural networks, and transformers, with their performance evaluated. However, their effectiveness within point-cloud-based neural networks remains unexplored. To address this gap, we incorporate KANs into PointNet for the first time to evaluate their performance on 3D point cloud classification and segmentation tasks. Specifically, we introduce PointNet-KAN, built upon two key components. First, it employs KANs instead of traditional MLPs. Second, it retains the core principle of PointNet by using shared KAN layers and applying symmetric functions for global feature extraction, ensuring permutation invariance with respect to the input features. In traditional MLPs, the goal is to train the weights and biases with fixed activation functions; however, in KANs, the goal is to train the activation functions themselves. We use Jacobi polynomials to construct the KAN layers. We extensively and systematically evaluate PointNet-KAN across various polynomial degrees and special types such as the Lagrange, Chebyshev, and Gegenbauer polynomials. Our results show that PointNet-KAN achieves competitive performance compared to PointNet with MLPs on benchmark datasets for 3D object classification and part and semantic segmentation, despite employing a shallower and simpler network architecture. We also study a hybrid PointNet model incorporating both KAN and MLP layers. We hope this work serves as a foundation and provides guidance for integrating KANs, as an alternative to MLPs, into more advanced point cloud processing architectures. ",
+        "bbox": [
+            228,
+            325,
+            767,
+            645
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 INTRODUCTION ",
+        "text_level": 1,
+        "bbox": [
+            173,
+            685,
+            336,
+            699
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Kolmogorov-Arnold Networks (KANs), introduced by Liu et al. (2024), have recently emerged as an alternative modeling framework to traditional Multilayer Perceptrons (MLPs) (Cybenko, 1989; Hornik et al., 1989). KANs are based on the Kolmogorov-Arnold representation theorem (Kolmogorov, 1957; Arnold, 2009). Unlike MLPs, which rely on fixed activation functions while training weights and biases, the objective in KANs is to train the activation functions themselves (Liu et al., 2024). ",
+        "bbox": [
+            169,
+            720,
+            823,
+            805
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The performance of KANs has been evaluated across various domains, including scientific machine learning tasks (Wang et al., 2024b; Shukla et al., 2024; Abueidda et al., 2024; Koenig et al., 2024), image classification (Azam & Akhtar, 2024; Cheon, 2024; Lobanov et al., 2024; Yu et al., 2024; Tran et al., 2024), image segmentation (Li et al., 2024; Tang et al., 2024), image detection (Wang et al., 2024a), audio classification (Yu et al., 2024), and other applications. Additionally, from a neural network architecture perspective, KANs have been integrated into convolutional neural networks (CNNs) (Azam & Akhtar, 2024; Bodner et al., 2024) and graph neural networks (Kiamari et al., 2024; Bresson et al., 2024; Zhang & Zhang, 2024; De Carlo et al., 2024). ",
+        "bbox": [
+            169,
+            811,
+            826,
+            925
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            486,
+            45
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2410.10084v3 [cs.CV] 11 Jun 2025 ",
+        "bbox": [
+            22,
+            277,
+            57,
+            717
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_number",
+        "text": "1 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "However, the efficiency of KANs for 3D point cloud data has not yet been explored. Point cloud data plays a critical role in various domains, including computer graphics, computer vision, robotics, and autonomous driving (Uy & Lee, 2018; Li et al., 2020; Guo et al., 2020; Zhang et al., 2023a;b). One of the most successful neural networks for deep learning on point cloud data is PointNet, introduced by Qi et al. (2017a). Following this, several modified and advanced versions of PointNet have been developed (Qi et al., 2017b; Shen et al., 2018; Thomas et al., 2019; Wang et al., 2019; Zhao et al., 2021). To the best of our knowledge, the only existing work embedding KANs into PointNet involves 2D supervised learning in the context of computational fluid dynamics (Kashefi, 2025). In this work, we integrate KANs into PointNet for the first time to evaluate its performance on classification and segmentation tasks for 3D point cloud data. ",
+        "bbox": [
+            169,
+            103,
+            826,
+            243
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "It is important to clarify that by embedding KANs into PointNet, we do not simply mean replacing every instance of MLPs with KANs. While such an approach could be considered a research case, our goal is to preserve and utilize the core principles upon which PointNet is built. First, we apply shared KANs, meaning that the same KANs are applied to all input points. Second, we utilize a symmetric function, such as the max function, to extract global features from the points. These two elements are fundamental to PointNet, and by maintaining them, we ensure that the network remains invariant to input permutations. Our objective is to propose a version of PointNet integrated with KANs that retains these two essential properties, which we refer to as PointNet-KAN throughout the rest of this article. First, we focus on PointNet (Qi et al., 2017a) to directly and explicitly investigate the effect of KANs on the network’s performance. Using more complex versions of PointNet (Qi et al., 2017b; Shen et al., 2018; Thomas et al., 2019; Wang et al., 2019; Zhao et al., 2021) could introduce other factors that might obscure the direct influence of KANs, making it challenging to determine whether any performance changes are due to the KAN architecture or other components of the network. Next, we investigate a hybrid version of PointNet that incorporates KAN layers in the encoder and MLP layers in the decoder or classification head, motivated by the desire to combine the advantages of KAN and MLP components. Moreover, we explore embedding KAN layers into PointNet++ (Qi et al., 2017b), an advanced point cloud-based neural network, for 3D object classification. ",
+        "bbox": [
+            173,
+            250,
+            826,
+            500
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We use Jacobi polynomials to construct PointNet-KAN and investigate its performance across different polynomial degrees. Additionally, we examine the effect of special cases of Jacobi polynomials, including Legendre polynomials, Chebyshev polynomials of the first and second kinds, and Gegenbauer polynomials. The performance of PointNet-KAN is evaluated across classification, part segmentation, and segmentation tasks. Overall, the summary of our key contributions is as follows: ",
+        "bbox": [
+            169,
+            506,
+            823,
+            575
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "• We introduce PointNet with KANs (i.e., PointNet-KAN) for the first time and evaluate its performance against PointNet with MLPs. ",
+            "• We embed KAN into a point-cloud-based neural network for the first time, for computer vision tasks on unordered 3D point sets. ",
+            "• We conduct an extensive evaluation of the hyperparameters of PointNet-KAN, specifically the degree and type of polynomial used in constructing KANs. ",
+            "• We assess the efficiency of PointNet-KAN on benchmarks for 3D object classification and segmentation tasks. ",
+            "• We demonstrate that PointNet-KAN achieves competitive performance to PointNet, despite having a much shallower and simpler network architecture. ",
+            "• We additionally investigate a hybrid PointNet architecture that integrates both KAN and MLP components. ",
+            "• We release our code to support reproducibility and future research. "
+        ],
+        "bbox": [
+            215,
+            589,
+            821,
+            800
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2 RELATED WORK ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            821,
+            341,
+            837
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Relevant work on KANs can be discussed from two perspectives. The first focuses on using KANs for classification and segmentation tasks in computer graphics and computer vision. For classification, researchers (Cheon, 2024; Bodner et al., 2024; Azam & Akhtar, 2024) have embedded KANs as a replacement for MLPs in various popular CNN-based neural networks for two-dimensional image classification, such as VGG16 (Simonyan & Zisserman, 2014), MobileNetV2 (Sandler et al., ",
+        "bbox": [
+            169,
+            854,
+            823,
+            925
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "2 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2018), EfficientNet (Tan, 2019), ConvNeXt (Liu et al., 2022), ResNet-101 (He et al., 2016), and Vision Transformer (Dosovitskiy, 2020), and evaluated the performance of these networks with KANs. For 3D image segmentation tasks, KANs have been embedded into U-Net (Ronneberger et al., 2015) as a replacement for MLPs (Tang et al., 2024; Wu et al., 2024). However, no prior work has explored the use of KANs in point-cloud-based neural networks for 3D classification and segmentation of unordered point sets or evaluated their performance on complex benchmark datasets such as ModelNet40 (Wu et al., 2015) and the ShapeNet Part dataset (Yi et al., 2016). From the second perspective, KANs were originally constructed using B-spline as the basis polynomial (Liu et al., 2024), and researchers employed this type of polynomial for image classification and segmentation (Cheon, 2024; Bodner et al., 2024; Azam & Akhtar, 2024). However, studies have shown that B-splines are computationally expensive and pose difficulties in implementation (Howard et al., 2024; Rigas et al., 2024). To address these issues, recent advancements in scientific machine learning suggested the use of Jacobi polynomials as an alternative in KANs (SS, 2024; Seydi, 2024). Accordingly, Jacobi polynomials are not only easier to implement but also computationally more efficient. However, no prior work has explored the use of KANs with Jacobi polynomials in computer vision for classification and segmentation tasks. ",
+        "bbox": [
+            169,
+            103,
+            826,
+            325
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "A key motivation for introducing KANs into point cloud-based networks is to reduce the complexity of current architectures, particularly in terms of the number of layers and overall network depth. For example, as shown in Fig. 2 of the PointNet article (Qi et al., 2017a), the classification branch consists of five shared MLP layers in the encoder and three MLP layers in the classification head. Moreover, the encoder includes two mini-PointNets, one used for input transformation and another for feature transformation, adding further complexity. Similarly, as illustrated in Fig. 9 of the Point-Net paper (Qi et al., 2017a), the part segmentation network employs eight shared MLP layers in the encoder, while the decoder’s first layer concatenates the global feature vector with five intermediate features extracted from the encoder. Compared to an MLP layer, a KAN layer appears to be a more capable component. Its learnable activation function is governed by a polynomial, with parameters that can switch between different polynomial types, offering flexibility based on the dataset and task. Thus, we investigate the potential of using KANs to enable shallower networks with comparable or better performance. ",
+        "bbox": [
+            169,
+            332,
+            826,
+            513
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In addition to the area of computer vision and computer graphics, Kashefi (2025) introduced KA-PointNet to predict the velocity and pressure fields in fluid dynamics on irregular geometries. To construct KA-PointNet, Kashefi (2025) modified the segmentation branch of PointNet by replacing shared MLP layers with shared KAN layers and used mean squared error as the loss function. However, KA-PointNet (Kashefi, 2025) was tested only on two-dimensional spatial domains, and the possibility of obtaining a lighter-weight architecture through layer pruning was not explored. In contrast, the present work applies shared KAN layers to both the classification and segmentation branches of PointNet, operates on three-dimensional coordinates, and adopts a cross-entropy loss. We analyze the effect of network depth to assess whether sequential stacking of KAN layers is required, and we integrate KAN layers into the hierarchical PointNet++ framework (Qi et al., 2017b), a more advanced point-based neural architecture, for both classification and segmentation tasks. ",
+        "bbox": [
+            169,
+            520,
+            826,
+            674
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3 KOLMOGOROV-ARNOLD NETWORK (KAN) LAYERS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            702,
+            637,
+            719
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Inspired by the Kolmogorov-Arnold representation theorem (Kolmogorov, 1957; Arnold, 2009), Kolmogorov-Arnold Network (KAN) has been proposed as a novel neural network architecture by Liu et al. (2024). According to the theorem, multivariate continuous function can be expressed as a finite composition of continuous univariate functions and additions. To describe the structure of KAN straightforwardly, consider a single-layer KAN. The network’s input is a vector $\\pmb { r }$ of size $d _ { \\mathrm { i n p u t } }$ , and its output is a vector $\\pmb { s }$ of size $d _ { \\mathrm { o u t p u t } }$ . In this configuration, the single-layer KAN maps the input to the output as follows: ",
+        "bbox": [
+            169,
+            739,
+            826,
+            838
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {s} _ {d _ {\\text {o u t p u t}}} = \\boldsymbol {\\mathsf {A}} _ {d _ {\\text {o u t p u t}} \\times d _ {\\text {i n p u t}}} \\boldsymbol {r} _ {d _ {\\text {i n p u t}}}, \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            411,
+            871,
+            823,
+            887
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where the tensor $\\pmb { \\mathsf { A } } _ { d _ { \\mathrm { o u t p u t } } } \\times d _ { \\mathrm { i n p u t } }$ is expressed as: ",
+        "bbox": [
+            171,
+            909,
+            470,
+            925
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {A} _ {d _ {\\text {o u t p u t}} \\times d _ {\\text {i n p u t}}} = \\left[ \\begin{array}{c c c c} \\psi_ {1, 1} (\\cdot) & \\psi_ {1, 2} (\\cdot) & \\dots & \\psi_ {1, d _ {\\text {i n p u t}}} (\\cdot) \\\\ \\psi_ {2, 1} (\\cdot) & \\psi_ {2, 2} (\\cdot) & \\dots & \\psi_ {2, d _ {\\text {i n p u t}}} (\\cdot) \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ \\psi_ {d _ {\\text {o u t p u t}}, 1} (\\cdot) & \\psi_ {d _ {\\text {o u t p u t}}, 2} (\\cdot) & \\dots & \\psi_ {d _ {\\text {o u t p u t}}, d _ {\\text {i n p u t}}} (\\cdot) \\end{array} \\right], \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            277,
+            114,
+            823,
+            184
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where each $\\psi ( \\gamma )$ (the subscript is removed to lighten notation) is defined as: ",
+        "bbox": [
+            171,
+            193,
+            673,
+            209
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\psi (\\gamma) = \\sum_ {i = 0} ^ {n} \\omega_ {i} f _ {i} ^ {(\\alpha , \\beta)} (\\gamma), \\tag {3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            411,
+            226,
+            823,
+            265
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $f _ { i } ^ { ( \\alpha , \\beta ) } ( \\gamma )$ represents the Jacobi polynomial of degree $i$ , $n$ is the polynomial order of $\\psi$ , and $\\omega _ { i }$ are trainable parameters. Hence, the total number of trainable parameters embedded in $\\pmb { \\mathsf { A } }$ is $( n + 1 ) \\times d _ { \\mathrm { i n p u t } } \\times d _ { \\mathrm { o u t p u t } }$ . We implement $f _ { n } ^ { ( \\alpha , \\beta ) } ( \\gamma )$ using a recursive relation (Szego, 1939): ˝ ",
+        "bbox": [
+            169,
+            277,
+            823,
+            328
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {n} ^ {(\\alpha , \\beta)} (\\gamma) = (a _ {n} \\gamma + b _ {n}) f _ {n - 1} ^ {(\\alpha , \\beta)} (\\gamma) + c _ {n} f _ {n - 2} ^ {(\\alpha , \\beta)} (\\gamma), \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            331,
+            343,
+            825,
+            364
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where the coefficients $a _ { n }$ , $b _ { n }$ , and $c _ { n }$ are given by: ",
+        "bbox": [
+            171,
+            373,
+            504,
+            388
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\na _ {n} = \\frac {(2 n + \\alpha + \\beta - 1) (2 n + \\alpha + \\beta)}{2 n (n + \\alpha + \\beta)}, \\tag {5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            364,
+            404,
+            825,
+            438
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nb _ {n} = \\frac {(2 n + \\alpha + \\beta - 1) \\left(\\alpha^ {2} - \\beta^ {2}\\right)}{2 n (n + \\alpha + \\beta) (2 n + \\alpha + \\beta - 2)}, \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            361,
+            450,
+            823,
+            484
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nc _ {n} = \\frac {- 2 (n + \\alpha - 1) (n + \\beta - 1) (2 n + \\alpha + \\beta)}{2 n (n + \\alpha + \\beta) (2 n + \\alpha + \\beta - 2)}, \\tag {7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            334,
+            497,
+            823,
+            530
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "with the following initial conditions: ",
+        "bbox": [
+            171,
+            540,
+            415,
+            554
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {0} ^ {(\\alpha , \\beta)} (\\gamma) = 1, \\tag {8}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            446,
+            571,
+            823,
+            592
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {1} ^ {(\\alpha , \\beta)} (\\gamma) = \\frac {1}{2} (\\alpha + \\beta + 2) \\gamma + \\frac {1}{2} (\\alpha - \\beta). \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            356,
+            612,
+            823,
+            642
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Since $f _ { n } ^ { ( \\alpha , \\beta ) } ( \\gamma )$ is recursively constructed, the polynomials $f _ { i } ^ { ( \\alpha , \\beta ) } ( \\gamma )$ for $0 \\leq i \\leq n$ are computed sequentially. Additionally, because the input to the Jacobi polynomials must lie within the interval $[ - \\bar { 1 } , 1 ]$ , the input vector $\\pmb { r }$ needs to be scaled to fit this range before being passed to the KAN layer. To achieve this, we apply the hyperbolic tangent function. Finally, setting $\\alpha = \\beta = 0$ yields the Legendre polynomial (Abramowitz, 1974; Szego, 1939), while the Chebyshev polynomials of the ˝ first and second kinds are obtained with $\\alpha = \\beta = - 0 . 5$ and $\\alpha = \\beta = 0 . 5$ , respectively (Abramowitz, 1974; Szego, 1939). Additionally, the Gegenbauer (or ultraspherical) polynomials arise when˝ $\\alpha = \\beta$ (Szego, 1939). ˝ ",
+        "bbox": [
+            169,
+            652,
+            825,
+            767
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4 OVERVIEW OF POINTNET AND ITS KEY PRINCIPLES ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            787,
+            633,
+            801
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Consider a point cloud $\\mathcal { X }$ as an unordered set with $N$ points, defined as $\\mathcal { X } = \\left\\{ \\mathbf { x } _ { j } \\in \\mathbb { R } ^ { d } \\right\\} _ { j = 1 } ^ { N }$ d \t j =1 . The dimension (or number of features) of each $\\mathbf { x } _ { j }$ is shown by $d$ . According to the Theorem 1 proposed in Qi et al. (2017a), a set function $g : \\mathcal { X }  \\mathbb { R }$ can be defined to map this set of points to a vector as follows: ",
+        "bbox": [
+            169,
+            816,
+            823,
+            878
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\ng \\left(\\mathbf {x} _ {1}, \\mathbf {x} _ {2}, \\dots , \\mathbf {x} _ {N}\\right) = \\tau \\left(\\max  _ {j = 1, \\dots , N} \\left\\{h \\left(\\mathbf {x} _ {j}\\right) \\right\\}\\right), \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            346,
+            895,
+            823,
+            929
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            486,
+            45
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "table",
+        "img_path": "images/bbbf13e4f556b089195736bceb6b846bf11fdf5f8c94a89dbfdc6454e17490ce.jpg",
+        "table_caption": [
+            "Table 1: Classification results on ModelNet40 (Wu et al., 2015). In PointNet-KAN, the Jacobi polynomial degree is set to 4 (i.e., $n = 4$ ) with $\\alpha = \\beta = 1 . 0$ . In PointNet-KAN-MLP++, the Jacobi polynomial degree is set to 2 (i.e., $n = 2$ ) with $\\alpha = \\beta = - 0 . 5$ . Time complexity for PointNet-KAN, PointNet-KAN-MLP++, PointNet++, DGCNN, PointMLP, and PointNet is provided. ‘M’ and ‘G’ stand for million and billion, respectively. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>normal vector</td><td>number of points</td><td>Mean class accuracy</td><td>Overall accuracy</td><td>FLOPs/sample</td></tr><tr><td>PointNet++ (Qi et al., 2017b)</td><td>no</td><td>2048</td><td>-</td><td>90.7</td><td>1.7G</td></tr><tr><td>PointNet++ (Qi et al., 2017b)</td><td>yes</td><td>2048</td><td>-</td><td>91.9</td><td>3.2G</td></tr><tr><td>DGCNN (Wang et al., 2019)</td><td>no</td><td>2048</td><td>90.7</td><td>93.5</td><td>4.8G</td></tr><tr><td>Point Transformer (Zhao et al., 2021)</td><td>yes</td><td>-</td><td>90.6</td><td>93.7</td><td>-</td></tr><tr><td>PointMLP (Ma et al., 2022)</td><td>no</td><td>1000</td><td>91.4</td><td>94.5</td><td>31.3G</td></tr><tr><td>ShapeLLM (Qi et al., 2024)</td><td>no</td><td>1000</td><td>94.8</td><td>95.0</td><td>-</td></tr><tr><td>PointNet (baseline) (Qi et al., 2017a)</td><td>no</td><td>1024</td><td>72.6</td><td>77.4</td><td>148M</td></tr><tr><td>PointNet (Qi et al., 2017a)</td><td>no</td><td>1024</td><td>86.2</td><td>89.2</td><td>440M</td></tr><tr><td>PointNet-KAN</td><td>no</td><td>1024</td><td>82.7</td><td>87.5</td><td>60M</td></tr><tr><td>PointNet-KAN</td><td>yes</td><td>1024</td><td>87.2</td><td>90.5</td><td>110M</td></tr><tr><td>PointNet-KAN-MLP++</td><td>yes</td><td>2048</td><td>90.6</td><td>92.9</td><td>2.7G</td></tr></table>",
+        "bbox": [
+            173,
+            185,
+            823,
+            330
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where max is a vector-wise max operator that takes $N$ vectors as input and returns a new vector, computed as the element-wise maximum. In PointNet (Qi et al., 2017a), the continuous functions $\\tau$ and $h$ are implemented as MLPs. In this work, we replace $\\tau$ and $h$ with KANs, resulting in PointNet-KAN. Note that the function $g$ is invariant to the permutation of input points. Details of this theorem and its proof can be found in Qi et al. (2017a). ",
+        "bbox": [
+            169,
+            364,
+            823,
+            434
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "5 ARCHITECTURE OF POINTNET-KAN ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            460,
+            511,
+            477
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Classification branch The top panel of Fig. 1 demonstrates the classification branch of PointNet-KAN. The architecture of the classification branch is explained as follows. The PointNet-KAN model accepts input with dimensionality corresponding to 3D spatial coordinates (i.e., $d = 3$ ) and possibly the 3D normal vector as part of the point set representation (i.e., $d = 6$ ). A shared KAN layer maps the input feature vector from its original space to an intermediate feature space of dimension 3072. Following the first shared KAN layer, batch normalization (Ioffe & Szegedy, 2015) is applied. After normalization, a max pooling operation is performed to extract global features by computing the maximum value across all points in the point cloud. Next, the global feature is passed through a KAN layer, which reduces the dimensionality to the number of output channels (i.e., $k$ ), corresponding to the classification task. A softmax function is applied to the output to convert the logits into class probabilities. The concept of shared KANs is analogous to the shared MLPs used in PointNet (Qi et al., 2017a). It means that the same functional tensor, A, is applied uniformly to the input or intermediate features in PointNet-KAN. The use of the shared KAN layers and the symmetric max-pooling function ensure that PointNet-KAN is invariant to the order of the points in the point cloud. ",
+        "bbox": [
+            169,
+            497,
+            823,
+            705
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Part segmentation and semantic segmentation branch As shown in the bottom panel of Fig. 1, the part segmentation branch of the PointNet-KAN is described as follows. The input is first passed through a shared KAN layer, transforming it to an intermediate feature space of size 640, followed by batch normalization. These local features are then processed by a second shared KAN layer, mapping them to a higher-dimensional space of size 5120, and another batch normalization step is applied. A max pooling operation extracts a global feature representing the entire point cloud, which is then expanded to match the number of points. The one-hot encoded class label, representing the object category, is concatenated with the local features and the global feature. This combined feature, consisting of local features of size 640, global features of size 5120, and the class label, is passed through a shared KAN layer to reduce the feature size to 640, followed by batch normalization. A final shared KAN layer generates the output, delivering point-wise segmentation predictions, followed by a softmax function to convert the logits into class probabilities. The architecture of PointNet-KAN for the semantic segmentation task is similar to that used for part segmentation (as shown in Fig. 1), except that it does not include a one-hot vector. ",
+        "bbox": [
+            169,
+            729,
+            826,
+            924
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            173,
+            32,
+            485,
+            45
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/627dade320b24e067a99b0d54bf571fd25bfb35cfeffdcd30eece7626ca2da13.jpg",
+        "image_caption": [
+            "Classification Network "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            222,
+            119,
+            658,
+            208
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/62eaa86d312b7f9a0c83450704c124bdf48647e495240098f9aa708e51008246.jpg",
+        "image_caption": [
+            "Segmentation Network ",
+            "Figure 1: Architecture of PointNet-KAN. The classification network is shown in the top panel, and the segmentation network is shown in the bottom panel. $N$ is the number of points in a point cloud. $d$ indicates the number of input point features (e.g., spatial coordinates, normal vectors, etc.). $k$ indicates the number of classes (e.g., for the ModelNet40 (Wu et al., 2015) benchmark, $k = 4 0$ ; see Sect. 6.1). $m$ indicates the total number of possible parts (e.g., for the ShapeNet part (Yi et al., 2016) benchmark, $m = 5 0$ ; see Sect. 6.2). In the semantic-segmentation application, the one-hot vector is removed and $m$ denotes the total number of possible classes (e.g., in the Stanford 3D semantic parsing benchmark (Armeni et al., 2016), $m = 1 3$ ). "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            222,
+            233,
+            797,
+            329
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "6 EXPERIMENT AND DISCUSSION ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            489,
+            465,
+            503
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "6.1 3D OBJECT CLASSIFICATION ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            521,
+            413,
+            535
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "We evaluate PointNet-KAN on the ModelNet40 (Wu et al., 2015) shape classification benchmark, which contains 12,311 models across 40 categories, with 9,843 models allocated for training and 2,468 for testing. Similar to Qi et al. (2017a), we uniformly sample 1,024 points from the mesh faces and normalize them into a unit sphere. We also conduct an experiment with included normal vectors as input features, computed using the trimesh library (Dawson-Haggerty et al.). Table 1 presents the classification results of PointNet-KAN, with a polynomial degree of 4 (i.e., $n = 4$ in Eq. 3) and $\\alpha = \\beta = 1$ . Training details are provided in A.1. The obtained results can be interpreted from two perspectives. ",
+        "bbox": [
+            169,
+            547,
+            823,
+            660
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "First, comparing PointNet-KAN with PointNet (baseline) (Qi et al., 2017a) and PointNet (Qi et al., 2017a) shows that PointNet-KAN (with or without normal vectors) achieves higher accuracy than PointNet (baseline). Additionally, PointNet-KAN with normal vectors as input features outperforms PointNet. The number of trainable parameters for PointNet-KAN with $n = 4$ , PointNet (baseline), and PointNet in the classification branch is approximately 1M, 0.8M, and 3.5M, respectively. It is worth noting that PointNet-KAN with $n = 2$ has only roughly 0.6M trainable parameters, making it lighter than PointNet (baseline) while still achieving an overall accuracy of 89.9 (see Table 3). Notably, despite its simpler architecture—lacking the input and feature transforms found in Point-Net, as shown in Fig. 2 of Qi et al. (2017a), and having only 3 hidden layers compared to the 8 hidden layers of PointNet—PointNet-KAN still delivers competitive results, with overall accuracy of $9 0 . 5 \\%$ versus $8 9 . 2 \\%$ . From a time complexity perspective, the number of floating-point operations required for one forward pass of the PointNet-KAN model is significantly lower than that of PointNet, as shown in Table 1. ",
+        "bbox": [
+            169,
+            666,
+            826,
+            847
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "From the second perspective, we observe that other advanced point-cloud-based deep learning frameworks, such as PointNet++ (Qi et al., 2017b), DGCNN (Wang et al., 2019), Point Transform (Zhao et al., 2021), PointMLP (Ma et al., 2022), and ShapeLLM (Qi et al., 2024), outperform PointNet-KAN, as listed in Table 1, though these models employ more advanced and complex architectures involving MLPs. This raises the question of whether redesigning these networks using ",
+        "bbox": [
+            169,
+            854,
+            823,
+            925
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            173,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            948,
+            503,
+            959
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/67f70f0f627df9ebd0c5b7edffa6d231c5b1ac4bc4e7289761d24dccd3449ee1.jpg",
+        "table_caption": [
+            "Table 2: Mean IoU results for part segmentation on ShapeNet part dataset (Yi et al., 2016). In PointNet-KAN and PointNet-KAN-MLP, the Jacobi polynomial degree is set to 2 (i.e., $n \\ : = \\ : 2$ ) with $\\alpha = \\beta = - 0 . 5$ . Results of other models allocated, Wu et al. (2014), 3DCNN (Qi et al., 2017a), Yi et al. (2016), PointNet (Qi et al., 2017a), DGCNN (Wang et al., 2019), KPConv (Thomas et al., 2019), TAP (Wang et al., 2023). PN-KAN and PN-KAN-MLP stand for PointNet-KAN and PointNet-KAN-MLP in this table, respectively. No normal vectors are included in the input features of any PointNet version. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>Mean IoU</td><td>aero</td><td>bag</td><td>cap</td><td>car</td><td>chair</td><td>ear phone</td><td>guitar</td><td>knife</td><td>lamp</td><td>laptop</td><td>motor</td><td>mug</td><td>pistol</td><td>rocket</td><td>skate board</td><td>table</td></tr><tr><td># shapes</td><td></td><td>2690</td><td>76</td><td>55</td><td>898</td><td>3758</td><td>69</td><td>787</td><td>392</td><td>1547</td><td>451</td><td>202</td><td>184</td><td>283</td><td>66</td><td>152</td><td>5271</td></tr><tr><td>Wu et al.</td><td>-</td><td>63.2</td><td>-</td><td>-</td><td>-</td><td>73.5</td><td>-</td><td>-</td><td>-</td><td>74.4</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>74.8</td><td></td></tr><tr><td>3DCNN</td><td>79.4</td><td>75.1</td><td>72.8</td><td>73.3</td><td>70.0</td><td>87.2</td><td>63.5</td><td>88.4</td><td>79.6</td><td>74.4</td><td>93.9</td><td>58.7</td><td>91.8</td><td>76.4</td><td>51.2</td><td>65.3</td><td>77.1</td></tr><tr><td>Yi et al.</td><td>81.4</td><td>81.0</td><td>78.4</td><td>77.7</td><td>75.7</td><td>87.6</td><td>61.9</td><td>92.0</td><td>85.4</td><td>82.5</td><td>95.7</td><td>70.6</td><td>91.9</td><td>85.9</td><td>53.1</td><td>69.8</td><td>75.3</td></tr><tr><td>DGCNN</td><td>85.2</td><td>84.0</td><td>83.4</td><td>86.7</td><td>77.8</td><td>90.6</td><td>74.7</td><td>91.2</td><td>87.5</td><td>82.8</td><td>95.7</td><td>66.3</td><td>94.9</td><td>81.1</td><td>63.5</td><td>74.5</td><td>82.6</td></tr><tr><td>KPCov</td><td>86.4</td><td>84.6</td><td>86.3</td><td>87.2</td><td>81.1</td><td>91.1</td><td>77.8</td><td>92.6</td><td>88.4</td><td>82.7</td><td>96.2</td><td>78.1</td><td>95.8</td><td>85.4</td><td>69.0</td><td>82.0</td><td>83.6</td></tr><tr><td>TAP</td><td>86.9</td><td>84.8</td><td>86.1</td><td>89.5</td><td>82.5</td><td>92.1</td><td>75.9</td><td>92.3</td><td>88.7</td><td>85.6</td><td>96.5</td><td>79.8</td><td>96.0</td><td>85.9</td><td>66.2</td><td>78.1</td><td>83.2</td></tr><tr><td>PointNet</td><td>83.7</td><td>83.4</td><td>78.7</td><td>82.5</td><td>74.9</td><td>89.6</td><td>73.0</td><td>91.5</td><td>85.9</td><td>80.8</td><td>95.3</td><td>65.2</td><td>93.0</td><td>81.2</td><td>57.9</td><td>72.8</td><td>80.6</td></tr><tr><td>PN-KAN</td><td>83.3</td><td>81.0</td><td>76.8</td><td>79.8</td><td>74.6</td><td>88.7</td><td>65.4</td><td>90.9</td><td>85.3</td><td>79.9</td><td>95.0</td><td>65.3</td><td>93.0</td><td>83.0</td><td>54.3</td><td>71.9</td><td>81.6</td></tr><tr><td>PN-KAN-MLP</td><td>83.9</td><td>82.3</td><td>76.3</td><td>86.0</td><td>75.8</td><td>89.3</td><td>72.7</td><td>91.0</td><td>85.3</td><td>80.5</td><td>95.3</td><td>65.5</td><td>93.4</td><td>82.4</td><td>55.7</td><td>74.6</td><td>82.0</td></tr></table>",
+        "bbox": [
+            173,
+            214,
+            823,
+            343
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "KANs instead of MLPs could improve their accuracy. While the current article focuses on evaluating KAN within the simplest point-cloud-based neural network, PointNet, we hope that the promising results of PointNet-KAN motivate future efforts to embed KANs into more advanced architectures. As an example of progress in this direction, we investigate PointNet++ (Qi et al., 2017b) with KAN layers. The results are presented and discussed in Sect. 6.4. ",
+        "bbox": [
+            169,
+            371,
+            823,
+            441
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "6.2 3D OBJECT PART SEGMENTATION ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            460,
+            444,
+            472
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "For the part segmentation task, we assess PointNet-KAN on the ShapeNet part dataset (Yi et al., 2016), which includes 16,881 shapes across 16 categories, with annotations for 50 distinct parts. The number of parts per category ranges from 2 to 6. We adhere to the official train, validation, and test splits as outlined in the literature (Chang et al., 2015; Qi et al., 2017a; Wang et al., 2019). In our experiment, we uniformly sample 2,048 points from each shape within a unit ball. The input features for PointNet-KAN consist solely of spatial coordinates, and normal vectors are not utilized (i.e., $d =$ 3). The evaluation metric used is Intersection-over-Union (IoU) on points, as described by Qi et al. (2017a). Training details are provided in A.1. Qualitative results for part segmentation are shown in Fig. 2. The performance of PointNet-KAN compared to PointNet Qi et al. (2017a) is presented in Table 2. Accordingly, PointNet-KAN demonstrates competitive results compared to PointNet, with a mean IoU of $8 3 . 3 \\%$ versus $8 3 . 7 \\%$ . As shown in Table 2, for categories such as motorbike, pistol, and table, PointNet-KAN provides more accurate predictions than PointNet Qi et al. (2017a). Based on our machine learning experiments, adding normal vectors as input features does not improve the performance of PointNet-KAN. A comparison between the segmentation branch of PointNet-KAN, shown in Fig. 1, and the part segmentation branch of PointNet, shown in Fig. 9 of Qi et al. (2017a), highlights the simplicity of the PointNet-KAN architecture, which consists of only 4 layers and uses a single local feature, whereas PointNet has 11 layers and uses 5 local features. Additionally, while PointNet includes input and feature transform networks, the PointNet-KAN architecture does not. Overall, PointNet-KAN outperforms earlier methodologies such as those in Wu et al. (2014), 3DCNN (Qi et al., 2017a), and Yi et al. (2016). However, more recent architectures, including DGCNN (Wang et al., 2019), KPConv (Thomas et al., 2019), and TAP (Wang et al., 2023), surpass PointNet-KAN. As discussed in Sect. 6.1, incorporating KANs into the core of these networks as a replacement for MLPs could potentially enhance their performance. ",
+        "bbox": [
+            169,
+            486,
+            826,
+            806
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We further investigate the slight performance decrease of PointNet-KAN compared to PointNet $8 3 . 3 \\%$ versus $8 3 . 7 \\%$ ) in the part segmentation task. This observation can be explained as follows. KAN layers have been shown to be more prone to overfitting in different applications, including both computational physics and computer graphics (Zhang & Zhou, 2024; Ji et al., 2024; Koenig et al., 2024; Cang et al., 2024). While this characteristic is not necessarily problematic in physicsinformed machine learning for solving inverse problems (Wang et al., 2025; Shukla et al., 2024), where the learnable activation functions in KAN layers can better fit sparse sensor data, it may negatively impact generalization in computer graphics tasks, potentially reducing performance on ",
+        "bbox": [
+            169,
+            811,
+            823,
+            925
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/a9a878f36ff8c269afbfbf723daa3df616ba516963f67ed3408d403dd82fd404.jpg",
+        "image_caption": [
+            "Aero, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            196,
+            125,
+            269,
+            176
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/32457b41d6e81747536aba2b7cd19d7d7d07eafe3731a083ad2aecae0d709896.jpg",
+        "image_caption": [
+            "Bag, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            326,
+            125,
+            403,
+            184
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/87f2832f90f0d0ad67e71028101921f48808eb01d62ebe9b00ff771359cad25f.jpg",
+        "image_caption": [
+            "Cap, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            462,
+            127,
+            535,
+            184
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/97c9d8adcd05694705867f9fb76c3e68b1d052dd0632ed58cdd60b8108171a5d.jpg",
+        "image_caption": [
+            "Chair, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            586,
+            122,
+            679,
+            189
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/f3475c895bc39f302bf055425959cad1448aa939f73e8bb71adfe0e379d941b9.jpg",
+        "image_caption": [
+            "Lamp, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            733,
+            130,
+            808,
+            175
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/e6870d4884e098aef8b47df5aa603030022478b7783949c76b0543302911054a.jpg",
+        "image_caption": [
+            "Aero, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            197,
+            253,
+            267,
+            305
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/c3ded0c3eb5da4492eddf30dcaafc180c70aac9eadc6169b78c3c750c187773e.jpg",
+        "image_caption": [
+            "Bag, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            326,
+            253,
+            401,
+            311
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/8f110dd58fc18c865b21927e3b1e85a6322e2820d95191739d09718d426259ac.jpg",
+        "image_caption": [
+            "Cap, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            462,
+            257,
+            537,
+            314
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/e02f347e681aca73258cbef667a5db46405a8bc9509e3d08dacb1e8bcd5130a3.jpg",
+        "image_caption": [
+            "Chair, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            588,
+            251,
+            679,
+            318
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/e6ca90b6e10f41517c91d29a93131229a7e074e7b22e1d2a0c0031d017b87c67.jpg",
+        "image_caption": [
+            "Lamp, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            733,
+            258,
+            808,
+            304
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/5fe2348a6f7a7f26b41b84f361d80692940091759248287cf397650d8b9b645a.jpg",
+        "image_caption": [
+            "Motor, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            202,
+            382,
+            269,
+            434
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/374b950eb0116c688044fd3351160f211a23d7f3734f4a8fff637764b64aa358.jpg",
+        "image_caption": [
+            "Mug, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            330,
+            378,
+            401,
+            439
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/683fde96d084e53073e8bb3419a3dce553cfefae61b1e47d60699c0b2cbbb2c8.jpg",
+        "image_caption": [
+            "Rocket, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            450,
+            378,
+            522,
+            430
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/136eb85413ae41b507a0bb0974fcc6224467a8e37210da846a7210e4f8bdd96d.jpg",
+        "image_caption": [
+            "Earphone, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            586,
+            382,
+            679,
+            439
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/1f389c63bd354878c379aca4ca8ad031b267f856525939e1a745ee41b81f4ede.jpg",
+        "image_caption": [
+            "Table, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            728,
+            378,
+            803,
+            434
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/3e0371bfc86640c2c91631bedac76f1c53f50e95dcdb2d95a0727fc2cefc1d9b.jpg",
+        "image_caption": [
+            "Motor, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            200,
+            511,
+            269,
+            564
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/0a6e6dea2436510f6aec075657d530fd4f5690ad2ae91782327872caf1653a53.jpg",
+        "image_caption": [
+            "Mug, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            330,
+            508,
+            401,
+            569
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/ca282818faec5648e9dd3fd5bfedf0dfed0a21b7140a47b8d2a632eb8fb7ba70.jpg",
+        "image_caption": [
+            "Rocket, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            450,
+            507,
+            522,
+            559
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/a22470b58268e88745f3472d208839de78232d59712e5bfacc74f342b0728ec0.jpg",
+        "image_caption": [
+            "Earphone, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            586,
+            512,
+            679,
+            568
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/129cd3ae7d7f1adb91818d330799a48d5c81e6d5673eea77035e9541dc61249c.jpg",
+        "image_caption": [
+            "Table, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            728,
+            508,
+            803,
+            564
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/920d2250fde9fc47c5123d6d9a88629600fa0279c0f657c523db5181b71f2a4b.jpg",
+        "image_caption": [
+            "Laptop, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            186,
+            616,
+            279,
+            688
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/560afa0da18a9a481c783e533d6c61140010ad581c921f4f03bc1b98f84e030e.jpg",
+        "image_caption": [
+            "Skateboard, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            320,
+            623,
+            413,
+            684
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/33452a2d1608fef407fbd8d03d3b4246005659a030cc83436302d4a151ca9841.jpg",
+        "image_caption": [
+            "Car, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            455,
+            619,
+            540,
+            683
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/8b566425fe9c28dfafe3563e5b046bb52a0bc1a32cedf1bf04e0b5ae4f30bb8a.jpg",
+        "image_caption": [
+            "Pistol, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            593,
+            625,
+            673,
+            669
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/e42111415af01a5a71daba5d44f4c7e41af9ee478831e0e021a5f4f252bde613.jpg",
+        "image_caption": [
+            "Knife, gt "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            720,
+            633,
+            800,
+            676
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/044b4ab4e861dfdedbf2df388c85fe2cba2253c12b3b58129114314df3181f98.jpg",
+        "image_caption": [
+            "Laptop, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            186,
+            744,
+            279,
+            816
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/37e0482414036750cfd20f9665050c1f86ad20b638e5d70fe82713af05bf74c6.jpg",
+        "image_caption": [
+            "Skateboard, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            320,
+            751,
+            413,
+            813
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/bd5470b79984a6dbbed3ee65adf8aa528e0ab4ba9001a3caa83b3dc5e8e3766c.jpg",
+        "image_caption": [
+            "Car, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            455,
+            750,
+            540,
+            811
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/f36fbe2f0ef8b8a0141e796d4fdbc9505cd4b6ebaaf130b03b9f14c9c07ad060.jpg",
+        "image_caption": [
+            "Pistol, p "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            593,
+            753,
+            673,
+            797
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/02238f0d9b3f8b10b3e813795e14ae34c0b8aa62287ee325eb8da81a689d8e67.jpg",
+        "image_caption": [
+            "Knife, p ",
+            "Figure 2: A few qualitative results obtained by PointNet-KAN for part segmentation on the ShapeNet Part dataset (Yi et al., 2016). The results correspond to PointNet-KAN using a Jacobi polynomial of degree 2 with $\\alpha = \\beta = - 0 . 5$ . In the labels, ‘gt’ represents the ground truth, and ‘p’ represents prediction. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            720,
+            763,
+            800,
+            805
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            173,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            493,
+            948,
+            503,
+            959
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "table",
+        "img_path": "images/e5f199b62a9bf8b00529cd08185abbcb5a7d77e52f4fdc3f944ac481f9dab6fb.jpg",
+        "table_caption": [
+            "Table 3: Effect of Jacobi polynomial degree on classification performance of PointNet-KAN with the choice of $\\alpha = \\beta = 1 . 0$ on ModelNet40 (Wu et al., 2015). Normal vectors are included as part of the input features. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Jacobi polynomial degree (n)</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr><tr><td>Number of trainable parameters</td><td>620928</td><td>823680</td><td>1026432</td><td>1229184</td><td>1431936</td></tr><tr><td>Mean class accuracy</td><td>86.7</td><td>87.0</td><td>87.2</td><td>86.8</td><td>86.1</td></tr><tr><td>Overall accuracy</td><td>89.9</td><td>90.4</td><td>90.5</td><td>89.9</td><td>89.9</td></tr></table>",
+        "bbox": [
+            200,
+            161,
+            797,
+            234
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "table",
+        "img_path": "images/fae66ed6224f9c6d60a7c629223ed9e98273137574655fde90341691cae1b307.jpg",
+        "table_caption": [
+            "Table 4: Effect of the choice of $\\alpha$ and $\\beta$ in Jacobi polynomials on the classification performance of PointNet-KAN, using a polynomial of degree 2 (i.e., $n = 2$ in Eq. 3), on ModelNet40 (Wu et al., 2015). Note that $\\alpha = \\beta = 0$ corresponds to the Legendre polynomial, $\\alpha = \\beta = - 0 . 5$ corresponds to the Chebyshev polynomial of the first kind, $\\alpha = \\beta = 0 . 5$ corresponds to the Chebyshev polynomial of the second kind, and, in general, $\\alpha = \\beta$ corresponds to the Gegenbauer polynomial. Normal vectors are included as part of the input features. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Polynomial type</td><td>α = β = 0</td><td>α = β = -0.5</td><td>α = β = 0.5</td><td>α = β = 1</td><td>2α = β = 2</td><td>α = 2β = 2</td></tr><tr><td>Mean class accuracy</td><td>85.6</td><td>86.0</td><td>86.7</td><td>86.7</td><td>85.4</td><td>86.2</td></tr><tr><td>Overall accuracy</td><td>89.5</td><td>89.9</td><td>90.1</td><td>89.9</td><td>89.4</td><td>89.8</td></tr></table>",
+        "bbox": [
+            173,
+            366,
+            823,
+            416
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "the test set. To overcome this challenge, we propose PointNet-KAN-MLP, in which we simply replace the shared KAN decoder layers of size $( 6 4 0 , m )$ (see the bottom panel of Fig. 1) with shared MLP layers of the same size. The results are presented in Table 2. We observe a mean IoU of $8 3 . 9 \\%$ , which surpasses the performance of both PointNet $( 8 3 . 3 \\% )$ and PointNet-KAN $( 8 3 . 7 \\% )$ . It is concluded that the shared KAN layers effectively extract global features as the encoder, while the shared MLP layers are well-suited for mapping these global features to predict the label of each part as the decoder. ",
+        "bbox": [
+            169,
+            455,
+            826,
+            551
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "6.3 SEMANTIC SEGMENTATION IN 3D SCENES ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            585,
+            504,
+            599
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "For the semantic segmentation task, we evaluate PointNet-KAN and PointNet-KAN-MLP (discussed in Sect. 6.2) on the Stanford 3D semantic parsing (S3DIS) dataset (Armeni et al., 2016), which consists of 3D scans captured using scanners across six areas, encompassing a total of 271 rooms. Each point in the dataset is labeled with one of 13 semantic categories, including common objects such as chairs, tables, floors, walls, as well as a category for clutter. In line with the Point-Net (Qi et al., 2017a) methodology, we partition the point cloud by room and further divide each room into 1-meter by 1-meter blocks. Each point is represented by 9 features of three-dimensional spatial coordinates, RGB color values, and a normalized location within the room, ranging from 0 to 1. Furthermore, 4096 points are sampled from each block. Following the protocol established by Armeni et al. (2016) and Qi et al. (2017a), we use the same 6-fold cross-validation strategy for training and testing. In particular, we use a Jacobi polynomial of degree 2 with $\\alpha = \\beta = - 0 . 5$ (i.e., the Chebyshev polynomial of the first kind) to construct KAN layers for this experiment. The results are tabulated in Table 5. Accordingly, we observe that both PointNet-KAN and PointNet-KAN-MLP outperform PointNet in terms of accuracy and mean IoU for both Area 5 and the 6-fold cross-validation criterion. PointNet-KAN-MLP shows a slight improvement over PointNet-KAN, for the same reason discussed in Sect.6.2. Moreover, a qualitative comparison of the semantic segmentation predictions by PointNet, PointNet-KAN, and PointNet-KAN-MLP, along with the ground truth for a conference room and two offices, is shown in Fig. 3. For instance, compared to Point-Net, PointNet-KAN and PointNet-KAN-MLP demonstrate, overall, more accurate segmentations of tables and chairs, as shown in Fig. 3. This machine learning experiment demonstrates the capacity of KAN layers, when embedded in point-cloud-based neural networks, to perform semantic segmentation in large-scale scenes. ",
+        "bbox": [
+            169,
+            618,
+            826,
+            925
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "table",
+        "img_path": "images/208994dfe4d42521698de91b3ae571873c700f5e4a20213bd79224d7ce885d92.jpg",
+        "table_caption": [
+            "Table 5: Results for semantic segmentation on the Stanford 3D semantic parsing (S3DIS) dataset (Armeni et al., 2016). Evaluations are reported using 6-fold cross-validation or on Area 5. In PointNet-KAN and PointNet-KAN-MLP, a polynomial of degree 2 (i.e., $n = 2$ in Eq. 3) with $\\alpha = \\beta = - 0 . 5$ is used. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\"></td><td colspan=\"2\">6-Fold</td><td colspan=\"2\">Area 5</td></tr><tr><td>mean IoU</td><td>overall accuracy</td><td>mean IoU</td><td>overall accuracy</td></tr><tr><td>PointCNN (Li et al., 2018)</td><td>65.4</td><td>-</td><td>-</td><td>-</td></tr><tr><td>DGCNN (Wang et al., 2019)</td><td>56.1</td><td>84.1</td><td>-</td><td>-</td></tr><tr><td>Point Transformer (Zhao et al., 2021)</td><td>73.5</td><td>90.2</td><td>70.4</td><td>90.8</td></tr><tr><td>PointNeXt-XL (Qian et al., 2022)</td><td>74.9</td><td>90.3</td><td>70.5</td><td>90.6</td></tr><tr><td>MH-V (Feng et al., 2024)</td><td>-</td><td>-</td><td>70.3</td><td>-</td></tr><tr><td>PointNet (baseline) (Qi et al., 2017a)</td><td>20.1</td><td>53.2</td><td>-</td><td>-</td></tr><tr><td>PointNet (Qi et al., 2017a)</td><td>47.7</td><td>78.6</td><td>41.1</td><td>-</td></tr><tr><td>PointNet-KAN</td><td>51.3</td><td>81.8</td><td>44.7</td><td>83.9</td></tr><tr><td>PointNet-KAN-MLP</td><td>51.5</td><td>82.4</td><td>44.5</td><td>84.3</td></tr></table>",
+        "bbox": [
+            173,
+            172,
+            823,
+            354
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/99dab6c1ede64cb07459bf83a098bcdbbb1801018386e29001e82a761278452f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            189,
+            397,
+            321,
+            470
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/91aab2855549d41edeee106391f674c6a2182ddc96b2ce2c9c406b861e95af36.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            352,
+            397,
+            483,
+            469
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/db1ac96b6cda994fec6d57cb4057c902a9903858f0724529ff4ae8be618ab46b.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            517,
+            397,
+            647,
+            469
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/cd22268e3a4726e7216bd03b36ed69b975060de51ad5836e436bc7d88d3343d3.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            681,
+            398,
+            810,
+            468
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/cc96433ba3336d278cfbc9aedc38695e5a3dce0f74de1019d5f9a098f7653902.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            192,
+            520,
+            320,
+            588
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/655826dbc77de285b2b8cb6c46b908099e565d4afcfd8a7af56dc7e04b26385c.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            357,
+            520,
+            483,
+            588
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/d842fa6f56e484871d7586f1eb1319db5c900d7605612183d247ba63ed5a20a7.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            522,
+            520,
+            647,
+            587
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/bfeea655541b954d1e9f13b3cb89591a0ef10749b9e6cedbdfcf0fd0d1b5df02.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            684,
+            521,
+            810,
+            587
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/79ac2653a8e9f8b038197c90b044f1f9c72ef5d068481f5219018b6558ddd29a.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            192,
+            643,
+            318,
+            710
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/b8f536a4ef5178ec3f2385a751769e14acc2cbecd9340df06a87746dc97d1908.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            357,
+            643,
+            480,
+            710
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/4559d1691380cdb0f89239d61d1ba21e01316636cfdbcfd385af4a8bf43723e3.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            522,
+            643,
+            645,
+            710
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/bcb485a1556dcf80f8d597902d9d9daf5b5e882c9004e529048e3722cb38967b.jpg",
+        "image_caption": [
+            "Ground Truth ",
+            "PointNet ",
+            "PointNet-KAN ",
+            "PointNet-KAN-MLP ",
+            "Figure 3: A few qualitative results obtained by PointNet, PointNet-KAN, and PointNet-KAN-MLP for semantic segmentation on the Stanford 3D semantic parsing (S3DIS) dataset (Armeni et al., 2016). In PointNet-KAN and PointNet-KAN-MLP, a Jacobi polynomial of degree 2 with $\\alpha = \\beta =$ $- 0 . 5$ is used. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            684,
+            643,
+            808,
+            710
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "6.4 A MORE ADVANCED NETWORK: POINTNET $^ { + + }$ WITH KAN AND MLP ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            854,
+            692,
+            868
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "In the previous sections, we analyzed PointNet-KAN, which incorporates two key principles for processing unordered point sets: shared layers and symmetric functions. In this section, we further investigate the capability of KAN layers by integrating them into PointNet++, a more advanced ",
+        "bbox": [
+            169,
+            881,
+            825,
+            925
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            490,
+            946,
+            509,
+            959
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "point-based neural network. PointNet++, proposed by (Qi et al., 2017b), is a hierarchical architecture that outperforms the original PointNet by capturing local geometric features at multiple scales via set abstraction modules (see Fig. 2 in (Qi et al., 2017b)). As discussed earlier, more sophisticated networks often include a variety of nonlinear and hierarchical operators, which can potentially obscure the isolated effect of substituting KAN layers for traditional MLPs. With this in mind, we evaluate the performance of PointNet++ with KAN layers for a classification task. Our results indicate that the standalone replacement of MLPs with KANs in the standard PointNet++ architecture (Qi et al., 2017b) does not yield a notable improvement in classification accuracy on the Model-Net40 dataset (Wu et al., 2015). However, our machine learning experiments show that combining KAN layers with MLP layers enhances overall performance. Specifically, we propose a hybrid architecture, PointNet-KAN-MLP $^ { + + }$ , in which shared KAN layers are used within the set abstraction modules for feature extraction, while MLP layers are retained in the classification head. ",
+        "bbox": [
+            169,
+            103,
+            826,
+            271
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "The results are presented in Table 1. The overall accuracy of PointNet-KAN-MLP $^ { + + }$ , $9 2 . 9 \\%$ , surpasses that of PointNet $( 8 9 . 2 \\% )$ , PointNet-KAN $( 9 0 . 5 \\% )$ , and PointNet++ $( 9 1 . 9 \\% )$ . This observation closely aligns with the findings discussed in the final paragraph of Sect. 6.2, where we analyzed the performance of PointNet-KAN-MLP in detail. In fact, KAN layers appear to perform better than MLP layers within the set abstraction modules for feature extraction. On the other hand, shared MLPs are less prone to overfitting and are more effective at mapping global features to classification scores. This explains why the performance of PointNet++ with KAN layers alone is comparable to the original PointNet++ with MLPs $( 9 1 . 8 \\%$ versus $9 1 . 9 \\%$ ). As a result, combining the two can enhance the performance of PointNet-KAN-MLP++ compared to PointNet++ architectures that rely solely on either MLPs or KANs. ",
+        "bbox": [
+            169,
+            277,
+            826,
+            417
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Finally, for the sake of completeness, we provide a brief overview of the PointNet-KAN-MLP++ architecture. PointNet-KAN-MLP $^ { + + }$ augments the hierarchical feature-learning paradigm of Point-$\\mathrm { N e t } { + + }$ by replacing each shared MLP in its set abstraction (SA) modules with a shared KAN layer. In shared KAN layers, the Jacobi polynomial degree is set to 2 (i.e., $n = 2$ ) with $\\alpha = \\beta = - 0 . 5$ . In the first SA stage, 512 centroids are sampled via farthest-point sampling. For each centroid, using single-scale grouping via a fixed-radius ball query, up to 32 neighboring points within a radius of 0.2 are grouped and normalized relative to the centroid’s coordinates. Each grouped patch, with shape $[ \\boldsymbol { B } \\times \\boldsymbol { d } \\times \\boldsymbol { n } _ { b } ]$ , is then processed by three stacked shared KAN layers with output dimensions [64, 64, 128], each followed by batch normalization. Here, $\\boldsymbol { B }$ denotes the batch size and $n _ { b }$ is the number of points in each local neighborhood (e.g., 32). A max-pooling operation along the neighbor dimension yields a 128-dimensional feature vector per centroid. This process is repeated at increasingly coarser scales: 128 centroids with a radius of 0.4 and KAN layers [128, 128, 256], followed by a global grouping using KAN layers [256, 512, 1024], resulting in a 1024-dimensional global descriptor for the entire point cloud. After building this SA hierarchy, the resulting $B \\times 1 0 2 4$ feature tensor is fed into a compact classifier head comprising three sequential MLP layers. The first layer projects from 1024 to 512 coefficients, followed by batch normalization and $40 \\%$ dropout; the second layer reduces dimensionality from 512 to 256 with the same normalization and dropout scheme. A final MLP layer then maps these 256-dimensional embeddings to the desired number of output classes. For further explanation of technical terms such as set abstraction, centroid, single-scale grouping, ball query, and farthest-point sampling, see Qi et al. (2017b). ",
+        "bbox": [
+            169,
+            422,
+            826,
+            702
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "table",
+        "img_path": "images/b7ec2b03d21f9d26f457bfdc2c0649b1856bcfce9ca47f879e67fcd8412061eb.jpg",
+        "table_caption": [
+            "Table 6: Mean IoU results of PointNet-KAN for part segmentation on ShapeNet part dataset (Yi et al., 2016) for different Jacobi polynomial degrees $( n )$ with $\\alpha = \\beta = 1$ . "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>Mean IoU</td><td>aero</td><td>bag</td><td>cap</td><td>car</td><td>chair</td><td>ear phone</td><td>guitar</td><td>knife</td><td>lamp</td><td>laptop</td><td>motor</td><td>mug</td><td>pistol</td><td>rocket</td><td>skate board</td><td>table</td></tr><tr><td># shapes</td><td></td><td>2690</td><td>76</td><td>55</td><td>898</td><td>3758</td><td>69</td><td>787</td><td>392</td><td>1547</td><td>451</td><td>202</td><td>184</td><td>283</td><td>66</td><td>152</td><td>5271</td></tr><tr><td>n = 2</td><td>82.8</td><td>81.1</td><td>76.8</td><td>78.7</td><td>74.4</td><td>88.4</td><td>64.8</td><td>90.5</td><td>84.5</td><td>78.8</td><td>95.0</td><td>66.9</td><td>93.0</td><td>82.3</td><td>56.8</td><td>73.5</td><td>80.7</td></tr><tr><td>n = 3</td><td>81.8</td><td>80.0</td><td>76.3</td><td>79.6</td><td>72.1</td><td>88.0</td><td>69.4</td><td>89.0</td><td>83.0</td><td>79.4</td><td>95.0</td><td>61.5</td><td>91.3</td><td>81.0</td><td>55.3</td><td>70.0</td><td>79.0</td></tr><tr><td>n = 4</td><td>82.4</td><td>81.2</td><td>71.2</td><td>75.6</td><td>70.7</td><td>87.9</td><td>68.3</td><td>90.0</td><td>81.8</td><td>78.4</td><td>94.0</td><td>60.7</td><td>90.7</td><td>80.1</td><td>51.3</td><td>70.8</td><td>81.7</td></tr><tr><td>n = 5</td><td>80.7</td><td>78.2</td><td>72.0</td><td>79.0</td><td>67.8</td><td>87.5</td><td>68.9</td><td>87.6</td><td>81.3</td><td>76.6</td><td>94.5</td><td>60.8</td><td>88.0</td><td>81.0</td><td>47.3</td><td>69.3</td><td>79.3</td></tr><tr><td>n = 6</td><td>82.2</td><td>80.5</td><td>70.8</td><td>78.0</td><td>71.7</td><td>87.5</td><td>62.5</td><td>88.0</td><td>82.7</td><td>76.8</td><td>94.6</td><td>62.8</td><td>92.0</td><td>78.9</td><td>48.7</td><td>65.9</td><td>81.6</td></tr></table>",
+        "bbox": [
+            173,
+            757,
+            823,
+            845
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "6.5 ABLATION STUDIES ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            869,
+            354,
+            883
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Influence of polynomial type and polynomial degree Concerning the classification task discussed in Sect. 6.1, Table 3 illustrates the effect of varying the polynomial degree from 2 to 6, with ",
+        "bbox": [
+            169,
+            895,
+            823,
+            925
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            948,
+            506,
+            959
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "table",
+        "img_path": "images/66fecefe49d480a5a9824a63485b1f2415acd0f2dea9ccbc3be18a1bee08f525.jpg",
+        "table_caption": [
+            "Table 7: Mean IoU results of PointNet-KAN for part segmentation on ShapeNet part dataset (Yi et al., 2016) for different values of $\\alpha$ and $\\beta$ . In PointNet-KAN, the Jacobi polynomial degree is set to 2 (i.e., $n = 2$ ). Note that $\\alpha = \\beta = 0$ corresponds to the Legendre polynomial, $\\alpha = \\beta =$ $- 0 . 5$ corresponds to the Chebyshev polynomial of the first kind, $\\alpha = \\beta = 0 . 5$ corresponds to the Chebyshev polynomial of the second kind, and, in general, $\\alpha = \\beta$ corresponds to the Gegenbauer polynomial. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>Mean IoU</td><td>aero</td><td>bag</td><td>cap</td><td>car</td><td>chair</td><td>ear phone</td><td>guitar</td><td>knife</td><td>lamp</td><td>laptop</td><td>motor</td><td>mug</td><td>pistol</td><td>rocket</td><td>skate board</td><td>table</td></tr><tr><td># shapes</td><td></td><td>2690</td><td>76</td><td>55</td><td>898</td><td>3758</td><td>69</td><td>787</td><td>392</td><td>1547</td><td>451</td><td>202</td><td>184</td><td>283</td><td>66</td><td>152</td><td>5271</td></tr><tr><td>α = β = 0</td><td>83.1</td><td>82.0</td><td>73.5</td><td>80.2</td><td>75.4</td><td>88.5</td><td>68.9</td><td>90.4</td><td>83.9</td><td>80.6</td><td>95.2</td><td>65.3</td><td>92.7</td><td>81.2</td><td>56.9</td><td>72.4</td><td>80.9</td></tr><tr><td>α = β = -0.5</td><td>83.3</td><td>81.0</td><td>76.8</td><td>79.8</td><td>74.6</td><td>88.7</td><td>65.4</td><td>90.9</td><td>85.3</td><td>79.9</td><td>95.0</td><td>65.3</td><td>93.0</td><td>83.0</td><td>54.3</td><td>71.9</td><td>81.6</td></tr><tr><td>α = β = 0.5</td><td>81.7</td><td>80.5</td><td>74.9</td><td>78.9</td><td>69.3</td><td>87.5</td><td>66.3</td><td>89.5</td><td>84.1</td><td>77.3</td><td>95.0</td><td>64.5</td><td>92.0</td><td>81.7</td><td>53.1</td><td>71.3</td><td>79.7</td></tr><tr><td>α = β = 1</td><td>82.8</td><td>81.1</td><td>76.8</td><td>78.7</td><td>74.4</td><td>88.4</td><td>64.8</td><td>90.5</td><td>84.5</td><td>78.8</td><td>95.0</td><td>66.9</td><td>93.0</td><td>82.3</td><td>56.8</td><td>73.5</td><td>80.7</td></tr><tr><td>2α = β = 2</td><td>82.6</td><td>81.0</td><td>75.8</td><td>81.5</td><td>72.1</td><td>88.1</td><td>68.0</td><td>90.9</td><td>83.5</td><td>79.5</td><td>95.2</td><td>63.2</td><td>91.2</td><td>80.5</td><td>58.2</td><td>74.0</td><td>80.8</td></tr><tr><td>α = 2β = 2</td><td>82.5</td><td>81.0</td><td>73.3</td><td>82.4</td><td>71.6</td><td>88.3</td><td>68.5</td><td>90.7</td><td>84.3</td><td>79.3</td><td>95.4</td><td>64.2</td><td>91.3</td><td>81.9</td><td>54.6</td><td>70.4</td><td>80.5</td></tr></table>",
+        "bbox": [
+            173,
+            200,
+            823,
+            292
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "$\\alpha = \\beta = 1$ held constant. While increasing the degree does not significantly affect accuracy, it does increase the number of trainable parameters. Moreover, Table 4 reports the results of varying $\\alpha$ and $\\beta$ with a fixed polynomial degree of 2, showing that different Jacobi polynomial types do not significantly impact performance. Concerning the segmentation task discussed in Sect. 6.2, we investigate the effect of the Jacobi polynomial degree and the roles of $\\alpha$ and $\\beta$ on performance. The results are tabulated in Table 6 and 7. Similar to the classification task discussed in Sect. 6.1, no significant differences are observed. As shown in Table 6, increasing the degree of the Jacobi polynomial does not improve prediction accuracy. According to Table 7, the best performance is achieved with the Chebyshev polynomial of the first kind when $\\alpha = \\beta = - 0 . 5$ . ",
+        "bbox": [
+            169,
+            318,
+            826,
+            445
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Influence of the size of tensors and global feature We investigate the effect of the size of the tensor A (see Eq. 2) and, consequently, the size of the global feature on prediction accuracy. In the classification branch (see Fig. 1), choosing the shared KAN layer with the size of 1024 (i.e., $\\pmb { \\mathsf { A } } _ { 1 0 2 4 \\times 6 }$ and global feature size of 1024) and 2048 (i.e., ${ \\pmb { \\mathsf { A } } } _ { 2 0 4 8 \\times 6 }$ and global feature size of 2048) results in the overall accuracy of $8 9 . 7 \\%$ and $9 0 . 3 \\%$ , respectively, for the ModelNet40 (Wu et al., 2015) benchmark. In the segmentation branch (see Fig. 1), there are four shared KAN layers, each corresponding to a tensor. From left to right, we refer to them as B, C, D, and E. For example, selecting the sets $\\mathsf { \\mathbf { B } } _ { 1 2 8 \\times 3 }$ , $\\pmb { \\complement } _ { 1 0 2 4 \\times 1 2 8 }$ , $ { \\mathbf { D } } _ { 1 2 8 \\times 1 1 5 3 }$ , ${ \\bf E } _ { \\mathrm { 5 0 \\times 1 2 8 } }$ and $\\mathsf { \\mathbf { B } } _ { 3 8 4 \\times 3 }$ , $\\pmb { \\mathsf { C } } _ { 3 0 7 2 \\times 3 8 4 }$ , $\\pmb { \\mathsf { D } } _ { 3 4 5 7 \\times 3 4 5 7 }$ , $\\mathsf { E } _ { 5 0 \\times 3 8 4 }$ , respectively, results in a mean IoU of $8 2 . 6 \\%$ and $8 2 . 2 \\%$ for the ShapeNet part (Yi et al., 2016) benchmark. Note that the size of the global feature in the segmentation branch is determined by the number of rows $( d _ { \\mathrm { o u t p u t } } )$ in tensor C. ",
+        "bbox": [
+            169,
+            460,
+            823,
+            614
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Robustness Figure 4 shows the overall accuracy on the ModelNet40 (Wu et al., 2015) benchmark when input points from the test set are randomly dropped. PointNet-KAN (with $\\alpha ~ = ~ \\beta ~ = ~ 1$ , $n \\ = \\ 4 )$ demonstrates relatively stable performance as the number of points decreases from 1024 to 128, with accuracy gradually dropping from $9 0 . 5 \\%$ to $8 3 . 7 \\%$ when using normal vectors $Q = 6$ ), and from $8 7 . 5 \\%$ to $7 7 . 5 \\%$ without normal vectors $\\left[ d = 3 \\right]$ ). Interestingly, PointNet-KAN shows stronger stability compared to other models (Qi et al., 2017a;b; Wang et al., 2019), as indicated in Fig. 4. ",
+        "bbox": [
+            169,
+            628,
+            553,
+            782
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Influence of input and feature transform networks and deeper architectures In Sect. 6.1 and Sect. 6.2, we pointed out that PointNet-KAN is effective, despite its simple and shallow architecture, and the absence of input and feature transform networks. A question arises: if such a simple structure performs well, why not improve PointNet-KAN’s performance by deepening the network and adding input and feature transform networks to achieve even better results? To answer this question, a ",
+        "bbox": [
+            169,
+            799,
+            553,
+            924
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "image",
+        "img_path": "images/98b515cc3ddf014a530b000d042462bdc13122199db1b5e3654faf6c169468ec.jpg",
+        "image_caption": [
+            "Figure 4: Robustness test for PointNet-KAN on the ModelNet40 (Wu et al., 2015) test case, where input points are randomly dropped. See text for details. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            568,
+            641,
+            821,
+            832
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "straightforward approach is to replace all MLPs in the PointNet architecture (see Fig. 2 of Qi et al. (2017a) for the classification branch and Fig. 9 of Qi et al. (2017a) for the segmentation branch) with KAN to create an equivalent model. We conduct this experiment as follows. We utilize KAN layers with a Jacobi polynomial degree of 2 (i.e., $n = 2$ ) and parameters $\\alpha = \\beta = 1$ . The size of the sequential KAN layers is chosen to match the corresponding size of the MLPs in PointNet, such as (64, 64), (64, 128, 1024), and so on, as illustrated in Qi et al. (2017a). To conserve space, we omit sketching the full network architecture again. Interestingly, the network’s performance does not improve. The overall accuracy of classification on ModelNet40 (Wu et al., 2015) is $8 8 . 9 \\%$ and the mean IoU on the ShapeNet part dataset (Yi et al., 2016) is $8 2 . 1 \\%$ . ",
+        "bbox": [
+            169,
+            103,
+            826,
+            229
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "7 SUMMARY ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            250,
+            294,
+            266
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "In this work, we proposed, for the first time, PointNet with shared KANs (i.e., PointNet-KAN) and compared its performance to PointNet with shared MLPs. Our results demonstrated that PointNet-KAN achieved competitive performance to PointNet in both classification and segmentation tasks, while using a simpler and much shallower network compared to the deep PointNet with shared MLPs. In our implementation of shared KAN, we compared various families of the Jacobi polynomials, including Lagrange, Chebyshev, and Gegenbauer polynomials, and observed no significant differences in performance among them. Additionally, we found that a polynomial degree of 2 was sufficient. PointNet-KAN exhibited greater stability and robustness than PointNet (Qi et al., 2017a), PointNet++ (Qi et al., 2017b), and DGCNN (Wang et al., 2019) as the number of input points decreased in classification tasks. Thus, its lightweight design relative to these networks makes it better suited for real-time inference under sparse-input conditions. Additionally, we explored the use of KANs as encoders and MLPs as decoders or classifiers within PointNet, motivated by the desire to leverage the strengths of both components in a hybrid architecture, and found that this version achieves better performance than both PointNet and PointNet-KAN in classification and segmentation tasks. As an example of an advanced point cloud neural network, we evaluated the performance of PointNet++ (Qi et al., 2017b) integrated with KANs in the encoder and MLPs in the classification head for object classification, and found that it outperforms the original PointNet++ architecture. We hope this work lays a foundation and offers insights for incorporating KANs, as an alternative to MLPs, into more advanced architectures for point cloud deep learning frameworks. ",
+        "bbox": [
+            169,
+            282,
+            826,
+            547
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "REPRODUCIBILITY STATEMENT ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            563,
+            393,
+            575
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "The Python code is available on the following GitHub repository at https://github.com/ Ali-Stanford/PointNet_KAN_Graphic. ",
+        "bbox": [
+            169,
+            588,
+            823,
+            617
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "ACKNOWLEDGMENT ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            633,
+            320,
+            647
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "We express our gratitude to the Sherlock Computing Center at Stanford University for providing the computational resources that supported this research. We sincerely thank the reviewers for their insightful comments and suggestions, which have contributed to enhancing the quality of this article. ",
+        "bbox": [
+            169,
+            657,
+            823,
+            702
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "REFERENCES ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            722,
+            287,
+            736
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Milton Abramowitz. Handbook of Mathematical Functions, With Formulas, Graphs, and Mathematical Tables,. Dover Publications, Inc., USA, 1974. ISBN 0486612724. ",
+            "Diab W Abueidda, Panos Pantidis, and Mostafa E Mobasher. Deepokan: Deep operator network based on kolmogorov arnold networks for mechanics problems. arXiv preprint arXiv:2405.19143, 2024. ",
+            "Iro Armeni, Ozan Sener, Amir R Zamir, Helen Jiang, Ioannis Brilakis, Martin Fischer, and Silvio Savarese. 3d semantic parsing of large-scale indoor spaces. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 1534–1543, 2016. ",
+            "Vladimir I Arnold. On functions of three variables. Collected Works: Representations of Functions, Celestial Mechanics and KAM Theory, 1957–1965, pp. 5–8, 2009. "
+        ],
+        "bbox": [
+            171,
+            746,
+            825,
+            925
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Basim Azam and Naveed Akhtar. Suitability of kans for computer vision: A preliminary investigation. arXiv preprint arXiv:2406.09087, 2024. ",
+            "Alexander Dylan Bodner, Antonio Santiago Tepsich, Jack Natan Spolski, and Santiago Pourteau. Convolutional kolmogorov-arnold networks. arXiv preprint arXiv:2406.13155, 2024. ",
+            "Roman Bresson, Giannis Nikolentzos, George Panagopoulos, Michail Chatzianastasis, Jun Pang, and Michalis Vazirgiannis. Kagnns: Kolmogorov-arnold networks meet graph learning. arXiv preprint arXiv:2406.18380, 2024. ",
+            "Yueyang Cang, Li Shi, et al. Can kan work? exploring the potential of kolmogorov-arnold networks in computer vision. arXiv preprint arXiv:2411.06727, 2024. ",
+            "Angel X Chang, Thomas Funkhouser, Leonidas Guibas, Pat Hanrahan, Qixing Huang, Zimo Li, Silvio Savarese, Manolis Savva, Shuran Song, Hao Su, et al. Shapenet: An information-rich 3d model repository. arXiv preprint arXiv:1512.03012, 2015. ",
+            "Minjong Cheon. Kolmogorov-arnold network for satellite image classification in remote sensing. arXiv preprint arXiv:2406.00600, 2024. ",
+            "George Cybenko. Approximation by superpositions of a sigmoidal function. Mathematics of control, signals and systems, 2(4):303–314, 1989. ",
+            "Dawson-Haggerty et al. trimesh. URL https://trimesh.org/. ",
+            "Gianluca De Carlo, Andrea Mastropietro, and Aris Anagnostopoulos. Kolmogorov-arnold graph neural networks. arXiv preprint arXiv:2406.18354, 2024. ",
+            "Alexey Dosovitskiy. An image is worth 16x16 words: Transformers for image recognition at scale. arXiv preprint arXiv:2010.11929, 2020. ",
+            "Tuo Feng, Wenguan Wang, Ruijie Quan, and Yi Yang. Shape2scene: 3d scene representation learning through pre-training on shape data. In European Conference on Computer Vision, pp. 73–91. Springer, 2024. ",
+            "Yulan Guo, Hanyun Wang, Qingyong Hu, Hao Liu, Li Liu, and Mohammed Bennamoun. Deep learning for 3d point clouds: A survey. IEEE transactions on pattern analysis and machine intelligence, 43(12):4338–4364, 2020. ",
+            "Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 770–778, 2016. ",
+            "Kurt Hornik, Maxwell Stinchcombe, and Halbert White. Multilayer feedforward networks are universal approximators. Neural networks, 2(5):359–366, 1989. ",
+            "Amanda A Howard, Bruno Jacob, Sarah H Murphy, Alexander Heinlein, and Panos Stinis. Finite basis kolmogorov-arnold networks: domain decomposition for data-driven and physics-informed problems. arXiv preprint arXiv:2406.19662, 2024. ",
+            "Sergey Ioffe and Christian Szegedy. Batch normalization: Accelerating deep network training by reducing internal covariate shift. In International conference on machine learning, pp. 448–456. pmlr, 2015. ",
+            "Tianrui Ji, Yuntian Hou, and Di Zhang. A comprehensive survey on kolmogorov arnold networks (kan). arXiv preprint arXiv:2407.11075, 2024. ",
+            "Ali Kashefi. Kolmogorov–Arnold PointNet: Deep learning for prediction of fluid fields on irregular geometries. Computer Methods in Applied Mechanics and Engineering, 439:117888, 2025. ",
+            "Mehrdad Kiamari, Mohammad Kiamari, and Bhaskar Krishnamachari. Gkan: Graph kolmogorovarnold networks. arXiv preprint arXiv:2406.06470, 2024. "
+        ],
+        "bbox": [
+            171,
+            102,
+            825,
+            925
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Benjamin C Koenig, Suyong Kim, and Sili Deng. Kan-odes: Kolmogorov-arnold network ordinary differential equations for learning dynamical systems and hidden physics. arXiv preprint arXiv:2407.04192, 2024. ",
+            "A. K. Kolmogorov. On the representation of continuous functions of several variables by superposition of continuous functions of one variable and addition. Doklady Akademii Nauk SSSR, 114: 369–373, 1957. ",
+            "Chenxin Li, Xinyu Liu, Wuyang Li, Cheng Wang, Hengyu Liu, and Yixuan Yuan. U-kan makes strong backbone for medical image segmentation and generation. arXiv preprint arXiv:2406.02918, 2024. ",
+            "Yangyan Li, Rui Bu, Mingchao Sun, Wei Wu, Xinhan Di, and Baoquan Chen. Pointcnn: Convolution on x-transformed points. Advances in neural information processing systems, 31, 2018. ",
+            "Ying Li, Lingfei Ma, Zilong Zhong, Fei Liu, Michael A Chapman, Dongpu Cao, and Jonathan Li. Deep learning for lidar point clouds in autonomous driving: A review. IEEE Transactions on Neural Networks and Learning Systems, 32(8):3412–3432, 2020. ",
+            "Zhuang Liu, Hanzi Mao, Chao-Yuan Wu, Christoph Feichtenhofer, Trevor Darrell, and Saining Xie. A convnet for the 2020s. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, pp. 11976–11986, 2022. ",
+            "Ziming Liu, Yixuan Wang, Sachin Vaidya, Fabian Ruehle, James Halverson, Marin Soljaciˇ c,´ Thomas Y Hou, and Max Tegmark. Kan: Kolmogorov-arnold networks. arXiv preprint arXiv:2404.19756, 2024. ",
+            "Valeriy Lobanov, Nikita Firsov, Evgeny Myasnikov, Roman Khabibullin, and Artem Nikonorov. Hyperkan: Kolmogorov-arnold networks make hyperspectral image classificators smarter. arXiv preprint arXiv:2407.05278, 2024. ",
+            "Xu Ma, Can Qin, Haoxuan You, Haoxi Ran, and Yun Fu. Rethinking network design and local geometry in point cloud: A simple residual mlp framework. arXiv preprint arXiv:2202.07123, 2022. ",
+            "Charles R Qi, Hao Su, Kaichun Mo, and Leonidas J Guibas. Pointnet: Deep learning on point sets for 3d classification and segmentation. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 652–660, 2017a. ",
+            "Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J Guibas. Pointnet++: Deep hierarchical feature learning on point sets in a metric space. Advances in neural information processing systems, 30, 2017b. ",
+            "Zekun Qi, Runpei Dong, Shaochen Zhang, Haoran Geng, Chunrui Han, Zheng Ge, Li Yi, and Kaisheng Ma. Shapellm: Universal 3d object understanding for embodied interaction. arXiv preprint arXiv:2402.17766, 2024. ",
+            "Guocheng Qian, Yuchen Li, Houwen Peng, Jinjie Mai, Hasan Hammoud, Mohamed Elhoseiny, and Bernard Ghanem. Pointnext: Revisiting pointnet++ with improved training and scaling strategies. Advances in neural information processing systems, 35:23192–23204, 2022. ",
+            "Spyros Rigas, Michalis Papachristou, Theofilos Papadopoulos, Fotios Anagnostopoulos, and Georgios Alexandridis. Adaptive training of grid-dependent physics-informed kolmogorov-arnold networks. arXiv preprint arXiv:2407.17611, 2024. ",
+            "Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net: Convolutional networks for biomedical image segmentation. In Medical image computing and computer-assisted intervention– MICCAI 2015: 18th international conference, Munich, Germany, October 5-9, 2015, proceedings, part III 18, pp. 234–241. Springer, 2015. ",
+            "Mark Sandler, Andrew Howard, Menglong Zhu, Andrey Zhmoginov, and Liang-Chieh Chen. Mobilenetv2: Inverted residuals and linear bottlenecks. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 4510–4520, 2018. "
+        ],
+        "bbox": [
+            171,
+            102,
+            825,
+            924
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "15 ",
+        "bbox": [
+            490,
+            946,
+            506,
+            959
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Seyd Teymoor Seydi. Exploring the potential of polynomial basis functions in kolmogorovarnold networks: A comparative study of different groups of polynomials. arXiv preprint arXiv:2406.02583, 2024. ",
+            "Yiru Shen, Chen Feng, Yaoqing Yang, and Dong Tian. Mining point cloud local structures by kernel correlation and graph pooling. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 4548–4557, 2018. ",
+            "Khemraj Shukla, Juan Diego Toscano, Zhicheng Wang, Zongren Zou, and George Em Karniadakis. A comprehensive and fair comparison between mlp and kan representations for differential equations and operator networks. Computer Methods in Applied Mechanics and Engineering, 431: 117290, 2024. ",
+            "Karen Simonyan and Andrew Zisserman. Very deep convolutional networks for large-scale image recognition. arXiv preprint arXiv:1409.1556, 2014. ",
+            "Sidharth SS. Chebyshev polynomial-based kolmogorov-arnold networks: An efficient architecture for nonlinear function approximation. arXiv preprint arXiv:2405.07200, 2024. ",
+            "G. Szego. Orthogonal polynomials, 12 1939. ISSN 0065-9258. URL ˝ http://dx.doi.org/ 10.1090/coll/023. ",
+            "Mingxing Tan. Efficientnet: Rethinking model scaling for convolutional neural networks. arXiv preprint arXiv:1905.11946, 2019. ",
+            "Tianze Tang, Yanbing Chen, and Hai Shu. 3d u-kan implementation for multi-modal mri brain tumor segmentation. arXiv preprint arXiv:2408.00273, 2024. ",
+            "Hugues Thomas, Charles R Qi, Jean-Emmanuel Deschaud, Beatriz Marcotegui, Franc¸ois Goulette, and Leonidas J Guibas. Kpconv: Flexible and deformable convolution for point clouds. In Proceedings of the IEEE/CVF international conference on computer vision, pp. 6411–6420, 2019. ",
+            "Van Duy Tran, Tran Xuan Hieu Le, Thi Diem Tran, Hoai Luan Pham, Vu Trung Duong Le, Tuan Hai Vu, Van Tinh Nguyen, and Yasuhiko Nakashima. Exploring the limitations of kolmogorov-arnold networks in classification: Insights to software training and hardware implementation, 2024. ",
+            "Mikaela Angelina Uy and Gim Hee Lee. Pointnetvlad: Deep point cloud based retrieval for largescale place recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 4470–4479, 2018. ",
+            "Yanheng Wang, Xiaohan Yu, Yongsheng Gao, Jianjun Sha, Jian Wang, Lianru Gao, Yonggang Zhang, and Xianhui Rong. Spectralkan: Kolmogorov-arnold network for hyperspectral images change detection. arXiv preprint arXiv:2407.00949, 2024a. ",
+            "Yizheng Wang, Jia Sun, Jinshuai Bai, Cosmin Anitescu, Mohammad Sadegh Eshaghi, Xiaoying Zhuang, Timon Rabczuk, and Yinghua Liu. Kolmogorov arnold informed neural network: A physics-informed deep learning framework for solving pdes based on kolmogorov arnold networks. arXiv preprint arXiv:2406.11045, 2024b. ",
+            "Yizheng Wang, Jia Sun, Jinshuai Bai, Cosmin Anitescu, Mohammad Sadegh Eshaghi, Xiaoying Zhuang, Timon Rabczuk, and Yinghua Liu. Kolmogorov–arnold-informed neural network: A physics-informed deep learning framework for solving forward and inverse problems based on kolmogorov–arnold networks. Computer Methods in Applied Mechanics and Engineering, 433: 117518, 2025. ISSN 0045-7825. doi: https://doi.org/10.1016/j.cma.2024.117518. ",
+            "Yue Wang, Yongbin Sun, Ziwei Liu, Sanjay E Sarma, Michael M Bronstein, and Justin M Solomon. Dynamic graph cnn for learning on point clouds. ACM Transactions on Graphics (tog), 38(5): 1–12, 2019. ",
+            "Ziyi Wang, Xumin Yu, Yongming Rao, Jie Zhou, and Jiwen Lu. Take-a-photo: 3d-to-2d generative pre-training of point cloud models. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pp. 5640–5650, 2023. "
+        ],
+        "bbox": [
+            171,
+            102,
+            825,
+            924
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            490,
+            948,
+            508,
+            959
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Yanlin Wu, Tao Li, Zhihong Wang, Hong Kang, and Along He. Transukan: Computingefficient hybrid kan-transformer for enhanced medical image segmentation. arXiv preprint arXiv:2409.14676, 2024. ",
+            "Zhirong Wu, Shuran Song, Aditya Khosla, Fisher Yu, Linguang Zhang, Xiaoou Tang, and Jianxiong Xiao. 3d shapenets: A deep representation for volumetric shapes. In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 1912–1920, 2015. ",
+            "Zizhao Wu, Ruyang Shou, Yunhai Wang, and Xinguo Liu. Interactive shape co-segmentation via label propagation. Computers & Graphics, 38:248–254, 2014. ",
+            "Li Yi, Vladimir G Kim, Duygu Ceylan, I-Chao Shen, Mengyan Yan, Hao Su, Cewu Lu, Qixing Huang, Alla Sheffer, and Leonidas Guibas. A scalable active framework for region annotation in 3d shape collections. ACM Transactions on Graphics (ToG), 35(6):1–12, 2016. ",
+            "Runpeng Yu, Weihao Yu, and Xinchao Wang. Kan or mlp: A fairer comparison. arXiv preprint arXiv:2407.16674, 2024. ",
+            "Fan Zhang and Xin Zhang. Graphkan: Enhancing feature extraction with graph kolmogorov arnold networks. arXiv preprint arXiv:2406.13597, 2024. ",
+            "Huang Zhang, Changshuo Wang, Shengwei Tian, Baoli Lu, Liping Zhang, Xin Ning, and Xiao Bai. Deep learning-based 3d point cloud classification: A systematic survey and outlook. Displays, 79:102456, 2023a. ",
+            "Rui Zhang, Yichao Wu, Wei Jin, and Xiaoman Meng. Deep-learning-based point cloud semantic segmentation: A survey. Electronics, 12(17):3642, 2023b. ",
+            "Xianyang Zhang and Huijuan Zhou. Generalization bounds and model complexity for kolmogorovarnold networks. arXiv preprint arXiv:2410.08026, 2024. ",
+            "Hengshuang Zhao, Li Jiang, Jiaya Jia, Philip HS Torr, and Vladlen Koltun. Point transformer. In Proceedings of the IEEE/CVF international conference on computer vision, pp. 16259–16268, 2021. "
+        ],
+        "bbox": [
+            171,
+            102,
+            825,
+            540
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            46
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "17 ",
+        "bbox": [
+            490,
+            946,
+            506,
+            959
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "A SUPPLEMENTARY MATERIALS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            102,
+            459,
+            118
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "A.1 TRAINING DETAILS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            133,
+            356,
+            148
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "The models for both classification and segmentation are implemented using PyTorch. For classification tasks, a batch size of 64 is used, while part and semantic segmentation uses a batch size of 32. The training process employs the Adam optimizer, configured with $\\beta _ { 1 } = 0 . 9$ , $\\beta _ { 2 } = 0 . 9 9 9$ , and $\\hat { \\epsilon } = 1 0 ^ { - 8 }$ . An initial learning rate of 0.0005 and 0.001 is chosen respectively for the classification and part and semantic segmentation tasks. To progressively decrease the learning rate during training, a learning rate scheduler is applied, which reduces the learning rate by a factor of 0.5 after every 20 epochs. The cross-entropy loss function is used. All experiments run on an NVIDIA A100 Tensor Core GPU with 80 GB of RAM. ",
+        "bbox": [
+            169,
+            159,
+            826,
+            272
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "header",
+        "text": "PointNet with KAN versus PointNet with MLP ",
+        "bbox": [
+            171,
+            32,
+            485,
+            45
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "page_number",
+        "text": "18 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 17
+    }
+]

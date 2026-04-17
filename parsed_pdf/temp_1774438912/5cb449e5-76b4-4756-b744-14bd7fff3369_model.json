@@ -1,0 +1,3956 @@
+[
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.237,
+                0.131,
+                0.738,
+                0.154
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                402,
+                288,
+                1254,
+                288,
+                1254,
+                338,
+                402,
+                338
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.135,
+                0.18,
+                0.836,
+                0.234
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                229,
+                396,
+                1421,
+                396,
+                1421,
+                514,
+                229,
+                514
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.15,
+                0.237,
+                0.821,
+                0.253
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                255,
+                521,
+                1395,
+                521,
+                1395,
+                556,
+                255,
+                556
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.235,
+                0.287,
+                0.314,
+                0.303
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                399,
+                631,
+                533,
+                631,
+                533,
+                666,
+                399,
+                666
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.318,
+                0.474,
+                0.606
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                699,
+                805,
+                699,
+                805,
+                1333,
+                129,
+                1333
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.634,
+                0.21,
+                0.649
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                132,
+                1394,
+                357,
+                1394,
+                357,
+                1427,
+                132,
+                1427
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.66,
+                0.47,
+                0.869
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1452,
+                799,
+                1452,
+                799,
+                1911,
+                129,
+                1911
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.077,
+                0.871,
+                0.471,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1916,
+                800,
+                1916,
+                800,
+                1984,
+                130,
+                1984
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.508,
+                0.294,
+                0.697,
+                0.406
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.509,
+                0.398,
+                0.687,
+                0.505
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.709,
+                0.294,
+                0.871,
+                0.405
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.697,
+                0.411,
+                0.876,
+                0.475
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Method</td><td>AP50</td><td>AP75</td></tr><tr><td>No Rotation</td><td>51.35</td><td>35.63</td></tr><tr><td>Largest Box</td><td>51.49</td><td>14.95</td></tr><tr><td>Our Rotation</td><td>55.73</td><td>38.05</td></tr><tr><td>Perfect Rotation</td><td>55.91</td><td>39.61</td></tr></table>"
+        },
+        {
+            "type": "table_footnote",
+            "bbox": [
+                0.698,
+                0.479,
+                0.882,
+                0.496
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1186,
+                1053,
+                1499,
+                1053,
+                1499,
+                1091,
+                1186,
+                1091
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.498,
+                0.535,
+                0.895,
+                0.626
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1177,
+                1521,
+                1177,
+                1521,
+                1377,
+                846,
+                1377
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.654,
+                0.894,
+                0.774
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1438,
+                1519,
+                1438,
+                1519,
+                1702,
+                846,
+                1702
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.776,
+                0.894,
+                0.837
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1707,
+                1519,
+                1707,
+                1519,
+                1841,
+                846,
+                1841
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.501,
+                0.847,
+                0.646,
+                0.862
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                851,
+                1863,
+                1098,
+                1863,
+                1098,
+                1896,
+                851,
+                1896
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.5,
+                0.871,
+                0.893,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                850,
+                1916,
+                1518,
+                1916,
+                1518,
+                1984,
+                850,
+                1984
+            ]
+        }
+    ],
+    [
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.092,
+                0.473,
+                0.244
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                202,
+                804,
+                202,
+                804,
+                536,
+                129,
+                536
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.251,
+                0.162,
+                0.267
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                132,
+                552,
+                275,
+                552,
+                275,
+                587,
+                132,
+                587
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.274,
+                0.473,
+                0.41
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                602,
+                804,
+                602,
+                804,
+                902,
+                129,
+                902
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.423,
+                0.22,
+                0.438
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                930,
+                374,
+                930,
+                374,
+                963,
+                130,
+                963
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.448,
+                0.473,
+                0.703
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                985,
+                804,
+                985,
+                804,
+                1546,
+                129,
+                1546
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.705,
+                0.473,
+                0.903
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1551,
+                804,
+                1551,
+                804,
+                1986,
+                129,
+                1986
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.499,
+                0.094,
+                0.885,
+                0.224
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.504,
+                0.235,
+                0.89,
+                0.294
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Rotation Method</td><td>AP50 (Coarse)</td><td>AP75 (Fine)</td><td>Shape Label</td></tr><tr><td>No Rotation</td><td>Med</td><td>Med</td><td>No</td></tr><tr><td>Largest Box (e.g. [1, 17, 5])</td><td>Med</td><td>Low</td><td>No</td></tr><tr><td>Ellipse + RU Loss (Ours)</td><td>Very High</td><td>High</td><td>No</td></tr><tr><td>Perfect Box (Gold Std)</td><td>Very High</td><td>Very High</td><td>Yes</td></tr></table>"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.498,
+                0.317,
+                0.895,
+                0.395
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                697,
+                1521,
+                697,
+                1521,
+                869,
+                846,
+                869
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.416,
+                0.892,
+                0.446
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                915,
+                1516,
+                915,
+                1516,
+                981,
+                846,
+                981
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.446,
+                0.893,
+                0.581
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                981,
+                1518,
+                981,
+                1518,
+                1278,
+                846,
+                1278
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.582,
+                0.895,
+                0.718
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1280,
+                1521,
+                1280,
+                1521,
+                1579,
+                846,
+                1579
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.73,
+                0.63,
+                0.747
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                850,
+                1606,
+                1071,
+                1606,
+                1071,
+                1643,
+                850,
+                1643
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.754,
+                0.878,
+                0.772
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                850,
+                1658,
+                1492,
+                1658,
+                1492,
+                1698,
+                850,
+                1698
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.778,
+                0.892,
+                0.824
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1711,
+                1516,
+                1711,
+                1516,
+                1812,
+                846,
+                1812
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.584,
+                0.832,
+                0.892,
+                0.849
+            ],
+            "angle": 0,
+            "content": "\\[\nS = \\{(x, y) \\mid \\forall (x, y) \\in \\text {o b j e c t} \\}. \\tag {1}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.856,
+                0.895,
+                0.903
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1883,
+                1521,
+                1883,
+                1521,
+                1986,
+                846,
+                1986
+            ]
+        }
+    ],
+    [
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.091,
+                0.47,
+                0.152
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                200,
+                799,
+                200,
+                799,
+                334,
+                129,
+                334
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.235,
+                0.164,
+                0.469,
+                0.181
+            ],
+            "angle": 0,
+            "content": "\\[\n\\mathbf {b} \\triangleq \\mathcal {B} (S). \\tag {2}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.208,
+                0.469,
+                0.343
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                457,
+                797,
+                457,
+                797,
+                754,
+                129,
+                754
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.152,
+                0.356,
+                0.469,
+                0.373
+            ],
+            "angle": 0,
+            "content": "\\[\nV _ {\\mathbf {b}} = \\left\\{S _ {i} \\mid \\mathcal {B} \\left(S _ {i}\\right) = \\mathbf {b}, \\forall S _ {i} \\in \\mathcal {P} \\right\\}. \\tag {3}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.385,
+                0.469,
+                0.506
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                847,
+                797,
+                847,
+                797,
+                1113,
+                129,
+                1113
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.185,
+                0.52,
+                0.469,
+                0.539
+            ],
+            "angle": 0,
+            "content": "\\[\n\\mathbf {b} _ {\\text {p e r f e c t}} ^ {\\theta} \\triangleq \\mathcal {B} \\left(\\mathcal {R} ^ {\\theta} \\left(S _ {\\text {p e r f e c t}}\\right)\\right), \\tag {4}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.56,
+                0.469,
+                0.726
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1232,
+                797,
+                1232,
+                797,
+                1597,
+                129,
+                1597
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.745,
+                0.469,
+                0.822
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1639,
+                797,
+                1639,
+                797,
+                1808,
+                129,
+                1808
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.832,
+                0.315,
+                0.848
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1830,
+                535,
+                1830,
+                535,
+                1865,
+                130,
+                1865
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.856,
+                0.469,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1883,
+                797,
+                1883,
+                797,
+                1984,
+                129,
+                1984
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.092,
+                0.892,
+                0.243
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                202,
+                1516,
+                202,
+                1516,
+                534,
+                846,
+                534
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.609,
+                0.254,
+                0.892,
+                0.273
+            ],
+            "angle": 0,
+            "content": "\\[\n\\mathbf {b} _ {\\text {l a r g e s t}} ^ {\\theta} \\triangleq \\mathcal {B} \\left(\\mathcal {R} ^ {\\theta} \\left(S _ {\\text {l a r g e s t}}\\right)\\right). \\tag {5}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.284,
+                0.892,
+                0.42
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                624,
+                1516,
+                624,
+                1516,
+                924,
+                846,
+                924
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.435,
+                0.677,
+                0.451
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                957,
+                1150,
+                957,
+                1150,
+                992,
+                848,
+                992
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.459,
+                0.892,
+                0.552
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1009,
+                1516,
+                1009,
+                1516,
+                1214,
+                846,
+                1214
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.562,
+                0.654,
+                0.577
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1236,
+                1111,
+                1236,
+                1111,
+                1269,
+                848,
+                1269
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.585,
+                0.892,
+                0.676
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1287,
+                1516,
+                1287,
+                1516,
+                1487,
+                846,
+                1487
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.695,
+                0.809,
+                0.711
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1529,
+                1375,
+                1529,
+                1375,
+                1564,
+                848,
+                1564
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.72,
+                0.892,
+                0.779
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1584,
+                1516,
+                1584,
+                1516,
+                1713,
+                846,
+                1713
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.78,
+                0.892,
+                0.901
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1716,
+                1516,
+                1716,
+                1516,
+                1982,
+                846,
+                1982
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "bbox": [
+                0.127,
+                0.098,
+                0.21,
+                0.192
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.128,
+                0.196,
+                0.216,
+                0.216
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                217,
+                431,
+                367,
+                431,
+                367,
+                475,
+                217,
+                475
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.241,
+                0.135,
+                0.267,
+                0.164
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                409,
+                297,
+                453,
+                297,
+                453,
+                360,
+                409,
+                360
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.297,
+                0.091,
+                0.43,
+                0.202
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.296,
+                0.215,
+                0.432,
+                0.225
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                503,
+                473,
+                734,
+                473,
+                734,
+                495,
+                503,
+                495
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.468,
+                0.104,
+                0.567,
+                0.189
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.487,
+                0.19,
+                0.547,
+                0.224
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                827,
+                418,
+                929,
+                418,
+                929,
+                492,
+                827,
+                492
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.599,
+                0.105,
+                0.685,
+                0.189
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.606,
+                0.19,
+                0.675,
+                0.226
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1030,
+                418,
+                1147,
+                418,
+                1147,
+                497,
+                1030,
+                497
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.723,
+                0.091,
+                0.857,
+                0.204
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.734,
+                0.206,
+                0.85,
+                0.228
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1247,
+                453,
+                1445,
+                453,
+                1445,
+                501,
+                1247,
+                501
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.075,
+                0.241,
+                0.894,
+                0.302
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                127,
+                530,
+                1519,
+                530,
+                1519,
+                664,
+                127,
+                664
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.12,
+                0.355,
+                0.469,
+                0.396
+            ],
+            "angle": 0,
+            "content": "\\[\n\\begin{array}{l} Q _ {\\mathbf {b} ^ {0}} ^ {\\theta} = \\text {u n i q u e} \\left\\{\\mathbf {b} _ {j} ^ {\\theta} = \\mathcal {B} \\left(\\mathcal {R} ^ {\\theta} \\left(S _ {i}\\right)\\right), \\forall S _ {i} \\in V _ {\\mathbf {b} ^ {0}} \\right\\} (6) \\\\ = \\left\\{\\mathbf {b} _ {j} ^ {\\theta} \\right\\} _ {j = 1, \\dots , M}. (7) \\\\ \\end{array}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.408,
+                0.47,
+                0.451
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                897,
+                799,
+                897,
+                799,
+                992,
+                129,
+                992
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.233,
+                0.469,
+                0.469,
+                0.487
+            ],
+            "angle": 0,
+            "content": "\\[\nQ ^ {\\theta} \\triangleq Q _ {\\mathbf {b} ^ {0}} ^ {\\theta}. \\tag {8}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.497,
+                0.47,
+                0.618
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1093,
+                799,
+                1093,
+                799,
+                1359,
+                129,
+                1359
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.166,
+                0.632,
+                0.469,
+                0.663
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {\\mathbf {b}} ^ {\\theta} = \\underset {\\widehat {\\mathbf {b}} ^ {\\theta} \\in Q ^ {\\theta}} {\\operatorname {a r g m a x}} I o U \\left(\\widehat {\\mathbf {b}} ^ {\\theta}, \\mathbf {b} _ {\\text {p e r f e c t}} ^ {\\theta}\\right). \\tag {9}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.673,
+                0.47,
+                0.741
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1480,
+                799,
+                1480,
+                799,
+                1630,
+                129,
+                1630
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.098,
+                0.766,
+                0.469,
+                0.799
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {\\mathbf {b}} ^ {\\theta} = \\underset {\\widehat {\\mathbf {b}} ^ {\\theta} \\in Q ^ {\\theta}} {\\operatorname {a r g m a x}} \\operatorname {A v g} \\left\\{\\operatorname {I o U} \\left(\\widehat {\\mathbf {b}} ^ {\\theta}, \\mathbf {b} _ {j} ^ {\\theta}\\right) \\mid \\forall \\mathbf {b} _ {j} ^ {\\theta} \\in Q ^ {\\theta} \\right\\}. \\tag {10}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.81,
+                0.47,
+                0.901
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1782,
+                799,
+                1782,
+                799,
+                1982,
+                129,
+                1982
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.505,
+                0.325,
+                0.889,
+                0.39
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Method</td><td>Shape Definition</td></tr><tr><td>Slargest</td><td>{(x1,y1),(x2,y1),(x2,y2),(x1,y2)}</td></tr><tr><td>Sellipse (Ours)</td><td>{(x,y)|(x-xc)/(bW/2)2+(y-yc)2/bH/2)=1}</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.499,
+                0.399,
+                0.893,
+                0.444
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                877,
+                1518,
+                877,
+                1518,
+                976,
+                848,
+                976
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.473,
+                0.892,
+                0.518
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1040,
+                1516,
+                1040,
+                1516,
+                1139,
+                848,
+                1139
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.57,
+                0.532,
+                0.892,
+                0.574
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {\\mathbf {b}} ^ {\\theta} = \\underset {\\widehat {\\mathbf {b}} ^ {\\theta} \\in Q ^ {\\theta}} {\\operatorname {a r g m a x}} \\sum_ {i = 1} ^ {M} p \\left(\\mathbf {b} _ {j} ^ {\\theta}\\right) I o U \\left(\\widehat {\\mathbf {b}} ^ {\\theta}, \\mathbf {b} _ {j} ^ {\\theta}\\right). \\tag {11}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.582,
+                0.892,
+                0.687
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1280,
+                1516,
+                1280,
+                1516,
+                1511,
+                848,
+                1511
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.579,
+                0.701,
+                0.891,
+                0.743
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {\\mathbf {b}} ^ {\\theta} = \\underset {\\widehat {\\mathbf {b}} ^ {\\theta} \\in Q ^ {\\theta}} {\\operatorname {a r g m a x}} \\frac {1}{K} \\sum_ {k = 1} ^ {K} I o U \\left(\\widehat {\\mathbf {b}} ^ {\\theta}, \\mathbf {b} _ {k} ^ {\\theta}\\right). \\tag {12}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.75,
+                0.893,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1650,
+                1518,
+                1650,
+                1518,
+                1984,
+                846,
+                1984
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "bbox": [
+                0.08,
+                0.089,
+                0.47,
+                0.266
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.088,
+                0.269,
+                0.458,
+                0.306
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Label Method</td><td>Slargest</td><td>Sellipse (Ours)</td><td>S(Ours)</td></tr><tr><td>Expected IoU</td><td>60.8</td><td>72.9</td><td>72.9</td></tr></table>"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.316,
+                0.471,
+                0.407
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                695,
+                800,
+                695,
+                800,
+                895,
+                129,
+                895
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.434,
+                0.47,
+                0.511
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                954,
+                799,
+                954,
+                799,
+                1124,
+                129,
+                1124
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.214,
+                0.524,
+                0.469,
+                0.544
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {\\mathbf {b}} ^ {\\theta} \\triangleq \\mathcal {B} (\\mathcal {R} ^ {\\theta} (\\widehat {S})), \\tag {13}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.078,
+                0.552,
+                0.47,
+                0.583
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                132,
+                1214,
+                799,
+                1214,
+                799,
+                1282,
+                132,
+                1282
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.097,
+                0.607,
+                0.47,
+                0.649
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {S} = \\underset {S \\in \\mathcal {V} _ {\\mathbf {b} ^ {0}}} {\\operatorname {a r g m a x}} \\sum_ {\\theta} \\frac {1}{K} \\sum_ {k = 1} ^ {K} \\left[ I o U \\left(\\mathcal {B} \\left(\\mathcal {R} ^ {\\theta} (S)\\right), \\mathbf {b} _ {k} ^ {\\theta}\\right) \\right]. \\tag {14}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.66,
+                0.471,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1452,
+                800,
+                1452,
+                800,
+                1984,
+                129,
+                1984
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.501,
+                0.089,
+                0.891,
+                0.277
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.502,
+                0.279,
+                0.892,
+                0.328
+            ],
+            "angle": 0,
+            "content": "<table><tr><td rowspan=\"2\"></td><td colspan=\"4\">AP50</td><td colspan=\"4\">AP75</td></tr><tr><td>10°</td><td>20°</td><td>30°</td><td>40°</td><td>10°</td><td>20°</td><td>30°</td><td>40°</td></tr><tr><td>Largest Box</td><td>98.2</td><td>93.79</td><td>86.31</td><td>82.9</td><td>59.2</td><td>25.6</td><td>19.9</td><td>17.3</td></tr><tr><td>Ellipse (Ours)</td><td>99.6</td><td>98.6</td><td>97.0</td><td>96.5</td><td>86.8</td><td>56.2</td><td>47.2</td><td>46.5</td></tr></table>"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.499,
+                0.338,
+                0.893,
+                0.398
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                743,
+                1518,
+                743,
+                1518,
+                875,
+                848,
+                875
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.429,
+                0.892,
+                0.46
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                943,
+                1516,
+                943,
+                1516,
+                1012,
+                848,
+                1012
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.487,
+                0.692,
+                0.503
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                850,
+                1071,
+                1176,
+                1071,
+                1176,
+                1106,
+                850,
+                1106
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.514,
+                0.891,
+                0.545
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1130,
+                1514,
+                1130,
+                1514,
+                1199,
+                848,
+                1199
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.621,
+                0.563,
+                0.891,
+                0.583
+            ],
+            "angle": 0,
+            "content": "\\[\n\\widehat {\\mathbf {b}} ^ {\\theta} = \\mathcal {B} \\left(\\mathcal {R} ^ {\\theta} \\left(S _ {\\text {e l l i p s e}}\\right)\\right), \\tag {15}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.594,
+                0.89,
+                0.624
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1306,
+                1513,
+                1306,
+                1513,
+                1372,
+                848,
+                1372
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.518,
+                0.639,
+                0.891,
+                0.673
+            ],
+            "angle": 0,
+            "content": "\\[\nS _ {\\text {e l l i p s e}} = \\left\\{(x, y) \\left| \\frac {(x - x _ {c}) ^ {2}}{\\left(b _ {W} ^ {0} / 2\\right) ^ {2}} + \\frac {(y - y _ {c}) ^ {2}}{\\left(b _ {H} ^ {0} / 2\\right) ^ {2}} = 1 \\right. \\right\\}, \\tag {16}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.687,
+                0.89,
+                0.718
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1511,
+                1513,
+                1511,
+                1513,
+                1579,
+                848,
+                1579
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.72,
+                0.892,
+                0.9
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1584,
+                1516,
+                1584,
+                1516,
+                1980,
+                846,
+                1980
+            ]
+        }
+    ],
+    [
+        {
+            "type": "equation",
+            "bbox": [
+                0.155,
+                0.089,
+                0.39,
+                0.114
+            ],
+            "angle": 0,
+            "content": "\\[\nC (\\theta) = \\max  \\left(0. 5, 1 + \\frac {1 - \\cos (4 \\theta)}{2 \\cos (4 \\delta) - 2}\\right)\n\\]"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.1,
+                0.115,
+                0.448,
+                0.303
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.077,
+                0.315,
+                0.471,
+                0.361
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                693,
+                800,
+                693,
+                800,
+                794,
+                130,
+                794
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.388,
+                0.231,
+                0.403
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                853,
+                392,
+                853,
+                392,
+                886,
+                130,
+                886
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.077,
+                0.412,
+                0.47,
+                0.487
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                906,
+                799,
+                906,
+                799,
+                1071,
+                130,
+                1071
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.097,
+                0.498,
+                0.47,
+                0.545
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                164,
+                1095,
+                799,
+                1095,
+                799,
+                1199,
+                164,
+                1199
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.097,
+                0.556,
+                0.47,
+                0.587
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                164,
+                1223,
+                799,
+                1223,
+                799,
+                1291,
+                164,
+                1291
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.097,
+                0.597,
+                0.47,
+                0.645
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                164,
+                1313,
+                799,
+                1313,
+                799,
+                1419,
+                164,
+                1419
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.097,
+                0.655,
+                0.47,
+                0.746
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                164,
+                1441,
+                799,
+                1441,
+                799,
+                1641,
+                164,
+                1641
+            ]
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.097,
+                0.498,
+                0.47,
+                0.746
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.757,
+                0.317,
+                0.772
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1665,
+                538,
+                1665,
+                538,
+                1698,
+                130,
+                1698
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.781,
+                0.471,
+                0.901
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1718,
+                800,
+                1718,
+                800,
+                1982,
+                129,
+                1982
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.503,
+                0.09,
+                0.889,
+                0.325
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.499,
+                0.337,
+                0.892,
+                0.38
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                741,
+                1516,
+                741,
+                1516,
+                836,
+                848,
+                836
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.504,
+                0.382,
+                0.9,
+                0.578
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>COCO val2017 Ablations</td><td>0°</td><td>10°</td><td>20°</td><td>30°</td></tr><tr><td colspan=\"5\">(a) Previous method</td></tr><tr><td>Largest Box(e.g. [4, 45, 37])</td><td>35.20</td><td>28.37</td><td>22.34</td><td>18.47</td></tr><tr><td colspan=\"5\">(b) Our Rotation Label Methods (Section 4.2)</td></tr><tr><td>Random</td><td>37.39</td><td>35.59</td><td>32.22</td><td>28.33</td></tr><tr><td>Octagon s = 0.1</td><td>35.82</td><td>31.64</td><td>27.16</td><td>23.54</td></tr><tr><td>Octagon s = 0.2</td><td>36.52</td><td>34.57</td><td>31.65</td><td>28.15</td></tr><tr><td>Octagon s = 0.5 (Diamond)</td><td>38.36</td><td>35.39</td><td>28.76</td><td>22.92</td></tr><tr><td>RotIoU</td><td>38.32</td><td>36.48</td><td>32.68</td><td>28.94</td></tr><tr><td>Ellipse (Section 4.1.2)</td><td>38.21</td><td>36.83</td><td>33.59</td><td>29.95</td></tr><tr><td colspan=\"5\">(c) With Our Loss (Section 4.3)</td></tr><tr><td>Ellipse + RU Loss δ = 45°</td><td>38.54</td><td>37.45</td><td>34.56</td><td>31.26</td></tr><tr><td>Ellipse + RU Loss δ = 30°</td><td>39.09</td><td>37.99</td><td>35.45</td><td>32.25</td></tr><tr><td>Ellipse + RU Loss δ = 15°</td><td>39.14</td><td>38.19</td><td>35.78</td><td>32.50</td></tr><tr><td>Ellipse + RU Loss δ = 10° (Final)</td><td>39.33</td><td>38.31</td><td>36.00</td><td>32.72</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.499,
+                0.588,
+                0.901,
+                0.709
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1293,
+                1531,
+                1293,
+                1531,
+                1559,
+                848,
+                1559
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.722,
+                0.892,
+                0.768
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1588,
+                1516,
+                1588,
+                1516,
+                1689,
+                848,
+                1689
+            ]
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.643,
+                0.784,
+                0.892,
+                0.8
+            ],
+            "angle": 0,
+            "content": "\\[\n\\alpha = 2 \\cos (4 \\delta), \\tag {17}\n\\]"
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.582,
+                0.819,
+                0.892,
+                0.849
+            ],
+            "angle": 0,
+            "content": "\\[\nC (\\theta) = 1 + \\frac {1}{\\alpha - 2} (1 - \\cos (4 \\theta)). \\tag {18}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.499,
+                0.856,
+                0.892,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1883,
+                1516,
+                1883,
+                1516,
+                1984,
+                848,
+                1984
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "bbox": [
+                0.08,
+                0.093,
+                0.312,
+                0.289
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.344,
+                0.094,
+                0.475,
+                0.289
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.508,
+                0.094,
+                0.625,
+                0.288
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.656,
+                0.094,
+                0.739,
+                0.289
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.754,
+                0.094,
+                0.88,
+                0.289
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.299,
+                0.893,
+                0.329
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                657,
+                1518,
+                657,
+                1518,
+                723,
+                129,
+                723
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.078,
+                0.33,
+                0.898,
+                0.421
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Datasets (At 0° Test Rotation)</td><td colspan=\"3\">Pascal VOC [14]</td><td colspan=\"3\">Transparent Bin Picking [18]</td><td colspan=\"3\">Synthetic Fruit Dataset [13]</td><td colspan=\"3\">Oxford Pets [30]</td></tr><tr><td>Methods</td><td>AP</td><td>AP50</td><td>AP75</td><td>AP</td><td>AP50</td><td>AP75</td><td>AP</td><td>AP50</td><td>AP75</td><td>AP</td><td>AP50</td><td>AP75</td></tr><tr><td>No Rotation</td><td>51.94</td><td>80.91</td><td>56.54</td><td>48.53</td><td>79.14</td><td>54.3</td><td>84.3</td><td>95.07</td><td>92.6</td><td>80.70</td><td>92.80</td><td>88.76</td></tr><tr><td rowspan=\"2\">Largest Box(e.g. [4, 45, 37]) \n(relative improvement)</td><td>50.23</td><td>81.31</td><td>54.3</td><td>37.49</td><td>79.09</td><td>28.45</td><td>83.47</td><td>95.05</td><td>92.24</td><td>79.54</td><td>94.20</td><td>90.03</td></tr><tr><td>-3.29%</td><td>0.49%</td><td>-3.96%</td><td>-22.7%</td><td>-0.06%</td><td>-47.6%</td><td>-0.98%</td><td>-0.02%</td><td>-0.39%</td><td>-1.43%</td><td>1.56%</td><td>1.43%</td></tr><tr><td rowspan=\"2\">Ellipse + RU Loss (Ours) \n(relative improvement)</td><td>52.89</td><td>81.57</td><td>57.97</td><td>50.36</td><td>81.78</td><td>56.76</td><td>84.83</td><td>95.83</td><td>93.17</td><td>81.28</td><td>94.37</td><td>91.09</td></tr><tr><td>1.84%</td><td>0.82%</td><td>2.53%</td><td>3.78%</td><td>3.35%</td><td>4.53%</td><td>1.05%</td><td>0.80%</td><td>0.62%</td><td>0.72%</td><td>1.69%</td><td>2.63%</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.076,
+                0.433,
+                0.9,
+                0.478
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                952,
+                1530,
+                952,
+                1530,
+                1051,
+                129,
+                1051
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.505,
+                0.469,
+                0.595
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1111,
+                797,
+                1111,
+                797,
+                1309,
+                129,
+                1309
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.596,
+                0.469,
+                0.655
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1311,
+                797,
+                1311,
+                797,
+                1441,
+                129,
+                1441
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.671,
+                0.163,
+                0.687
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1476,
+                277,
+                1476,
+                277,
+                1511,
+                130,
+                1511
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.696,
+                0.159,
+                0.712
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1531,
+                270,
+                1531,
+                270,
+                1566,
+                130,
+                1566
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.719,
+                0.469,
+                0.825
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1581,
+                797,
+                1581,
+                797,
+                1815,
+                129,
+                1815
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.825,
+                0.469,
+                0.9
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1815,
+                797,
+                1815,
+                797,
+                1980,
+                129,
+                1980
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.505,
+                0.892,
+                0.595
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1111,
+                1516,
+                1111,
+                1516,
+                1309,
+                846,
+                1309
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.596,
+                0.892,
+                0.73
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1311,
+                1516,
+                1311,
+                1516,
+                1606,
+                846,
+                1606
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.739,
+                0.665,
+                0.754
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                850,
+                1625,
+                1130,
+                1625,
+                1130,
+                1658,
+                850,
+                1658
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.763,
+                0.892,
+                0.807
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1678,
+                1516,
+                1678,
+                1516,
+                1775,
+                846,
+                1775
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.825,
+                0.892,
+                0.9
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1815,
+                1516,
+                1815,
+                1516,
+                1980,
+                846,
+                1980
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.281,
+                0.101,
+                0.694,
+                0.113
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                477,
+                222,
+                1179,
+                222,
+                1179,
+                248,
+                477,
+                248
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.123,
+                0.131,
+                0.36,
+                0.247
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.367,
+                0.131,
+                0.605,
+                0.247
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.612,
+                0.131,
+                0.85,
+                0.248
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.123,
+                0.26,
+                0.849,
+                0.366
+            ],
+            "angle": 0,
+            "content": "<table><tr><td rowspan=\"2\">COCO val2017 Results</td><td colspan=\"4\">AP</td><td colspan=\"4\">AP50</td><td colspan=\"4\">AP75</td></tr><tr><td>\\( 0^{\\circ} \\)</td><td>\\( 10^{\\circ} \\)</td><td>\\( 20^{\\circ} \\)</td><td>\\( 30^{\\circ} \\)</td><td>\\( 0^{\\circ} \\)</td><td>\\( 10^{\\circ} \\)</td><td>\\( 20^{\\circ} \\)</td><td>\\( 30^{\\circ} \\)</td><td>\\( 0^{\\circ} \\)</td><td>\\( 10^{\\circ} \\)</td><td>\\( 20^{\\circ} \\)</td><td>\\( 30^{\\circ} \\)</td></tr><tr><td>No Rotation</td><td>39.26</td><td>37.54</td><td>33.68</td><td>29.19</td><td>59.68</td><td>56.88</td><td>51.35</td><td>45.37</td><td>41.69</td><td>40.14</td><td>35.63</td><td>30.39</td></tr><tr><td>Largest Box (e.g. [4, 45, 37])</td><td>35.20</td><td>28.37</td><td>22.34</td><td>18.47</td><td>58.79</td><td>56.31</td><td>51.49</td><td>46.30</td><td>36.00</td><td>25.37</td><td>14.95</td><td>10.91</td></tr><tr><td>(relative improvement)</td><td>-10.3%</td><td>-24.4%</td><td>-33.7%</td><td>-36.7%</td><td>-1.48%</td><td>-1.01%</td><td>0.27%</td><td>2.04%</td><td>-13.6%</td><td>-36.8%</td><td>-58.1%</td><td>-64.1%</td></tr><tr><td>Ellipse + RU Loss (Ours)</td><td>39.33</td><td>38.31</td><td>36.00</td><td>32.72</td><td>60.08</td><td>58.66</td><td>55.73</td><td>51.60</td><td>41.74</td><td>40.71</td><td>38.05</td><td>33.97</td></tr><tr><td>(relative improvement)</td><td>0.17%</td><td>2.05%</td><td>6.88%</td><td>12.1%</td><td>0.67%</td><td>3.12%</td><td>8.54%</td><td>13.7%</td><td>0.13%</td><td>1.42%</td><td>6.79%</td><td>11.8%</td></tr><tr><td>Perfect Labels</td><td>39.66</td><td>39.17</td><td>37.24</td><td>34.08</td><td>60.28</td><td>58.89</td><td>55.91</td><td>51.83</td><td>42.05</td><td>41.73</td><td>39.61</td><td>36.02</td></tr><tr><td>(relative improvement)</td><td>1.02%</td><td>4.36%</td><td>10.6%</td><td>16.7%</td><td>1.00%</td><td>3.53%</td><td>8.88%</td><td>14.2%</td><td>0.88%</td><td>3.94%</td><td>11.2%</td><td>18.5%</td></tr></table>"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.375,
+                0.892,
+                0.406
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                825,
+                1516,
+                825,
+                1516,
+                893,
+                129,
+                893
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.433,
+                0.47,
+                0.479
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                952,
+                799,
+                952,
+                799,
+                1053,
+                129,
+                1053
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.499,
+                0.47,
+                0.606
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1097,
+                799,
+                1097,
+                799,
+                1333,
+                129,
+                1333
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.625,
+                0.47,
+                0.702
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1375,
+                799,
+                1375,
+                799,
+                1544,
+                129,
+                1544
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.712,
+                0.276,
+                0.726
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1566,
+                469,
+                1566,
+                469,
+                1597,
+                130,
+                1597
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.735,
+                0.469,
+                0.811
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1617,
+                797,
+                1617,
+                797,
+                1784,
+                129,
+                1784
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.831,
+                0.313,
+                0.847
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                130,
+                1828,
+                532,
+                1828,
+                532,
+                1863,
+                130,
+                1863
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.856,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                129,
+                1883,
+                799,
+                1883,
+                799,
+                1984,
+                129,
+                1984
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.433,
+                0.892,
+                0.493
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                952,
+                1516,
+                952,
+                1516,
+                1084,
+                846,
+                1084
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.514,
+                0.81,
+                0.53
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                848,
+                1130,
+                1377,
+                1130,
+                1377,
+                1166,
+                848,
+                1166
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.538,
+                0.892,
+                0.644
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1183,
+                1516,
+                1183,
+                1516,
+                1416,
+                846,
+                1416
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.659,
+                0.619,
+                0.674
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                850,
+                1449,
+                1052,
+                1449,
+                1052,
+                1482,
+                850,
+                1482
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.684,
+                0.892,
+                0.835
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1504,
+                1516,
+                1504,
+                1516,
+                1837,
+                846,
+                1837
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.856,
+                0.892,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                846,
+                1883,
+                1516,
+                1883,
+                1516,
+                1984,
+                846,
+                1984
+            ]
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.079,
+                0.09,
+                0.176,
+                0.107
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                134,
+                198,
+                299,
+                198,
+                299,
+                235,
+                134,
+                235
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.116,
+                0.47,
+                0.223
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                255,
+                799,
+                255,
+                799,
+                490,
+                149,
+                490
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.226,
+                0.472,
+                0.318
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                497,
+                802,
+                497,
+                802,
+                699,
+                149,
+                699
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.089,
+                0.322,
+                0.47,
+                0.383
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                151,
+                708,
+                799,
+                708,
+                799,
+                842,
+                151,
+                842
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.089,
+                0.387,
+                0.47,
+                0.448
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                151,
+                851,
+                799,
+                851,
+                799,
+                985,
+                151,
+                985
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.453,
+                0.47,
+                0.514
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                996,
+                799,
+                996,
+                799,
+                1130,
+                149,
+                1130
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.518,
+                0.47,
+                0.61
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                1139,
+                799,
+                1139,
+                799,
+                1342,
+                149,
+                1342
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.614,
+                0.47,
+                0.689
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                1350,
+                799,
+                1350,
+                799,
+                1515,
+                149,
+                1515
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.694,
+                0.47,
+                0.77
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                1526,
+                799,
+                1526,
+                799,
+                1694,
+                149,
+                1694
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.088,
+                0.775,
+                0.47,
+                0.851
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                149,
+                1705,
+                799,
+                1705,
+                799,
+                1872,
+                149,
+                1872
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.855,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                134,
+                1881,
+                799,
+                1881,
+                799,
+                1984,
+                134,
+                1984
+            ]
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.079,
+                0.116,
+                0.472,
+                0.902
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.535,
+                0.092,
+                0.892,
+                0.123
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                909,
+                202,
+                1516,
+                202,
+                1516,
+                270,
+                909,
+                270
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.125,
+                0.894,
+                0.171
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                275,
+                1519,
+                275,
+                1519,
+                376,
+                855,
+                376
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.174,
+                0.895,
+                0.248
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                382,
+                1521,
+                382,
+                1521,
+                545,
+                855,
+                545
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.252,
+                0.892,
+                0.328
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                554,
+                1516,
+                554,
+                1516,
+                721,
+                855,
+                721
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.331,
+                0.894,
+                0.406
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                728,
+                1519,
+                728,
+                1519,
+                893,
+                855,
+                893
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.41,
+                0.892,
+                0.456
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                902,
+                1516,
+                902,
+                1516,
+                1003,
+                855,
+                1003
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.459,
+                0.892,
+                0.504
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1009,
+                1516,
+                1009,
+                1516,
+                1108,
+                855,
+                1108
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.507,
+                0.892,
+                0.553
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1115,
+                1516,
+                1115,
+                1516,
+                1216,
+                855,
+                1216
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.556,
+                0.892,
+                0.646
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1223,
+                1516,
+                1223,
+                1516,
+                1421,
+                855,
+                1421
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.649,
+                0.892,
+                0.725
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1427,
+                1516,
+                1427,
+                1516,
+                1595,
+                855,
+                1595
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.728,
+                0.892,
+                0.804
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1601,
+                1516,
+                1601,
+                1516,
+                1768,
+                855,
+                1768
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.807,
+                0.892,
+                0.868
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1775,
+                1516,
+                1775,
+                1516,
+                1909,
+                855,
+                1909
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.871,
+                0.892,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                1916,
+                1516,
+                1916,
+                1516,
+                1984,
+                855,
+                1984
+            ]
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.503,
+                0.092,
+                0.895,
+                0.902
+            ],
+            "angle": 0,
+            "content": null
+        }
+    ],
+    [
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.114,
+                0.092,
+                0.47,
+                0.137
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                193,
+                202,
+                799,
+                202,
+                799,
+                301,
+                193,
+                301
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.141,
+                0.47,
+                0.201
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                310,
+                799,
+                310,
+                799,
+                442,
+                136,
+                442
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.204,
+                0.471,
+                0.294
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                448,
+                800,
+                448,
+                800,
+                646,
+                136,
+                646
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.298,
+                0.471,
+                0.344
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                655,
+                800,
+                655,
+                800,
+                756,
+                136,
+                756
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.347,
+                0.471,
+                0.407
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                763,
+                800,
+                763,
+                800,
+                895,
+                136,
+                895
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.411,
+                0.469,
+                0.442
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                904,
+                797,
+                904,
+                797,
+                972,
+                136,
+                972
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.446,
+                0.47,
+                0.506
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                981,
+                799,
+                981,
+                799,
+                1113,
+                136,
+                1113
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.509,
+                0.47,
+                0.584
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                1119,
+                799,
+                1119,
+                799,
+                1284,
+                136,
+                1284
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.588,
+                0.47,
+                0.648
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                1293,
+                799,
+                1293,
+                799,
+                1425,
+                136,
+                1425
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.652,
+                0.47,
+                0.757
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                1434,
+                799,
+                1434,
+                799,
+                1665,
+                136,
+                1665
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.761,
+                0.47,
+                0.822
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                1674,
+                799,
+                1674,
+                799,
+                1808,
+                136,
+                1808
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.825,
+                0.469,
+                0.901
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                136,
+                1815,
+                797,
+                1815,
+                797,
+                1982,
+                136,
+                1982
+            ]
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.08,
+                0.092,
+                0.471,
+                0.901
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.092,
+                0.893,
+                0.167
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                202,
+                1518,
+                202,
+                1518,
+                367,
+                855,
+                367
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.172,
+                0.892,
+                0.263
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                855,
+                378,
+                1516,
+                378,
+                1516,
+                578,
+                855,
+                578
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.268,
+                0.892,
+                0.343
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                589,
+                1516,
+                589,
+                1516,
+                754,
+                856,
+                754
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.347,
+                0.892,
+                0.394
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                763,
+                1516,
+                763,
+                1516,
+                866,
+                856,
+                866
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.398,
+                0.892,
+                0.459
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                875,
+                1516,
+                875,
+                1516,
+                1009,
+                856,
+                1009
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.464,
+                0.892,
+                0.538
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1020,
+                1516,
+                1020,
+                1516,
+                1183,
+                856,
+                1183
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.544,
+                0.892,
+                0.574
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1196,
+                1516,
+                1196,
+                1516,
+                1262,
+                856,
+                1262
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.579,
+                0.892,
+                0.655
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1273,
+                1516,
+                1273,
+                1516,
+                1441,
+                856,
+                1441
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.659,
+                0.892,
+                0.69
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1449,
+                1516,
+                1449,
+                1516,
+                1517,
+                856,
+                1517
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.695,
+                0.892,
+                0.77
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1529,
+                1516,
+                1529,
+                1516,
+                1694,
+                856,
+                1694
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.775,
+                0.892,
+                0.866
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1705,
+                1516,
+                1705,
+                1516,
+                1905,
+                856,
+                1905
+            ]
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.871,
+                0.892,
+                0.902
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                856,
+                1916,
+                1516,
+                1916,
+                1516,
+                1984,
+                856,
+                1984
+            ]
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.503,
+                0.092,
+                0.893,
+                0.902
+            ],
+            "angle": 0,
+            "content": null
+        }
+    ],
+    [
+        {
+            "type": "text",
+            "bbox": [
+                0.113,
+                0.092,
+                0.47,
+                0.122
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                192,
+                202,
+                799,
+                202,
+                799,
+                268,
+                192,
+                268
+            ]
+        }
+    ]
+]

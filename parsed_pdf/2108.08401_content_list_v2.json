@@ -1,0 +1,2620 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "GP-S3Net: Graph-based Panoptic Sparse Semantic Segmentation Network "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        107,
+        128,
+        859,
+        151
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Ryan Razani ∗, Ran Cheng *, Enxu Li, Ehsan Taghavi, Yuan Ren, and Liu Bingbing Huawei Noah’s Ark Lab, Toronto, Canada "
+          }
+        ]
+      },
+      "bbox": [
+        151,
+        180,
+        820,
+        215
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        233,
+        251,
+        310,
+        266
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Panoptic segmentation as an integrated task of both static environmental understanding and dynamic object identification, has recently begun to receive broad research interest. In this paper, we propose a new computationally efficient LiDAR based panoptic segmentation framework, called GP-S3Net. GP-S3Net is a proposal-free approach in which no object proposals are needed to identify the objects in contrast to conventional two-stage panoptic systems, where a detection network is incorporated for capturing instance information. Our new design consists of a novel instance-level network to process the semantic results by constructing a graph convolutional network to identify objects (foreground), which later on are fused with the background classes. Through the fine-grained clusters of the foreground objects from the semantic segmentation backbone, over-segmentation priors are generated and subsequently processed by 3D sparse convolution to embed each cluster. Each cluster is treated as a node in the graph and its corresponding embedding is used as its node feature. Then a GCNN predicts whether edges exist between each cluster pair. We utilize the instance label to generate ground truth edge labels for each constructed graph in order to supervise the learning. Extensive experiments demonstrate that GP-S3Net outperforms the current state-of-the-art approaches, by a significant margin across available datasets such as, nuScenes and SemanticPOSS, ranking "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { 1 ^ { s t } }"
+          },
+          {
+            "type": "text",
+            "content": "on the competitive public SemanticKITTI leaderboard upon publication. "
+          }
+        ]
+      },
+      "bbox": [
+        73,
+        282,
+        473,
+        691
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        720,
+        207,
+        736
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "One of the main tasks in realizing autonomy in robotic applications is scene understanding using the available data collected from sensors such as camera, Light Detection And Ranging (LiDAR) and RAdio Detection and Ranging (RADAR). Scene understanding can be divided into different tasks such as scene classification, object detection, se-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        748,
+        468,
+        838
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "mantic/instance segmentation and more recently panoptic segmentation. In recent years, deep learning has been used as the main solution to object detection and segmentation. With more granular data available, specially from high resolution LiDARs, the task of semantic/instance segmentation has become a more vital part of any perception module due to generating all the fundamental perceptual information needed for robotic applications such as free space, parking area and vegetation, in addition to all dynamic objects in 3D coordinates. "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        252,
+        890,
+        402
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7c3d68c719020bbb12ea0e6cb21a718f41007fd2c5b3320522d51c1f9982bd4f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        503,
+        417,
+        694,
+        559
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7cd7666cff86dd4e35ef39f4de666761ee26aab89c7f3ac9548fae344c6488a1.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        696,
+        417,
+        885,
+        559
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d36fa30696b82663520481be6ad56725da7dee1a82ceda7eb9687b8179477273.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        503,
+        561,
+        694,
+        702
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2fdc761b44003dac2e4dc7af372bd5730faeee8903f3ae90825a63bbda3a7eb2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: Comparison of our proposed method with DS-Net [15] and TORNADONet [11] on SemanticKITTI benchmark [1]. DS-Net and TORNADONet suffer from oversegmentation problem, while ours shows successful panoptic predictions. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        696,
+        561,
+        885,
+        702
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Normally, the task of semantic segmentation and instance segmentation are treated separately, using two different DNN models. In contrast, panoptic segmentation combines semantic and instance segmentation tasks as explained in [19] by defining two different categories of model predictions, namely, “things” and “stuff”. “Things” is re-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        809,
+        890,
+        900
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2108.08401v1 [cs.CV] 18 Aug 2021 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        260,
+        57,
+        705
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "*Indicates equal contribution. "
+          }
+        ]
+      },
+      "bbox": [
+        98,
+        851,
+        251,
+        863
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "†Emails: {ryan.razani, ran.cheng1, "
+          }
+        ]
+      },
+      "bbox": [
+        98,
+        863,
+        398,
+        876
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "thomas.enxu.li, ehsan.taghavi, yuan.ren3, "
+          }
+        ]
+      },
+      "bbox": [
+        80,
+        876,
+        439,
+        888
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "liu.bingbing}@huawei.com "
+          }
+        ]
+      },
+      "bbox": [
+        80,
+        888,
+        292,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ferred to all countable objects such as cars, pedestrians, bikes, etc. and “stuff” is referred to uncountable semantics (background) such as road, vegetation, parking. Then, the panoptic task is defined by predicting the things and stuff together in one unified solution. Although the panoptic segmentation definition seems plausible, the question of “Is there a way to integrate independent semantic segmentation and target recognition into a system so that the instance level segmentation of objects can effectively use the results of semantic segmentation?” has not been addressed adequately in the literature. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        472,
+        257
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper we present a novel approach to solve the panoptic segmentation problem solely based on Li-DAR that can achieve state-of-the-art panoptic and semantic segmentation results on various benchmarks such as SemanticKITTI [1], nuScenes [2], and SemanticPOSS [24]. Our method uses graph network to generate instances directly from over-segmented clusters obtained by HDB-SCAN [3] that takes in predicted foreground points from the semantic segmentation backbone. Instead of learning the offset vector of each cluster and obtaining instances by re-clustering, a connectivity probability of each edge is learned in the graph. Over-segmented clusters are aggregated together by these connected edges to form instances. Thus, conventional clustering problem is transformed into a supervised edge classification problem. By doing so, we introduce the following contributions: "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        257,
+        472,
+        500
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• A flexible panoptic segmentation framework to benefit from the best available semantic segmentation models and their output. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• A novel clustering and graph convolutional neural network that generates instance-level results (things and their IDs). "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• A seamless fusion of semantic and instance level results to generate panoptic segmentation predictions. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• A thorough experimental results of three major outdoor datasets and an ablation study to show the effectiveness of the proposed solution. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        508,
+        467,
+        707
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Related work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        724,
+        215,
+        739
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Semantic segmentation Most point cloud semantic segmentation methods can be categorized to projection-based, point-based and voxel-based methods, by their method of data processing. Projection-based methods aim to project 3D point clouds into 2D image space in either the topdown Bird-Eye-View [35, 28], or spherical Range-View (RV) [8, 23, 27] or multi-view format [11], and then process with the standard 2D CNNs. Benefited from the quick arrangement of unordered points and the speed of 2D CNN, it is easy for projection-based methods to achieve real time "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        750,
+        472,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "performance, although their accuracy is limited by the information loss during projection. Point-wise methods, such as PointNet++[26], KPConv [30] and RandLA-Net [16], process the raw 3D points without applying any additional transformation or pre-processing. This kind of methods are more suitable for small scale point clouds. However, for large scale point clouds, due to large computation and memory requirements, it is usually difficult to make real time inference. Voxel-based approaches transform a point cloud into 3D volumetric grids in which 3D convolutions are used. Theoretically, 3D convolution is a natural extension of the 2D convolution concept. 3D volumetric grids embedded in Euclidean space can guarantee the shift invariant (or space invariant). However, the high computational requirements still constrain development of the voxel-based approaches. Recently, several sparse convolution libraries, such as Torch sparse, Minkowski Engine [6] and SPConv, have been developed to accelerate the convolution computation by fully exploiting sparsity of point clouds. With the help of these libraries, voxel-based methods such as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { A F } ) ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "-S3Net [5], Cylinder3D [36] and S3Net [4] have achieved state-of-thearts LiDAR semantic segmentation performance on public datasets. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        436
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Instance segmentation Instance segmentation of point clouds can be divided into two categories, i.e. proposalbased and proposal-free methods. Proposal-based methods, e.g. 3D Bonet [33] and GSPN [34], implement 3D bounding box detection followed by a refinement in the bounding box. The refinement network generates a point-wise mask, which filters out the points not belong to the instance. Proposal-free methods are based on clustering. The whole scene is usually segmented into small blocks, and the embeddings of each block are learned and used in the final clustering. PointGroup [18] clusters points towards the instance centroid by learning the offsets of each block. OccuSeg [13] divides the whole scene into super-voxels and uses a graph-based method for clustering. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        443,
+        890,
+        654
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Panoptic segmentation Panoptic segmentation unifies both semantic segmentation and instance segmentation. Panoptic segmentation can also be divided into proposal-based (topdown) and proposal-free (bottom-up) methods. Proposalbased methods such as EfficientLPS [29] and MOPT [17], are two-stage approaches. They detect the foreground instances first, then refine these instances and finally implement the semantic segmentation on the background stuff. In contrast, proposal-free methods are usually single-staged. They segment the scene semantically and identify the instances based on the semantic segmentation result by using a unified network. This kind of network usually consists of a single backbone for feature extraction and two separate branches for semantic and instance segmentation tasks, which are also known as semantic head and instance head. Panoster [10], LPSAD [22] and DS-Net [15] use this two "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        657,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "separate branches structure. Among them, Panoster can use KPConv [30] and SalsaNext [8] as its backbone. All these three methods achieve competitive performance on outdoor LiDAR datasets. Recently, some algorithms use graph to represent the high level topological relationship between foreground things and background stuff, e.g. Wu et al. [31] proposed a bidirectional graph connection module to diffuse information across branches, and achieved state-of-the-art performance on the COCO and ADE20K panoptic segmentation benchmarks. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        472,
+        241
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Proposed approach "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        253,
+        264,
+        272
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we first introduce the problem formulation. Next, the proposed method, GP-S3Net, is presented with detailed description of its components along with network optimization details. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        279,
+        468,
+        340
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1. Problem statement "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        348,
+        261,
+        364
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here we consider a panoptic segmentation task in which a LiDAR point cloud frame is given with a set of unordered points "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( P , L ) = ( \\{ p _ { i } , l _ { i } \\} )"
+          },
+          {
+            "type": "text",
+            "content": "with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p _ { i } \\in \\mathbb { R } ^ { d _ { i n } }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i = 1 , . . . , N"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "denotes the number of points in a point cloud scan. Each point can be paired with features such as Cartesian coordinates "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y , z )"
+          },
+          {
+            "type": "text",
+            "content": ", intensity of returning laser beam "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( i )"
+          },
+          {
+            "type": "text",
+            "content": ", colors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( R , G , B )"
+          },
+          {
+            "type": "text",
+            "content": ", etc. Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { i } \\in \\mathbb { R } ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "represents the ground truth labels corresponding to each point "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "which can be either “stuff” with a single class label "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": ", or “things” with a single class label "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": "and an instance label "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { I }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        372,
+        468,
+        523
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our goal is to learn a function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { F } _ { c l s , i n s t } ( . , \\Phi )"
+          },
+          {
+            "type": "text",
+            "content": "parameterized by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Phi"
+          },
+          {
+            "type": "text",
+            "content": "that assigns a single class label "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": "for all the points related to “stuff” and, class label "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": "and an instance label "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { I }"
+          },
+          {
+            "type": "text",
+            "content": "for all the points in the point cloud related to “things”. InSemantic Instance other words, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { F } _ { p a n o p t i c } ( . , \\Phi )"
+          },
+          {
+            "type": "text",
+            "content": "assigns class and instance labelntation ork  Fusion pair "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\hat { c } _ { i } , i \\hat { n } s t _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": "to each point "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "where applicable. To solve this problem, we present GP-S3Net in which a proposal-Results free design is leveraged to generate predictions for panoptic segmentation benefiting from a novel GNN approach. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        523,
+        468,
+        661
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/45f9c975f6a79073a7605d93ddb4c0e35fee501ff1968cf33bee4e17fadad3aa.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: Overview of our proposed GP-S3Net model for LiDAR panoptic segmentation "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        78,
+        674,
+        465,
+        738
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2. Network architecture "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        816,
+        277,
+        832
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The panoptic segmentation of 3D point cloud usually simultaneously performs semantic segmentation and object recognition on the point cloud, and uses the result of object recognition as a mask to classify the instance of foreground "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        839,
+        468,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "semantic categories (such as vehicles, pedestrians). We propose a cluster method based on graph neural network supervised learning to achieve adaptive object instance segmentation. Through the fine-grained cluster of the foreground class, the over segmentation prior is obtained, and then the three-dimensional sparse convolution is used to embed each cluster. This embedding is used as a feature of the graph node to establish an edge between multiple clusters in the same instance. Essentially, we use semantic information to establish a graph structure. Since the instance label is known, we can perform supervised learning on edges to predict the existence of edges between two cluster embeddings. In essence, we convert an unsupervised task into a supervised learning task. This method is applicable to all panoptic segmentation, including point cloud, rgb image. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        318
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The overall pipeline of our proposed GP-S3Net is shown in Figure 2. It includes a semantic segmentation segmentation backbone followed by a graph-based instance segmentation network and panoptic fusion. A generic semantic Li-DAR segmentation module takes in raw LiDAR point cloud as input and outputs semantic masks which are directly used in the new enhanced instance model. The instance model then clusters the “things” semantic masks and encodes their features into a unified feature vector. These features are fed into a GCNN model followed by a merging step to create the instance information. Finally, the output of the semantic and instance segmentation network are fused (concatenated) without including any learned-based model. The final output is panoptically labeled point cloud in which every point has both a semantic and a instance label. The detailed description of the network architecture is provided below. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        318,
+        892,
+        559
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2.1 Semantic segmentation backbone "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        498,
+        577,
+        785,
+        593
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For the semantic segmentation model we benefit from the model introduced in [5]. (AF)2-S3Net consists of an endto-end 3D encoder-decoder CNN network that combines the voxel-based and point-based learning methods into a unified framework, resulting in highly accurate semantic segmentation model with competitive results for various datasets such as SemanticKITTI and nuScenes. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        601,
+        890,
+        705
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(AF)2-S3Net provides semantic segmentation results using efficient feature attention and fusion at different scales, making the model able to predict semantics for all classes, especially smaller dynamic objects on the road. This characteristic of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { A F } ) ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "-S3Net makes it a viable choice for the first part of the proposed panoptic framework introduced in this paper. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        707,
+        890,
+        813
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2.2 Instance segmentation network "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        498,
+        830,
+        772,
+        847
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in the top branch of Figure 3, our method first uses the segmented point cloud as input and performs oversegmentation by clustering on foreground classes (e.g., car, "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        854,
+        890,
+        902
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2925c5c19995b8ab22be3b4c19000d8774fd1806a16035fc9717504f83a674ab.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: Illustration of GP-S3Net instance learning procedure. The input to the instance network is semantically segmented point cloud from the semantic network. The output is the list of instance clusters for foreground classes which will be fused with background classes to form panoptic results. Instance labels generation block drawn in red dashed box is ON only during training. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        81,
+        89,
+        885,
+        364
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/40805932ca3b417a4be66d57e3aa8a0e026cd837306f38b5cd2d642f1b28a669.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: EdgeNet model "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        86,
+        468,
+        460,
+        612
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "pedestrian). Then, the over-segmented clusters are fed into 1x64 vectors to MLP one by one, and get ??2 output vector whose da sparse convolutional neural network followed by a global average pooling layer to embed the cluster points and their corresponding features. Each point of the cluster has pointwise normal features, intensity and inherited semantic probabilities. All points in one cluster will be converted into a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\times K"
+          },
+          {
+            "type": "text",
+            "content": "embedding vector. Since we use global average pooling, the cluster embedding can compress any number of points into a single point embedding vector of features. We treat the clusters as graph nodes and build a fully connected graph out of all clusters. The embedding vector is thus regarded as the graph node feature. The edge features are depicted in Figure 5, where the edge feature is defined by the cosine similarity of two cluster embedding vectors and the Euclidean distance of two clusters’ centroids. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        674,
+        472,
+        900
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Instance segmentation can be addressed by clustering the entroidobjects’ semantic labels, however the clustering process is ncenot supervised friendly in which only a clustering radius can be tuned. Therefore, it is difficult to exploit the instance labels offered in most of the datasets. In our method, we convert this unsupervised clustering task into a supervised edge Semantclassification problem. First, the foreground class points are Backbonpassed though HDBSCAN so that each instance is divided into several over-segmented clusters. Then, the clustered Input 3D Point Cloudpoints, which belong to the same instance object, are associated using the instance ground truth labels, as illustrated in 2Algorithm 1. Since we have built the fully connected graph, ???? ????as illustrated in the bottom branch of Figure 3, we can create the ground truth labels of edges using the associating relationship between cluster nodes. The edges between the sion are 1x2. associated clusters are thus marked as 1, otherwise 0. Finally after getting the ground truth labels and features of graph nodes and edges, we apply the edge classification using a graph convolutional neural network, named EdgeNet, to predict fully connectected edge labels. After the predition, those over-segmented clusters are merged into a corresponding instance node and the instance ID is projected to each points inside the nodes as output. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        465,
+        890,
+        815
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Instance-level segmented regions are geometrically mutual exclusive, thus we can leverage the connectivity of subgraph to describe the clusters that belongs to a single instance. Therefore, the local connectivity can be described by a binary adjacent matrix where 1 means connection ex-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        825,
+        892,
+        902
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5183d4eb3532bd2c82e6b715437a2353d3491628dd3376f18c42b666c3b088ad.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5: Computation of the edge features used for constructing a cluster graph. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "are the feature embedding of node "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i"
+          },
+          {
+            "type": "text",
+            "content": "and node "
+          },
+          {
+            "type": "equation_inline",
+            "content": "j"
+          },
+          {
+            "type": "text",
+            "content": "for a given edge "
+          },
+          {
+            "type": "equation_inline",
+            "content": "E _ { i j }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Delta C"
+          },
+          {
+            "type": "text",
+            "content": "is the 3d coordinates of point cloud centroids of each node. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        83,
+        90,
+        465,
+        195
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ists and two corresponding nodes belongs to the same instance object. As a result, we can recover the instance points from merging the connected cluster nodes to the same instance group. In this manner, we predict the edges of a fully connected cluster graph in a supervised learning fashion. As depicted in Figure 4, EdgeNet model takes the fully connected cluster graph as input and predicts the edge class for each two pairs of cluster graph. We concatenate the cluster node embedding features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( N \\times 3 2 )"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "is the number of clusters predicted by HDBSCAN, and the node centroid feature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( N \\times 3 )"
+          },
+          {
+            "type": "text",
+            "content": "as the input graph node feature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( N \\times 3 5 )"
+          },
+          {
+            "type": "text",
+            "content": "of the EdgeNet model. The edge feature has two components, the cosine similarity of the cluster graph node feature and the euclidean distance of the cluster graph node centroids. The fully connected cluster graph with node and edge features are fed into two SageConv layers [12] to perform neighborhood node feature aggregation. Then, the starting node feature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { i } ^ { s }"
+          },
+          {
+            "type": "text",
+            "content": "and ending node feature "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n _ { i } ^ { e }"
+          },
+          {
+            "type": "text",
+            "content": "of a given edge "
+          },
+          {
+            "type": "equation_inline",
+            "content": "E _ { i }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i \\in \\{ 1 , 2 , . . . , N ^ { 2 } \\}"
+          },
+          {
+            "type": "text",
+            "content": ", are concatenated as edge feature of the edge "
+          },
+          {
+            "type": "equation_inline",
+            "content": "E _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "with size of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( 1 \\times 6 4 )"
+          },
+          {
+            "type": "text",
+            "content": ". Finally, the edge features are passed into a fully connected layer and the binary edge class labels are predicted. The details of the EdgeNet GCNN architecture is presented in Table 1. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        290,
+        472,
+        640
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/dfe317b0476c01c4b66f005a6bf79bed3bc4b5fb3f9b95605c1859d4f54ac3ec.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: EdgeNet Design. We denote SE as Sparse Embedding, GNN as Graph Neural Network, M and N are number of foreground points and number of cluster, respectively. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( F _ { i n } , F _ { o u t } )"
+          },
+          {
+            "type": "text",
+            "content": "are the number of input and output features. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Stages</td><td>Operation Layer</td><td>Operation Layer</td><td>\\( \\left( {{F}_{in},{F}_{out}}\\right) \\)</td><td>Filter Size</td><td>Stride</td><td>Output Size</td></tr><tr><td>Input</td><td>Input Foreground Point Cloud</td><td>-</td><td>-</td><td>-</td><td>-</td><td>Mx24</td></tr><tr><td>SE</td><td>SparseConv layer</td><td>Sparse Convolution + ReLU</td><td>24,64</td><td>3x3x3</td><td>1x1x1</td><td>Mx64</td></tr><tr><td>SE</td><td>SparseConv layer</td><td>Sparse Convolution + ReLU</td><td>64,32</td><td>3x3x3</td><td>1x1x1</td><td>Mx32</td></tr><tr><td>SE</td><td>Sparse Global Pooling</td><td>Average pooling</td><td>-</td><td>cluster-wise</td><td>-</td><td>Nx32</td></tr><tr><td>GNN</td><td>Graph Conv Mean Aggregator</td><td>SageConv + ReLU</td><td>35,64</td><td>-</td><td>-</td><td>Nx64</td></tr><tr><td>GNN</td><td>Graph Conv Mean Aggregator</td><td>SageConv</td><td>64,32</td><td>-</td><td>-</td><td>Nx32</td></tr><tr><td>GNN</td><td>EdgeNet</td><td>MLP + ReLU</td><td>(32+32),32</td><td>-</td><td>-</td><td>(NxN)x32</td></tr><tr><td>GNN</td><td>EdgeNet</td><td>MLP + Softmax</td><td>32,2</td><td>-</td><td>-</td><td>(NxN)x2</td></tr><tr><td>output</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>(NxN)x2</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        83,
+        652,
+        464,
+        727
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As our method relies on the oversegmentation process, it might be possible that the predictions from the semantic segmentation backbone are incorrect when the GNN thinks multiple clusters with different semantics belong to a single instance. Thus, we refine the semantics of each instance "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        825,
+        470,
+        900
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "with point-wise majority voting. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        90,
+        715,
+        106
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Graph edge labels generation The graph nodes are obtained by running HDBSCAN on the foreground point cloud. Here, we assume the points within the same cluster (graph node) belong to the same instance. In order to supervise the edge classification of the graph, we construct the binary ground truth (GT) edge label matrix, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { e d g e } \\in \\mathbb { B } ^ { N \\times N }"
+          },
+          {
+            "type": "text",
+            "content": "where a True entry indicates the two nodes belong to the Backbonesame object, False indicates they do not, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "Backboneis the number of nodes. Note that this GT edge label is only needed during training, and is obtained by associating each graph node with the GT instance label. Detailed pseudo-code of this operation can be found in Algorithm 1. In summary, we build a correspondence between the cluster ID of the point and its GT instance ID using the offset trick. In particular, the most 32 bit is the GT ID and the least 32 bit is the cluster ID for each entry in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s _ { c o m b o }"
+          },
+          {
+            "type": "text",
+            "content": ". Thus, we can obtain the list of nodes belong to the same object, and a permutation of each node pair in the list will be marked as positive labels. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        106,
+        893,
+        378
+      ]
+    },
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 1: Cluster node association "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "Input: Things Points  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p\\in \\mathbb{R}^{M\\times 3}"
+          },
+          {
+            "type": "text",
+            "content": " Things Instance Label  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l\\in \\mathbb{N}^M"
+          },
+          {
+            "type": "text",
+            "content": "   \nOutput: Binary labels  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l_{edge}\\in \\mathbb{B}^{N\\times N}"
+          },
+          {
+            "type": "text",
+            "content": " of fully connected edge between each cluster;   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c\\coloneqq hdbscan(p)"
+          },
+          {
+            "type": "equation_inline",
+            "content": "nClusterr:=len(set(c))"
+          },
+          {
+            "type": "equation_inline",
+            "content": "l_{edge}\\coloneqq zeros(nCluster,nClusterr)"
+          },
+          {
+            "type": "equation_inline",
+            "content": "d\\coloneqq \\{\\}"
+          },
+          {
+            "type": "text",
+            "content": "   \nfor  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i_{gt}'"
+          },
+          {
+            "type": "text",
+            "content": " in set(l) do  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "|d[i_{gt}']\\coloneqq \\{\\}"
+          },
+          {
+            "type": "text",
+            "content": "   \nend   \noffset  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\coloneqq 2^{32}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "s_{comb0}\\coloneqq c + offset * l"
+          },
+          {
+            "type": "text",
+            "content": " .   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s'_\\coloneqq set(s_{comb0})"
+          },
+          {
+            "type": "equation_inline",
+            "content": "s_{gt}'\\coloneqq s' / / offset"
+          },
+          {
+            "type": "equation_inline",
+            "content": "s_{pred}'\\coloneqq s'\\% offset"
+          },
+          {
+            "type": "text",
+            "content": "   \nfor idx,  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i_{gt}'"
+          },
+          {
+            "type": "text",
+            "content": " in enum(s') do  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "|d[i_{gt}]'.append(s_{pred}[idx])|"
+          },
+          {
+            "type": "text",
+            "content": "   \nend   \nfor  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i_{gt}'"
+          },
+          {
+            "type": "text",
+            "content": " in d do trueEdge  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\coloneqq"
+          },
+          {
+            "type": "text",
+            "content": " permute(d[i'g]); for  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(i,j)"
+          },
+          {
+            "type": "text",
+            "content": " in trueEdge do  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "|l_{edge}[i,j] = True;"
+          },
+          {
+            "type": "text",
+            "content": " end   \nend "
+          }
+        ]
+      },
+      "bbox": [
+        516,
+        415,
+        849,
+        806
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Experimental Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        844,
+        705,
+        861
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we firstly introduce the three datasets that we report the results on, followed by the quantitative met-"
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        869,
+        892,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "rics we use. Secondly, we present our experimental setup in detail. Further, the quantitative and qualitative results together with ablation analysis on various clustering algorithms as baselines are shown. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        468,
+        150
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "SemanticKITTI is the first available benchmark on LiDAR-based panoptic segmentation [1]. It contains 22 sequences where sequence 00-10 are used for training and validation (19,130 training frames and 4,071 validation frames) and 11-21 are held out for testing (20,351 frames). We validate and provide ablation analysis on sequence 08. Each point in the dataset is provided with a semantic label of 28 classes which are mapped to 19 classes for the task of panoptic segmentation. Among these 19 classes, 11 of them are stuff classes and 8 of them are things where the instance IDs are available. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        152,
+        470,
+        316
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "nuScenes is a multi-modal autonomous driving dataset containing 1000 scenes where 700 are used for training, 150 for validation, and the rest for testing [2]. Since the dataset does not provide point-level panoptic labels for Li-DAR scans, we obtain the panoptic segmentation labels by the following procedure. With semantic labels from the lidarseg dataset and 3D bounding box annotations from the detection dataset, we assign every point having the same semantic inside each bounding box unique instance IDs. Due to the test set labels being held out, we train the model on the training split (28,130 frames) and evaluate on the validation split (6,019 frames). Among 16 labeled classes in lidarseg, 8 vehicle and human classes are things and the rest are considered stuff. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        319,
+        468,
+        530
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "SemanticPOSS is a dataset with data collected in Peking University and uses the same data format as SemanticKITTI. It contains 2,988 LiDAR scans (six sequences) with point-wise semantic label and instance ID. Sequence 00, 01, 03, 04 and 05 are used for training, and sequence 02 is the validation set. 11 remapped classes are used in panoptic segmentation, among which 3 classes are things, and 8 classes are stuff. Comparing with SemanticKITTI and nuScenes, SemanticPOSS has a large quantity of dynamic instances [24] thus challenging for panoptic segmentation tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        532,
+        468,
+        698
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Evaluation metric Mean Panoptic Quality (PQ) is used as our main metric to evaluate and compare the results with others. PQ can be further decomposed into SQ and RQ to provide additional insights of the results as shown in Equation 1 [20]. These three metrics are calculated separately on stuff and things classes, providing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { P Q } ^ { S t }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { S Q } ^ { S t }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathsf { R Q } ^ { S t }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { P Q } ^ { T h }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathrm { S Q } } ^ { T h }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathsf { R Q } ^ { T h }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        699,
+        468,
+        806
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {P Q} _ {c} = \\underbrace {\\frac {\\sum_ {(p , g) \\in T P _ {c}} \\mathbf {I o U} (p , g)}{| T P _ {c} |}} _ {\\text {S e g m e n t a t i o n Q u a l i t y (S Q)}} \\times \\underbrace {\\frac {| T P _ {c} |}{| T P _ {c} | + \\frac {1}{2} | F P _ {c} | + \\frac {1}{2} | F N _ {c} |}} _ {\\text {R e c o n g i n t i o n Q u a l i t y (R Q)}} \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/50db4d56e0d6b3253ca11bf8120b324f1c0b8a0dea4826faf6d90248c6d95263.jpg"
+        }
+      },
+      "bbox": [
+        76,
+        829,
+        482,
+        901
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbf {P Q} = \\frac {1}{n} \\sum_ {c = 1} ^ {n} \\mathbf {P Q} _ {c} \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/8aa0b8d6c3f0cb128963a235f8f7fadd68a0470d54d3173cd0baa83a26c7a202.jpg"
+        }
+      },
+      "bbox": [
+        633,
+        104,
+        890,
+        142
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "denotes the total number of classes, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( p , g )"
+          },
+          {
+            "type": "text",
+            "content": "represent the prediction and ground truth, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| T P _ { c } |"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| F P _ { c } |"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| F N _ { c } |"
+          },
+          {
+            "type": "text",
+            "content": "are the set of true positive, false positives, and false negative matches for class "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "respectively. A match is a true positive if their IoU is larger than 0.5. In addition, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { P Q } ^ { \\dagger }"
+          },
+          {
+            "type": "text",
+            "content": "is also reported as suggested in [25]. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        151,
+        893,
+        242
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1. Experimental setup "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        252,
+        687,
+        268
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We train our model using SGD optimizer with momentum of 0.9 and learning rate of 0.001, weight decay of 0.0005 for 150 epochs for all three datasets. Experiments are done on NVIDIA V100 GPUs. Cross Entropy Loss is used to train the edge classification for the GCNN, while the semantic segmentation is supervised by losses presented in [5]. Embedding size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "for the graph node is set to 32. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        276,
+        890,
+        381
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We implement LPSAD as a baseline model and results on SemanticKITTI validation set were matched as reported in [22]. We also provide the quantitative and qualitative results of this baseline model on nuScenes and Semantic-POSS. In addition, to generate a better panoptic method using range-image data, we train the TORNADO-Net [11] (without the PPL block) for the task of panoptic segmentation as it represents a better range-image segmentation results. Further, we train DS-Net [15] on SemanticPOSS with the official codebase released by the authors. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        382,
+        890,
+        532
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2. Quantitative evaluation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        544,
+        718,
+        559
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Starting from SemanticKITTI test results (the only available test benchmark), we can see that GP-S3Net is standing out as the best framework for panoptic segmentation achieving PQ of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 0 . 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". Moreover, the method does not suffer from any degradation in semantic segmentation results, topping all other methods at mIoU of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 0 . 8 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". Focusing on the methods that do not use object proposals, the new method, i.e., GP-S3Net, performs outstandingly better than prior arts in terms of PQ such as LPSAD "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( + 2 2 . 0 \\% )"
+          },
+          {
+            "type": "text",
+            "content": ", Panoster "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( + 7 . 3 \\% )"
+          },
+          {
+            "type": "text",
+            "content": "and DS-Net "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( + 4 . 1 \\% )"
+          },
+          {
+            "type": "text",
+            "content": ". When we combine all methods, as it is shown in Table 2, GP-S3Net can achieve better results than EfficientLPS [29] by a small margin, but provides much better semantic segmentation results, and all without using any object proposal information which normally means access to bounding box information of dynamic objects. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        568,
+        890,
+        809
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To show the effectiveness of the proposed method in other large-scale outdoor datasets, and to show the generalization quality of GP-S3Net, we also provide the validation benchmark results for nuScenes and SemanticPOSS in Tables 4 and 5, respectively. GP-S3Net outperforms the prior-art in almost all the metrics for both datasets proving "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        810,
+        890,
+        901
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/12daef74844c8ad83f995f5419912a8948b492b41d50d6dcb9155229810ce1d3.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>PQ</td><td>\\( PQ^† \\)</td><td>RQ</td><td>SQ</td><td>\\( PQ^{Th} \\)</td><td>\\( RQ^{Th} \\)</td><td>\\( SQ^{Th} \\)</td><td>\\( PQ^{St} \\)</td><td>\\( RQ^{St} \\)</td><td>\\( SQ^{St} \\)</td><td>mIoU</td></tr><tr><td>RangeNet++ [23] + PointPillars [21]</td><td>37.1</td><td>45.9</td><td>47.0</td><td>75.9</td><td>20.2</td><td>25.2</td><td>75.2</td><td>49.3</td><td>62.8</td><td>76.5</td><td>52.4</td></tr><tr><td>LPSAD [22]</td><td>38.0</td><td>47.0</td><td>48.2</td><td>76.5</td><td>25.6</td><td>31.8</td><td>76.8</td><td>47.1</td><td>60.1</td><td>76.2</td><td>50.9</td></tr><tr><td>PanopticTrackNet [17]</td><td>43.1</td><td>50.7</td><td>53.9</td><td>78.8</td><td>28.6</td><td>35.5</td><td>80.4</td><td>53.6</td><td>67.3</td><td>77.7</td><td>52.6</td></tr><tr><td>KPConv [30] + PointPillars [21]</td><td>44.5</td><td>52.5</td><td>54.4</td><td>80.0</td><td>32.7</td><td>38.7</td><td>81.5</td><td>53.1</td><td>65.9</td><td>79.0</td><td>58.8</td></tr><tr><td>Panoster [10]</td><td>52.7</td><td>59.9</td><td>64.1</td><td>80.7</td><td>49.4</td><td>58.5</td><td>83.3</td><td>55.1</td><td>68.2</td><td>78.8</td><td>59.9</td></tr><tr><td>DS-Net [15]</td><td>55.9</td><td>62.5</td><td>66.7</td><td>82.3</td><td>55.1</td><td>62.8</td><td>87.2</td><td>56.5</td><td>69.5</td><td>78.7</td><td>61.6</td></tr><tr><td>EfficientLPS [29]</td><td>57.4</td><td>63.2</td><td>68.7</td><td>83.0</td><td>53.1</td><td>60.5</td><td>87.8</td><td>60.5</td><td>74.6</td><td>79.5</td><td>61.4</td></tr><tr><td>GP-S3Net [Ours]</td><td>60.0</td><td>69.0</td><td>72.1</td><td>82.0</td><td>65.0</td><td>74.5</td><td>86.6</td><td>56.4</td><td>70.4</td><td>78.7</td><td>70.8</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        135,
+        88,
+        834,
+        207
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/d332f521a168e65b877b1aa2d55cfb04f578b3178edfde17f9e2b84ed9991323.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Comparison of LiDAR panoptic segmentation performance on SemanticKITTI[1] test dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>PQ</td><td>\\( PQ^† \\)</td><td>RQ</td><td>SQ</td><td>\\( PQ^{Th} \\)</td><td>\\( RQ^{Th} \\)</td><td>\\( SQ^{Th} \\)</td><td>\\( PQ^{St} \\)</td><td>\\( RQ^{St} \\)</td><td>\\( SQ^{St} \\)</td><td>mIoU</td></tr><tr><td>RangeNet++ [23] + PointPillars [21]</td><td>36.5</td><td>-</td><td>44.9</td><td>73.0</td><td>19.6</td><td>24.9</td><td>69.2</td><td>47.1</td><td>59.4</td><td>75.8</td><td>52.8</td></tr><tr><td>LPSAD [22] [Our Implementation]</td><td>37.4</td><td>44.2</td><td>47.8</td><td>66.9</td><td>25.3</td><td>32.4</td><td>65.2</td><td>46.2</td><td>58.9</td><td>68.2</td><td>49.4</td></tr><tr><td>PanopticTrackNet [17]</td><td>40.0</td><td>-</td><td>48.3</td><td>73.0</td><td>29.9</td><td>33.6</td><td>76.8</td><td>47.4</td><td>59.1</td><td>70.3</td><td>53.8</td></tr><tr><td>KPCConv [30] + PointPillars [21]</td><td>41.1</td><td>-</td><td>50.3</td><td>74.3</td><td>28.9</td><td>33.1</td><td>69.8</td><td>50.1</td><td>62.8</td><td>77.6</td><td>56.6</td></tr><tr><td>TORNADO-Net [11] w/ Fusion</td><td>50.6</td><td>55.9</td><td>62.1</td><td>74.9</td><td>48.1</td><td>57.5</td><td>72.5</td><td>52.4</td><td>65.4</td><td>76.7</td><td>59.2</td></tr><tr><td>Panoster [10]</td><td>55.6</td><td>-</td><td>66.8</td><td>79.9</td><td>56.6</td><td>65.8</td><td>-</td><td>-</td><td>-</td><td>-</td><td>61.1</td></tr><tr><td>DS-Net [15]</td><td>57.7</td><td>63.4</td><td>68.0</td><td>77.6</td><td>61.8</td><td>68.8</td><td>78.2</td><td>54.8</td><td>67.3</td><td>77.1</td><td>63.5</td></tr><tr><td>EfficientLPS[29]</td><td>59.2</td><td>65.1</td><td>69.8</td><td>75.0</td><td>58.0</td><td>68.2</td><td>78.0</td><td>60.9</td><td>71.0</td><td>72.8</td><td>64.9</td></tr><tr><td>GP-S3Net [Ours]</td><td>63.3</td><td>71.5</td><td>75.9</td><td>81.4</td><td>70.2</td><td>80.1</td><td>86.2</td><td>58.3</td><td>72.9</td><td>77.9</td><td>73.0</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        135,
+        244,
+        834,
+        377
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/015d4e2cff5f078edc0b9238a696ba8580d59295f6d70ef5c154caf5d38d2547.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Comparison of LiDAR panoptic segmentation performance on SemanticKITTI[1] validation dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>PQ</td><td>\\( PQ^† \\)</td><td>RQ</td><td>SQ</td><td>\\( PQ^{Th} \\)</td><td>\\( RQ^{Th} \\)</td><td>\\( SQ^{Th} \\)</td><td>\\( PQ^{St} \\)</td><td>\\( RQ^{St} \\)</td><td>\\( SQ^{St} \\)</td><td>mIoU</td></tr><tr><td>Cylinder3D [36] + PointPillars [21]</td><td>36.0</td><td>44.5</td><td>43.0</td><td>83.3</td><td>23.3</td><td>27.0</td><td>83.7</td><td>57.2</td><td>69.6</td><td>82.7</td><td>52.3</td></tr><tr><td>Cylinder3D [36] + SECOND [32]</td><td>40.1</td><td>48.4</td><td>47.3</td><td>84.2</td><td>29.0</td><td>33.6</td><td>84.4</td><td>58.5</td><td>70.1</td><td>83.7</td><td>58.5</td></tr><tr><td>DS-Net [15]</td><td>42.5</td><td>51.0</td><td>50.3</td><td>83.6</td><td>32.5</td><td>38.3</td><td>83.1</td><td>59.2</td><td>70.3</td><td>84.4</td><td>70.7</td></tr><tr><td>RangeNet++ [23] + Mask R-CNN [14]</td><td>45.2</td><td>53.7</td><td>55.7</td><td>80.2</td><td>39.2</td><td>48.6</td><td>79.4</td><td>55.2</td><td>67.6</td><td>81.5</td><td>61.7</td></tr><tr><td>PanopticTrackNet [17]</td><td>50.0</td><td>57.3</td><td>60.6</td><td>80.9</td><td>45.1</td><td>52.4</td><td>80.3</td><td>58.3</td><td>74.3</td><td>81.9</td><td>63.1</td></tr><tr><td>KPCov [30] + Mask R-CNN [14]</td><td>50.1</td><td>57.9</td><td>60.7</td><td>81.0</td><td>43.9</td><td>50.4</td><td>80.2</td><td>60.5</td><td>77.8</td><td>82.2</td><td>63.9</td></tr><tr><td>LPSAD [22] [Our Implementation]</td><td>50.4</td><td>57.7</td><td>62.4</td><td>79.4</td><td>43.2</td><td>53.2</td><td>80.2</td><td>57.5</td><td>71.7</td><td>78.5</td><td>62.5</td></tr><tr><td>TORNADO-Net [11] w/ Fusion</td><td>54.0</td><td>59.8</td><td>65.4</td><td>80.9</td><td>44.1</td><td>53.9</td><td>80.1</td><td>63.9</td><td>76.9</td><td>81.8</td><td>68.0</td></tr><tr><td>EfficientLPS [29]</td><td>59.2</td><td>62.8</td><td>70.7</td><td>82.9</td><td>51.8</td><td>62.7</td><td>80.6</td><td>71.5</td><td>84.1</td><td>84.3</td><td>69.4</td></tr><tr><td>GP-S3Net [Ours]</td><td>61.0</td><td>67.5</td><td>72.0</td><td>84.1</td><td>56.0</td><td>65.2</td><td>85.3</td><td>66.0</td><td>78.7</td><td>82.9</td><td>75.8</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        135,
+        417,
+        834,
+        559
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/de6090dbe4e84e35c5ae45b083dcf10cf7f08a3d8b42536f329fb3ec43547bab.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Comparison of LiDAR panoptic segmentation performance on nuScenes[2] validation dataset. "
+          },
+          {
+            "type": "text",
+            "content": "Table 5: Comparison of LiDAR panoptic segmentation performance on SemanticPOSS[24] validation dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>PQ</td><td>PQ†</td><td>RQ</td><td>SQ</td><td>PQTh</td><td>RQTh</td><td>SQTh</td><td>PQSt</td><td>RQSt</td><td>SQSt</td><td>mIoU</td></tr><tr><td>LPSAD [22] [Our Implementation]</td><td>22.5</td><td>32.7</td><td>34.0</td><td>53.5</td><td>18.7</td><td>25.7</td><td>70.5</td><td>24.0</td><td>37.1</td><td>47.1</td><td>35.5</td></tr><tr><td>TORNADO-Net [11] w/ Fusion</td><td>33.7</td><td>43.3</td><td>46.0</td><td>68.4</td><td>41.2</td><td>49.6</td><td>83.1</td><td>30.9</td><td>44.7</td><td>62.9</td><td>44.5</td></tr><tr><td>DS-Net [15]</td><td>35.6</td><td>45.9</td><td>49.2</td><td>68.6</td><td>27.4</td><td>33.8</td><td>76.8</td><td>38.7</td><td>55.0</td><td>65.5</td><td>54.5</td></tr><tr><td>GP-S3Net [Ours]</td><td>48.7</td><td>60.3</td><td>63.7</td><td>61.3</td><td>61.6</td><td>71.7</td><td>86.4</td><td>43.8</td><td>60.8</td><td>51.8</td><td>61.8</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        135,
+        598,
+        834,
+        667
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the proposed framework can work across a wide range of sensor setups and geometrical differences. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        720,
+        470,
+        751
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3. Qualitative evaluation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        75,
+        756,
+        282,
+        771
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Figure 6, LPSAD [22] and TORNADO-Net [11], which both are based on point offset predictions and clustering, perform poorly in crowded scenes where they have failed to differentiate instances of pedestrians and vehicles (visible in nuScenes and SemanticKITTI samples). In contrast, GP-S3Net, which is a graph-based approach, is learned to separate most of the objects, regardless of their closeness, with much less confusion in assigning instance "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        779,
+        470,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "labels. "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        720,
+        545,
+        734
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Another case is large objects like trucks as it is shown in the SemanticPOSS sample. It is clear that neither of the methods, i.e. LPSAD and TORNADO-Net, can solve the problem of less-segmentation for larger objects. Similar issues can be observed in SemanticKITTI as shown in Figure 1 on better benchmarks such as DS-Net [15]. However, GP-S3Net can resolve this issue by assigning all those clusters into on instance, in this case truck, correctly. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        779,
+        890,
+        902
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3d02391025565a170f5edfeb25716a61ac6c9ba46eea7e807328f4b72ae4d14a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6: Comparison of different models with GP-S3Net on three different datasets of SemanticKITTI, nuScenes, and SemanticPOSS. Red circles demonstrate that our method performs better in many details than recent state-of-the-art models. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        99,
+        98,
+        883,
+        479
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.4. Ablation studies "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        549,
+        238,
+        564
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To further demonstrate the effectiveness of our graphbased network, we provide an ablation analysis in Table 6 comparing our baseline with our proposed method on validation sequence of SemanticKITTI dataset. The baselines are our semantic segmentation backbone followed by different clustering algorithms with no instance head. It can be observed that Meanshift [7], performs relatively better than HDBSCAN [3], and DBSCAN [9] due to its robust kernel function insensitive to the density change in the point cloud. The proposed method outperforms all the baselines by a large margin. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        574,
+        470,
+        741
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/dd4eca1e2d2372dfaa4cd7a03e854828c9ca19a8edbd9f63c69fcc057cbb4eac.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6: Ablation study of the proposed method vs baselines evaluated on SemanticKITTI [1] validation dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Architecture</td><td>PQ</td><td>\\( PQ^{Th} \\)</td><td>\\( RQ^{Th} \\)</td><td>\\( SQ^{Th} \\)</td></tr><tr><td>Baseline w/ DBSCAN [9]</td><td>49.4</td><td>40.5</td><td>51.3</td><td>78.4</td></tr><tr><td>Baseline w/ HDBSCAN [3]</td><td>53.4</td><td>50.1</td><td>63.1</td><td>78.5</td></tr><tr><td>Baseline w/ MeanShift [7]</td><td>55.8</td><td>55.7</td><td>66.7</td><td>82.5</td></tr><tr><td>Proposed</td><td>63.3</td><td>70.2</td><td>80.1</td><td>86.2</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        101,
+        753,
+        444,
+        843
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5. Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        549,
+        617,
+        564
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this work, we proposed GP-S3Net, a novel one-stage panoptic segmentation network. In addition to the strong semantic segmentation backbone, GP-S3Net has an effective instance network that takes in the clusters of the semantic masks of the thing classes and constructs a graph with node and edge features learned from sparse convolutions. A GCNN is followed to predict whether an edge exists between each node pair. This novel approach has turned an unsupervised clustering task into a supervised graph edge classification problem where edges between two nodes indicate them belonging to the same instance. Comprehensive benchmarking results are presented on SemanticKITTI, nuScenes and SemanticPOSS datasets, demonstrating the state-of-the-art performance of GP-S3Net. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        575,
+        890,
+        787
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        804,
+        596,
+        819
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[1] Jens Behley, Martin Garbade, Andres Milioto, Jan Quenzel, Sven Behnke, Cyrill Stachniss, and Jurgen Gall. Se-¨ mantickitti: A dataset for semantic scene understanding of lidar sequences. In 2019 IEEE/CVF International Conference on Computer Vision, ICCV 2019, Seoul, Korea (South), "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        506,
+        830,
+        892,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "October 27 - November 2, 2019, pages 9296–9306. IEEE, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[2] Holger Caesar, Varun Bankiti, Alex H Lang, Sourabh Vora, Venice Erin Liong, Qiang Xu, Anush Krishnan, Yu Pan, Giancarlo Baldan, and Oscar Beijbom. nuscenes: A multimodal dataset for autonomous driving. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 11621–11631, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[3] Ricardo J. G. B. Campello, Davoud Moulavi, and Joerg Sander. Density-based clustering based on hierarchical density estimates. Advances in Knowledge Discovery and Data Mining Lecture Notes in Computer Science, page 160–172, 2013. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[4] Ran Cheng, Ryan Razani, Yuan Ren, and Bingbing Liu. S3net: 3d lidar sparse semantic segmentation network, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[5] Ran Cheng, Ryan Razani, Ehsan Taghavi, Enxu Li, and Bingbing Liu. (af)2-s3net: Attentive feature fusion with adaptive feature selection for sparse semantic segmentation network, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[6] Christopher Choy, JunYoung Gwak, and Silvio Savarese. 4d spatio-temporal convnets: Minkowski convolutional neural networks. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 3075–3084, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[7] D. Comaniciu and P. Meer. Mean shift: a robust approach toward feature space analysis. IEEE Transactions on Pattern Analysis and Machine Intelligence, 24(5):603–619, 2002. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[8] Tiago Cortinhal, George Tzelepis, and Eren Erdal Aksoy. Salsanext: Fast semantic segmentation of lidar point clouds for autonomous driving. In 2020 IEEE Intelligent Vehicles Symposium (IV), pages 655–661, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[9] Martin Ester, Hans-Peter Kriegel, Jorg Sander, and Xiaowei Xu. A density-based algorithm for discovering clusters in large spatial databases with noise. Kdd, 96:226–231, 1996. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[10] Stefano Gasperini, Mohammad-Ali Nikouei Mahani, Alvaro Marcos-Ramiro, Nassir Navab, and Federico Tombari. Panoster: End-to-end panoptic segmentation of lidar point clouds, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[11] Martin Gerdzhev, Ryan Razani, Ehsan Taghavi, and Bingbing Liu. Tornado-net: multiview total variation semantic segmentation with diamond inception module, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[12] William L Hamilton, Rex Ying, and Jure Leskovec. Inductive representation learning on large graphs. arXiv preprint arXiv:1706.02216, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[13] L. Han, T. Zheng, L. Xu, and L. Fang. Occuseg: Occupancyaware 3d instance segmentation. In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pages 2937–2946, Los Alamitos, CA, USA, jun 2020. IEEE Computer Society. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[14] Kaiming He, Georgia Gkioxari, Piotr Dollar, and Ross Gir- ´ shick. Mask r-cnn. In Proceedings of the IEEE international conference on computer vision, pages 2961–2969, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[15] Fangzhou Hong, Hui Zhou, Xinge Zhu, Hongsheng Li, and Ziwei Liu. Lidar-based panoptic segmentation via dynamic shifting network. arXiv preprint arXiv:2011.11964, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[16] Qingyong Hu, Bo Yang, Linhai Xie, Stefano Rosa, Yulan Guo, Zhihua Wang, Niki Trigoni, and Andrew Markham. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        470,
+        900
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Randla-net: Efficient semantic segmentation of large-scale point clouds. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 11108– 11117, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[17] Juana Valeria Hurtado, Rohit Mohan, Wolfram Burgard, and Abhinav Valada. Mopt: Multi-object panoptic tracking, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[18] Li Jiang, Hengshuang Zhao, Shaoshuai Shi, Shu Liu, Chi-Wing Fu, and Jiaya Jia. Pointgroup: Dual-set point grouping for 3d instance segmentation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[19] Alexander Kirillov, Kaiming He, Ross Girshick, Carsten Rother, and Piotr Dollar. Panoptic segmentation. In ´ Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 9404–9413, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[20] Alexander Kirillov, Kaiming He, Ross Girshick, Carsten Rother, and Piotr Dollar. Panoptic segmentation. 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[21] Alex H. Lang, Sourabh Vora, Holger Caesar, Lubing Zhou, Jiong Yang, and Oscar Beijbom. Pointpillars: Fast encoders for object detection from point clouds. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[22] A. Milioto, J. Behley, C. McCool, and C. Stachniss. Lidar panoptic segmentation for autonomous driving. In 2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pages 8505–8512, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[23] Andres Milioto, Ignacio Vizzo, Jens Behley, and Cyrill Stachniss. Rangenet++: Fast and accurate lidar semantic segmentation. In Proc. of the IEEE/RSJ Intl. Conf. on Intelligent Robots and Systems (IROS), 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[24] Yancheng Pan, Biao Gao, Jilin Mei, Sibo Geng, Chengkun Li, and Huijing Zhao. Semanticposs: A point cloud dataset with large quantity of dynamic instances. In 2020 IEEE Intelligent Vehicles Symposium (IV), pages 687–693. IEEE, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[25] Lorenzo Porzi, Samuel Rota Bulo, Aleksander Colovic, and Peter Kontschieder. Seamless scene segmentation. 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[26] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J Guibas. Pointnet++: Deep hierarchical feature learning on point sets in a metric space. In Advances in neural information processing systems, pages 5099–5108, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[27] Ryan Razani, Ran Cheng, Ehsan Taghavi, and Liu Bingbing. Lite-hdseg: Lidar semantic segmentation using lite harmonic dense convolutions, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[28] Martin Simon, Stefan Milz, Karl Amende, and Horst-Michael Gross. Complex-yolo: An euler-region-proposal for real-time 3d object detection on point clouds. In Laura Leal-Taixe and Stefan Roth, editors, ´ Computer Vision – ECCV 2018 Workshops, pages 197–209, Cham, 2019. Springer International Publishing. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[29] Kshitij Sirohi, Rohit Mohan, Daniel Buscher, Wolfram Bur- ¨ gard, and Abhinav Valada. Efficientlps: Efficient lidar panoptic segmentation, 2021. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        503,
+        92,
+        890,
+        900
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[30] Hugues Thomas, Charles R Qi, Jean-Emmanuel Deschaud, Beatriz Marcotegui, Franc¸ois Goulette, and Leonidas J Guibas. Kpconv: Flexible and deformable convolution for point clouds. In Proceedings of the IEEE International Conference on Computer Vision, pages 6411–6420, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[31] Yangxin Wu, Gengwei Zhang, Yiming Gao, Xiajun Deng, Ke Gong, Xiaodan Liang, and Liang Lin. Bidirectional graph reasoning network for panoptic segmentation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[32] Yan Yan, Yuxing Mao, and Bo Li. Second: Sparsely embedded convolutional detection. Sensors, 18(10):3337, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[33] Bo Yang, Jianan Wang, Ronald Clark, Qingyong Hu, Sen Wang, Andrew Markham, and Niki Trigoni. Learning object bounding boxes for 3d instance segmentation on point clouds. In H. Wallach, H. Larochelle, A. Beygelzimer, F. d'Alche-Buc, E. Fox, and R. Garnett, editors,´ Advances in Neural Information Processing Systems, volume 32. Curran Associates, Inc., 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[34] Li Yi, Wang Zhao, He Wang, Minhyuk Sung, and Leonidas Guibas. Gspn: Generative shape proposal network for 3d instance segmentation in point cloud. pages 3942–3951, 06 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[35] Y. Zeng, Y. Hu, S. Liu, J. Ye, Y. Han, X. Li, and N. Sun. Rt3d: Real-time 3-d vehicle detection in lidar point cloud for autonomous driving. IEEE Robotics and Automation Letters, 3(4):3434–3440, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[36] Hui Zhou, Xinge Zhu, Xiao Song, Yuexin Ma, Zhe Wang, Hongsheng Li, and Dahua Lin. Cylinder3d: An effective 3d framework for driving-scene lidar semantic segmentation. arXiv preprint arXiv:2008.01550, 2020. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        468,
+        527
+      ]
+    }
+  ]
+]

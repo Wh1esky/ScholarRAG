@@ -1,0 +1,3556 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "CONTEXTGNN: BEYOND TWO-TOWER RECOMMENDATION SYSTEMS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        99,
+        697,
+        146
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Yiwen Yuan, Zecheng Zhang, Xinwei He, Akihiro Nitta, Weihua Hu, Dong Wang, Manan Shah, Shenyang Huang, Blaz Stojanovi ˇ c, Alan Krumholz ˇ , Jan Eric Lenssen, Jure Leskovec, Matthias Fey Kumo.AI "
+          }
+        ]
+      },
+      "bbox": [
+        179,
+        169,
+        728,
+        224
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        450,
+        253,
+        545,
+        268
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recommendation systems predominantly utilize two-tower architectures, which evaluate user-item rankings through the inner product of their respective embeddings. However, one key limitation of two-tower models is that they learn a pairagnostic representation of users and items. In contrast, pair-wise representations either scale poorly due to their quadratic complexity or are too restrictive on the candidate pairs to rank. To address these issues, we introduce Context-based Graph Neural Networks (CONTEXTGNNs), a novel deep learning architecture for link prediction in recommendation systems. The method employs a pair-wise representation technique for familiar items situated within a user’s local subgraph, while leveraging two-tower representations to facilitate the recommendation of exploratory items. A final network then predicts how to fuse both pair-wise and two-tower recommendations into a single ranking of items. We demonstrate that CONTEXTGNN is able to adapt to different data characteristics and outperforms existing methods, both traditional and GNN-based, on a diverse set of practical recommendation tasks, improving performance by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "20 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on average. "
+          }
+        ]
+      },
+      "bbox": [
+        228,
+        281,
+        767,
+        489
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 INTRODUCTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        511,
+        336,
+        526
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recommendation systems have emerged as an important application domain for predictive machine learning over the past decades (Webber, 2021; He et al., 2023; Li et al., 2024). Given a set of users and a set of items (e.g., products available for purchase), recommendation systems aim to identify optimal item recommendations for each user (e.g., products most likely to be purchased by the user). Traditionally, this problem is modeled via different variants of a two-tower paradigm (Hu et al., 2008; Koren et al., 2009), where one tower embeds users and the other tower embeds items, which are then matched and ranked via an inner-product decoder. This scheme proves to be highly efficient for scaling up recommendation systems during the inference phase, as it allows to pre-compute user and item representations and to perform the final ranking via fast (approximate) maximum inner product search (Johnson et al., 2019). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        541,
+        826,
+        681
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "However, one key limitation of two-tower based architectures for recommendation is that they learn a pair-agnostic representation for users and items. That is, the user representation is not aware of the item under consideration, and similarly, the item representation is not aware of the user and thus item representations are not capturing the uniqueness of user’s view on the items. As such, neither of the representations on both ends capture knowledge about the pair-wise dependency they are making a prediction for. For example, consider a user who restocks their cosmetic products on a regular basis. In this scenario, the fine-grained context of user-cosmetic pairs is crucial, which cannot be adequately captured by two independent user and item representations alone. Such lack of knowledge has severe consequences on the quality of predictions, since, e.g., the model is unable to distinguish between scenarios such as familiar purchases (i.e. users who repeatedly interact with the similar set of items) vs. exploratory purchases (i.e. users who like to explore new items). While pairwise representations, which incorporate the knowledge about the pair they are making a prediction for, are able to contextualize the prediction, one would need to generate pair-wise representations for all possible user-item pairs, which is ineffable due to its quadratic complexity. Alternatively, one can pre-filter the set of candidate pairs, e.g., via content-based filtering or collaborative filtering Ricci et al. (2010); Campana & Delmastro (2017), but the model’s capabilities are then limited by the recall of the candidate generation procedure. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        686,
+        826,
+        924
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2411.19513v1 [cs.IR] 29 Nov 2024 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        267,
+        57,
+        707
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we develop Context-based Graph Neural Networks (CONTEXTGNNs), a novel single-stage Graph Neural Network (GNN)-based recommendation system that fuses pair-wise representations and two-tower representations into a single unified architecture. CONTEXTGNN is designed to perform temporal recommendations (predict the next set of items a user will interact with) on a heterogeneous temporal graph, and leverages the best of both worlds: The first model supports pairwise representations for all items within a user’s local interaction graph (Zhu et al., 2021). For distant user-item pairs, i.e. user-item pairs that are not within the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "-hop neighborhood of each other, the pair-wise embeddings are supplemented by a global, two-tower-based GNN, which serves as an effective fallback model. A final network then predicts a user-specific, personalized fusion score that dictates how to merge both pair-wise and two-tower recommendations into a single ranking. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        243
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "They key idea behind CONTEXTGNN is to contextualize the prediction for the area of items for which a user has rich past interactions. Here, pair-wise representations are able to capture finegrained patterns of past user-item interactions, such as repeat purchases and other prior actions (e.g., clicks, tag-as-favorite, add-to-cart), or through collaborative signals (e.g., whether friends have purchased the same item). The second component, a novel pair-agnostic two-tower model based on shallow item embeddings, allows for modeling exploratory and serendipitous recommendations. For these “distant” items, where no specific user-item context exists, pair-wise representations offer minimal benefits, making the fallback to two-tower representations suitable. Importantly, the twotower model is designed in such a way that it allows for integration into pair-wise architectures with little computational overhead. Finally, the model learns which users prefer familiar items over exploratory purchases and adjusts the final ranking scores accordingly. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        250,
+        826,
+        402
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We deploy CONTEXTGNNs in the context of relational deep learning (Fey et al., 2024) for recommendation within relational databases. Relational databases (Robinson et al., 2024) comprise diverse sets of tables with rich multi-modal input features and rich multi-behavioral, temporal interactions, making them the perfect setting for stress-testing our model. Furthermore, we examine the challenges in modeling the complex patterns of human behavior. Our analysis and experimental results underscore the need for a hybrid architecture, as a single model is not sufficient to address the diversity of real-world datasets both within and across tasks effectively. We demonstrate that CONTEXTGNN is able to adapt to different data characteristics, while outperforming existing models on realistic and practical recommendation tasks. In particular, CONTEXTGNN improves results by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "20 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on average compared to the best pair-wise representation baseline, and by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "344 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on average compared to the best two-tower representation baseline. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        409,
+        823,
+        561
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 RELATED WORK "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        585,
+        346,
+        601
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recommendation systems are a long-standing research area in machine learning. The recommendation problem is often formulated as link prediction on a bipartite graph with two sets of nodes, one containing the users and another containing the items. Between these two node sets, past interactions are presented as links, and the goal is to predict which links are going to occur in the future. Traditionally, it is approached by computing the inner product of user and item embeddings, e.g., via matrix factorization (Koren et al., 2009) to discover and utilize similarity between users and items, i.e. collaborative filtering (Hu et al., 2008; Mnih & Salakhutdinov, 2007). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        619,
+        823,
+        717
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Similar to many other areas, deep learning made an impact in recommendation systems, e.g., by predicting scores with non-linear networks (H. & C., 2017; He et al., 2017), by utilizing graph embedding techniques (Perozzi et al., 2014; Grover & Leskovec, 2016), or by sampling from distributions modeled by a variational autoencoder (Liang et al., 2018). Recently, the new field of generative recommendation deserves mentioning, utilizing large language models to provide recommendation by text generation (Wu et al., 2023). Our work here relates to two lines of research: Sequential recommendation systems and recommendations with GNNs. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        724,
+        823,
+        821
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recommendation on Sequences. Recommendation has traditionally been modeled as a sequence prediction problem. Early methods utilize Marcov chains (Rendle et al., 2010; He & McAuley, 2016), which have later been replaced by recurrent neural networks (Liu et al., 2018), temporal attention (Kang & McAuley, 2018; Li et al., 2017) and transformer formulations (Sun et al., 2019; Yang et al., 2022; Xia et al., 2022). They also have been combined with GNNs to additionally capture collaborative signals (Ma et al., 2020). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        840,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recommendation with GNNs. Various two-tower-based Graph Neural Networks (Hamilton et al., 2017) have been developed for link prediction tasks, based on the idea of integrating the paradigm of collaborative filtering via refining embeddings on the user-item interaction graph. Early examples use GNN-based autoencoders (Kipf & Welling, 2016; Schlichtkrull et al., 2018) to obtain prediction on graph links. Since GNNs propagate information locally (and thus cannot reason about the position of nodes inside a graph), it has been shown that propagating shallow user and item embeddings with deep GNNs is crucial to capture the full collaborative signal (Wang et al., 2019). LIGHTGCN (He et al., 2020) and ULTRAGCN (Mao et al., 2021) further simplify message propagation for embedding generation for improved performance on small-scale datasets. Another line of work strengthens GNN-based recommender systems by adding self-supervision (Wu et al., 2021; Yu et al., 2022; Cai et al., 2023), e.g., based on contrastive learning via graph augmentations. These findings are orthogonal to our work, but still embrace a two-tower architecture under the hood. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        271
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The line of work that comes closest to CONTEXTGNN is related to encoding identity- and positionawareness into GNNs in order to relate user-item pairs (You et al., 2019; 2021). For example, local subgraphs have been extended to encode positional information of user-item pairs (Zhang & Chen, 2018; Teru et al., 2020), but lack an efficient inference procedure. NBFNET (Zhu et al., 2021) introduces a path-based pair-wise representation model that constructs a subgraph centered around the user node, while reading out the GNN’s representations at the item nodes. This method yields item representations that are conditioned on the specific user, thereby incorporating pair-wise information without incurring excessive computational cost. However, this method constrains candidates to items within the user’s subgraph, which tremendously limits its effectiveness in scenarios involving exploratory recommendations or cold-start items. Our local pair-wise representation model builds upon this framework, extending it to fit into the heterogeneous, multi-behavioral, and temporal recommendation system context. Most importantly, we analyze and eliminate its main limitation around locality by extending it with an effective fallback model. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        277,
+        823,
+        458
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "While the vast majority of related work focuses on modeling recommendation systems on static graphs, recently multiple benchmarks for temporal recommendation have appeared, such as the TEMPORAL GRAPH BENCHMARK (Huang et al., 2023) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { \\frac { Y } { 2 } }"
+          },
+          {
+            "type": "text",
+            "content": "RELBENCH (Robinson et al., 2024). In this work, we adapt the temporal formulation of a recommender systems task and extensively evaluate CONTEXTGNN in the practical setting of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { \\frac { Y } { 2 } }"
+          },
+          {
+            "type": "text",
+            "content": "RELBENCH and show that our method significantly outperforms previous approaches. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        464,
+        823,
+        550
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 TEMPORAL RECOMMENDATIONS AND WHERE TO FIND THEM"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        568,
+        720,
+        584
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We formulate the temporal recommendation problem on a heterogeneous graph snapshot "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathcal G } ^ { ( - \\infty , T ] } = ( \\mathcal V , \\mathcal E , \\phi , \\psi )"
+          },
+          {
+            "type": "text",
+            "content": "up to timestamp "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ", with node set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\nu"
+          },
+          {
+            "type": "text",
+            "content": "and edge set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } \\subseteq \\mathcal { V } \\times \\mathcal { V }"
+          },
+          {
+            "type": "text",
+            "content": ", where each node "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v \\in \\mathcal V"
+          },
+          {
+            "type": "text",
+            "content": "belongs to a node type "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi ( v )"
+          },
+          {
+            "type": "text",
+            "content": "and each edge "
+          },
+          {
+            "type": "equation_inline",
+            "content": "e \\in { \\mathcal { E } }"
+          },
+          {
+            "type": "text",
+            "content": "belongs to an edge type "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\psi ( e )"
+          },
+          {
+            "type": "text",
+            "content": ". We refer to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L } \\subset \\mathcal { V }"
+          },
+          {
+            "type": "text",
+            "content": "as the user set and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R } \\subset \\mathcal { V }"
+          },
+          {
+            "type": "text",
+            "content": "as the item set within our heterogeneous graph. The task is then to predict a set of ground-truth items "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { Y } _ { v } ^ { ( T , T + i ] } \\subseteq \\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": ", for which there occurred a link for the user "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v \\in { \\mathcal { L } }"
+          },
+          {
+            "type": "text",
+            "content": "in the time interval "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( T , T + i ]"
+          },
+          {
+            "type": "text",
+            "content": "for a given interval size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i"
+          },
+          {
+            "type": "text",
+            "content": ". When making the prediction, the model only has access to historical information up to timestamp "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        599,
+        823,
+        703
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the simplest case, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } ^ { ( - \\infty , T ] }"
+          },
+          {
+            "type": "text",
+            "content": "is given as a bipartite graph, with node set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { V } = \\mathcal { L } \\cup \\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": ", and a single edge type "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| \\{ \\psi ( e ) : e \\in \\mathcal { E } \\} | = 1"
+          },
+          {
+            "type": "text",
+            "content": ". However, the generalization to heterogeneous graphs allows to incorporate other node types, but most importantly, different edge types of user behaviors (e.g., click, tag-as-favorite, add-to-cart) which offer complementary signals for predicting the target behavior (e.g., purchase) (Xia et al., 2022). Nodes and edges may be (partially) annotated with an initial feature representation, e.g. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { h } _ { v } ^ { ( 0 ) } \\in \\mathbb { R } ^ { d } , v \\in \\mathcal { V }"
+          },
+          {
+            "type": "text",
+            "content": ", and with a timestamp indicating their appearance (or disappearance). In the absence of timestamps, the given framework can be easily transformed into a static link prediction problem, as commonly practiced in literature (Kipf & Welling, 2016; Wang et al., 2019; He et al., 2020). However, this approach disregards critical information, such as the recency of past activity. Note that the given framework also allows newly appearing users and items over time. However, for simplicity of notation, we assume them to be in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "at all times. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        709,
+        823,
+        867
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Locality Score. Developing machine learning solutions for recommendation systems is inherently challenging due to the complex patterns of human behavior (He et al., 2023). Users vary significantly in preferences; some are explorers who constantly seek new experiences, while others are repeaters "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "who prefer familiarity. Such characteristics are especially noticeable across different datasets, e.g., it is more likely that a user repeats a previous purchase than that the user rates the same movie twice. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        133
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To understand these effects better, we introduce the locality score, which measures the fraction of ground-truth links that fall within the k-hop neighborhood N (−∞,T ]k (v) of the subgraph centered "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { N } _ { k } ^ { ( - \\infty , T ] } ( v )"
+          },
+          {
+            "type": "text",
+            "content": "around a user "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v \\in { \\mathcal { L } }"
+          },
+          {
+            "type": "text",
+            "content": "up to timestamp "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        138,
+        826,
+        186
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "s _ {k} ^ {(T, T + i ]} = \\frac {1}{| \\mathcal {L} |} \\sum_ {v \\in \\mathcal {L}} = \\frac {\\left| \\mathcal {N} _ {k} ^ {(- \\infty , T ]} (v) \\cap \\mathcal {R} \\cap \\mathcal {Y} _ {v} ^ {[ T , T + i)} \\right|}{\\left| \\mathcal {Y} _ {v} ^ {[ T , T + i)} \\right|}. \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ba6c4811d3b1e699932bee0b99a7e67dd056fa95863cb56245f4bf494cedf953.jpg"
+        }
+      },
+      "bbox": [
+        313,
+        202,
+        825,
+        253
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Intuitively, the locality score quantifies how many of its future ground-truth items are local to a user. Depending on the subgraph depth "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": ", the score reflects different interaction patterns. For a shallow subgraph "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k = 1 ,"
+          },
+          {
+            "type": "text",
+            "content": "), it captures whether the user repeats purchases or has previously interacted with the item through actions like clicks or tagging as favorite. As the subgraph depth increases, the score begins to incorporate collaborative filtering signals, such as whether friends have purchased the ground-truth item in the past "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k = 2 ,"
+          },
+          {
+            "type": "text",
+            "content": "), or whether the ground-truth item was previously purchased by users that have a similar buying behavior as the user under consideration ( "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k = 3"
+          },
+          {
+            "type": "text",
+            "content": "). Note that in practice, it is infeasible to go beyond depth "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k = 3"
+          },
+          {
+            "type": "text",
+            "content": "due to scalability concerns. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        266,
+        823,
+        378
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/f0275e3c85c64ddcbec005cbf50d253e7dae6808ef5ab0e25ae7fb37d7b0e0e0.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: The locality score for different subgraph depths "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k \\in \\{ 1 , 3 \\}"
+          },
+          {
+            "type": "text",
+            "content": "on validation/test splits for all recommendation tasks in RELBENCH. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Task</td><td>Split</td><td>k=1</td><td>k=3</td></tr><tr><td rowspan=\"6\">rel-amazon</td><td rowspan=\"2\">user-item-purchase</td><td>val</td><td>0.002</td><td>0.181</td></tr><tr><td>test</td><td>0.001</td><td>0.168</td></tr><tr><td rowspan=\"2\">user-item-rate</td><td>val</td><td>0.002</td><td>0.183</td></tr><tr><td>test</td><td>0.002</td><td>0.170</td></tr><tr><td rowspan=\"2\">user-item-review</td><td>val</td><td>0.002</td><td>0.185</td></tr><tr><td>test</td><td>0.001</td><td>0.175</td></tr><tr><td rowspan=\"2\">rel-hm</td><td rowspan=\"2\">user-item-purchase</td><td>val</td><td>0.045</td><td>0.395</td></tr><tr><td>test</td><td>0.048</td><td>0.417</td></tr><tr><td rowspan=\"4\">rel-stack</td><td rowspan=\"2\">user-post-comment</td><td>val</td><td>0.265</td><td>0.308</td></tr><tr><td>test</td><td>0.256</td><td>0.298</td></tr><tr><td rowspan=\"2\">post-post-related</td><td>val</td><td>0.109</td><td>0.225</td></tr><tr><td>test</td><td>0.141</td><td>0.280</td></tr><tr><td rowspan=\"4\">rel-trial</td><td rowspan=\"2\">condition-sponsor-run</td><td>val</td><td>0.000</td><td>0.241</td></tr><tr><td>test</td><td>0.000</td><td>0.242</td></tr><tr><td rowspan=\"2\">site-sponsor-run</td><td>val</td><td>0.000</td><td>0.208</td></tr><tr><td>test</td><td>0.000</td><td>0.229</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        179,
+        439,
+        498,
+        670
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We evaluate the locality score for varying "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "on RELBENCH (Robinson et al., 2024), a relational deep learning (Fey et al., 2024) benchmark that spans a wide variety of real-world recommendation tasks with diverse characteristics (cf. Table 1). Interestingly, the locality score does not exceed 0.5 on any dataset, indicating that the majority of ground-truth items are entirely exploratory and not covered by any path of length "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\leq ~ 3"
+          },
+          {
+            "type": "text",
+            "content": "in the graph. However, for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k \\ = \\ 1"
+          },
+          {
+            "type": "text",
+            "content": ", we observe high locality scores on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathtt { r e l - h m }"
+          },
+          {
+            "type": "text",
+            "content": "and rel-stack, suggesting that users tend to frequently repeat clothing purchases or comment multiple times on the same post. Increasing the subgraph depth generally improves coverage as seen in datasets like rel-amazon. While users do not usually repurchase/rate/review the same item twice here, they tend to purchase the same products that “nearby” users bought. Overall, this observation suggests that while pair-wise representation architectures such as NBFNET (Zhu et al., "
+          }
+        ]
+      },
+      "bbox": [
+        509,
+        383,
+        826,
+        688
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "2021) are powerful, they often times fail to offer sufficient coverage within their candidate set, decreasing their effectiveness tremendously. This raises an interesting question of how we can leverage the benefits of pair-wise representations, while supporting the modeling of exploratory recommendations without the need for complex multi-stage approaches. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        689,
+        823,
+        746
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 RECOMMENDATION WITH CONTEXT-BASED GRAPH NEURAL NETWORKS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        169,
+        766,
+        815,
+        782
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next, we describe Context-based Graph Neural Networks (CONTEXTGNNs), which consist of two separate GNN architectures sitting behind the same GNN backbone. CONTEXTGNN fuses both pair-wise representations and two-tower representations into a single architecture, and is thus naturally able to adapt to diverse dataset and task characteristics. The first model employs pairwise representations based on the item candidate set given within the local user-centric subgraph (cf. Sec. 4.1). The second model introduces a novel two-tower architecture based on shallow item representations, which is used to predict a ranking for all pairs of users and items outside the user’s subgraph (cf. Sec. 4.2). Finally, a user-specific fusion score, produced by an MLP on the user GNN representation, is added to the scores of the pair-wise representation model, which aligns the distinct "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        797,
+        826,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/eb8df4e268a70418b71b95b110beffd9cfb78a8e576f9fdc6647946a0a6f276e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        85,
+        385,
+        292
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2aa552e30b040a3a71c489607ef15ca2e64cb728266327d7eab59f5d4d95e637.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: Overview of Context-based Graph Neural Networks. CONTEXTGNN utilizes a bidirectional "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { G N N } _ { \\theta }"
+          },
+          {
+            "type": "text",
+            "content": "to learn user "
+          },
+          {
+            "type": "equation_inline",
+            "content": " { h _ { v } ^ { ( 2 ) } }"
+          },
+          {
+            "type": "text",
+            "content": "and user-specific item representations "
+          },
+          {
+            "type": "equation_inline",
+            "content": " { h _ { w } ^ { ( 2 ) } }"
+          },
+          {
+            "type": "text",
+            "content": "within a user’s local subgraph. Its message passing scheme is enhanced by additionally propagating shallow item embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\pmb w } _ { \\pmb w }"
+          },
+          {
+            "type": "text",
+            "content": "and seed user IDENTICATORθ representations. Afterwards, item scores are produced depending on whether an item situates within a user’s subgraph. A user-specific fusion score is learned via an "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathrm { M L P } } _ { \\theta }"
+          },
+          {
+            "type": "text",
+            "content": "to produce the final ranking by offsetting the contributions of local rankings. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        398,
+        92,
+        825,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "scores of the two models and captures how exploratory a specific user is, thus given either more or less weight to the respective models (cf. Sec. 4.3). We go over additional considerations and extensions in Sec. 4.4. An overview of CONTEXTGNN is visualized in Fig. 1. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        407,
+        823,
+        450
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 PAIR-WISE REPRESENTATIONS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        465,
+        426,
+        479
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our local pair-wise representation model builds upon the framework proposed by Zhu et al. (2021), extending it to fit into the heterogeneous, multi-behavioral, and temporal recommendation system context. NBFNET is a path-based method that generalizes the Bellman-Ford algorithm (Baras & Theodorakopoulos, 2010). Rather than learning a pair-wise representation via two independent node representations h(k)v "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { h } _ { v } ^ { ( k ) }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { h } _ { w } ^ { ( k ) }"
+          },
+          {
+            "type": "text",
+            "content": "(i.e. via two independent subgraphs), NBFNET only utilizes the userspecific subgraph, but readouts GNN item representations from it. As such, NBFNET abbreviates the pair-wise representation h(k)(v,w "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { ( v , w ) } ^ { ( k ) }"
+          },
+          {
+            "type": "text",
+            "content": "via the user-specific item representations "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { h } _ { w } ^ { ( k ) }"
+          },
+          {
+            "type": "text",
+            "content": ". Hence, it captures both knowledge about the item "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w"
+          },
+          {
+            "type": "text",
+            "content": "and the user "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v"
+          },
+          {
+            "type": "text",
+            "content": "in its representation. In order to let the GNN differentiate between the seed user and other users being sampled within the subgraph, a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "-dimensional INDICATORθ representation is added to the seed node (You et al., 2021). Specifically, our pair-wise representation model then looks as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        491,
+        823,
+        652
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Sample a "
+              },
+              {
+                "type": "equation_inline",
+                "content": "k"
+              },
+              {
+                "type": "text",
+                "content": "-hop subgraph "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\tilde { \\mathcal { G } }  \\mathcal { G } _ { k } ^ { ( - \\infty , T ] } [ v ]"
+              },
+              {
+                "type": "text",
+                "content": "with node set "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\tilde { \\nu }"
+              },
+              {
+                "type": "text",
+                "content": "around user "
+              },
+              {
+                "type": "equation_inline",
+                "content": "v \\in { \\mathcal { L } }"
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Add an indicator representation to the user seed node: "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\pmb { h } _ { v } ^ { ( 0 ) }  \\pmb { h } _ { v } ^ { ( 0 ) } + \\mathrm { I N D I C A T O R } \\theta ."
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. Read out both GNN user and item representations at layer "
+              },
+              {
+                "type": "equation_inline",
+                "content": "k"
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        207,
+        666,
+        782,
+        724
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {h} _ {v} ^ {(k)}, \\{\\boldsymbol {h} _ {w} ^ {(k)}: w \\in \\tilde {\\mathcal {V}} \\cap \\mathcal {R} \\} \\leftarrow \\operatorname {G N N} _ {\\boldsymbol {\\theta}} ^ {(k)} (\\tilde {\\mathcal {G}}, \\boldsymbol {H} ^ {(0)}).",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/2f3395d420d25b08a47a2c58f95544f2b4d45a5be9e263d5acece540c5b9f88a.jpg"
+        }
+      },
+      "bbox": [
+        362,
+        731,
+        689,
+        751
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "4. Compute the final ranking for all items "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w \\in \\tilde { \\mathcal { V } } \\cap \\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": ": y(v,w) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { ( v , w ) } ^ { ( \\mathrm { p a i r } ) }  h _ { v } ^ { ( k ) } \\cdot h _ { w } ^ { ( k ) } ."
+          }
+        ]
+      },
+      "bbox": [
+        207,
+        758,
+        715,
+        780
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In contrast to NBFNET, we readout both the user and item representations from the GNN in order to produce the ranking of local items. This lets the model leverage the full "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "-hop user information, as otherwise user representations are only computed in intermediate GNN layers based on limited subgraph depths. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        790,
+        823,
+        848
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Further note that sampling a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "-hop subgraph typically results in a directed computation graph towards the seed node (Fey & Lenssen, 2019). However, to facilitate the extraction of item node representations, the sampled subgraph must be transformed into a bidirectional graph prior to applying the GNN. This approach aligns with previous work that decouples the depth and scope of GNNs (Zeng et al., 2021). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This approach proves particularly effective in the context of temporal, heterogeneous graphs, as the GNN naturally learns to integrate multi-behavior signals originating from different edge types. For instance, the pair-wise representation captures all past user-item interactions, such as the recency of the last purchase or whether the item has been previously clicked or tagged. Despite its expressiveness, this method is also highly efficient, as only a single GNN pass over the user subgraph is required to make predictions for the entire set of related items. Assuming bounded subgraph sizes, training and inference over the full user set can be achieved in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { O } ( | \\mathcal { L } | )"
+          },
+          {
+            "type": "text",
+            "content": "time, which is in stark contrast to the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "O ( | \\mathcal { L } | \\cdot | \\mathcal { R } | )"
+          },
+          {
+            "type": "text",
+            "content": "complexity required by two-tower models. Moreover, as no shallow embeddings are used, this approach naturally extends to newly appearing users and items over time. Nonetheless, as discussed in Sec. 3, this method alone does not fully address the diverse requirements of modern recommendation systems due to its limited set of potential candidates. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        104,
+        823,
+        257
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 TWO-TOWER REPRESENTATIONS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        273,
+        444,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CONTEXTGNN’s two-tower model ranks all user-item pairs outside the user’s subgraph, serving as an effective fallback mechanism to supplement the pair-wise representations. While drawing inspiration from related two-tower architectures (Wang et al., 2019; He et al., 2020), our novel twotower model enables an efficient integration with pair-wise architectures. The key innovation in our two-tower model is the use of shallow item representations. Specifically, we do not deploy a GNN to compute item representations; instead we entirely rely on a shallow embedding matrix W ∈ R|R|×d "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { W } \\in \\mathbb { R } ^ { | \\mathcal { R } | \\times d }"
+          },
+          {
+            "type": "text",
+            "content": "to learn item representations. This design is inspired by multiple key observations: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        299,
+        823,
+        398
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• Limited information gain from applying a GNN on the item side. Item connections are naturally very dense. In extreme cases, popular items may receive over 1M interactions (an item is connected to every user that has previously interacted with it). This leads to significant challenges and uncertainties in subgraph sampling, and easily exposes the GNN to oversquashing and oversmoothing issues. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• Shallow embedding matrices are very effective. Shallow item embedding matrices can capture key signals such as popularity trends, seasonal patterns, demographic preferences and item similarity just as effectively as a GNN. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• GNN item representations scale poorly during training. Incorporating both user and item GNN representations limits the model to only use a small number of negative samples due to memory constraints. In contrast, shallow item embeddings support training against a much larger corpus of negative samples "
+              },
+              {
+                "type": "equation_inline",
+                "content": "( \\approx 1 0 \\mathbf { M } )"
+              },
+              {
+                "type": "text",
+                "content": ", which is critical for improving model performance. This approach also eliminates the need for complex negative sampling strategies, which are often required when the number of negative samples is limited. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        411,
+        825,
+        614
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Importantly, we also inject the shallow item embeddings within the user’s GNN forward pass, such that user representations can better align themselves to the corresponding item representations. Hence, the GNN representation of users follows a similar spirit to models such as NGCF (Wang et al., 2019) or LIGHTGCN (He et al., 2020), although we do not utilize shallow user embeddings as the GNN itself is powerful enough to learn its own rich representation without them. As such, our two-tower representation model can be summarized as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        627,
+        823,
+        712
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Sample a "
+              },
+              {
+                "type": "equation_inline",
+                "content": "k"
+              },
+              {
+                "type": "text",
+                "content": "-hop subgraph "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\tilde { \\mathcal { G } }  \\mathcal { G } _ { k } ^ { ( - \\infty , T ] } [ v ]"
+              },
+              {
+                "type": "text",
+                "content": "with node set "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\tilde { \\nu }"
+              },
+              {
+                "type": "text",
+                "content": "around user "
+              },
+              {
+                "type": "equation_inline",
+                "content": "v \\in { \\mathcal { L } }"
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Add the shallow embedding to all sampled items "
+              },
+              {
+                "type": "equation_inline",
+                "content": "w \\in \\tilde { \\mathcal { V } } \\cap \\mathcal { R } : h _ { w } ^ { ( 0 ) }  h _ { w } ^ { ( 0 ) } + w _ { w } ."
+              },
+              {
+                "type": "text",
+                "content": "(0)w ← h(0)w + ww . "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. Read out the GNN user representation at layer "
+              },
+              {
+                "type": "equation_inline",
+                "content": "k"
+              },
+              {
+                "type": "text",
+                "content": ": "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\pmb { h } _ { v } ^ { ( k ) } \\gets \\mathbf { G } \\mathbf { N } \\mathbf { N } _ { \\pmb { \\theta } } ^ { ( k ) } ( \\tilde { \\mathcal { G } } , \\pmb { H } ^ { ( 0 ) } )"
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "4. Compute the final ranking for all items w ∈ R \\ V˜: y(tower)(v,w) "
+              },
+              {
+                "type": "equation_inline",
+                "content": "w \\in \\mathcal { R } \\setminus \\tilde { \\mathcal { V } } \\colon y _ { ( v , w ) } ^ { ( \\mathrm { t o w e r } ) }  h _ { v } ^ { ( k ) } \\cdot w _ { w } ."
+              },
+              {
+                "type": "text",
+                "content": "(tower) · ww . "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        207,
+        724,
+        769,
+        813
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3 CONTEXT-BASED GRAPH NEURAL NETWORKS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        829,
+        540,
+        844
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our final CONTEXTGNN architecture fuses both pair-wise representations and two-tower representations into a single unified architecture. That is, for all items "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w \\in \\tilde { \\mathcal { V } } \\cup \\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "inside the local user subgraph, we leverage the scores y(pair)(v,w) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { ( v , w ) } ^ { ( \\mathrm { p a i r } ) }"
+          },
+          {
+            "type": "text",
+            "content": "obtained from the pair-wise representations, while we fallback to the two-tower scores y(tower)(v,w) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { ( v , w ) } ^ { ( \\mathrm { t o w e r } ) }"
+          },
+          {
+            "type": "text",
+            "content": "for all items "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w \\in \\tilde { \\mathcal { V } } \\setminus \\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "outside the sampled subgraph. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        928
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The observation that user behaviors are diverse is the final element that makes CONTEXTGNN work. To accommodate such diversity across different users, CONTEXTGNN learns a user-specific fusion score predicted from the GNN’s user embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { h } _ { v } ^ { ( k ) }"
+          },
+          {
+            "type": "text",
+            "content": "via an "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathrm { M L P } } _ { \\theta }"
+          },
+          {
+            "type": "text",
+            "content": ". This personalized fusion score aligns the distinct scores by learning which users prefer familiar items over exploratory purchases, and adjusts the final ranking scores accordingly. With this, the final score is given by "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        176
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "y _ {(v, w)} = \\left\\{ \\begin{array}{l l} y _ {(v, w)} ^ {(\\text {p a i r})} + \\operatorname {M L P} _ {\\theta} \\left(h _ {v} ^ {(k)}\\right) & \\text {i f} w \\in \\tilde {\\mathcal {V}} \\cup \\mathcal {R}, \\\\ y _ {(v, w)} ^ {(\\text {t o w e r})} & \\text {o t h e r w i s e .} \\end{array} \\right. \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/5ffb2edee89cfc09cdfaa0d5590e9be7f792a2156ba01e894438d6d3d1f18fcc.jpg"
+        }
+      },
+      "bbox": [
+        323,
+        179,
+        823,
+        228
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In CONTEXTGNN, both pair-wise representations and two-tower representations are derived from the same GNN backbone. Since both models depend solely on the user subgraph, the user embedding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { h } _ { v } ^ { ( k ) }"
+          },
+          {
+            "type": "text",
+            "content": "can be extracted in a single GNN forward pass and leveraged for downstream uses in both models. This streamlined approach makes CONTEXTGNN computationally very efficient. CONTEXTGNN is then trained end-to-end, optimizing both types of item scores as well as the fusion score altogether to maximize the predictive performance of future user-item interactions. In practice, we utilize the cross entropy loss for optimization, although any other loss formulation is applicable as well (Rendle et al., 2009). During inference, we obtain top scores from the two-tower model via (approximate) maximum inner product search (Johnson et al., 2019), and merge them to the pair-wise scores in a post-processing procedure. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        234,
+        826,
+        378
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.4 EXTENSIONS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        393,
+        305,
+        407
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We go over additional considerations and extensions when applying CONTEXTGNNs in practice. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        419,
+        812,
+        435
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fitting into the Context of Relational Deep Learning. CONTEXTGNNs nicely align with the framework of relational deep learning (Fey et al., 2024), a blueprint for graph representation learning on relational databases. Specifically, relational deep learning treats relational databases as a heterogeneous temporal graph, in which dimension and fact tables are linked through primary-foreign key relationships. Then, temporal-aware subgraph sampling is employed to generate heterogeneous subgraph snapshots "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { k } ^ { ( - \\infty , T ] } [ v ]"
+          },
+          {
+            "type": "text",
+            "content": "up to timestamp "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ", which are used to predict future user-item interactions. Relational databases (Robinson et al., 2024) comprise diverse set of tables with rich multi-modal input features and rich multi-behavioral, temporal interactions, making them the perfect setting for stress-testing CONTEXTGNNs. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        448,
+        823,
+        578
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Transductive vs. Inductive Modeling. Although the pair-wise representations in CONTEXTGNN are inductive by design, the usage of the shallow embedding matrix on the item side places it in a transductive setting. This means that while CONTEXTGNN can naturally accommodate newly appearing users over time, it is unable to handle new items at prediction time since their shallow embeddings remain uninitialized. To enable CONTEXTGNN to operate in an inductive setting, we propose to replace the shallow item embedding matrix with a deep neural network on top of its item input features "
+          },
+          {
+            "type": "equation_inline",
+            "content": " { h _ { w } ^ { ( 0 ) } }"
+          },
+          {
+            "type": "text",
+            "content": ". This approach allows CONTEXTGNN to scale to tasks such as marketplace or event recommendation, where handling of new items is essential. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        590,
+        823,
+        707
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Sampled Softmax Formulation. Since it is infeasible to train against the full item set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "when optimizing CONTEXTGNNs, in practice, we rely on a sampled softmax formulation. This basically converts the objective of CONTEXTGNN into a classification problem with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": "sampled classes, shared across the entire mini-batch. The utilized sampling procedure is based on a priority queue: we ensure that (1) all ground-truth items and (2) the union of sampled subgraph items of a given mini-batch are included in the set of classes. Then, we (3) fill up the remainder of items with unexplored items outside all subgraphs of the mini-batch based on a uniform sampling procedure. In practice, we have no issues to scale the number of classes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": "to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\approx 1 M"
+          },
+          {
+            "type": "text",
+            "content": "on commodity GPUs (15GB of memory), giving CONTEXTGNN rich signals to learn from. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        720,
+        826,
+        847
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 EXPERIMENTAL EVALUATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        864,
+        454,
+        880
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We perform experiments on six diverse datasets stemming from different domains, including ten different recommendation tasks. We aim to answer the following research questions: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Q1 Which benefits does CONTEXTGNN provide over each of its individual component? "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Q2 How does CONTEXTGNN perform against state-of-the-art recommendation system methods? "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Q3 How does the locality score of Sec. 3 influence the model performance of CONTEXTGNN? "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Q4 How efficient and scalable is CONTEXTGNN compared to the related work? "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        818,
+        180
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our method1 is implemented in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { O }"
+          },
+          {
+            "type": "text",
+            "content": "PYTORCH (Paszke et al., 2019) utilizing the PYTORCH GEO-METRIC (Fey & Lenssen, 2019) and PYTORCH FRAME (Hu et al., 2024) libraries. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        193,
+        823,
+        223
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1 RELATIONAL DEEP LEARNING "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        241,
+        428,
+        255
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Dataset Description. We utilize the recommendation tasks introduced in RELBENCH (Robinson et al., 2024), which consists of eight different realistic and temporal-aware recommendation tasks. RELBENCH datasets contain rich relational structure, providing a challenging environment for recommendation tasks. To achieve strong performance, methods must be able to leverage information across multiple relational tables. All datasets are publicly accessible and vary in terms of domain, size, and sparsity. The task is to predict the top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "items given a user at a given seed time. The metric we use is Mean Average Precision (MAP) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@ k"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "is set per task (higher is better). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        267,
+        826,
+        367
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "rel-amazon Predict the list of distinct items each user purchases (user-item-purchase), gives a 5-star (user-item-rate), or gives a detailed review (user-item-review). "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        378,
+        823,
+        409
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "rel-hm Predict the list of items each user will purchase (user-item-purchase). "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        414,
+        746,
+        429
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "rel-stack Predict the list of distinct posts a user will comment (user-post-comment), or to predict the list of posts that users will link a given post to (post-post-related). "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        434,
+        825,
+        464
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "rel-trial Predict whether a condition will have which sponsors (condition-sponsor-run), or whether a sponsor will have a trial in a facility (site-sponsor-run). "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        468,
+        823,
+        511
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Experimental Protocols. We compare CONTEXTGNN to the following baseline methods: "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        527,
+        781,
+        542
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "LIGHTGBM (Ke et al., 2017) concatenates both user and item features, and feeds them into a LIGHTGBM decision tree. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        556,
+        823,
+        585
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "MULTIVAE (Liang et al., 2018) extends variational autoencoders to collaborative filtering via a user-item interaction matrix for implicit feedback. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        590,
+        823,
+        619
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "GRAPHSAGE (Hamilton et al., 2017) employs a heterogeneous GNN on both user and item side, and ranks the produced embeddings via an inner product decoder. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        625,
+        823,
+        655
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NGCF (Wang et al., 2019) extends GRAPHSAGE by propagating both shallow user and item embeddings inside the GNN. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        659,
+        823,
+        688
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NBFNET (Zhu et al., 2021) employs pair-wise GNN representations. This is the backbone of our pair-wise representation model in CONTEXTGNN. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        694,
+        823,
+        722
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "SHALLOWITEM describes our two-tower model in CONTEXTGNN, which ranks user GNN representations and shallow item embeddings via an inner product decoder. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        728,
+        823,
+        758
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Importantly, all GNN-based models utilize the same GNN backbone, which guarantees fair comparison of training procedures that are agnostic to the underlying model implementation. Specifically, we use a heterogeneous GRAPHSAGE variant as introduced in Robinson et al. (2024), which leverages a RESNET tabular model (Gorishniy et al., 2021) to encode multi-modal input data into a shared embedding space, which then gets fed into a heterogeneous GRAPHSAGE variant (Hamilton et al., 2017) with sum-based neighbor aggregation. For all experiments, optimization is done via ADAM (Kingma & Ba, 2015) for a maximum of 20 epochs. The hyper-parameters we tune for each task are: (1) the number of hidden units "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\in \\ \\{ 3 2 , \\bar { 6 } 4 , 1 2 8 , 2 5 6 , \\bar { 5 } \\bar { 1 } 2 \\}"
+          },
+          {
+            "type": "text",
+            "content": ", (2), the batch size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\in \\{ 2 5 6 , 5 1 2 , 1 0 2 4 \\}"
+          },
+          {
+            "type": "text",
+            "content": ", and (3) the learning rate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\in \\{ 0 . 0 0 1 , 0 . 0 1 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        771,
+        826,
+        898
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1Source code: https://github.com/kumo-ai/ContextGNN "
+          }
+        ]
+      },
+      "bbox": [
+        191,
+        909,
+        609,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/103b21ce9b046e34d9ad933dabc1d52ebb28a61da368ecd4a7461b890ed53885.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Recommendation results (MAP, higher is better, in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\%"
+          },
+          {
+            "type": "text",
+            "content": ") on RELBENCH. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Task</td><td>Split</td><td>LIGHT GBM</td><td>MULTI VAE</td><td>GRAPH SAGE</td><td>NGCF</td><td>NBFNET</td><td>SHALLOW ITEM</td><td>CONTEXT GNN</td></tr><tr><td colspan=\"9\">rel-amazon</td></tr><tr><td rowspan=\"2\">user-item-purchase</td><td>val</td><td>0.18</td><td>0.37</td><td>1.53</td><td>1.16</td><td>2.60</td><td>1.45</td><td>2.71</td></tr><tr><td>test</td><td>0.16</td><td>0.23</td><td>0.74</td><td>0.88</td><td>2.06</td><td>0.56</td><td>2.93</td></tr><tr><td rowspan=\"2\">user-item-rate</td><td>val</td><td>0.22</td><td>0.34</td><td>1.42</td><td>1.22</td><td>1.61</td><td>1.62</td><td>2.68</td></tr><tr><td>test</td><td>0.17</td><td>0.24</td><td>0.87</td><td>0.86</td><td>1.24</td><td>0.74</td><td>2.25</td></tr><tr><td rowspan=\"2\">user-item-review</td><td>val</td><td>0.14</td><td>0.19</td><td>1.03</td><td>0.79</td><td>1.86</td><td>1.06</td><td>1.95</td></tr><tr><td>test</td><td>0.09</td><td>0.10</td><td>0.47</td><td>0.55</td><td>1.57</td><td>0.40</td><td>1.63</td></tr><tr><td colspan=\"9\">rel-hm</td></tr><tr><td rowspan=\"2\">user-item-purchase</td><td>val</td><td>0.44</td><td>0.33</td><td>0.92</td><td>0.81</td><td>2.64</td><td>0.49</td><td>3.00</td></tr><tr><td>test</td><td>0.38</td><td>0.28</td><td>0.80</td><td>0.75</td><td>2.81</td><td>0.40</td><td>2.93</td></tr><tr><td colspan=\"9\">rel-stack</td></tr><tr><td rowspan=\"2\">user-post-comment</td><td>val</td><td>0.04</td><td>0.07</td><td>0.43</td><td>0.52</td><td>15.17</td><td>0.05</td><td>15.22</td></tr><tr><td>test</td><td>0.04</td><td>0.01</td><td>0.11</td><td>0.13</td><td>12.72</td><td>0.03</td><td>13.34</td></tr><tr><td colspan=\"9\">rel-trial</td></tr><tr><td rowspan=\"2\">condition-sponsor-run</td><td>val</td><td>4.88</td><td>2.59</td><td>3.12</td><td>3.71</td><td>11.33</td><td>0.88</td><td>11.59</td></tr><tr><td>test</td><td>4.82</td><td>2.47</td><td>2.89</td><td>3.88</td><td>11.36</td><td>0.85</td><td>11.65</td></tr><tr><td rowspan=\"2\">site-sponsor-run</td><td>val</td><td>10.92</td><td>7.16</td><td>14.09</td><td>9.68</td><td>17.47</td><td>12.59</td><td>28.55</td></tr><tr><td>test</td><td>8.40</td><td>6.17</td><td>10.70</td><td>6.54</td><td>19.06</td><td>10.66</td><td>28.02</td></tr><tr><td rowspan=\"2\">Average (↑)</td><td>val</td><td>2.30</td><td>1.46</td><td>2.82</td><td>2.24</td><td>7.56</td><td>2.35</td><td>9.22</td></tr><tr><td>test</td><td>2.01</td><td>1.29</td><td>2.08</td><td>1.72</td><td>7.71</td><td>1.81</td><td>9.23</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        176,
+        128,
+        823,
+        483
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Discussion. The results are reported in Table 2. We answer Q1 by comparing CONTEXTGNN to its individual components NBFNET and SHALLOWITEM, and answer Q2 by relating CON-TEXTGNN’s performance to all reported baselines. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        518,
+        823,
+        561
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CONTEXTGNN outperforms all competing baselines, often by very significant margins. Notably, one can observe that the two-tower models MULTIVAE, GRAPHSAGE and NGCF all fail to capture the pair-wise signals that both NBFNET and CONTEXTGNN are able to leverage. This shows that two-tower representations are not powerful enough to capture the fine-grained pair-wise dependencies that are required to solve these tasks with high precision. Among the two-tower GNN models, there is no clear winner between GRAPHSAGE and NGCF, indicating that shallow (user) embeddings do not significantly drive improvements (and may even hinder performance, especially in tasks with inherent temporal dynamics). CONTEXTGNN improves results by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "34 4 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on average compared to the best two-tower baseline. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        568,
+        823,
+        693
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Among the baselines, NBFNET performs the best across all tasks, while CONTEXTGNN can consistently improve upon these strong outcomes. On average, CONTEXTGNN increases performance by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "20 \\%"
+          },
+          {
+            "type": "text",
+            "content": "compared to NBFNET, underscoring the importance of incorporating “distant” items into the ranking process - an aspect that NBFNET overlooks by design. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        700,
+        823,
+        757
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our own two-tower SHALLOWITEM model performs comparably to other two-tower GNN baselines, despite only using shallow item information in order to improve the overall efficiency of the model. This supports the hypothesis that a deep GNN on the item side is not particularly useful on most tasks, as the shallow embeddings can capture most of the key signals on the item side just as well as the GNN. However, there exists specific cases such as the condition-sponsor-run task on the rel-trial dataset, where SHALLOWITEM underperforms relative to GRAPHSAGE and NGCF. On this task, deep GNNs on the item side play indeed a crucial role to improve results of two-tower models, which is captured in CONTEXTGNN through its pair-wise representation model. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        763,
+        823,
+        875
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The most noteworthy result is seen in the site-sponsor-run task on the rel-trial dataset. Here, both pair-wise models and two-tower models achieve strong initial results. Combining these two paradigms together via CONTEXTGNN improves the final performance by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\approx 1 0 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", indicat-"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        882,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ing that each of the individual components of CONTEXTGNN captures orthogonal signals. The fusion of these paradigms yields a ranking model that excels in both local and distant item ranking, achieving superior overall performance. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        147
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In order to answer Q3, we now analyze the relationship between the locality score "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s _ { k } ^ { [ T , T + i ) }"
+          },
+          {
+            "type": "text",
+            "content": "and the performance of CONTEXTGNN. We observe that the improvements of CONTEXTGNN compared to NBFNET are notably higher on tasks with lower locality scores. This observation aligns intuitively, as CONTEXTGNN needs to rely more heavily on its two-tower component during optimization when locality scores are lower. Specifically, in tasks with the lowest locality scores (e.g., 0.168, 0.170 and 0.229 on the user-item-purchase, user-item-rate and site-sponsor-run tasks from the rel-amazon and rel-trial datasets), CONTEXTGNN achieves substantial performance gains of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "42 \\%"
+          },
+          {
+            "type": "text",
+            "content": "to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "80 \\%"
+          },
+          {
+            "type": "text",
+            "content": "compared to NBFNET. Conversely, for tasks with higher locality scores (e.g., 0.417, 0.298, and 0.280 on the user-item-purchase, user-post-comment, and post-post-related tasks from the rel-hm and rel-stack datasets), the performance improvements of CONTEXTGNN over NBFNET are more modest, ranging from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". These findings underscore the significant impact of the locality score on the performance of NBFNET, whereas CONTEXTGNN demonstrates robustness, achieving stellar performance improvements regardless of task-specific characteristics. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        152,
+        826,
+        351
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2 STATIC LINK PREDICTION"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        378,
+        397,
+        391
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "While CONTEXTGNN’s main focus is to excel on large-scale real-world use-cases which are temporal and heterogeneous, it can also be used in a plug-andplay fashion for any link prediction task. To verify, we evaluate CONTEXTGNN on the static link prediction task of Amazon-Book (Wang et al., 2019), which is a small-scale dataset of 52,643 users and 91,599 items, which does not come with input features, only considers users with at least ten interactions, and evaluates on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "10 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of randomly selected interactions independent of time, cf. Table 3. We can see that CONTEXTGNN is able to outperform both "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        407,
+        517,
+        574
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/681fd2fece1a74cd6e07a3aa8ca5660c1360b9e39448372aa89390f576c2295e.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Results on Amazon-Book. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>Recall@20</td><td>NDCG@20</td></tr><tr><td>NGCF (2019)</td><td>0.0337</td><td>0.0261</td></tr><tr><td>LIGHTGCN (2020)</td><td>0.0410</td><td>0.0318</td></tr><tr><td>ULTRAGCN (2021)</td><td>0.0681</td><td>0.0556</td></tr><tr><td>LIGHTGCL (2023)</td><td>0.0585</td><td>0.0436</td></tr><tr><td>SIMGCL (2022)</td><td>0.0478</td><td>0.0379</td></tr><tr><td>SGL (2021)</td><td>0.0468</td><td>0.0371</td></tr><tr><td>CONTEXTGNN</td><td>0.0451</td><td>0.0377</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        535,
+        434,
+        821,
+        551
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NGCF and LIGHTGCN, while it is slightly underperforming compared to, e.g., ULTRAGCN or LIGHTGCL. Given the relatively small size of this dataset, much of the progress in GNN-based recommendation systems has centered on two key directions: (1) simplifying GNN architectures, and (2) incorporating self-supervised learning techniques. Exploring how CONTEXTGNN can benefit from a more lightweight GNN backbone or complementary learning signals presents an exciting direction for future research. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        574,
+        823,
+        657
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.3 TEMPORAL NEXT-ITEM PREDICTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        686,
+        470,
+        699
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use CONTEXTGNN to perform temporal next-item recommendation on the IJCAI Contest dataset (Xia et al., 2022), which is a common dataset to evaluate sequential recommendation models et al. (Sun et al., 2019; Xia et al., 2020; 2022). As per evaluation protocol, we report HitRate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@ k"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { N D C G @ } k"
+          },
+          {
+            "type": "text",
+            "content": "over 99 sampled negatives per entity. Notably, CON-TEXTGNN excels at incorporating multi-behavioral and temporal signal, "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        715,
+        433,
+        881
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "cf. Table 4. We observe that CONTEXTGNN is able to out-perform all baselines on all metrics on this task (e.g., "
+          },
+          {
+            "type": "equation_inline",
+            "content": "170 \\%"
+          },
+          {
+            "type": "text",
+            "content": "improvement on HitRate@1). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        882,
+        823,
+        910
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/5966e43bac165b710e5b3b14f3dbccdf8542bd6e88faa19a06b101f5198e163f.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Results on IJCAI Contest. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>HR@1</td><td>HR@5</td><td>NDCG@5</td><td>HR@10</td><td>NDCG@10</td></tr><tr><td>DEEPFM (2017)</td><td>0.138</td><td>0.332</td><td>0.244</td><td>0.469</td><td>0.290</td></tr><tr><td>BERT4REC (2019)</td><td>0.141</td><td>0.356</td><td>0.261</td><td>0.467</td><td>0.297</td></tr><tr><td>CHORUS (2020a)</td><td>0.140</td><td>0.345</td><td>0.247</td><td>0.457</td><td>0.283</td></tr><tr><td>HYREC (2020b)</td><td>0.137</td><td>0.323</td><td>0.229</td><td>0.442</td><td>0.266</td></tr><tr><td>NMTR (2019)</td><td>0.141</td><td>0.360</td><td>0.254</td><td>0.481</td><td>0.304</td></tr><tr><td>MATN (2020)</td><td>0.142</td><td>0.375</td><td>0.273</td><td>0.489</td><td>0.309</td></tr><tr><td>MBGCN (2020)</td><td>0.137</td><td>0.332</td><td>0.228</td><td>0.463</td><td>0.277</td></tr><tr><td>TGT (2022)</td><td>0.148</td><td>0.399</td><td>0.293</td><td>0.519</td><td>0.330</td></tr><tr><td>CONTEXTGNN</td><td>0.411</td><td>0.603</td><td>0.513</td><td>0.667</td><td>0.534</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        450,
+        741,
+        821,
+        864
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.4 EFFICIENCY ANALYSIS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        104,
+        375,
+        118
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our hybrid CONTEXTGNN model is designed in such a way to have minimal overhead compared to its two components in isolation since the vast majority of the model parts are shared between the two paradigms. To answer Q4, we report the runtime in seconds to reach 1,000 optimization steps across different models, cf. Table 5. Most importantly, since CONTEXTGNN only requires a single GNN forward pass, it is faster compared to any two-tower GNN by a "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        128,
+        486,
+        268
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/507dc77764a5bb38950c8a6e5a07c8de06574f90273ac43227b100aab815b335.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5: Runtime [s] of 1,000 optimization steps. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>rel-hm</td><td>rel-stack</td></tr><tr><td>GRAPHSAGE (1 negative)</td><td>275s</td><td>37s</td></tr><tr><td>GRAPHSAGE (10 negatives)</td><td>293s</td><td>44s</td></tr><tr><td>GRAPHSAGE (100 negatives)</td><td>OOM</td><td>OOM</td></tr><tr><td>NFBNET</td><td>77s</td><td>21s</td></tr><tr><td>SHALLOWITEM</td><td>92s</td><td>22s</td></tr><tr><td>CONTEXTGNN</td><td>94s</td><td>23s</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        503,
+        155,
+        823,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "very significant factor (i.e., a two-tower GNN such as GRAPHSAGE requires to run the GNN on both positive and negative items). In particular, two-tower GNNs scale very poorly when increasing the number of negative samples to train against. For training recommendation systems, a large number of negative examples is important to allow learning of discriminative features. However, In the simplest case (one negative pair per positive pair), a two-tower GNN needs to be executed three times already. CONTEXTGNN does not have this limitation and can consider up to 1M negatives before running into GPU memory limitations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        268,
+        826,
+        367
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 CONCLUSION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        386,
+        320,
+        402
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We presented a novel hybrid GNN pipeline for recommendation called CONTEXTGNN that can effectively contextualize predictions via pair-wise representations for familiar items, while falling back to two-tower representations for exploratory and serendipitous items. We evaluated our architecture on real-world datasets on which it consistently improved upon the state-of-the-art. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        417,
+        823,
+        476
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ACKNOWLEDGMENTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        489,
+        328,
+        503
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We thank the entire Kumo.AI team for their invaluable support in bringing Hybrid-GNN into production for over dozens of customers and for any dataset scale. Special thanks go to Amitabha Roy, Myungwhan Kim and Federico Reyes Gomez for helpful discussions and feedback. ´ "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        513,
+        823,
+        558
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "REFERENCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        578,
+        287,
+        593
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. S. Baras and G. Theodorakopoulos. Path problems in networks. Synthesis Lectures on Communication Networks, 3(1):1–77, 2010. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "X. Cai, C. Huang, L. Xia, and X. Ren. LightGCL: Simple yet effective graph contrastive learning for recommendation. In ICLR, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "M. G. Campana and F. Delmastro. Recommender systems for online and mobile social networks: A survey. Online Social Networks and Media, 3:75–97, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "M. Fey and J. E. Lenssen. Fast graph representation learning with PyTorch Geometric. In ICLR Workshop on Representation Learning on Graphs and Manifolds, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "M. Fey, W. Hu, K. Huang, J. E. Lenssen, R. Ranjan, J. Robinson, R. Ying, J. You, and J. Leskovec. Relational deep learning: Graph representation learning on relational databases. In ICML, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "C. Gao, X. He, D. Gan, X. Chen, F. Feng, Y. Li, T. S. Chua, and D. Jin. Neural multi-task recommendation from multi-behavior data. In ICDE, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yury Gorishniy, Ivan Rubachev, Valentin Khrulkov, and Artem Babenko. Revisiting deep learning models for tabular data. In NeurIPS, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "A. Grover and J. Leskovec. node2vec: Scalable feature learning for networks. In SIGKDD, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "H. Guo, R. Tang, Y. Ye, Z. Li, and X. He. DeepFM: A factorization-machine based neural network for CTR prediction. In ICJAI, 2017. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        601,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "11 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Xiangnan H. and Tat-Seng C. Neural factorization machines for sparse predictive analytics. In SIGIR, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "W. Hamilton, Z. Ying, and J. Leskovec. Inductive representation learning on large graphs. In NIPS, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "R. He and J. McAuley. Fusing similarity models with Markov chains for sparse sequential recommendation. In ICDM, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "X. He, L. Liao, H. Zhang, L. Nie, X. Hu, and T. Chua. Neural collaborative filtering. In WWW, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "X. He, K. Deng, X. Wang, Y. Li, Y. Zhang, and M. Wang. LightGCN: Simplifying and powering graph convolution network for recommendation. In SIGIR, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Z. He, W. Liu, W. Guo, J. Qin, Y. Zhang, Y. Hu, and R. Tang. A survey on user behavior modeling in recommender systems. In IJCAI, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "W. Hu, Y. Yuan, Z. Zhang, A. Nitta, K. Cao, V. Kocijan, J. Leskovec, and M. Fey. PyTorch Frame: A modular framework for multi-modal tabular learning. CoRR, abs/2404.00776, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Y. Hu, Y. Koren, and C. Volinsky. Collaborative filtering for implicit feedback datasets. In ICDM, 2008. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "S. Huang, F. Poursafaei, J. Danovitch, M. Fey, W. Hu, E. Rossi, J. Leskovec, M. Bronstein, G. Rabusseau, and R. Rabbany. Temporal graph benchmark for machine learning on temporal graphs. NeurIPS, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "B. Jin, C. Gao, X. He, D. Jin, and Y. Li. Multi-behavior recommendation with graph convolutional networks. In SIGIR, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Johnson, M. Douze, and H. Jegou. Billion-scale similarity search with GPUs. ´ IEEE Transactions on Big Data, 7(3):535–547, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "W. Kang and J. McAuley. Self-attentive sequential recommendation. In ICDM, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T. Liu. LightGBM: A highly efficient gradient boosting decision tree. In NIPS, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "D. P. Kingma and J. L. Ba. Adam: A method for stochastic optimization. In ICLR, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "T. N. Kipf and M. Welling. Varitional graph auto-encoders. In NIPS Workshop on Bayesian Deep Learning, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Y. Koren, R. Bell, and C. Volinsky. Matrix factorization techniques for recommender systems. Computer, 42(8):30–37, 2009. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Li, P. Ren, Z. Chen, Z. Ren, T. Lian, and J. Ma. Neural attentive session-based recommendation. New York, NY, USA, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Y. Li, K. Liu, R. Satapathy, S. Wang, and E. Cambria. Recent developments in recommender systems: A survey. IEEE Computational Intelligence Magazine, 19:78–95, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "D. Liang, R. G. Krishnan, M. D. Hoffman, and T. Jebara. Variational autoencoders for collaborative filtering. In WWW, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Q. Liu, Y. Zeng, R. Mokhosi, and H. Zhang. STAMP: Short-term attention/memory priority model for session-based recommendation. In SIGKDD, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "C. Ma, L. Ma, Y. Zhang, J. Sun, X. Liu, and M. Coates. Memory augmented graph neural networks for sequential recommendation. In AAAI, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "K. Mao, J. Zhu, X. Xiao, B. Lu, Z. Wang, and X. He. UltraGCN: Ultra simplification of graph convolutional networks for recommendation. In CIKM, 2021. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "A. Mnih and R. R. Salakhutdinov. Probabilistic matrix factorization. In NIPS, 2007. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein, L. Antiga, A. Desmaison, A. Kopf, E. Yang, Z. DeVito, M. Raison, A. Tejani, S. Chilamkurthy, B. Steiner, L. Fang, J. Bai, and S. Chintala. PyTorch: An imperative style, high-performance deep learning library. In NeurIPS, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "B. Perozzi, R. Al-Rfou, and S. Skiena. DeepWalk: Online learning of social representations. In SIGKDD, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "S. Rendle, C. Freudenthaler, Z. Gantner, and L. Schmidt-Thieme. BPR: Bayesian personalized ranking from implicit feedback. In UAI, 2009. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "S. Rendle, C. Freudenthaler, and L. Schmidt-Thieme. Factorizing personalized Markov chains for next-basket recommendation. In WWW, 2010. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "F. Ricci, L. Rokach, and B. Shapira. Introduction to recommender systems handbook. In Recommender systems handbook. 2010. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Robinson, R. Ranjan, W. Hu, K. Huang, J. Han, A. Dobles, M. Fey, J. E. Lenssen, Y. Yuan, Z. Zhang, X. He, and J. Leskovec. RelBench: A benchmark for deep learning on relational databases. In NeurIPS, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "M. Schlichtkrull, T. N. Kipf, P. Bloem, R. van den Berg, I. Titov, and M. Welling. Modeling relational data with graph convolutional networks. In The Semantic Web, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "F. Sun, J. Liu, J. Wu, C. Pei, X. Lin, W. Ou, and P. Jiang. BERT4Rec: Sequential recommendation with bidirectional encoder representations from transformer. In CIKM, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "K. K. Teru, E. G. Denis, and W. L. Hamilton. Inductive relation prediction by subgraph reasoning. In ICML, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "C. Wang, M. Zhang, W. Ma, Y. Liu, and Sh. Ma. Make it a chorus: knowledge-and time-aware item modeling for sequential recommendation. In SIGIR, 2020a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Wang, K. Ding, L. Hong, H. Lui, and J. Caverlee. Next-item recommendation with sequential hypergraphs. In SIGIR, 2020b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "X. Wang, X. He, M. Wang, F. Feng, and T. Chua. Neural graph collaborative filtering. In SIGIR, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Webber. Powering real-time recommendations with graph database technology. Technical report, Neo4J, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Wu, X. Wang, F. Feng, X. He, L. Chen, J. Lian, and X. Xie. Self-supervised graph learning for recommendation. In SIGIR, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "L. Wu, Z. Zheng, Z. Qiu, H. Wang, H. Gu, T. Shen, C. Qin, C. Zhu, H. Zhu, Q. Liu, H. Xiong, and E. Chen. A survey on large language models for recommendation. CoRR, abs/2305.19860, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "L. Xia, C. Huang, Y. Xu, P. Dai, B. Zhang, and L. Bo. Multiplex behavioral relation learning for recommendation via memory augmented transformer network. In SIGIR, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "L. Xia, C. Huang, Y. Xu, and J. Pei. Multi-behavior sequential recommendation with temporal graph transformer. In TKDE, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Y. Yang, C. Huang, L. Xia, Y. Liang, Y. Yu, and C. Li. Multi-behavior hypergraph-enhanced transformer for sequential recommendation. In SIGKDD, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. You, R. Ying, and J. Leskovec. Position-aware graph neural networks. In ICML, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. You, J. M. Gomes-Selman, R. Ying, and J. Leskovec. Identity-aware graph neural networks. In AAAI, 2021. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Yu, H. Yin, X. Xia, T. Chen, L. Cui, and Q. V. H. Nguyen. Are graph augmentations necessary? simple graph contrastive learning for recommendation. In SIGIR, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "H. Zeng, M. Zhang, Y. Xia, A. Srivastava, A. Malevich, R. Kannan, V. Prasanna, L. Jin, and R. Chen. Decoupling the depth and scope of graph neural networks. In NeurIPS, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "M. Zhang and Y. Chen. Link prediction based on graph neural networks. In NIPS, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Z. Zhu, Z. Zhang, L. P. Xhonneux, and J. Tang. Neural Bellmann-Ford networks: A general graph neural network framework for link prediction. In NeurIPS, 2021. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        825,
+        231
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ]
+]

@@ -1,0 +1,3437 @@
+[
+    {
+        "type": "text",
+        "text": "Projective Manifold Gradient Layer for Deep Rotation Regression ",
+        "text_level": 1,
+        "bbox": [
+            151,
+            130,
+            816,
+            151
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Jiayi Chen1,2 ",
+        "bbox": [
+            86,
+            186,
+            192,
+            205
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Yingda Yin1 Tolga Birdal3,4 ",
+        "bbox": [
+            212,
+            188,
+            450,
+            205
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1CFCS, Peking University ",
+        "bbox": [
+            246,
+            205,
+            454,
+            223
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "3Stanford University ",
+        "bbox": [
+            290,
+            224,
+            454,
+            241
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Baoquan Chen1 Leonidas J. Guibas3 He Wang1† ",
+        "bbox": [
+            472,
+            186,
+            888,
+            205
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "2Beijing Institute for General AI ",
+        "bbox": [
+            472,
+            205,
+            733,
+            224
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "4Imperial College London ",
+        "bbox": [
+            472,
+            224,
+            683,
+            241
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            233,
+            276,
+            310,
+            292
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Regressing rotations on SO(3) manifold using deep neural networks is an important yet unsolved problem. The gap between the Euclidean network output space and the non-Euclidean SO(3) manifold imposes a severe challenge for neural network learning in both forward and backward passes. While several works have proposed different regression-friendly rotation representations, very few works have been devoted to improving the gradient backpropagating in the backward pass. In this paper, we propose a manifold-aware gradient that directly backpropagates into deep network weights. Leveraging Riemannian optimization to construct a novel projective gradient, our proposed regularized projective manifold gradient (RPMG) method helps networks achieve new state-of-the-art performance in a variety of rotation estimation tasks. Our proposed gradient layer can also be applied to other smooth manifolds such as the unit sphere. Our project page is at https://jychen18.github.io/RPMG. ",
+        "bbox": [
+            73,
+            308,
+            468,
+            580
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1. Introduction ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            617,
+            207,
+            632
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Estimating rotations is a crucial problem in visual perception that has broad applications, e.g., in object pose estimation, robot control, camera relocalization, 3D reconstruction and visual odometry [8, 13, 16, 22, 37]. Recently, with the proliferation of deep neural networks, learning to accurately regress rotations is attracting more and more attention. However, the non-Euclidean characteristics of rotation space make accurately regressing rotation very challenging. ",
+        "bbox": [
+            73,
+            635,
+            467,
+            755
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "As we know, rotations reside in a non-Euclidean manifold, SO(3) group, whereas the unconstrained outputs of neural networks usually live in Euclidean spaces. This gap between the neural network output space and SO(3) manifold becomes a major challenge for deep rotation regression, thus tackling this gap becomes an important research topic. One popular research direction is to design learningfriendly rotation representations, e.g., 6D continuous rep-",
+        "bbox": [
+            75,
+            756,
+            467,
+            876
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "resentation from [46] and 10D symmetric matrix representation from [27]. Recently, Levinson et al. [25] adopted the vanilla 9D matrix representation discovering that simply replacing the Gram-Schmidt process in the 6D representation [46] with symmetric SVD-based orthogonalization can make this representation superior to the others. ",
+        "bbox": [
+            500,
+            277,
+            890,
+            368
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Despite the progress on discovering better rotation representations, the gap between a Euclidean network output space and the non-Euclidean SO(3) manifold hasn’t been completely filled. One important yet long-neglected problem lies in optimization on non-Euclidean manifolds [1]: to optimize on SO(3) manifold, the optimization variable is a rotation matrix, which contains nine matrix elements; if we naively use Euclidean gradient, which simply computes the partial derivatives with respect to each of the nine matrix elements, to update the variable, this optimization step will usually lead to a new matrix off SO(3) manifold. Unfortunately, we observe that all the existing works on rotation regression simply rely upon vanilla auto-differentiation for backpropagation, exactly computing Euclidean gradient and performing such off-manifold updates to predicted rotations. We argue that, for training deep rotation regression networks, the off-manifold components will lead to noise in the gradient of neural network weights, hindering network training and convergence. ",
+        "bbox": [
+            496,
+            369,
+            890,
+            656
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "To tackle this issue, we draw inspiration from differential geometry, where people leverage Riemannian optimization to optimize on the non-Euclidean manifold, which finds the direction of the steepest geodesic path on the manifold and take an on-manifold step. We thus propose to leverage Riemannian optimization and delve deep into the study of the backward pass. Note that this is a fundamental yet currently under-explored avenue, given that most of the existing works focus on a holistic design of rotation regression that is agnostic to forward/backward pass. However, incorporating Riemannian optimization into network training is highly non-trivial and challenging. Although methods of Riemannian optimization allow for optimization on SO(3) [5, 31], matrix manifolds [1] or general Riemannian manifolds [34,44], they are not directly applicable to update the weights of the neural networks that are Euclidean. Also, ",
+        "bbox": [
+            496,
+            657,
+            890,
+            900
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_footnote",
+        "text": "†: He Wang is the corresponding author (hewang@pku.edu.cn). ",
+        "bbox": [
+            99,
+            886,
+            437,
+            900
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2110.11657v3 [cs.CV] 30 Mar 2022 ",
+        "bbox": [
+            22,
+            258,
+            57,
+            705
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_number",
+        "text": "1 ",
+        "bbox": [
+            480,
+            924,
+            488,
+            936
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "approaches like [17] incorporate a Riemannian distance as well as its gradient into network training, however, they do not deal with the representation issue. ",
+        "bbox": [
+            75,
+            90,
+            468,
+            136
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In this work, we want to propose a better manifoldaware gradient in the backward pass of rotation regression that directly updates the neural network weights. We begin by taking a Riemannian optimization step and computing the difference between the rotation prediction and the updated rotation, which is closer to the ground truth. Backpropagating this ”error”, we encounter the mapping function (or orthogonalization function) that transforms the raw network output to a valid rotation. This projection, which can be the Gram-Schmidt process or SVD orthogonalization [25], is typically a many-to-one mapping. This nonbijectivity provides us with a new design space for our gradient: if we were to use a gradient to update the raw output rotation, many gradients would result in the same update in the final output rotation despite being completely different for backpropagating into the neural network weights. Now the problem becomes: which gradient is the best for backpropagation when many of them correspond to the same update to the output? ",
+        "bbox": [
+            75,
+            138,
+            468,
+            425
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We observe that this problem is somewhat similar to some problems with ambiguities or multi-ground-truth issues. One example would be the symmetry issue in pose estimation: a symmetric object, e.g. a textureless cube, appears the same under many different poses, which needs to be considered when supervising the pose predictions. For supervising the learning in such a problem, Wang et. al. [39] proposed to use min-of-N loss [14], which only penalizes the smallest error between the prediction and all the possible ground truths. We therefore propose to find the gradient with the smallest norm that can update the final output rotation to the goal rotation. This back-projection process involves finding an element closest to the network output in the inverse image of the goal rotation and projecting the network output to this inverse image space. We therefore coin our gradient projective manifold gradient. One thing to note is that this projective gradient tends to shorten the network output, causing the norms of network output to vanish. To fix this problem, we further incorporate a simple regularization into the gradient, leading to our full solution regularized projective manifold gradient (RPMG). ",
+        "bbox": [
+            75,
+            428,
+            468,
+            744
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Note that our proposed gradient layer operates on the raw network output and can be directly backpropagated into the network weights. Our method is very general and is not tied to a specific rotation representation. It can be coupled with different non-Euclidean rotation representations, including quaternion, 6D representation [46], and 9D rotation matrix representation [25], and can even be used for regressing other non-manifold variables. ",
+        "bbox": [
+            75,
+            747,
+            467,
+            866
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We evaluate our devised projective manifold gradient layers on a diverse set of problems involving rota-",
+        "bbox": [
+            75,
+            869,
+            467,
+            900
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "tion regression: 3D object pose estimation from 3D point clouds/images, rotation estimation problems without using ground truth rotation supervisions, and please see Appendix E.3 for more experiments on camera relocalization. Our method demonstrates significant and consistent improvements on all these tasks and all different rotation representations tested. Going beyond rotation estimation, we also demonstrate performance improvements on regressing unit vectors (lie on a unit sphere) as an example of an extension to other non-Euclidean manifolds. ",
+        "bbox": [
+            496,
+            90,
+            890,
+            239
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We summarize our contribution as below: ",
+        "bbox": [
+            517,
+            242,
+            795,
+            256
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "• We propose a novel manifold-aware gradient layer, namely RPMG, for the backward pass of rotation regression, which can be applied to different rotation representations and losses and used as a “plug-in” at no actual cost. ",
+            "• Our extensive experiments over different tasks and rotation representations demonstrate the significant improvements from using RPMG. ",
+            "• Our method can also benefit regression tasks on other manifolds, e.g. $S ^ { 2 }$ . "
+        ],
+        "bbox": [
+            517,
+            262,
+            890,
+            412
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2. Related Work ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            426,
+            640,
+            441
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Both rotation parameterization and optimization on SO(3) are well-studied topics. Early deep learning models leverage various rotation representations for pose estimation, e.g., direction cosine matrix (DCM) [19, 43], axisangle [12, 15, 35], quaternion [11, 21, 23, 42, 45] and Eulerangle [24,30,33]. Recently, [46] points out that Euler-angle, axis-angle, and quaternion are not continuous rotation representations, since their representation spaces are not homeomorphic to SO(3). As better representations for rotation regression, 6D [46], 9D [25], 10D [27] representations are proposed to resolve the discontinuity issue and improve the regression accuracy. A concurrent work [7] examines different manifold mappings theoretically and experimentally, finding out that SVD orthogonalization performs the best when regressing arbitrary rotations. Originating from general Riemannian optimization, [31] presents an easy approach for minimization on the $S O ( 3 )$ group by constructing a local axis-angle parameterization, which is also the tangent space of $S O ( 3 )$ manifold. They backpropagate gradient to the tangent space and use the exponential map to update the current rotation matrix. Most recently, [32] constructs a PyTorch library that supports tangent space gradient backpropagation for 3D transformation groups, (e.g., SO(3), $S E ( 3 )$ , $S i m ( 3 ) )$ . This proposed library can be used to implement the Riemannian gradient in our layer. ",
+        "bbox": [
+            496,
+            445,
+            890,
+            821
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "3. Preliminaries ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            829,
+            638,
+            844
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "3.1. Riemannian Geometry ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            849,
+            710,
+            866
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Following [3, 4], we define an $m$ -dimensional Riemannian manifold embedded in an ambient Euclidean space ",
+        "bbox": [
+            500,
+            869,
+            890,
+            900
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "2 ",
+        "bbox": [
+            478,
+            924,
+            491,
+            936
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "$\\mathcal { X } ~ = ~ \\mathbb { R } ^ { d }$ and endowed with a Riemannian metric $\\textbf { G } \\triangleq$ $( \\mathbf { G } _ { \\mathbf { x } } ) _ { \\mathbf { x } \\in \\mathcal { M } }$ to be a smooth curved space $( { \\mathcal { M } } , G )$ . A vector $\\textbf { v } \\in { \\mathcal { X } }$ is said to be tangent to $\\mathcal { M }$ at $\\mathbf { x }$ iff there exists a smooth curve $\\gamma ~ : ~ [ 0 , 1 ] \\ \\mapsto \\ { \\mathcal { M } }$ s.t. $\\gamma ( 0 ) \\ = \\textbf { x }$ and ${ \\dot { \\gamma } } ( 0 ) = { \\bf v }$ . The velocities of all such curves through $\\mathbf { x }$ form the tangent space $\\mathcal { T } _ { \\mathbf { x } } \\mathcal { M } ~ = ~ \\{ \\dot { \\gamma } ( 0 ) | \\gamma ~ : ~ \\mathbb { R } ~ \\mapsto ~$ $\\mathcal { M }$ is smooth around 0 and $\\gamma ( 0 ) = \\mathbf { x } \\}$ . ",
+        "bbox": [
+            76,
+            89,
+            468,
+            196
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Definition 1 (Riemannian gradient). For a smooth function $f : \\mathcal { M } \\mapsto \\mathbb { R }$ and $\\forall ( \\mathbf { x } , \\mathbf { v } ) \\in \\mathcal { T } \\mathcal { M }$ , we define the Riemannian gradient of $f$ as the unique vector field gradf satisfying [6]: ",
+        "bbox": [
+            76,
+            200,
+            468,
+            247
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathrm {D} f (\\mathbf {x}) [ \\mathbf {v} ] = \\langle \\mathbf {v}, \\operatorname {g r a d} f (\\mathbf {x}) \\rangle_ {\\mathbf {x}} \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            174,
+            253,
+            468,
+            270
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathrm Ḋ f Ḍ ( \\mathbf x ) [ \\mathbf v ]$ is the derivation of $f$ by v. It can further be shown (see Appendix B.1) that an expression for gradf can be obtained through the projection of the Euclidean gradient orthogonally onto the tangent space ",
+        "bbox": [
+            76,
+            272,
+            468,
+            332
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {g r a d} f (\\mathbf {x}) = \\nabla f (\\mathbf {x}) _ {\\parallel} = \\Pi_ {\\mathbf {x}} \\bigl (\\nabla f (\\mathbf {x}) \\bigr). \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            145,
+            334,
+            468,
+            352
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $\\Pi _ { \\mathbf { x } } : \\mathcal { X } \\mapsto \\mathcal { T } _ { \\mathbf { x } } \\mathcal { M } \\subseteq \\mathcal { X }$ is an orthogonal projector with respect to $\\langle \\cdot , \\cdot \\rangle _ { \\mathbf { x } }$ . ",
+        "bbox": [
+            76,
+            357,
+            468,
+            388
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Definition 2 (Riemannian optimization). We consider gradient descent to solve the problems of $\\mathrm { m i n } _ { \\mathbf { x } \\in \\mathcal { M } } f ( \\mathbf { x } )$ . For a local minimizer or a stationary point $\\mathbf { x } ^ { \\star }$ of $f$ , the Riemannian gradient vanishes $\\operatorname { g r a d } f ( \\mathbf { x } ^ { \\star } ) = 0$ enabling a simple algorithm, Riemannian gradient descent $( R G D )$ : ",
+        "bbox": [
+            76,
+            397,
+            468,
+            472
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {x} _ {k + 1} = R _ {\\mathbf {x} _ {k}} \\left(- \\tau_ {k} \\operatorname {g r a d} f \\left(\\mathbf {x} _ {k}\\right)\\right) \\tag {3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            169,
+            474,
+            468,
+            491
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $\\tau _ { k }$ is the step size at iteration $k$ and $R _ { { \\bf x } _ { k } }$ is the retraction usually chosen related to the exponential map. ",
+        "bbox": [
+            76,
+            501,
+            468,
+            531
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.2. Rotation Representations ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            541,
+            308,
+            556
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "There are many ways of representing a rotation: classic rotation representations, e.g. Euler angles, axis-angle, and quaternion; and recently introduced regression-friendly rotation representations such as e.g. 5D [46], 6D [46], 9D [25] and 10D [27] representations. A majority of deep neural networks can output an unconstrained, arbitrary ndimensional vector x in a Euclidean space $\\mathcal { X } = \\mathbb { R } ^ { n }$ . For Euler angle and axis-angle representations which use a vector from $\\mathbb { R } ^ { 3 }$ to represent a rotation, a neural network can simply output a 3D vector; however, for quaternions, 6D, 9D or 10D representations that lies on non-Euclidean manifolds, manifold mapping function $\\pi : \\mathbb { R } ^ { n } \\mapsto { \\mathcal { M } }$ is generally needed for normalization or orthogonalization purposes to convert network outputs to valid elements belonging to the representation manifold. This network Euclidean output space $\\mathcal { X }$ is where the representation manifolds reside and therefore are also called ambient space. ",
+        "bbox": [
+            75,
+            560,
+            468,
+            816
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Definition 3 (Rotation representation). One rotation representation, which lies on a representation manifold $\\mathcal { M }$ , defines a surjective rotation mapping $\\phi : \\hat { \\mathbf { x } } \\in \\mathcal { M } \\to \\phi ( \\hat { \\mathbf { x } } ) \\in$ SO(3) and a representation mapping function $\\psi : \\mathbf { R } \\in$ $\\mathrm { S O ( 3 ) }  \\psi ( \\mathbf { R } ) \\in \\mathcal { M } _ { \\mathrm { \\Omega } }$ , such that $\\phi ( \\psi ) = \\mathbf { R } \\in \\mathrm { S O } ( 3 )$ . ",
+        "bbox": [
+            73,
+            825,
+            468,
+            901
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Definition 4 (Manifold mapping function). From an ambient space $\\mathcal { X }$ to the representation manifold $\\mathcal { M }$ , we can define a manifold mapping function $\\pi : \\mathbf { x } \\in \\mathcal { X }  \\pi ( \\mathbf { x } ) \\in \\mathcal { M }$ , which projects a point x in the ambient, Euclidean space to a valid element $\\hat { \\mathbf { x } } = \\pi ( \\mathbf { x } )$ on the manifold $\\mathcal { M }$ . ",
+        "bbox": [
+            496,
+            90,
+            890,
+            167
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We summarize the manifold mappings, the rotation mappings and representation mappings for several non-Euclidean rotation representations below. ",
+        "bbox": [
+            496,
+            174,
+            890,
+            218
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Unit quaternion. Unit quaternions represent a rotation using a 4D unit vector $\\textbf { q } \\in \\ S ^ { 3 }$ double covering the non-Euclidean 3-sphere i.e. q and −q identify the same rotation. A network with a final linear activation can only predict $\\textbf { x } \\in \\ \\mathbb { R } ^ { 4 }$ . The corresponding manifold mapping function is usually chosen to be a normalization step, which reads $\\pi _ { q } ( \\mathbf { x } ) = \\mathbf { x } / \\| \\mathbf { x } \\|$ . For rotation and representation mapping, we leverage the standard mappings between rotation and quaternion (see Appendix G). ",
+        "bbox": [
+            496,
+            219,
+            890,
+            354
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "6D representation and Gram-Schmidt orthogonalization. 6D rotation representation [46], lying on Stiefel manifold $\\nu _ { 2 } ( \\mathbb { R } ^ { 3 } )$ , uses two orthogonal unit 3D vectors $( \\hat { \\mathbf { c } } _ { 1 } , \\hat { \\mathbf { c } } _ { 2 } )$ to represent a rotation, which are essentially the first two columns of a rotation matrix. Its manifold mapping $\\pi _ { 6 D }$ is done through Gram-Schmidt orthogonalization. Its rotation mapping $\\phi _ { 6 D }$ is done by adding the third column $\\hat { \\mathbf { c } } _ { 3 } = \\hat { \\mathbf { c } } _ { 1 } \\times \\hat { \\mathbf { c } } _ { 2 }$ . Its representation mapping $\\psi _ { 6 D }$ is simply getting rid of the third column ${ \\hat { \\mathbf { c } } } _ { 3 }$ from a rotation matrix. ",
+        "bbox": [
+            496,
+            354,
+            890,
+            491
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "9D representation and SVD orthogonalization. To map a raw 9D network output M to a rotation matrix, [25] use SVD orthogonalization as the manifold mapping function $\\pi _ { 9 D }$ , as follows: $\\pi _ { 9 D }$ first decomposes M into its left and right singular vectors $\\{ \\mathbf { U } , \\mathbf { V } ^ { \\top } \\}$ and singular values $\\Sigma$ , $\\mathbf { M } \\ = \\ \\mathbf { U } \\Sigma \\mathbf { V } ^ { \\top }$ ; then it replaces $\\Sigma$ with $\\Sigma ^ { \\prime } =$ $\\mathrm { d i a g ( 1 , 1 , d e t ( \\mathbf { U } \\mathbf { V } ^ { \\top } ) } )$ and finally, computes $\\mathbf { R } = \\mathbf { U } \\Sigma ^ { \\prime } \\mathbf { V } ^ { \\top }$ to get the corresponding rotation matrix $\\mathbf { R } \\in \\mathrm { S O } ( 3 )$ . As this representation manifold is SO(3), both the rotation and representation mapping functions are simply identity. ",
+        "bbox": [
+            496,
+            491,
+            890,
+            642
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "10D representation. [27] propose a novel 10D representation for rotation matrix. The manifold mapping function $\\pi _ { 1 0 D }$ maps $\\pmb { \\theta } \\in \\mathbb { R } ^ { 1 0 }$ to $\\mathbf { q _ { \\lambda } } \\in \\mathcal { S } ^ { 3 }$ by computing the eigenvector corresponding to the smallest eigenvalue of $\\mathbf { A } ( \\pmb \\theta )$ , expressed as $\\overline { { \\pi } } _ { 1 0 D } ( \\mathbf { x } ) = \\operatorname* { m i n } _ { \\mathbf { q } \\in S ^ { 3 } } \\mathbf { q } ^ { \\top } \\mathbf { A } ( \\mathbf { x } ) \\overline { { \\mathbf { q } } } .$ , in which ",
+        "bbox": [
+            496,
+            642,
+            890,
+            724
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {A} (\\boldsymbol {\\theta}) = \\left[ \\begin{array}{l l l l} \\theta_ {1} & \\theta_ {2} & \\theta_ {3} & \\theta_ {4} \\\\ \\theta_ {2} & \\theta_ {5} & \\theta_ {6} & \\theta_ {7} \\\\ \\theta_ {3} & \\theta_ {6} & \\theta_ {8} & \\theta_ {9} \\\\ \\theta_ {4} & \\theta_ {7} & \\theta_ {9} & \\theta_ {1 0} \\end{array} \\right]. \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            576,
+            733,
+            890,
+            797
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Since the representation manifold is $S ^ { 3 }$ , the rotation and representation mapping are the same as unit quaternion. ",
+        "bbox": [
+            496,
+            811,
+            890,
+            843
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.3. Deep Rotation Regression ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            849,
+            735,
+            866
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We conclude this section by describing the ordinary forward and backward passes of a neural network based rota-",
+        "bbox": [
+            500,
+            869,
+            890,
+            900
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            478,
+            924,
+            490,
+            936
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/5ebe379335bc34775a4f20daa4f0d5fc5703fa0add222d32f576e464b0e24a1f.jpg",
+        "image_caption": [
+            "Figure 1. Projective Manifold Gradient Layer. In the forward pass, the network predicts a raw output x, which is then transformed into a valid rotation $\\mathbf { R } = \\phi ( \\pi ( \\mathbf { x } ) )$ . We leave this forward pass unchanged and only modify the backward pass. In the backward pass, we first use Riemannian optimization to get a goal rotation $\\mathbf { R } _ { g }$ and map it back to $\\hat { \\mathbf { x } } _ { g }$ on the representation manifold $\\mathcal { M }$ . After that we find the element $\\mathbf { x } _ { g p }$ which is closest to the raw output in the inverse image of $\\hat { \\mathbf { x } } _ { g }$ , and finally get the gradient gRPM we want. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            101,
+            85,
+            872,
+            258
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "tion regression, as used in [25, 46]. ",
+        "bbox": [
+            76,
+            335,
+            308,
+            351
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Forward and backward passes. Assume, for a rotation representation, the network predicts $\\mathbf { x } \\in \\mathcal { X }$ , then the manifold mapping $\\pi$ will map $\\mathbf { x }$ to $\\hat { \\mathbf { x } } = \\pi ( \\mathbf { x } ) \\in \\mathcal { M }$ , followed by a rotation mapping $\\phi$ that finally yields the output rotation ${ \\bf R } = \\phi ( \\hat { \\bf x } ) = \\phi ( \\pi ( { \\bf x } ) )$ . Our work only tackles the backward pass and keeps the forward pass unchanged, as shown in the top part of Figure 1. The gradient in the backwardpass is simply computed using Pytorch autograd method, that is ${ \\bf g } = f ^ { \\prime } ( { \\bf R } ) \\phi ^ { \\prime } ( \\hat { \\bf x } ) \\pi ^ { \\prime } ( { \\bf x } )$ . ",
+        "bbox": [
+            75,
+            354,
+            470,
+            492
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Loss function. The most common choice for supervising rotation matrix is L2 loss, $\\| \\mathbf { R } - \\mathbf { R } _ { g t } \\| _ { F } ^ { 2 }$ , as used by [25,46]. This loss is equal to $4 - 4 \\cos ( < \\mathbf { R } , \\mathbf { R } _ { g t } > )$ , where $< \\mathbf { R } , \\mathbf { R } _ { g t } >$ represents the angle between $\\mathbf { R }$ and $\\mathbf { R } _ { g t }$ . ",
+        "bbox": [
+            76,
+            494,
+            468,
+            556
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4. Method ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            571,
+            168,
+            587
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Overview. In this work, we propose a projective manifold gradient layer, without changing the forward pass of a given rotation regressing network, as shown in Figure 1. Our focus is to find a better gradient g of the loss function $\\mathcal { L }$ with respect to the network raw output $\\mathbf { x }$ for backpropagation into the network weights. ",
+        "bbox": [
+            75,
+            595,
+            468,
+            685
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Let’s start with examining the gradient of network output x in a general case – regression in Euclidean space. Given a ground truth $\\mathbf { x } _ { g t }$ and the L2 loss $\\| \\mathbf { x } - \\mathbf { x } _ { g t } \\| ^ { 2 }$ that maximizes the likelihood in the presence of Gaussian noise in $\\mathbf { x }$ , the gradient would be $\\mathbf { g } = 2 ( \\mathbf { x } - \\mathbf { x } _ { g t } )$ . ",
+        "bbox": [
+            75,
+            686,
+            468,
+            763
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "In the case of rotation regression, we therefore propose to find a proper $\\mathbf { x } ^ { * } \\in \\mathcal { X }$ for a given ground truth $\\mathbf { R } _ { g t }$ or a computed goal rotation ${ \\bf R } _ { g }$ when the ground truth rotation is not available, and then simply use $\\mathbf { x } - \\mathbf { x } ^ { * }$ as our gradient to backpropagate into the network. ",
+        "bbox": [
+            75,
+            763,
+            468,
+            839
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Note that finding such an $\\mathbf { x } ^ { * }$ can be challenging. Assuming we know $\\mathbf { R } _ { g t }$ , finding an $\\mathbf { x } ^ { * }$ involves inverting $\\phi$ and $\\pi$ since the network output ${ \\mathbf R } = \\phi ( \\pi ( { \\mathbf x } ) )$ . Furthermore, we may not know $\\mathbf { R } _ { g t }$ under indirect rotation supervision (e.g., ",
+        "bbox": [
+            75,
+            839,
+            470,
+            902
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "flow loss as used in PoseCNN [42]) and self-supervised rotation estimation cases (e.g., 2D mask loss as used in [38]). ",
+        "bbox": [
+            498,
+            335,
+            890,
+            366
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "In this work, we introduce the following techniques to mitigate these problems: (i) we first take a Riemannian gradient to compute a goal rotation $\\mathbf { R } _ { g } \\in \\mathrm { S O } ( 3 )$ , which does not rely on knowing $\\mathbf { R } _ { g t }$ , as explained in Section 4.1; (ii) we then find the set of all possible $\\mathbf { x } _ { g } \\mathbf { s }$ that can be mapped to $\\mathbf { R } _ { g }$ , or in other words, the inverse image of $\\mathbf { R } _ { g }$ under $\\pi$ and $\\phi$ ; (iii) we find $\\mathbf { x } _ { g p }$ which is the element in this set closest to $\\mathbf { x }$ in the Euclidean metric and set it as $\\mathbf { \\cdots } \\mathbf { x } ^ { \\ast \\ast \\mathbf { \\cdots } }$ . We will construct our gradient using this $\\mathbf { x } ^ { * }$ , as explained in 4.2. (iv) we add a regularization term to this gradient forming gRPMG as explained in 4.3. The whole backward pass leveraging our proposed regularized projective manifold gradient is shown in the lower half of Figure 1. ",
+        "bbox": [
+            498,
+            368,
+            892,
+            565
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4.1. Riemannian Gradient and Goal Rotation ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            575,
+            852,
+            590
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "To handle rotation estimation with/without direct rotation supervision, we first propose to compute the Riemannian gradient of the loss function $\\mathcal { L }$ with respect to the output rotation R and find a goal rotation ${ \\bf R } _ { g }$ that is presumably closer to the ground truth rotation than R. ",
+        "bbox": [
+            498,
+            597,
+            890,
+            672
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Assume the loss function is in the following form $\\mathcal { L } ( f ( \\mathbf { R } ) )$ , where $\\begin{array} { r } { \\textbf { R } = \\ \\pi ( \\phi ( \\mathbf { x } ) ) } \\end{array}$ is the output rotation and $f$ constructs a loss function that compares R to the ground truth rotation $\\mathbf { R } _ { g t }$ directly or indirectly. Given $\\mathbf { R } ( \\mathbf { x } )$ and $\\mathcal { L } ( f ( \\mathbf { R } ( \\mathbf { x } ) ) )$ , we can perform one step of Riemannian optimization yielding our goal rotation ${ \\mathbf { R } _ { g } } \\gets$ $R _ { \\mathbf { R } } ( - \\tau \\operatorname { g r a d } \\ L ( f ( \\mathbf { R } ) ) )$ , where $\\tau$ is the step size of Riemannian gradient and can be set to a constant as a hyperparameter or varying during the training. For L2 loss $\\| \\mathbf { R } - \\mathbf { R } _ { g t } \\| _ { F } ^ { 2 }$ , the Riemannian gradient is always along the geodesic path between $\\mathbf { R }$ and $\\mathbf { R } _ { g t }$ on SO(3) [20]. In this case, $\\mathbf { R } _ { g }$ can generally be seen as an intermediate goal between $\\mathbf { R }$ and $\\mathbf { R } _ { g t }$ dependent on $\\tau$ . Gradually increasing $\\tau$ from 0 will first make ${ \\bf R } _ { g }$ approach $\\mathbf { R } _ { g t }$ starting with ${ \\bf R } _ { g } = { \\bf R }$ , and then reach $\\mathbf { R } _ { g t }$ where we denote $\\tau = \\tau _ { g t }$ , and ",
+        "bbox": [
+            498,
+            674,
+            892,
+            902
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            478,
+            924,
+            491,
+            936
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "finally going beyond $\\mathbf { R } _ { g t }$ . Although, when $\\mathbf { R } _ { g t }$ is available, one can simply set ${ \\bf R } _ { g } = { \\bf R } _ { g t }$ , we argue that this is just a special case under $\\tau = \\tau _ { g t }$ . For scenarios where $\\mathbf { R } _ { g t }$ is unavailable, e.g., in self-supervised learning cases (see in Section 5.3), we don’t know $\\mathbf { R } _ { g t }$ and $\\tau _ { g t }$ , thus we need to compute $\\mathbf { R } _ { g }$ using Riemannian optimization. In the sequel, we only use ${ \\bf R } _ { g }$ for explaining our methods without loss of generality. See Section 4.3 for how to choose $\\tau$ . ",
+        "bbox": [
+            75,
+            90,
+            472,
+            212
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "4.2. Projective Manifold Gradient ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            222,
+            341,
+            239
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Given $\\mathbf { R } _ { g }$ , we can use the representation mapping $\\psi$ to find the corresponding $\\hat { \\mathbf { x } } _ { g } = \\psi ( \\mathbf { R } _ { g } )$ on the representation manifold $\\mathcal { M }$ . However, further inverting $\\pi$ and finding the corresponding $\\mathbf { x } _ { g } \\in \\mathcal { X }$ is a non-trivial problem, due to the projective nature of $\\pi$ . In fact, there are many $\\mathbf { x } _ { g } \\mathbf { s }$ that satisfy $\\pi ( \\mathbf { x } _ { g } ) = \\hat { \\mathbf { x } } _ { g }$ . It seems that we can construct a gradient $\\mathbf { g } = ( \\mathbf { x } - \\mathbf { x } _ { g } )$ using any $\\mathbf { x } _ { g }$ that satisfies $\\pi ( \\mathbf { x } _ { g } ) = \\hat { \\mathbf { x } } _ { g }$ . No matter which $\\mathbf { x } _ { g }$ we choose, if this gradient were to update $\\mathbf { x }$ , it will result in the same $\\mathbf { R } _ { g }$ . But, when backpropagating into the network, those gradients will update the network weights differently, potentially resulting in different learning efficiency and network performance. ",
+        "bbox": [
+            75,
+            243,
+            468,
+            424
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Formally, we formulate this problem as a multi-groundtruth problem for x: we need to find the best $\\mathbf { x } ^ { * }$ to supervise from the inverse image of $\\hat { \\mathbf { x } } _ { g }$ under the mapping $\\pi$ . We note that similar problems have been seen in pose supervision dealing with symmetry as in [39], where one needs to find one pose to supervise when there are many poses under which the object appears the same. [39] proposed to use a min-of-N strategy introduced by [14]: from all possible poses, taking the pose that is closest to the network prediction as ground truth. A similar strategy is also seen in supervising quaternion regression, as q and $- \\mathbf { q }$ stand for the same rotation. One common choice of the loss function is therefore $\\operatorname* { m i n } \\{ \\mathcal { L } ( \\mathbf { q } , \\mathbf { q } _ { g t } ) , \\mathcal { L } ( \\mathbf { q } , - \\mathbf { q } _ { g t } ) \\}$ [27], which penalizes the distance to the closest ground truth quaternion. ",
+        "bbox": [
+            75,
+            424,
+            468,
+            636
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Inspired by these works, we propose to choose our gradient among all the possible gradients with the lowest level of redundancy, i.e., we require $\\mathbf { x } ^ { * }$ to be the one closest to x, or in other words, the gradient to have the smallest norm, meaning that we need to find the projection point $\\mathbf { x } _ { g p }$ of $\\mathbf { x }$ to all the valid $\\mathbf { x } _ { g }$ : ",
+        "bbox": [
+            75,
+            636,
+            468,
+            728
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {x} _ {g p} = \\underset {\\pi (\\mathbf {x} _ {g}) = \\hat {\\mathbf {x}} _ {g}} {\\operatorname {a r g m i n}} \\| \\mathbf {x} - \\mathbf {x} _ {g} \\| _ {2} \\tag {5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            179,
+            739,
+            468,
+            767
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "We then can construct our projective manifold gradient (PMG) as $\\mathbf { g } _ { P M } = \\mathbf { x } - \\mathbf { x } _ { g p }$ . We will denote the naive gradient $\\mathbf { g } _ { M } = \\mathbf { x } - \\hat { \\mathbf { x } } _ { g }$ as manifold gradient (MG). ",
+        "bbox": [
+            76,
+            779,
+            468,
+            825
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Here we provide another perspective on why a network may prefer PMG. In the case where a deep network is trained using stochastic gradient descent (SGD), the final gradient used to update the network weights is averaged across the gradients of all the batch instances. If gradients ",
+        "bbox": [
+            75,
+            825,
+            468,
+            900
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/e712d2ed2fcb6a5636675db96ddacfce416330a5c349a5036853cd894b28293b.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            516,
+            89,
+            671,
+            191
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/ec02c97f25993ac1e2f0b0b8935d79ef851a0603159f6aecb4c7f77d321c7d42.jpg",
+        "image_caption": [
+            "Figure 2. Illustration for regularized projective manifold gradient. Left: In the forward pass, we simply project $\\mathbf { x }$ to $\\hat { \\bf x }$ by $\\pi$ . In the backward pass, first we compute a Riemannian gradient, which is shown as the green arrow. After getting a next goal $\\hat { \\mathbf { x } } _ { g } \\in \\mathcal { M }$ by Riemannian optimization, we find the inverse projection $\\mathbf { x } _ { g p }$ of $\\hat { \\mathbf { x } } _ { g }$ , which leads to our projective manifold gradient, shown as the blue arrow. With a regularization term, we can get our final regularized projective manifold gradient, as the purple arrow. Right: Projection point $\\hat { \\mathbf { x } } _ { g p }$ in the case of quaternion. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            700,
+            103,
+            875,
+            176
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "from different batch instances contain different levels of redundancy, then the averaged gradient may be biased or not even appropriate. This argument is generally applicable to all stochastic optimizers (e.g., Adam [2]) ",
+        "bbox": [
+            496,
+            351,
+            890,
+            412
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Inverting $\\pi$ . There are many ways to solve this projection problem for different manifold mapping functions $\\pi$ . For example, we can formulate this as a constrained optimization problem. For the manifold mapping functions we consider, we propose the following approach: we first solve for the inverse image $\\pi ^ { - 1 } ( \\hat { \\mathbf { x } } _ { g } )$ of $\\hat { \\mathbf { x } } _ { g }$ in the ambient space $\\mathcal { X }$ analytically, which reads $\\pi ^ { - 1 } ( \\hat { \\mathbf { x } } _ { g } ) = \\{ \\mathbf { x } _ { g } \\in \\mathcal { X } \\mid \\pi ( \\mathbf { x } _ { g } ) =$ $\\hat { \\bf x } _ { g } \\}$ ; we then project x onto this inverse image space. Note that, sometimes only a superset of this inverse image can be found analytically, requiring certain constraints on $\\mathbf { x } _ { g p }$ to be enforced. ",
+        "bbox": [
+            496,
+            412,
+            892,
+            578
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Here we list the inverse image $\\pi ^ { - 1 } ( \\hat { \\mathbf { x } } _ { g } )$ and the projection point $\\mathbf { x } _ { g p }$ for different rotation representations and their corresponding manifold mapping $\\pi$ . Please refer to Appendix B.2 for detailed derivations. ",
+        "bbox": [
+            496,
+            580,
+            890,
+            640
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Quaternion. With $\\pi _ { q } ( \\mathbf { x } ) = \\mathbf { x } / \\| \\mathbf { x } \\|$ , $\\mathbf { x } \\in \\mathbb { R } ^ { 4 }$ , and $\\hat { \\mathbf { x } } _ { g } \\in S ^ { 3 }$ : $\\pi _ { q } ^ { - 1 } ( \\hat { \\mathbf { x } } _ { g } ) = \\{ \\mathbf { x } \\mid \\mathbf { x } = k \\hat { \\mathbf { x } } _ { g } , k \\in \\mathbb { R }$ and $k > 0 \\}$ , which is a ray in the direction of $\\hat { \\mathbf { x } } _ { g }$ starting from the origin. Without considering the constraint of $k > 0$ , an analytical solution to this projection point $\\mathbf { x } _ { g p }$ of $\\mathbf { x }$ onto this line can be derived: $\\mathbf { x } _ { g p } = ( \\mathbf { x } \\cdot \\hat { \\mathbf { x } } _ { g } ) \\hat { \\mathbf { x } } _ { g }$ . ",
+        "bbox": [
+            496,
+            640,
+            890,
+            733
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "6D representation. With $\\pi _ { 6 D }$ as Gram-Schmidt process, $\\begin{array} { r } { \\textbf { x } = [ \\mathbf { u } , \\mathbf { v } ] ~ \\in ~ \\mathbb { R } ^ { 6 } , } \\end{array}$ , and $\\hat { \\mathbf { x } _ { g } } ~ \\in ~ \\mathcal { V } _ { 2 } ( \\mathbb { R } ^ { 3 } )$ : $\\pi _ { 6 D } ^ { - 1 } ( \\hat { \\bf x } _ { g } ) =$ $\\{ [ k _ { 1 } \\hat { \\mathbf { u } } _ { g } , k _ { 2 } \\hat { \\mathbf { u } } _ { g } + k _ { 3 } \\hat { \\mathbf { v } } _ { g } ] \\mid k _ { 1 } , k _ { 2 } , k _ { 3 } \\in \\mathbb { R }$ and $k _ { 1 } , k _ { 3 } > 0 \\}$ (the former is a ray whereas the latter spans a half plane). Without considering the constraint of $k _ { 1 } , k _ { 3 } > 0$ , the projection point $\\mathbf { x } _ { g p }$ can be analytically represented as $\\mathbf { x } _ { g p } =$ $[ ( \\mathbf { u } \\cdot \\hat { \\mathbf { u } } _ { g } ) \\hat { \\mathbf { u } } _ { g } , ( \\mathbf { v } \\cdot \\hat { \\mathbf { u } } _ { g } ) \\hat { \\mathbf { u } } _ { g } + ( \\mathbf { v } \\cdot \\hat { \\mathbf { v } } _ { g } ) \\hat { \\mathbf { v } } _ { g } ]$ ",
+        "bbox": [
+            496,
+            734,
+            890,
+            840
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "9D representation. With $\\pi _ { 9 D } ( \\mathbf { x } )$ as SVD orthogonalization, $\\mathbf { x } \\in \\mathbb { R } ^ { 3 \\times 3 }$ , and $\\hat { \\mathbf { x } } _ { g } \\in \\mathrm { S O } ( 3 )$ , the analytical expression for $\\pi _ { 9 D } ^ { - 1 }$ is available when we ignore the positive singular value constraints, which gives $\\overline { { \\pi } } _ { 9 D } ^ { - 1 } ( \\hat { \\bf x } _ { g } ) \\ \\overline { { = } } \\ \\{ { \\bf S } \\hat { \\bf x } _ { g } \\ | \\ \\bar { \\bf S } \\ = \\ $ ",
+        "bbox": [
+            496,
+            840,
+            890,
+            902
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            480,
+            924,
+            488,
+            936
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "$\\mathbf { S } ^ { \\top } \\big \\}$ . We can further solve the projection point $\\mathbf { x } _ { g p }$ with an elegant representation $\\begin{array} { r } { \\mathbf { x } _ { g p } = \\frac { \\mathbf { x } \\hat { \\mathbf { x } } _ { g } ^ { T } + \\hat { \\mathbf { x } } _ { g } \\mathbf { x } ^ { T } } { 2 } } \\end{array}$ . ",
+        "bbox": [
+            76,
+            90,
+            467,
+            128
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "10D representation. Please refer to Appendix B.2 for the derivation and expression of $\\mathbf { x } _ { q p }$ . ",
+        "bbox": [
+            76,
+            128,
+            467,
+            159
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4.3. Regularized Projective Manifold Gradient ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            166,
+            436,
+            181
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Issues in naive projective manifold gradient. In the right plot of Figure 2, we illustrate this projection process for several occasions where x takes different positions relative to $\\mathbf { x } _ { g }$ . We demonstrate that there are two issues in this process. ",
+        "bbox": [
+            76,
+            186,
+            467,
+            247
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "First, no matter where $\\mathbf { x }$ is in, the projection operation will shorten the length of our prediction because $\\| \\mathbf { x } _ { g p } \\| <$ $\\| \\mathbf { x } \\|$ is always true for all of 4D/6D/9D/10D representation. This will cause the length norm of the prediction of the network to become very small as the training progresses (see Figure 3). The shrinking network output will keep increasing the effective learning rate, preventing the network from convergence and leading to great harm to the network performance (see Table 2 and Figure 3 for ablation study). ",
+        "bbox": [
+            76,
+            248,
+            467,
+            383
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Second, when the angle between $\\mathbf { x }$ and $\\hat { \\mathbf { x } } _ { g }$ becomes larger than $\\pi / 2$ (in the case of ${ \\bf x } = { \\bf x } _ { 3 }$ ), the naive projection $\\mathbf { x } _ { g p }$ will be in the opposite direction of $\\hat { \\mathbf { x } } _ { g }$ and can not be mapped back to $\\hat { \\mathbf { x } } _ { g }$ under $\\pi _ { q }$ , resulting in a wrong gradient. The same set of issues also happens to 6D, 9D and 10D representations. The formal reason is that the analytical solution of the inverse image assumes certain constraints are satisfied, which is usually true only when either $\\hat { \\mathbf { x } } _ { g }$ is not far from x or the network is about to converge. ",
+        "bbox": [
+            75,
+            385,
+            467,
+            520
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Regularized projective manifold gradient. To solve the first issue, we propose to add a regularization term $\\mathbf { x } _ { g p } - \\hat { \\mathbf { x } } _ { g }$ to the projective manifold gradient, which can avoid the length vanishing problem. The regularized projective manifold gradient then reads: ",
+        "bbox": [
+            76,
+            522,
+            467,
+            597
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {g} _ {R P M} = \\mathbf {x} - \\mathbf {x} _ {g p} + \\lambda \\left(\\mathbf {x} _ {g p} - \\hat {\\mathbf {x}} _ {g}\\right), \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            153,
+            612,
+            467,
+            628
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\lambda$ is a regularization coefficient. See the left plot of Figure 2 for an illustration. ",
+        "bbox": [
+            76,
+            641,
+            467,
+            671
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Discussion on the hyperparameters $\\lambda$ and $\\tau$ . Our method apparently introduces two additional hyperparameters, $\\lambda$ and $\\tau$ , however, we argue that this doesn’t increase the searching space of hyperparameters for our method. ",
+        "bbox": [
+            76,
+            672,
+            467,
+            733
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "For $\\lambda$ , the only requirement is that $\\lambda$ is small (we simply set to 0.01), because: (1) we want the projective manifold gradient $( \\mathbf { x } - \\mathbf { x } _ { g p } )$ to be the major component of our gradient; (2) since this regularization is roughly proportional to the difference in prediction length and a constant, a small lambda is enough to prevent the length from vanishing and, in the end, the prediction length will stay roughly constant at the equilibrium under projection and regularization. In the ablation study of Section 5.1, we show that the performance is robust to the change of $\\lambda$ . Note that, on the other extreme, when $\\lambda = 1$ , gRPM becomes $\\mathbf { g } _ { M }$ . ",
+        "bbox": [
+            75,
+            734,
+            467,
+            900
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "For $\\tau$ , we propose a ramping up schedule which is wellmotivated. To tackle the second problem of reversed gradient, we need a small $\\tau _ { i n i t }$ to keep $\\mathbf { R } _ { g }$ close to R at the beginning of training. But when the network is about to converge, we will prefer a τconverge which can keep ${ \\bf R } _ { g }$ close to $\\mathbf { R } _ { g t }$ for better convergence. We cannot directly set τconverge to $\\tau _ { \\mathrm { g t } }$ , which is introduced in 4.1, because $\\tau _ { \\mathrm { g t } }$ is not a constant and cannot be used in Riemannian Optimization. However, if we want to tackle the problem of reversed gradient, we must need Riemannian Optimization and $\\tau _ { i n i t }$ . Thus we need a constant approximation of $\\tau _ { \\mathrm { g t } }$ when the angle between R and $\\mathbf { R } _ { g t }$ converges to 0. Note that τconverge can be derived analytically when the loss function is the most widely used L2 loss or geodesic loss(please refer to Appendix B.1 for details), and therefore doesn’t need to be tuned. Therefore we propose to increase $\\tau$ from a small value $\\tau _ { i n i t }$ , leading to a slow warm-up and, as the training progresses, we gradually increase it to the final $\\tau = \\tau _ { c o n v e r g e }$ by ten uniform steps. This strategy further improves our performance. ",
+        "bbox": [
+            496,
+            90,
+            890,
+            393
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "5. Experiments ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            398,
+            632,
+            416
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "We investigate popular rotation representations and find our methods greatly improve the performance in different kinds of tasks. For our regularized projective manifold gradient (RPMG), we apply it in the backpropagation process of Quaternion, 6D, 9D and 10D, without changing the forward pass, leading to three new methods RPMG-Quat, RPMG-6D, RPMG-9D and RPMG-10D. We compare the following seven baselines: Euler angle, axisangle, Quaternion, 6D [46], 9D [25], 9D-Inf [25] and 10D [27]. We adopt three evaluation metrics: mean, median, and $5 ^ { \\circ }$ accuracy of (geodesic) errors between predicted rotation and ground truth rotation. For most of our experiments, we set the regularization term $\\lambda = 0 . 0 1$ and increase $\\tau$ from $\\tau _ { i n i t } = 0 . 0 5$ to $\\tau _ { c o n v e r g e } = 0 . 2 5$ by ten uniform steps. We further show and discuss the influence of different choices of these two hyperparameters in our ablation studies. ",
+        "bbox": [
+            496,
+            421,
+            890,
+            662
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "5.1. 3D Object Pose Estimation from Point Clouds ",
+        "text_level": 1,
+        "bbox": [
+            496,
+            669,
+            885,
+            684
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Experimental setting. As in [9], we use the complete point clouds generated from the models in ModelNet-40 [40]. We use the same train/test split as in [9] and report the results of airplane, chair, sofa, toilet and bed those five categories because they exhibit less rotational symmetries. Given one shape point clouds of a specific category, the network learns to predict the 3D rotation of the input point clouds from the predefined canonical view of this category [39]. We replace the point clouds alignment task used in [25, 46] (which has almost been solved) by this experiment since it is more challenging and closer to real-world applications (no canonical point clouds is given to the network). ",
+        "bbox": [
+            496,
+            688,
+            890,
+            869
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "We use a PointNet $^ { + + }$ [28] network as our backbone, supervised by L2 loss between the predicted rotation matrix ",
+        "bbox": [
+            496,
+            869,
+            890,
+            900
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            478,
+            925,
+            490,
+            936
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/1da381cc1f39f0df0a983860b4eb9e31c2b1a839de0ba1c5109dcab39c5bdac8.jpg",
+        "table_caption": [
+            "Table 1. Pose estimation from ModelNet40 point clouds. Left: a comparison of methods by mean, median, and $5 ^ { \\circ }$ accuracy of (geodesic) errors after 30k training steps. Mn, Md and Acc are abbreviations of mean, median and $5 ^ { \\circ }$ accuracy. Right: median test error of airplane in different iterations during training. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Methods</td><td colspan=\"3\">Airplane</td><td colspan=\"3\">Chair</td><td colspan=\"3\">Sofa</td><td colspan=\"3\">Toilet</td><td colspan=\"3\">Bed</td></tr><tr><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td></tr><tr><td>Euler</td><td>125</td><td>131</td><td>0</td><td>13.6</td><td>9.0</td><td>17</td><td>120</td><td>125</td><td>0</td><td>127</td><td>133</td><td>0</td><td>113</td><td>122</td><td>0</td></tr><tr><td>Axis-Angle</td><td>10.8</td><td>8.2</td><td>22</td><td>16.4</td><td>10.9</td><td>9</td><td>24.1</td><td>14.6</td><td>6</td><td>21.9</td><td>13.0</td><td>9</td><td>25.5</td><td>11.0</td><td>16</td></tr><tr><td>Quaternion</td><td>9.7</td><td>7.6</td><td>27</td><td>16.7</td><td>11.4</td><td>12</td><td>20.4</td><td>12.7</td><td>10</td><td>16.0</td><td>9.3</td><td>17</td><td>27.8</td><td>11.3</td><td>14</td></tr><tr><td>6D</td><td>5.5</td><td>4.7</td><td>54</td><td>9.8</td><td>6.4</td><td>35</td><td>14.6</td><td>9.5</td><td>15</td><td>9.3</td><td>6.8</td><td>33</td><td>24.7</td><td>9.6</td><td>17</td></tr><tr><td>9D</td><td>4.7</td><td>3.9</td><td>67</td><td>7.9</td><td>5.4</td><td>44</td><td>15.7</td><td>10.0</td><td>14</td><td>10.3</td><td>6.9</td><td>30</td><td>22.3</td><td>8.5</td><td>20</td></tr><tr><td>9D-Inf (MG-9D)</td><td>3.1</td><td>2.5</td><td>90</td><td>5.3</td><td>3.7</td><td>69</td><td>7.8</td><td>5.0</td><td>50</td><td>4.2</td><td>3.3</td><td>75</td><td>12.9</td><td>4.6</td><td>55</td></tr><tr><td>10D</td><td>5.3</td><td>4.2</td><td>61</td><td>8.9</td><td>6.0</td><td>38</td><td>15.1</td><td>10.3</td><td>13</td><td>10.7</td><td>6.5</td><td>35</td><td>23.1</td><td>8.7</td><td>19</td></tr><tr><td>RPMG-Quat</td><td>3.2</td><td>2.4</td><td>88</td><td>6.3</td><td>3.7</td><td>67</td><td>8.1</td><td>4.5</td><td>57</td><td>4.9</td><td>3.5</td><td>74</td><td>13.3</td><td>3.6</td><td>70</td></tr><tr><td>RPMG-6D</td><td>2.6</td><td>2.1</td><td>94</td><td>5.0</td><td>3.1</td><td>74</td><td>6.6</td><td>3.6</td><td>70</td><td>3.8</td><td>2.9</td><td>83</td><td>13.5</td><td>2.7</td><td>81</td></tr><tr><td>RPMG-9D</td><td>2.5</td><td>2.0</td><td>94</td><td>5.1</td><td>3.1</td><td>76</td><td>6.1</td><td>3.1</td><td>77</td><td>4.3</td><td>2.7</td><td>83</td><td>10.9</td><td>2.5</td><td>86</td></tr><tr><td>RPMG-10D</td><td>2.8</td><td>2.2</td><td>93</td><td>5.1</td><td>3.2</td><td>75</td><td>6.5</td><td>3.2</td><td>72</td><td>4.9</td><td>2.8</td><td>82</td><td>13.5</td><td>2.7</td><td>82</td></tr></table>",
+        "bbox": [
+            78,
+            73,
+            645,
+            205
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/b037628385e4cb45ffe2443cb499d7cca558104f3a42f54841698f2d2a451a70.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            648,
+            80,
+            885,
+            200
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/eb8b9e592ebdfc426d59a391df422a92e94242cdeedf303668dacceb4634d054.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            84,
+            273,
+            271,
+            416
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/51d628291cfdeeebcbc73c16588069a072703864d1f613951be230926adbed34.jpg",
+        "image_caption": [
+            "Figure 3. Average L2 norm of the network raw output $\\mathbf { x }$ during training. Left: PMG-4D/6D/9D/10D (w/o reg. $\\lambda = 0$ ). Right: RPMG-4D/6D/9D/10D (w/ reg. $\\lambda = 0 . 0 1$ ) "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            277,
+            273,
+            464,
+            416
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "R and the ground truth rotation matrix $\\mathbf { R } _ { g t }$ . To facilitate a fair comparison between multiple methods, we use the same set of hyperparameters in all the experiments. Please see Appendix F for more details. ",
+        "bbox": [
+            75,
+            492,
+            468,
+            551
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Analysis of results. The results are shown in Table 1. We see a great improvement of our methods in all three rotation representations. In this experiment, one may find 9D-Inf also leads to a good performance, which is actually a special case of our method with $\\lambda = 1$ , or in other words, it is MG with $\\tau = \\tau _ { g t }$ . Nonetheless, in Table 3, we can observe a larger gap. Also, this simple loss may lead to bad performance when $\\mathbf { R } _ { g t }$ is unavailable in Section 5.3. ",
+        "bbox": [
+            75,
+            551,
+            468,
+            672
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Ablation study on $\\lambda ,$ . As mentioned in Section 4.3, naively using PMG without any regularization, corresponding to setting $\\lambda = 0$ , will lead to length vanishing; To maintain the length of prediction roughly constant, we only need to add a small $\\lambda$ . In Figure 3, We show the length vanishing problem without regularization and stabilized length with a small regularization. In Table 1, we show that the network performs much better when we have a small λ (RPMG) than $\\lambda = 0$ (PMG) or $\\lambda = 1$ (MG), which deviates too far away from the desired projective manifold gradient. As for the exact value of $\\lambda$ , our experiments show that our method is robust to the choice of $\\lambda$ as long as it is small. Table 2 also shows that $\\lambda = 0 . 0 1 , 0 . 0 0 5 , 0 . 0 5$ all lead to similar performance, thus freeing us from tuning the parameter $\\lambda$ . ",
+        "bbox": [
+            75,
+            672,
+            470,
+            883
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Ablation study on $\\tau$ . For the choices of $\\tau$ , Table 2 shows ",
+        "bbox": [
+            76,
+            885,
+            468,
+            900
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "that our proposed strategy, which ramps up $\\tau$ from a small $\\tau _ { \\mathrm { i n i t } }$ to τconverge, works the best. The reason is that: a big $\\tau$ , when training begins, may cause the problem of reversed gradient discussed in Section 4.3. On the other side, a small $\\tau$ at the end of training will slow down the training process and can do harm to convergence. Note that, the performance is not very sensitive to the exact value, which means we don’t require a parameter tuning for $\\tau$ even in general cases. We are good even with simply setting τ = τgt. $\\tau = \\tau _ { g t }$ ",
+        "bbox": [
+            496,
+            287,
+            892,
+            425
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "table",
+        "img_path": "images/2529ba1ea307cf84078a4b2ffd957c2037e4fc34da080b1e9e0cff4db862bcc2.jpg",
+        "table_caption": [
+            "Table 2. Ablation study of pose estimation from airplane point clouds. Here MG stands for manifold gradient $\\mathbf { x } - \\hat { \\mathbf { x } } _ { g }$ , corresponding to set $\\lambda = 1$ ; PMG stands for projective manifold gradient $\\mathbf { x } - \\mathbf { x } _ { g p }$ , corresponding to set $\\lambda = 0$ . "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td colspan=\"2\">Methods</td><td>Mean (°)↓</td><td>Med (°)↓</td><td>5° Acc (%)↑</td></tr><tr><td>L2 6D</td><td>-</td><td>-</td><td>5.50</td><td>4.67</td><td>54.4</td></tr><tr><td rowspan=\"2\">MG-6D</td><td rowspan=\"2\">λ = 1</td><td>τconverge</td><td>3.51</td><td>2.95</td><td>85.2</td></tr><tr><td>τgt</td><td>3.19</td><td>2.72</td><td>87.8</td></tr><tr><td rowspan=\"2\">PMG-6D</td><td rowspan=\"2\">λ = 0</td><td>τconverge</td><td>57.65</td><td>45.22</td><td>0.2</td></tr><tr><td>τgt</td><td>133</td><td>136</td><td>0.0</td></tr><tr><td rowspan=\"6\">RPMG-6D</td><td rowspan=\"4\">λ = 0.01</td><td>τinit</td><td>2.67</td><td>2.18</td><td>93.1</td></tr><tr><td>τconverge</td><td>2.71</td><td>2.14</td><td>93.2</td></tr><tr><td>τgt</td><td>3.02</td><td>2.14</td><td>89.5</td></tr><tr><td>τinit → τconverge</td><td>2.59</td><td>2.07</td><td>93.6</td></tr><tr><td>λ = 0.05</td><td rowspan=\"2\">τinit → τconverge</td><td>2.73</td><td>2.23</td><td>92.9</td></tr><tr><td>λ = 0.005</td><td>2.52</td><td>2.05</td><td>94.3</td></tr></table>",
+        "bbox": [
+            503,
+            433,
+            890,
+            580
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5.2. 3D Rotation Estimation from ModelNet Images ",
+        "text_level": 1,
+        "bbox": [
+            498,
+            675,
+            890,
+            693
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "In this experiment, we follow the setting in [25] to estimate poses from 2D images. Images are rendered from ModelNet-10 [40] objects from arbitrary viewpoints [26]. A MobileNet [18] is used to extract image features and three MLPs to regress rotations. We use the same categories as in Experiment 5.1 except airplane, since ModelNet-10 doesn’t have this category. We didn’t quote the numbers from [25] since we conduct all the experiments using the same set of hyperparameters to ensure a fair comparison. Please see Appendix F.2 for more details. ",
+        "bbox": [
+            496,
+            700,
+            892,
+            851
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "The results are shown in Table 3. Our RPMG layer boosts the performance of all three representations significantly. See the curves with the same color for comparison. ",
+        "bbox": [
+            496,
+            854,
+            890,
+            900
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            478,
+            924,
+            490,
+            935
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "table",
+        "img_path": "images/40b93b9024a92b5266970d7f01517e8f13dea986b6bfc9964b795e2c67079330.jpg",
+        "table_caption": [
+            "Table 3. Pose estimation from ModelNet10 images. Left: a comparison of methods by mean $( ^ { \\circ } )$ ), median(◦), and $5 ^ { \\circ }$ accuracy $( \\% )$ of (geodesic) errors after 600k training steps. Mn, Md and Acc are abbreviations of mean, median and $5 ^ { \\circ }$ accuracy. Right: median test error of chair in different iterations during training. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Methods</td><td colspan=\"3\">Chair</td><td colspan=\"3\">Sofa</td><td colspan=\"3\">Toilet</td><td colspan=\"3\">Bed</td></tr><tr><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td><td>Mn↓</td><td>Md↓</td><td>Acc↑</td></tr><tr><td>Euler</td><td>21.5</td><td>10.9</td><td>10</td><td>27.5</td><td>12.0</td><td>9</td><td>14.9</td><td>8.5</td><td>19</td><td>27.6</td><td>9.6</td><td>17</td></tr><tr><td>Axis-Angle</td><td>25.7</td><td>14.3</td><td>7</td><td>30.3</td><td>14.6</td><td>6</td><td>20.3</td><td>13.0</td><td>8</td><td>36.3</td><td>16.7</td><td>4</td></tr><tr><td>Quaternion</td><td>25.8</td><td>15.0</td><td>6</td><td>30.0</td><td>15.7</td><td>6</td><td>20.6</td><td>13.0</td><td>8</td><td>34.1</td><td>15.5</td><td>5</td></tr><tr><td>6D</td><td>19.6</td><td>9.1</td><td>19</td><td>17.5</td><td>7.3</td><td>27</td><td>10.9</td><td>6.2</td><td>37</td><td>32.3</td><td>11.7</td><td>11</td></tr><tr><td>9D</td><td>17.5</td><td>8.3</td><td>23</td><td>19.8</td><td>7.6</td><td>25</td><td>11.8</td><td>6.5</td><td>34</td><td>30.4</td><td>11.1</td><td>13</td></tr><tr><td>9D-Inf</td><td>12.1</td><td>5.1</td><td>49</td><td>12.5</td><td>3.5</td><td>70</td><td>7.6</td><td>3.7</td><td>67</td><td>22.5</td><td>4.5</td><td>56</td></tr><tr><td>10D</td><td>18.4</td><td>9.0</td><td>20</td><td>20.9</td><td>8.7</td><td>20</td><td>11.5</td><td>5.9</td><td>39</td><td>29.9</td><td>11.5</td><td>11</td></tr><tr><td>RPMG-Quat</td><td>13.0</td><td>5.9</td><td>40</td><td>13.0</td><td>3.6</td><td>67</td><td>8.6</td><td>4.2</td><td>61</td><td>23.2</td><td>4.9</td><td>51</td></tr><tr><td>RPMG-6D</td><td>12.9</td><td>4.7</td><td>53</td><td>11.5</td><td>2.8</td><td>77</td><td>7.8</td><td>3.4</td><td>71</td><td>20.3</td><td>3.6</td><td>67</td></tr><tr><td>RPMG-9D</td><td>11.9</td><td>4.4</td><td>58</td><td>10.5</td><td>2.4</td><td>82</td><td>7.5</td><td>3.2</td><td>75</td><td>20.0</td><td>2.9</td><td>76</td></tr><tr><td>RPMG-10D</td><td>12.8</td><td>4.5</td><td>55</td><td>11.2</td><td>2.4</td><td>82</td><td>7.2</td><td>3.0</td><td>76</td><td>19.2</td><td>2.9</td><td>75</td></tr></table>",
+        "bbox": [
+            81,
+            88,
+            607,
+            244
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/11f4651025f983ecbc93292ae8b6a433935a9d855481992e95a9a99aad1eda97.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            609,
+            98,
+            883,
+            236
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5.3. Rotation Estimation without Supervision ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            325,
+            426,
+            343
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Self-supervised instance-level rotation estimation from point clouds. For one complete chair instance $Z$ , given a complete observation $X$ , we estimate its pose R. We then use Chamfer distance between $Z$ and $\\mathbf { R } ^ { - 1 } { \\boldsymbol { X } }$ as a selfsupervised loss. The network structure and training settings are all the same as Experiment 5.1, except here we use $\\tau = 2$ . See Appendix E.2 for how to find a suitable $\\tau$ . ",
+        "bbox": [
+            75,
+            349,
+            468,
+            455
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The interesting thing here is that vanilla 9D-Inf fails while our methods still perform very well. We think that this is because the Chamfer distance loss will greatly enlarge the effect of the noisy part (which is introduced by $\\lambda$ ) in gradient, leading to a very bad performance. ",
+        "bbox": [
+            75,
+            455,
+            468,
+            532
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "table",
+        "img_path": "images/ef0b5ce427219bb7439db5f54b9c0fab21284766ecbe8649284ad3c17a112790.jpg",
+        "table_caption": [
+            "Table 4. Self-supervised Instance-Level Rotation Estimation from Point Clouds. We report mean, median and $3 ^ { \\circ }$ accuracy of (geodesic) errors after 30K iterations. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Methods</td><td>Mean (°)↓</td><td>Med (°)↓</td><td>3°Acc (%)↑</td></tr><tr><td>Euler</td><td>131.9</td><td>139.1</td><td>0.0</td></tr><tr><td>Axis-Angle</td><td>4.5</td><td>3.8</td><td>34.5</td></tr><tr><td>Quaternion</td><td>4.3</td><td>3.5</td><td>37.5</td></tr><tr><td>6D</td><td>55.1</td><td>6.7</td><td>20.0</td></tr><tr><td>9D</td><td>1.8</td><td>1.6</td><td>88.0</td></tr><tr><td>9D-Inf</td><td>118.2</td><td>119.5</td><td>0.0</td></tr><tr><td>10D</td><td>1.6</td><td>1.5</td><td>91.0</td></tr><tr><td>RPMG-Quat</td><td>3.5</td><td>2.4</td><td>70.0</td></tr><tr><td>RPMG-6D</td><td>15.0</td><td>2.9</td><td>55.0</td></tr><tr><td>RPMG-9D</td><td>1.3</td><td>1.2</td><td>97.5</td></tr><tr><td>RPMG-10D</td><td>1.5</td><td>1.4</td><td>97.0</td></tr></table>",
+        "bbox": [
+            158,
+            545,
+            390,
+            667
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5.4. Regression on Other Non-Euclidean Manifolds ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            739,
+            468,
+            756
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "In addition to SO(3), our method can also be applied for regression on other non-Euclidean manifolds as long as the target manifold meets some conditions: 1) the manifold should support Riemannian optimization. 2) the inverse projection $\\pi ^ { - 1 }$ should be calculable, although it doesn’t need to be mathematically complete. Here we show the experiment of Sphere manifold $S ^ { 2 }$ . ",
+        "bbox": [
+            75,
+            763,
+            468,
+            868
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Unit vector regression. For rotational symmetric categories (e.g., bottle), the pose of an object is ambiguous. ",
+        "bbox": [
+            75,
+            869,
+            468,
+            900
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We’d rather regress a unit vector for each object indicating the up direction of it. We use the ModelNet-40 [40] bottle point cloud dataset. The network architecture is the same as in Experiment 5.1 except the dimension of output is 3. ",
+        "bbox": [
+            496,
+            327,
+            890,
+            388
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "L2-loss-w/-norm computes L2 loss between the normalized predictions and the ground truth. L2-loss-w/o-norm computes L2 loss between the raw predictions and the ground truth, similar to $\\lambda \\ : = \\ : 1$ and $\\tau = \\tau _ { g t }$ . For MG-3D, PMG-3D and RPMG-3D, We increase $\\tau$ from 0.1 to 0.5 since here $\\tau _ { c o n v e r g e } = 0 . 5$ (please see Appendix C for the derivation). ",
+        "bbox": [
+            496,
+            388,
+            890,
+            494
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The results are shown in Table 5. MG-3D performs on par with L2-loss-w/o-norm, and PMG-3D leads to a large error since the length vanishing problem similar to Figure 3. RPMG-3D outperforms all the baselines and variants. ",
+        "bbox": [
+            496,
+            496,
+            890,
+            555
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "table",
+        "img_path": "images/39316e8e9daec18adac93bcddab7d20872f4739c2c37c88f27134e943496fa8a.jpg",
+        "table_caption": [
+            "Table 5. Unit vector estimation from ModelNet bottle point clouds. We report mean, median, and $1 ^ { \\circ }$ accuracy of (geodesic) errors after 30K iterations. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Methods</td><td>Mean (°)↓</td><td>Med (°)↓</td><td>1°Acc (%)↑</td></tr><tr><td>L2 loss w/ norm</td><td>8.73</td><td>2.71</td><td>0.0</td></tr><tr><td>L2 loss w/o norm</td><td>5.71</td><td>1.10</td><td>37.4</td></tr><tr><td>MG-3D (λ=1)</td><td>5.37</td><td>1.20</td><td>22.2</td></tr><tr><td>PMG-3D (λ=0)</td><td>21.96</td><td>14.79</td><td>0.0</td></tr><tr><td>RPMG-3D (λ=0.01)</td><td>4.69</td><td>0.76</td><td>72.7</td></tr></table>",
+        "bbox": [
+            558,
+            563,
+            831,
+            636
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "6. Conclusion and Future Work ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            705,
+            767,
+            722
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Our work tackles the problem of designing a gradient layer to facilitate the learning of rotation regression. Our extensive experiments have demonstrated the effectiveness of our method coupled with different rotation representations in diverse tasks dealing with rotation estimation. ",
+        "bbox": [
+            496,
+            732,
+            890,
+            808
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The limitation of our methods mainly lies in two fronts: 1) we introduce two new hyperparameters, i.e., $\\tau$ and $\\lambda$ , though our performance is not sensitive to them, as long as they are in a reasonable range; 2) as discussed in Sec 5.4, our method can only be applied to manifolds with certain constraints. We leave how to relax those to future works. ",
+        "bbox": [
+            496,
+            810,
+            890,
+            898
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            478,
+            924,
+            488,
+            935
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            78,
+            89,
+            173,
+            104
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] P-A Absil, Robert Mahony, and Rodolphe Sepulchre. Optimization algorithms on matrix manifolds. Princeton University Press, 2009. 1, 11 ",
+            "[2] Henry Adams, M. Aminian, Elin Farnell, M. Kirby, C. Peterson, Joshua Mirth, R. Neville, P. Shipman, and C. Shonkwiler. A fractal dimension for measures via persistent homology. arXiv: Dynamical Systems, pages 1–31, 2020. 5 ",
+            "[3] Tolga Birdal and Umut Simsekli. Probabilistic permutation synchronization using the riemannian structure of the birkhoff polytope. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 11105–11116, 2019. 2 ",
+            "[4] Tolga Birdal, Umut Simsekli, Mustafa Onur Eken, and Slobodan Ilic. Bayesian pose graph optimization via bingham distributions and tempered geodesic mcmc. Advances in Neural Information Processing Systems, 31, 2018. 2 ",
+            "[5] Jose-Luis Blanco. A tutorial on se (3) transformation parameterizations and on-manifold optimization. University of Malaga, Tech. Rep, 3:6, 2010. 1 ",
+            "[6] Nicolas Boumal. An introduction to optimization on smooth manifolds. Available online, May, 2020. 3 ",
+            "[7] Romain Bregier. Deep regression on manifolds: a 3d rotation ´ case study. CoRR, abs/2103.16317, 2021. 2 ",
+            "[8] Mai Bui, Tolga Birdal, Haowen Deng, Shadi Albarqouni, Leonidas Guibas, Slobodan Ilic, and Nassir Navab. 6d camera relocalization in ambiguous scenes via continuous multimodal inference. arXiv preprint arXiv:2004.04807, 2020. 1 ",
+            "[9] Haiwei Chen, Shichen Liu, Weikai Chen, Hao Li, and Randall Hill. Equivariant point network for 3d point cloud analysis. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 14514–14523, 2021. 6 ",
+            "[10] Earl A Coddington and Norman Levinson. Theory of ordinary differential equations. Tata McGraw-Hill Education, 1955. 11 ",
+            "[11] Haowen Deng, Mai Bui, Nassir Navab, Leonidas Guibas, Slobodan Ilic, and Tolga Birdal. Deep bingham networks: Dealing with uncertainty and ambiguity in pose estimation. arXiv preprint arXiv:2012.11002, 2020. 2 ",
+            "[12] Thanh-Toan Do, Ming Cai, Trung Pham, and Ian D. Reid. Deep-6dpose: Recovering 6d object pose from a single RGB image. CoRR, abs/1802.10367, 2018. 2 ",
+            "[13] Siyan Dong, Qingnan Fan, He Wang, Ji Shi, Li Yi, Thomas Funkhouser, Baoquan Chen, and Leonidas Guibas. Robust neural routing through space partitions for camera relocalization in dynamic indoor environments. arXiv preprint arXiv:2012.04746, 2020. 1 ",
+            "[14] Haoqiang Fan, Hao Su, and Leonidas J Guibas. A point set generation network for 3d object reconstruction from a single image. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 605–613, 2017. 2, 5 ",
+            "[15] Ge Gao, Mikko Lauri, Jianwei Zhang, and Simone Frintrop. Occlusion resistant object rotation regression from point cloud segments. In Proceedings of the European Con-"
+        ],
+        "bbox": [
+            78,
+            114,
+            470,
+            901
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "ference on Computer Vision (ECCV) Workshops, September 2018. 2 ",
+            "[16] Zan Gojcic, Caifa Zhou, Jan D Wegner, Leonidas J Guibas, and Tolga Birdal. Learning multiview 3d point cloud registration. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, pages 1759–1769, 2020. 1 ",
+            "[17] Benjamin Hou, Nina Miolane, Bishesh Khanal, Matthew CH Lee, Amir Alansary, Steven McDonagh, Jo V Hajnal, Daniel Rueckert, Ben Glocker, and Bernhard Kainz. Computing cnn loss and gradients for pose estimation with riemannian geometry. In International Conference on Medical Image Computing and Computer-Assisted Intervention, pages 756–764. Springer, 2018. 2 ",
+            "[18] Andrew G. Howard, Menglong Zhu, Bo Chen, Dmitry Kalenichenko, Weijun Wang, Tobias Weyand, Marco Andreetto, and Hartwig Adam. Mobilenets: Efficient convolutional neural networks for mobile vision applications. CoRR, abs/1704.04861, 2017. 7 ",
+            "[19] Jiahui Huang, He Wang, Tolga Birdal, Minhyuk Sung, Federica Arrigoni, Shi-Min Hu, and Leonidas J Guibas. Multibodysync: Multi-body segmentation and motion estimation via 3d scan synchronization. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 7108–7118, 2021. 2 ",
+            "[20] Du Q Huynh. Metrics for 3d rotations: Comparison and analysis. Journal of Mathematical Imaging and Vision, 35(2):155–164, 2009. 4 ",
+            "[21] Alex Kendall and Roberto Cipolla. Geometric loss functions for camera pose regression with deep learning. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), July 2017. 2 ",
+            "[22] Alex Kendall, Matthew Grimes, and Roberto Cipolla. Posenet: A convolutional network for real-time 6-dof camera relocalization. In Proceedings of the IEEE international conference on computer vision, pages 2938–2946, 2015. 1 ",
+            "[23] Alex Kendall, Matthew Grimes, and Roberto Cipolla. Posenet: A convolutional network for real-time 6-dof camera relocalization. In Proceedings of the IEEE International Conference on Computer Vision (ICCV), December 2015. 2, 16 ",
+            "[24] Abhijit Kundu, Yin Li, and James M. Rehg. 3d-rcnn: Instance-level 3d object reconstruction via render-andcompare. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), June 2018. 2 ",
+            "[25] Jake Levinson, Carlos Esteves, Kefan Chen, Noah Snavely, Angjoo Kanazawa, Afshin Rostamizadeh, and Ameesh Makadia. An analysis of svd for deep rotation estimation. arXiv preprint arXiv:2006.14616, 2020. 1, 2, 3, 4, 6, 7, 14, 16 ",
+            "[26] Shuai Liao, Efstratios Gavves, and Cees G. M. Snoek. Spherical regression: Learning viewpoints, surface normals and 3d rotations on n-spheres. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, Long Beach, USA, June 2019. 7 ",
+            "[27] Valentin Peretroukhin, Matthew Giamou, David M. Rosen, W. Nicholas Greene, Nicholas Roy, and Jonathan Kelly. A "
+        ],
+        "bbox": [
+            503,
+            92,
+            890,
+            901
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            478,
+            924,
+            491,
+            936
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Smooth Representation of SO(3) for Deep Rotation Learning with Uncertainty. In Proceedings of Robotics: Science and Systems (RSS’20), Jul. 12–16 2020. 1, 2, 3, 5, 6, 12, 14 ",
+            "[28] Charles R Qi, Li Yi, Hao Su, and Leonidas J Guibas. Pointnet++: Deep hierarchical feature learning on point sets in a metric space. arXiv preprint arXiv:1706.02413, 2017. 6, 16 ",
+            "[29] Olinde Rodrigues. Des lois geom´ etriques qui r ´ egissent les ´ deplacements d’un syst ´ eme solide dans l’espace, et de la ` variation des coordonnees provenant de ces d ´ eplacements ´ consider´ es ind ´ ependamment des causes qui peuvent les pro-´ duire. Journal de mathematiques pures et appliqu ´ ees ´ , 5(1):380–440, 1840. 11 ",
+            "[30] Hao Su, Charles R. Qi, Yangyan Li, and Leonidas J. Guibas. Render for cnn: Viewpoint estimation in images using cnns trained with rendered 3d model views. In Proceedings of the IEEE International Conference on Computer Vision (ICCV), December 2015. 2, 14, 15 ",
+            "[31] Camillo J Taylor and David J Kriegman. Minimization on the lie group so (3) and related manifolds. Yale University, 16(155):6, 1994. 1, 2, 11 ",
+            "[32] Zachary Teed and Jia Deng. Tangent space backpropagation for 3d transformation groups. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2021. 2 ",
+            "[33] Shubham Tulsiani and Jitendra Malik. Viewpoints and keypoints. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), June 2015. 2 ",
+            "[34] Constantin Udriste. Convex functions and optimization methods on Riemannian manifolds, volume 297. Springer Science & Business Media, 2013. 1 ",
+            "[35] Benjamin Ummenhofer, Huizhong Zhou, Jonas Uhrig, Nikolaus Mayer, Eddy Ilg, Alexey Dosovitskiy, and Thomas Brox. Demon: Depth and motion network for learning monocular stereo. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), July 2017. 2 ",
+            "[36] Florian Walch, Caner Hazirbas, Laura Leal-Taixe, Torsten ´ Sattler, Sebastian Hilsenbeck, and Daniel Cremers. Imagebased localization using lstms for structured feature correlation. In ICCV, October 2017. 15 ",
+            "[37] Chen Wang, Danfei Xu, Yuke Zhu, Roberto Mart´ın-Mart´ın, Cewu Lu, Li Fei-Fei, and Silvio Savarese. Densefusion: 6d object pose estimation by iterative dense fusion. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 3343–3352, 2019. 1 ",
+            "[38] Gu Wang, Fabian Manhardt, Jianzhun Shao, Xiangyang Ji, Nassir Navab, and Federico Tombari. Self6d: Selfsupervised monocular 6d object pose estimation. In The European Conference on Computer Vision (ECCV), August 2020. 4 ",
+            "[39] He Wang, Srinath Sridhar, Jingwei Huang, Julien Valentin, Shuran Song, and Leonidas J Guibas. Normalized object coordinate space for category-level 6d object pose and size estimation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 2642– 2651, 2019. 2, 5, 6 ",
+            "[40] Z. Wu, S. Song, A. Khosla, F. Yu, L. Zhang, X. Tang, and J. Xiao. 3d shapenets: A deep representation for volumetric "
+        ],
+        "bbox": [
+            78,
+            90,
+            468,
+            900
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "shapes. In Computer Vision and Pattern Recognition, 2015. 6, 7, 8, 16 ",
+            "[41] Yu Xiang, Roozbeh Mottaghi, and Silvio Savarese. Beyond pascal: A benchmark for 3d object detection in the wild. In IEEE Winter Conference on Applications of Computer Vision, pages 75–82, 2014. 14 ",
+            "[42] Yu Xiang, Tanner Schmidt, Venkatraman Narayanan, and Dieter Fox. Posecnn: A convolutional neural network for 6d object pose estimation in cluttered scenes. arXiv preprint arXiv:1711.00199, 2017. 2, 4 ",
+            "[43] Li Yi, Haibin Huang, Difan Liu, Evangelos Kalogerakis, Hao Su, and Leonidas Guibas. Deep part induction from articulated object pairs. ACM Transactions on Graphics, 37(6), 2019. 2 ",
+            "[44] Hongyi Zhang, Sashank J Reddi, and Suvrit Sra. Riemannian svrg: Fast stochastic optimization on riemannian manifolds. arXiv preprint arXiv:1605.07147, 2016. 1 ",
+            "[45] Yongheng Zhao, Tolga Birdal, Jan Eric Lenssen, Emanuele Menegatti, Leonidas Guibas, and Federico Tombari. Quaternion equivariant capsule networks for 3d point clouds. In European Conference on Computer Vision, pages 1–19. Springer, 2020. 2 ",
+            "[46] Yi Zhou, Connelly Barnes, Jingwan Lu, Jimei Yang, and Hao Li. On the continuity of rotation representations in neural networks. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 5745– 5753, 2019. 1, 2, 3, 4, 6, 16 "
+        ],
+        "bbox": [
+            501,
+            92,
+            890,
+            472
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            477,
+            924,
+            495,
+            936
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "A. More on Riemannian Geometry ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            89,
+            372,
+            107
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "In this part, we supplement the definitions in Section 3 to allow for a slightly more rigorous specification of the exponential map for interested readers. ",
+        "bbox": [
+            75,
+            114,
+            468,
+            160
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "We denote the union of all tangent spaces as the tangent bundle: $\\mathcal { T } \\mathcal { M } = \\cup _ { \\mathbf { x } \\in \\mathcal { M } } \\mathcal { T } _ { \\mathbf { x } } \\mathcal { M }$ . Riemannian metric $\\mathbf { G _ { x } }$ induces a norm $\\| \\mathbf { u } \\| _ { \\mathbf { x } } , \\forall \\mathbf { u } \\in \\mathcal { T } _ { \\mathbf { x } } \\mathcal { M }$ $\\| \\mathbf { u } \\| _ { \\mathbf { x } }$ locally defining the geometry of the manifold and allows for computing the length of any curve $\\gamma : [ 0 , 1 ] \\to \\mathcal { M }$ , with $\\gamma ( 0 ) = \\mathbf { x }$ and $\\gamma ( 1 ) = \\mathbf { y }$ as the integral of its speed: $\\begin{array} { r } { \\ell ( \\gamma ) = \\int _ { 0 } ^ { 1 } \\| \\dot { \\gamma } ( t ) \\| _ { \\gamma ( t ) } d t } \\end{array}$ . The notion of length leads to a natural notion of distance by taking the infimum over all lengths of such curves, giving the Riemannian distance on $\\mathcal { M }$ , $d ( \\mathbf { x } , \\mathbf { y } ) = \\operatorname* { i n f } _ { \\gamma } \\ell ( \\gamma )$ . The constant speed length minimizing curve $\\gamma$ is called a geodesic on $\\mathcal { M }$ . ",
+        "bbox": [
+            75,
+            161,
+            470,
+            328
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "By the celebrated Picard Lindelof theorem [ ¨ 10], given any $( \\mathbf { x } , \\mathbf { v } ) \\in \\mathcal { T M }$ , there exists a unique maximal geodesic $\\gamma _ { \\mathbf { v } }$ such that $\\gamma _ { \\mathbf { v } } ( 0 ) = \\mathbf { x }$ and ${ \\dot { \\gamma } } _ { \\mathbf { v } } ( 0 ) = \\mathbf { v }$ . Hence, we can define a unique diffeomorphism or exponential map, sending $\\mathbf { x }$ to the endpoint of the geodesic: $\\begin{array} { r } { \\exp _ { \\mathbf { x } } ( \\mathbf { v } ) = \\gamma _ { \\mathbf { v } } ( 1 ) } \\end{array}$ . We will refer to the well-defined, smooth inverse of this map as the logaritmic map: $\\log _ { \\mathbf { x } } \\mathbf { y } \\triangleq \\exp _ { \\mathbf { x } } ^ { - 1 } ( \\mathbf { v } )$ . Note that the geodesic is not the only way to move away from $\\mathbf { x }$ in the direction of v on $\\mathcal { M }$ . In fact, any continuously differentiable, smooth map $R _ { \\mathbf { x } } : \\mathcal { T } _ { \\mathbf { x } } \\mathcal { M } \\mapsto \\mathcal { M }$ whose directional derivative along v is identity, i.e. $\\mathrm Ḋ R _ { \\mathbf x } ( \\mathbf 0 ) [ \\mathbf v ] = \\mathbf v$ and $R _ { \\mathbf { x } } ( \\mathbf { 0 } ) = \\mathbf { x }$ allows for moving on the manifold in a given direction v. Such $R _ { \\mathbf { x } }$ , called retraction, constitutes the basic building block of any on-manifold optimizer as we use in the main paper. In addition to those we also speak of a manifold projector $\\pi : \\mathcal X \\mapsto \\mathcal M$ is available for the manifolds we consider in this paper. Note that, most of these definitions directly generalize to matrix manifolds such as Stiefel or Grassmann [1]. ",
+        "bbox": [
+            75,
+            329,
+            470,
+            617
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "B. Projective Manifold Gradient on $S O ( 3 )$ ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            631,
+            433,
+            650
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "B.1. Details of Riemannian Optimization on $S O ( 3 )$ ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            657,
+            465,
+            674
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Riemannian gradient on $S O ( 3 )$ . Since we mainly focus on the SO(3) manifold in this paper, we will further show the specific expression of some related concepts of SO(3) below. ",
+        "bbox": [
+            75,
+            680,
+            468,
+            739
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Firstly, SO(3) is defined as a matrix subgroup of the general linear group $G L ( 3 )$ : ",
+        "bbox": [
+            75,
+            742,
+            468,
+            772
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {S O} (3) = \\left\\{\\mathbf {R} \\in \\mathbb {R} ^ {3 \\times 3}: \\mathbf {R} ^ {\\top} \\mathbf {R} = \\mathbf {I}, \\det  (\\mathbf {R}) = 1 \\right\\}. \\tag {7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            99,
+            784,
+            468,
+            801
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "The tangent space of a rotation matrix in SO(3) is isomorphic to $\\mathbb { R } ^ { 3 }$ making SO(3) an embedded submanifold of the ambient Eucldiean space $\\mathcal { X }$ . Hence, SO(3) inherits the metric or the inner product of its embedding space, $\\mathcal { X }$ . ",
+        "bbox": [
+            75,
+            815,
+            468,
+            876
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Since SO(3) is also a Lie group, elements of the tangent space $\\phi ^ { \\wedge } \\in { \\mathcal { T } } _ { \\mathbf { I } } { \\mathcal { M } }$ can be uniquely mapped to the manifold $\\mathcal { M }$ through the exponential map: ",
+        "bbox": [
+            500,
+            90,
+            893,
+            137
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exp_ {\\mathbf {I}} \\left(\\phi^ {\\wedge}\\right) = \\mathbf {I} + \\phi^ {\\wedge} + \\frac {1}{2 !} \\left(\\phi^ {\\wedge}\\right) ^ {2} + \\frac {1}{3 !} \\left(\\phi^ {\\wedge}\\right) ^ {3} + \\dots , \\tag {8}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            511,
+            142,
+            890,
+            171
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { I } \\in \\mathrm { S O } ( 3 )$ is the identity matrix and ∧ is a skewsymmetric operator $\\wedge : \\mathbb { R } ^ { 3 } \\to \\mathcal { T } _ { \\mathbf { I } } \\mathcal { M }$ as ",
+        "bbox": [
+            498,
+            176,
+            890,
+            207
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\phi^ {\\wedge} = \\left( \\begin{array}{c c c} 0 & - \\phi_ {z} & \\phi_ {y} \\\\ \\phi_ {z} & 0 & - \\phi_ {x} \\\\ - \\phi_ {y} & \\phi_ {x} & 0 \\end{array} \\right) \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            594,
+            213,
+            890,
+            262
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Due to the nature of the Lie group, we can expand the formula in Eq. (8) from the tangent space of the identity, $\\mathcal { T } _ { \\mathbf { I } } \\mathcal { M }$ , to $\\mathcal { T } _ { \\mathbf { R } } \\mathcal { M }$ by simply multiplying by an R: ",
+        "bbox": [
+            498,
+            267,
+            890,
+            313
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exp_ {\\mathbf {R}} \\left(\\phi^ {\\wedge}\\right) = \\mathbf {R} \\left(\\sum_ {n = 0} ^ {\\infty} \\left(\\frac {1}{n !} \\left(\\phi^ {\\wedge}\\right) ^ {n}\\right)\\right) \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            576,
+            321,
+            890,
+            364
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "If the vector $\\phi$ is rewritten in terms of a unit vector $\\omega$ and a magnitude $\\theta$ , the exponential map can further be simplified as ",
+        "bbox": [
+            498,
+            366,
+            890,
+            411
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {E x p} _ {\\mathbf {R}} (\\phi) = \\mathbf {R} (\\mathbf {I} + \\sin \\theta \\omega^ {\\wedge} + (1 - \\cos \\theta) (\\omega^ {\\wedge}) ^ {2}) \\tag {11}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            511,
+            417,
+            890,
+            435
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "which is well known as the Rodrigues formula [29]. Following [31], we have ",
+        "bbox": [
+            498,
+            440,
+            890,
+            469
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left. \\frac {\\partial}{\\partial \\phi_ {x}} \\operatorname {E x p} _ {\\mathbf {R}} (\\phi) \\right| _ {\\phi = 0} = \\left. \\mathbf {R} \\left(\\cos \\theta \\frac {\\partial \\theta}{\\partial \\phi_ {x}} \\omega^ {\\wedge}\\right) \\right| _ {\\phi = 0} = \\mathbf {R} \\mathbf {x} ^ {\\wedge} \\tag {12}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            522,
+            474,
+            890,
+            517
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { x } = ( 1 , 0 , 0 ) \\in \\mathbb { R } ^ { 3 }$ . For $\\phi _ { y }$ and $\\phi _ { z }$ , there are the similar expressions of the gradient. Finally we can have ",
+        "bbox": [
+            498,
+            518,
+            890,
+            549
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {g r a d} \\mathcal {L} f (\\mathbf {R}) = \\left. \\left(\\frac {\\partial f (\\mathbf {R})}{\\partial \\mathbf {R}} \\frac {\\partial}{\\partial \\phi} \\operatorname {E x p} _ {\\mathbf {R}} (\\phi) \\right| _ {\\phi = 0}\\right) ^ {\\wedge} \\tag {13}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            519,
+            555,
+            890,
+            598
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Riemannian gradient descent on SO(3). We are now ready to state the Riemannian optimization in the main paper in terms of the exponential map: ",
+        "bbox": [
+            498,
+            613,
+            890,
+            659
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {R} _ {k + 1} = \\operatorname {E x p} _ {\\mathbf {R} _ {k}} (- \\tau_ {k} \\nabla \\phi). \\tag {14}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            602,
+            672,
+            890,
+            690
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Note that if we consider the most commonly used L2 loss $f ( \\mathbf { R } ) = \\| \\mathbf { R } - \\mathbf { R } _ { \\mathrm { g t } } \\| _ { F } ^ { 2 }$ , where ",
+        "bbox": [
+            500,
+            693,
+            890,
+            723
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {R} = \\left( \\begin{array}{c c c} a _ {1} & b _ {1} & c _ {1} \\\\ a _ {2} & b _ {2} & c _ {2} \\\\ a _ {3} & b _ {3} & c _ {3} \\end{array} \\right) \\in \\mathrm {S O} (3), \\quad \\mathbf {R} _ {\\mathrm {g t}} = \\left( \\begin{array}{c c c} x _ {1} & y _ {1} & z _ {1} \\\\ x _ {2} & y _ {2} & z _ {2} \\\\ x _ {3} & y _ {3} & z _ {3} \\end{array} \\right) \\in \\mathrm {S O} (3),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            503,
+            729,
+            885,
+            763
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "we can get an analytical expression of $\\begin{array} { r l } { \\nabla \\phi } & { { } = } \\end{array}$ $( \\nabla \\phi _ { x } , \\nabla \\phi _ { y } , \\nabla \\phi _ { z } )$ as follows: ",
+        "bbox": [
+            500,
+            768,
+            890,
+            797
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\nabla \\phi_ {x} = \\frac {\\partial f (\\mathbf {R})}{\\partial \\mathbf {R}} * \\mathbf {R x} ^ {\\wedge} \\\\ = 2 \\left| \\left| \\left( \\begin{array}{c c c} a _ {1} - x _ {1} & b _ {1} - y _ {1} & c _ {1} - z _ {1} \\\\ a _ {2} - x _ {2} & b _ {2} - y _ {2} & c _ {2} - z _ {2} \\\\ a _ {3} - x _ {3} & b _ {3} - y _ {3} & c _ {3} - z _ {3} \\end{array} \\right) \\left( \\begin{array}{c c c} 0 & c _ {1} & - b _ {1} \\\\ 0 & c _ {2} & - b _ {2} \\\\ 0 & c _ {3} & - b _ {3} \\end{array} \\right) \\right| \\right| _ {1} \\\\ = 2 * \\sum_ {i = 1} ^ {3} \\left(b _ {i} * z _ {i} - c _ {i} * y _ {i}\\right) \\tag {15} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            514,
+            804,
+            890,
+            897
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_footnote",
+        "text": "maximal refers to the fact that the curve is as long as possible. ",
+        "bbox": [
+            99,
+            887,
+            428,
+            898
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "11 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Similarly, we have $\\begin{array} { r } { \\nabla \\phi _ { y } = 2 * \\sum _ { i = 1 } ^ { 3 } ( c _ { i } * x _ { i } - a _ { i } * z _ { i } ) } \\end{array}$ and $\\begin{array} { r } { \\nabla \\phi _ { z } = 2 * \\sum _ { i = 1 } ^ { 3 } ( a _ { i } * \\bar { y } _ { i } - b _ { i } * \\bar { x _ { i } } ) } \\end{array}$ 1. ",
+        "bbox": [
+            76,
+            89,
+            468,
+            125
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "τconverge in ablation study. We have mentioned in Section 4.3 that $\\tau$ should be small at the beginning of training and be large when converging. This is because a small $\\tau$ can yield $\\mathbf { R } _ { g }$ closer to $\\mathbf { R }$ and greatly alleviate the reverse problem at the beginning stage of training discussed in Section 4.3. Later in training, a large $\\tau$ can help us converge better. The initial $\\tau$ will not influence the final results too much, and we just need to choose a reasonable value. But the final $\\tau$ matters. ",
+        "bbox": [
+            75,
+            145,
+            468,
+            281
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Right before convergence, our ideal choice for the final $\\tau$ would be $\\tau _ { \\mathrm { g t } }$ . Given that the value of $\\tau _ { \\mathrm { g t } }$ will change according to the geodesic distance between R and $\\mathbf { R } _ { \\mathrm { g t } }$ , we instead choose to find a suitable constant value to act like $\\tau _ { \\mathrm { g t } }$ when converging, which we denotes as τconverge. ",
+        "bbox": [
+            76,
+            282,
+            468,
+            359
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Lemma 1. The final value of τconverge satisfies: ",
+        "bbox": [
+            76,
+            369,
+            398,
+            386
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {R} _ {\\mathrm {g t}} = \\lim  _ {<   \\mathbf {R}, \\mathbf {R} _ {\\mathrm {g t}} > \\rightarrow 0} R _ {\\mathbf {R}} (- \\tau_ {\\text {c o n v e r g e}} \\operatorname {g r a d} \\mathcal {L} (f (\\mathbf {R})) \\tag {16}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            99,
+            396,
+            468,
+            417
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "where $< \\mathbf { R } , \\mathbf { R } _ { \\mathrm { g t } } >$ represents the angle between R and Rgt. $\\mathbf { R } _ { \\mathrm { g t } }$ ",
+        "bbox": [
+            76,
+            429,
+            468,
+            460
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Proof. Considering the symmetry, without loss of generality, we assume that $\\mathbf { R } = \\mathbf { I }$ , which will simplify the derivation. Based upon the conclusion in Eq. (15), when we use L2 loss, we have $\\nabla \\phi = ( 2 * ( z _ { 2 } - y _ { 3 } ) , 2 * ( x _ { 3 } - z _ { 1 } ) , 2 *$ $( y _ { 1 } - x _ { 2 } ) )$ and grad $\\mathcal { L } f ( \\mathbf { R } ) = ( \\nabla \\phi ) ^ { \\wedge } = 2 ( \\mathbf { R } _ { \\mathrm { g t } } ^ { \\top } - \\mathbf { R } _ { \\mathrm { g t } } )$ . Taking the manifold logarithm of both sides, we get: ",
+        "bbox": [
+            76,
+            470,
+            468,
+            556
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\log_ {\\mathbf {R}} \\left(\\mathbf {R} _ {\\mathrm {g t}}\\right) = \\lim  _ {<   \\mathbf {R}, \\mathbf {R} _ {\\mathrm {g t}} > \\rightarrow 0} - \\tau_ {\\text {c o n v e r g e}} \\operatorname {g r a d} \\mathcal {L} f (\\mathbf {R}) \\tag {17}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            102,
+            566,
+            468,
+            589
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "The solution for τconverge can then be derived as follows: ",
+        "bbox": [
+            76,
+            601,
+            455,
+            616
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\tau_ {c o n v e r g e} = \\lim  _ {<   \\mathbf {R}, \\mathbf {R} _ {\\mathrm {g t}} > \\rightarrow 0} - \\frac {\\log_ {\\mathbf {R}} (\\mathbf {R} _ {\\mathrm {g t}})}{\\operatorname {g r a d} \\mathcal {L} f (\\mathbf {R})} \\\\ = \\lim  _ {\\theta \\rightarrow 0} - \\frac {(\\phi_ {\\mathrm {g t}}) ^ {\\wedge}}{2 (\\mathbf {R} _ {\\mathrm {g t}} ^ {\\top} - \\mathbf {R} _ {\\mathrm {g t}})} \\\\ = \\lim  _ {\\theta \\rightarrow 0} - \\frac {(\\phi_ {\\mathrm {g t}}) ^ {\\wedge}}{2 \\sin \\theta ((\\left(\\omega_ {\\mathrm {g t}}\\right) ^ {\\wedge}) ^ {\\top} - (\\omega_ {\\mathrm {g t}}) ^ {\\wedge})} \\\\ = \\lim  _ {\\theta \\rightarrow 0} \\frac {\\theta}{4 \\sin \\theta} \\\\ = \\frac {1}{4} \\tag {18} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            124,
+            628,
+            468,
+            782
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "where $( \\phi _ { \\mathrm { g t } } ) ^ { \\wedge } = \\log _ { \\mathbf { I } } ( \\mathbf { R } _ { \\mathrm { g t } } ) = \\theta ( \\omega _ { \\mathrm { g t } } ) ^ { \\wedge }$ , $\\boldsymbol { \\theta } = < \\mathbf { I } , \\mathbf { R } _ { \\mathrm { g t } } >$ □ ",
+        "bbox": [
+            76,
+            792,
+            468,
+            811
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Note that though $\\begin{array} { r } { \\tau _ { c o n v e r g e } = \\frac { 1 } { 4 } } \\end{array}$ is only true for the L2 loss, we can solve τconverge $\\tau _ { c o n v e r g e }$ for other frequently used loss formats, e.g., geodesic loss [27]. If we use geodesic loss $\\theta ^ { 2 }$ , it can be computed that $\\begin{array} { r } { \\tau _ { c o n v e r g e } = \\frac { 1 } { 2 } } \\end{array}$ . We leave the detailed derivation to the interested readers. ",
+        "bbox": [
+            76,
+            824,
+            468,
+            898
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "B.2. Derivations of Inverse Projection ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            90,
+            790,
+            107
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "For different rotation representations, we follow the same process to find its inverse projection: we first find the inverse image space $\\pi ^ { - 1 } ( \\mathbf { x } _ { g } )$ , then project x to this space resulting in $\\mathbf { x } _ { g p }$ , and finally get our (regularized) projective manifold gradient. ",
+        "bbox": [
+            498,
+            113,
+            890,
+            189
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Quaternion We need to solve ",
+        "bbox": [
+            500,
+            208,
+            712,
+            222
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbf {x} _ {g p} = \\quad \\operatorname {a r g m i n} \\quad \\| \\mathbf {x} _ {g} - \\mathbf {x} \\| _ {2} ^ {2}, \\tag {19} \\\\ \\mathbf {x} _ {g} \\in \\pi_ {q} ^ {- 1} (\\hat {\\mathbf {x}} _ {g}) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            593,
+            232,
+            890,
+            263
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "where x is the raw output of our network in ambient space $\\mathbb { R } ^ { 4 }$ $\\mathbb { R } ^ { 4 } , \\hat { \\mathbf { x } } _ { g }$ is the next goal in representation manifold $S ^ { 3 }$ , and $\\mathbf { x } _ { g }$ is the variable to optimize in ambient space $\\mathbb { R } ^ { 4 }$ . Recall $\\pi _ { q } ^ { - 1 } ( \\hat { \\mathbf { x } } _ { g } ) = \\{ \\mathbf { x } \\mid \\mathbf { x } = k \\hat { \\mathbf { x } } _ { g } , k \\in \\mathbb { R }$ and $k > 0 \\}$ , and we can have ",
+        "bbox": [
+            498,
+            272,
+            890,
+            345
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| \\mathbf {x} - \\mathbf {x} _ {g} \\right\\| _ {2} ^ {2} = \\mathbf {x} ^ {2} - 2 k \\mathbf {x} \\cdot \\hat {\\mathbf {x}} _ {g} + k ^ {2} \\hat {\\mathbf {x}} _ {g} ^ {2} \\tag {20}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            573,
+            345,
+            890,
+            364
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Without considering the condition of $k > 0$ , We can see when $\\begin{array} { r } { k = \\frac { { \\bf x } \\cdot \\hat { \\bf x } _ { g } } { \\hat { \\bf x } _ { g } ^ { 2 } } = { \\bf x } \\cdot \\hat { \\bf x } _ { g } } \\end{array}$ the target formula reaches minimum. Note that when using a small $\\tau$ , the angle between $\\hat { \\mathbf { x } } _ { g }$ and $\\mathbf { x }$ is always very small, which means the condition of $k = \\mathbf { x } \\cdot \\hat { \\mathbf { x } } _ { g } > 0$ can be satisfied naturally. For the sake of simplicity and consistency of gradient, we ignore the limitation of $k$ no matter what value $\\tau$ takes. Therefore, the inverse projection is $\\mathbf { x } _ { g p } = ( \\mathbf { x } \\cdot \\hat { \\mathbf { x } } _ { g } ) \\hat { \\mathbf { x } } _ { g }$ . ",
+        "bbox": [
+            498,
+            369,
+            890,
+            496
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "6D representation We need to solve ",
+        "bbox": [
+            500,
+            511,
+            756,
+            526
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left[ \\mathbf {u} _ {g p}, \\mathbf {v} _ {g p} \\right] = \\underset {\\left[ \\mathbf {u} _ {g}, \\mathbf {v} _ {g} \\right] \\in \\pi_ {6 D} ^ {- 1} \\left(\\left[ \\hat {\\mathbf {u}} _ {g}, \\hat {\\mathbf {v}} _ {g} \\right]\\right)} {\\operatorname * {a r g m i n}} \\left(\\left\\| \\mathbf {u} _ {g} - \\mathbf {u} \\right\\| _ {2} ^ {2} + \\left\\| \\mathbf {v} _ {g} - \\mathbf {v} \\right\\| _ {2} ^ {2}\\right) \\tag {21}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            517,
+            535,
+            890,
+            561
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "where $[ \\mathbf { u } , \\mathbf { v } ]$ is the raw output of network in ambient space $\\mathbb { R } ^ { 6 }$ , $[ \\hat { \\mathbf { u } } _ { g } , \\hat { \\mathbf { v } } _ { g } ]$ is the next goal in representation manifold $\\nu _ { 2 } ( \\mathbb { R } ^ { 3 } )$ and $[ \\mathbf { u } _ { g } , \\mathbf { v } _ { g } ]$ is the variable to optimize in ambient space $\\mathbb { R } ^ { 6 }$ . Recall $\\pi _ { 6 D } ^ { - 1 } ( [ \\hat { \\bf u } _ { g } , \\hat { \\bf v } _ { g } ] ) \\ = \\ \\{ [ k _ { 1 } \\hat { \\bf u } _ { g } , k _ { 2 } \\hat { \\bf u } _ { g } \\ +$ $k _ { 3 } \\hat { \\mathbf { v } } _ { g } ] \\mid k _ { 1 } , k _ { 2 } , k _ { 3 } \\in \\mathbb { R }$ and $k _ { 1 } , k _ { 3 } > 0 \\}$ . We can see that $\\mathbf { u } _ { g }$ and ${ \\bf v } _ { g }$ are independent, and $\\mathbf { u } _ { g }$ is similar to the situation of quaternion. So we only need to consider the part of ${ \\bf v } _ { g }$ as below: ",
+        "bbox": [
+            498,
+            571,
+            890,
+            694
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| \\mathbf {v} - \\mathbf {v} _ {g} \\right\\| _ {2} ^ {2} = \\mathbf {v} ^ {2} + k _ {2} ^ {2} \\hat {\\mathbf {u}} _ {g} ^ {2} + k _ {3} ^ {2} \\hat {\\mathbf {v}} _ {g} ^ {2} - 2 k _ {2} \\mathbf {v} \\cdot \\hat {\\mathbf {u}} _ {g} - 2 k _ {3} \\mathbf {v} \\cdot \\hat {\\mathbf {v}} _ {g} \\tag {22}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            508,
+            702,
+            890,
+            722
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "For the similar reason as quaternion, we ignore the condition of $k _ { 3 } ~ > ~ 0$ and we can see when $k _ { 2 } = \\textbf { v } \\cdot \\hat { \\mathbf { u } } _ { g }$ and $k _ { 3 } = \\mathbf { v } \\cdot \\hat { \\mathbf { v } } _ { g }$ , the target formula reaches minimum. Therefore, the inverse projection is $[ { \\bf u } _ { g p } , { \\bf v } _ { g p } ] = [ ( { \\bf u } \\cdot \\hat { \\bf u } _ { g } ) \\hat { \\bf u } _ { g } , ( { \\bf v } \\cdot { \\bf \\sigma }$ $\\hat { \\mathbf { u } } _ { g } ) \\hat { \\mathbf { u } } _ { g } + ( \\mathbf { v } \\cdot \\hat { \\mathbf { v } } _ { g } ) \\hat { \\mathbf { v } } _ { g } ]$ ",
+        "bbox": [
+            498,
+            731,
+            890,
+            808
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "9D representation For this representation, obtaining the inverse image $\\pi _ { 9 D } ^ { - 1 }$ is not so obvious. Recall $\\pi _ { 9 D } ( { \\bf x } ) =$ $\\mathbf { U } \\Sigma ^ { \\prime } \\mathbf { V } ^ { \\top }$ , where U and $\\mathbf { V }$ are left and right singular vectors of $\\mathbf { x }$ decomposed by SVD expressed as $\\mathbf { x } = \\mathbf { U } \\Sigma \\mathbf { V } ^ { \\top }$ , and $\\Sigma ^ { \\prime } = \\mathrm { d i a g } ( 1 , 1 , \\mathrm { d e t } ( \\mathbf { U } \\mathbf { V } ^ { \\top } ) )$ . ",
+        "bbox": [
+            498,
+            824,
+            890,
+            900
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Lemma 2. The inverse image $\\pi _ { 9 D } ^ { - 1 } ( { \\bf R } _ { g } ) = \\{ { \\bf S } { \\bf R } _ { g } \\ | \\ { \\bf S } = $ $\\mathbf { S } ^ { \\top } \\big \\}$ satisfies that $\\left\\{ \\mathbf { x } _ { g } ~ \\vert ~ \\pi _ { 9 D } ( \\mathbf { x } _ { g } ) = \\mathbf { R } _ { g } \\right\\} \\subset \\pi _ { 9 D } ^ { - 1 } ( \\mathbf { R } _ { g } )$ . ",
+        "bbox": [
+            75,
+            89,
+            468,
+            123
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Proof. To find a suitable $\\pi _ { 9 D } ^ { - 1 }$ , the most straightforward way is to only change the singular values $\\Sigma _ { g } \\ =$ $\\mathrm { d i a g } ( \\lambda _ { 0 } , \\lambda _ { 1 } , \\lambda _ { 2 } )$ , where $\\lambda _ { 0 } , \\lambda _ { 1 } , \\lambda _ { 2 }$ can be arbitrary scalars, and recompose the $\\mathbf { x } _ { g } = \\mathbf { U } \\Sigma _ { g } \\mathbf { V } ^ { \\top }$ . ",
+        "bbox": [
+            75,
+            128,
+            468,
+            191
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "However, we argue that this simple method will fail to capture the entire set of $\\left\\{ \\mathbf { x } _ { g } \\mid \\pi _ { 9 D } ( \\mathbf { x } _ { g } ) = \\mathbf { R } _ { g } \\right\\}$ , because different $\\mathbf { U } ^ { \\prime }$ and $\\mathbf { V } ^ { \\prime }$ can yield the same rotation ${ \\bf R } _ { g }$ . In fact, $\\mathbf { U } _ { g }$ can be arbitrary if $\\mathbf { x } _ { g } = \\mathbf { U } _ { g } \\Sigma _ { g } \\mathbf { V } _ { g } ^ { \\top }$ and $\\mathbf { U } _ { g } \\dot { \\Sigma } _ { g } ^ { \\prime } \\mathbf { V } _ { g } ^ { \\top } =$ $\\mathbf { R } _ { g }$ . Assuming ${ \\bf R } _ { g }$ is known, we can replace $\\mathbf { V } _ { g } ^ { \\top }$ by ${ \\bf R } _ { g }$ and express $\\mathbf { x } _ { g }$ in a different way: $\\mathbf { x } _ { g } = \\mathbf { U } _ { g } \\boldsymbol { \\Sigma } _ { g } \\frac { 1 } { \\boldsymbol { \\Sigma } _ { g } ^ { \\prime } } \\mathbf { U } _ { g } ^ { - 1 } \\mathbf { R } _ { g }$ Notice that $\\mathbf { U } _ { g } \\Sigma _ { g } \\frac { 1 } { \\Sigma _ { g } ^ { \\prime } } \\mathbf { U } _ { g } ^ { - 1 }$ must be a symmetry matrix since $\\mathbf { U } _ { g }$ is an orthogonal matrix. Therefore, $\\{ \\mathbf { x } _ { g } \\mid \\pi _ { 9 D } ( \\mathbf { x } _ { g } ) =$ $\\mathbf { R } _ { g } ^ { - } \\} \\subseteq \\pi _ { 9 D } ^ { - 1 } ( \\mathbf { R } _ { g } ^ { - } ) = \\{ \\mathbf { S } \\mathbf { R } _ { g } \\mid \\mathbf { S } = \\mathbf { S } ^ { \\top } \\}$ . ",
+        "bbox": [
+            76,
+            191,
+            468,
+            340
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Note that such $\\mathbf { x } _ { g } \\in \\pi _ { 9 D } ^ { - 1 } ( \\mathbf { R } _ { g } )$ can’t ensure $\\pi _ { 9 D } ( { \\bf x } _ { g } ) =$ $\\mathbf { R } _ { g }$ , because in the implementation of SVD, the order and the sign of three singular values are constrained, which is not taken into consideration. Therefore, $\\{ \\mathbf { x } _ { g } \\mid \\pi _ { 9 D } ( \\mathbf { x } _ { g } ) =$ ${ \\bf R } _ { g } \\} \\ne \\pi _ { 9 D } ^ { - 1 } ( { \\bf R } _ { g } )$ . □ ",
+        "bbox": [
+            76,
+            340,
+            468,
+            416
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Then we need to solve ",
+        "bbox": [
+            96,
+            424,
+            248,
+            438
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {x} _ {g p} = \\underset {\\mathbf {x} _ {g} \\in \\pi_ {9 D} ^ {- 1} (\\mathbf {R} _ {g})} {\\operatorname {a r g m i n}} \\| \\mathbf {x} _ {g} - \\mathbf {x} \\| _ {2} ^ {2} \\tag {23}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            169,
+            450,
+            468,
+            481
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { x }$ is the raw output of our network in ambient space $\\mathbb { R } ^ { 3 \\times 3 }$ , $\\hat { \\mathbf { x } } _ { g }$ is the next goal in representation manifold SO(3), and $\\mathbf { x } _ { g }$ is the variable to optimize in ambient space $\\mathbb { R } ^ { 3 \\times 3 }$ . We can further transform the objective function as below: ",
+        "bbox": [
+            76,
+            491,
+            468,
+            551
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| \\mathbf {x} _ {g} - \\mathbf {x} \\right\\| _ {2} ^ {2} = \\left\\| \\mathbf {S R} _ {g} - \\mathbf {x} \\right\\| _ {2} ^ {2} = \\left\\| \\mathbf {S} - \\mathbf {x} \\mathbf {R} _ {g} ^ {\\top} \\right\\| _ {2} ^ {2} \\tag {24}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            112,
+            561,
+            468,
+            580
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Now we can easily find when S equals to the symmetry part of $\\mathbf { x R } _ { g } ^ { \\top }$ , the target formula reaches minimum. Therefore, the inverse projection admits a simple form $\\mathbf { x } _ { g p } =$ $\\frac { \\mathbf { x R } _ { g } ^ { \\top } + \\mathbf { R } _ { g } \\mathbf { x } ^ { \\top } } { 2 } \\mathbf { R } _ { g }$ Rg. ",
+        "bbox": [
+            76,
+            590,
+            468,
+            660
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "10D representation Recall the manifold mapping $\\pi _ { 1 0 D }$ : $\\mathbb { R } ^ { 1 0 }  S ^ { 3 } , \\pi _ { 1 0 D } ( \\mathbf { x } ) = \\operatorname* { m i n } _ { \\mathbf { q } \\in S ^ { 3 } } \\mathbf { q } ^ { \\top } \\mathbf { A } ( \\mathbf { x } ) \\mathbf { q } .$ q∈S3 , in which ",
+        "bbox": [
+            76,
+            675,
+            468,
+            714
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {A} (\\boldsymbol {\\theta}) = \\left( \\begin{array}{l l l l} \\theta_ {1} & \\theta_ {2} & \\theta_ {3} & \\theta_ {4} \\\\ \\theta_ {2} & \\theta_ {5} & \\theta_ {6} & \\theta_ {7} \\\\ \\theta_ {3} & \\theta_ {6} & \\theta_ {8} & \\theta_ {9} \\\\ \\theta_ {4} & \\theta_ {7} & \\theta_ {9} & \\theta_ {1 0} \\end{array} \\right). \\tag {25}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            158,
+            724,
+            468,
+            789
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "We need to solve ",
+        "bbox": [
+            96,
+            806,
+            212,
+            819
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {x} _ {g p} = \\underset {\\mathbf {A} (\\mathbf {x} _ {g}) \\mathbf {q} _ {g} = \\lambda \\mathbf {q} _ {g}} {\\arg \\min } \\| \\mathbf {x} _ {g} - \\mathbf {x} \\| _ {2} ^ {2}, \\tag {26}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            163,
+            830,
+            468,
+            859
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { x }$ is the raw output of our network in ambient space $\\mathbb { R } ^ { 1 0 }$ , ${ \\bf q } _ { g }$ is the next goal in representation manifold $S ^ { 3 }$ , and ",
+        "bbox": [
+            76,
+            869,
+            468,
+            901
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "$\\mathbf { x } _ { g }$ is the variable to optimize in ambient space $\\mathbb { R } ^ { 1 0 }$ . Note that $\\lambda$ is also a variable to optimize. For the similar reason as before, for the sake of simplicity and consistency of analytical solution, here we also need to relax the constraint that $\\lambda$ should be the smallest eigenvalue of $\\mathbf { A } ( \\mathbf { x } _ { g } )$ . ",
+        "bbox": [
+            496,
+            90,
+            890,
+            167
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "To solve Eq. 25, we start from rewriting ${ \\bf A } ( { \\bf x } _ { g } ) { \\bf q } _ { g } =$ $\\lambda \\mathbf { q } _ { g }$ as ",
+        "bbox": [
+            500,
+            167,
+            890,
+            196
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {M} \\Delta \\mathbf {x} = \\lambda \\mathbf {q} _ {g} - \\mathbf {A} (\\mathbf {x}) \\mathbf {q} _ {g}, \\tag {27}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            607,
+            196,
+            890,
+            214
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "where $\\Delta \\mathbf { x } = \\mathbf { x } _ { g } - \\mathbf { x }$ and ",
+        "bbox": [
+            498,
+            219,
+            669,
+            234
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {M} = \\left( \\begin{array}{c c c c c c c c c c} q _ {1} & q _ {2} & q _ {3} & q _ {4} & 0 & 0 & 0 & 0 & 0 & 0 \\\\ 0 & q _ {1} & 0 & 0 & q _ {2} & q _ {3} & q _ {4} & 0 & 0 & 0 \\\\ 0 & 0 & q _ {1} & 0 & 0 & q _ {2} & 0 & q _ {3} & q _ {4} & 0 \\\\ 0 & 0 & 0 & q _ {1} & 0 & 0 & q _ {2} & 0 & q _ {3} & q _ {4} \\end{array} \\right) \\tag {28}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            519,
+            246,
+            890,
+            289
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { q } _ { g } ~ = ~ ( q _ { 1 } , q _ { 2 } , q _ { 3 } , q _ { 4 } ) ^ { \\top }$ . For simplicity, we denote $\\lambda \\mathbf { q } _ { g } - \\mathbf { A } ( \\mathbf { x } ) \\mathbf { q } _ { g }$ as $\\mathbf { b }$ . ",
+        "bbox": [
+            498,
+            300,
+            890,
+            333
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Once we have finished the above steps for preparation, we solve $\\lambda$ and $\\Delta \\mathbf { x }$ for the minimal problem by two steps as below. First, we assume $\\lambda$ is known and the problem becomes that given M and b, we need to find the best $\\Delta \\mathbf { x }$ to minimize $\\| \\Delta \\mathbf { x } \\| _ { 2 } ^ { 2 }$ with the constraint $\\mathbf { M } \\Delta \\mathbf { x } = \\mathbf { b }$ . This is a typical quadratic optimization problem with linear equality constraints, and the analytical solution satisfies ",
+        "bbox": [
+            496,
+            333,
+            890,
+            436
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left( \\begin{array}{c c} \\mathbf {I} & \\mathbf {M} ^ {\\top} \\\\ \\mathbf {M} & \\mathbf {0} \\end{array} \\right) \\left( \\begin{array}{l} \\Delta \\mathbf {x} \\\\ \\mathbf {v} \\end{array} \\right) = \\left( \\begin{array}{l} \\mathbf {0} \\\\ \\mathbf {b} \\end{array} \\right) \\tag {29}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            596,
+            448,
+            890,
+            482
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "where v is a set of Lagrange multipliers which come out of the solution alongside $\\Delta \\mathbf { x }$ , and $\\left( \\begin{array} { c c } { \\bar { \\mathbf { I } } } & { \\mathbf { M } ^ { \\top } } \\\\ { \\mathbf { M } } & { \\mathbf { 0 } } \\end{array} \\right)$ is called KKT matrix. Since this matrix has full rank almost everywhere, we can multiple the inverse of this KKT matrix in both sides of Eq. 29 and lead to the solution of $\\Delta \\mathbf { x }$ as below: ",
+        "bbox": [
+            496,
+            487,
+            890,
+            577
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\binom {\\Delta \\mathbf {x}} {\\mathbf {v}} = \\left( \\begin{array}{c c} \\mathbf {I} & \\mathbf {M} ^ {\\top} \\\\ \\mathbf {M} & \\mathbf {0} \\end{array} \\right) ^ {- 1} \\binom {\\mathbf {0}} {\\mathbf {b}} \\tag {30}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            586,
+            588,
+            890,
+            625
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Recall that $\\mathbf { b } = \\lambda \\mathbf { q } _ { g } - \\mathbf { A } ( \\mathbf { x } ) \\mathbf { q } _ { g }$ , therefore so far we have had the solution of $\\Delta \\mathbf { x }$ respect to each $\\lambda$ : ",
+        "bbox": [
+            496,
+            635,
+            890,
+            666
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\Delta \\mathbf {x} = \\binom {\\Delta \\mathbf {x}} {\\mathbf {v}} _ {0: 1 0} = \\mathbf {K} (\\lambda \\mathbf {q} _ {g} - \\mathbf {A} (\\mathbf {x}) \\mathbf {q} _ {g}) = \\lambda \\mathbf {S} - \\mathbf {T} \\tag {31}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            508,
+            676,
+            890,
+            712
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "in which $\\mathbf { K }$ is the upper right part of the inverse of the KKT matrix $\\mathbf { K } = \\left[ \\left( \\begin{array} { c c } { \\mathbf { I } } & { \\mathbf { M } ^ { \\top } } \\\\ { \\mathbf { M } } & { \\mathbf { 0 } } \\end{array} \\right) ^ { - } \\right.$ # , $\\mathbf { S } = \\mathbf { K } \\mathbf { q } _ { g }$ and 10:14,0:10 T = KA(x)qg. $\\mathbf { T } = \\mathbf { K } \\mathbf { A } ( \\mathbf { x } ) \\mathbf { q } _ { g }$ ",
+        "bbox": [
+            496,
+            720,
+            890,
+            791
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Next, we need to optimize $\\lambda$ to minimize our objective function $\\| \\Delta \\mathbf { x } \\| _ { 2 } ^ { 2 }$ . In fact, using the results of Eq. 31, $\\| \\Delta \\mathbf { x } \\| _ { 2 } ^ { 2 }$ becomes a quadratic functions on $\\lambda$ , thus we can simply get the final analytical solution of $\\lambda$ and $\\mathbf { x } _ { g p }$ : ",
+        "bbox": [
+            496,
+            791,
+            890,
+            852
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\{ \\begin{array}{l} \\lambda = \\frac {\\left(\\mathbf {S} ^ {\\top} \\mathbf {T} + \\mathbf {T} ^ {\\top} \\mathbf {S}\\right)}{2 \\mathbf {S} ^ {\\top} \\mathbf {S}} \\\\ \\mathbf {x} _ {g p} = \\mathbf {x} + \\lambda \\mathbf {S} - \\mathbf {T} \\end{array} \\right. \\tag {32}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            614,
+            863,
+            890,
+            904
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Another thing worth mentioning here is that in this special case, the representation manifold $S ^ { 3 }$ is no longer a subspace of the abmient space $\\mathbb { R } ^ { 1 0 }$ , which means that we can’t directly compute our regularization term ${ \\bf x } _ { g p } - { \\bf q } _ { g }$ because $\\mathbf { x } _ { g p } \\in \\mathbb { R } ^ { 1 0 }$ while ${ \\mathbf q } _ { g } \\in \\mathcal S ^ { 3 }$ . However, the length vanishing problem still exists as shown in Figure 3. Therefore, to compute the regularization term, we need a simple mapping to convert ${ \\bf q } _ { g }$ to an element on $\\mathbb { R } ^ { 1 0 }$ with stable length norm. We use the mapping $g : S ^ { 3 }  \\mathbb { R } ^ { 1 0 } , g ( \\mathbf { q } ) = \\mathbf { A } ^ { - 1 } ( \\mathbf { I } - \\mathbf { q } \\mathbf { q } ^ { \\top } )$ , which is proposed in [27]. They also proved that $\\pi ( g ( \\mathbf { q } ) ) =$ q is always true, which makes $g ( \\mathbf { q } )$ better than simply normalizing $\\mathbf { x } _ { g p }$ because the latter one will suffer from the problem of opposite gradient discussed in Section 4.3. ",
+        "bbox": [
+            76,
+            90,
+            472,
+            287
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "C. Projective Manifold Gradient on $S ^ { 2 }$ ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            300,
+            406,
+            319
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "C.1. Riemannian Optimization on $S ^ { 2 }$ ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            325,
+            362,
+            343
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Our methods can also be applied for the regression of other manifolds. Taking $S ^ { 2 }$ as an example, which is included in Experiment 5.4, we will show the detail of how our projective manifold gradient layer works in other manifolds. ",
+        "bbox": [
+            76,
+            349,
+            468,
+            424
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "During forward, The network predicts a raw output ${ \\textbf { x } } \\in$ $\\mathbb { R } ^ { 3 }$ , which is then mapped to $\\hat { \\textbf { x } } \\in S ^ { 2 }$ through a manifold mapping $\\pi ( \\mathbf { x } ) = \\mathbf { x } / \\| \\mathbf { x } \\|$ . Here we don’t define the rotation mapping and representation mapping, and we directly compute the loss function on representation manifold $S ^ { 2 }$ . ",
+        "bbox": [
+            76,
+            425,
+            468,
+            500
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "During backward, to apply a Riemannian optimization, we first need to know some basic concepts of $S ^ { 2 }$ . The tangent space of an arbitrary element $\\hat { \\mathbf { x } } \\in S ^ { 2 }$ is $\\mathcal { T } _ { \\hat { \\mathbf { x } } } \\mathcal { M }$ , which is a plane. And we can map a geodesic path $\\mathbf { v } \\in \\mathcal { T } _ { \\hat { \\mathbf { x } } } \\mathcal { M }$ to an element on the manifold $S ^ { 2 }$ through $\\exp _ { \\hat { \\mathbf { x } } } ( \\mathbf { v } ) \\ =$ $\\cos ( \\| \\mathbf { v } \\| ) { \\hat { \\mathbf { x } } } + \\sin ( \\| \\mathbf { v } \\| ) { \\frac { \\mathbf { v } } { \\| \\mathbf { v } \\| } }$ , where $\\left. . \\right.$ means the ordinal Frobenius norm. ",
+        "bbox": [
+            76,
+            501,
+            468,
+            606
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "For the definition of the mapping ∧, which connects Euclidean space $\\mathbb { R } ^ { 2 }$ and the tangent space $\\mathcal { T } _ { \\hat { \\mathbf { x } } } \\mathcal { M }$ , we need to first define two orthogonal axes $\\hat { \\mathbf { c } } _ { 1 }$ , $\\hat { \\mathbf { c } } _ { 2 }$ in the tangent plane. Note that the choice of $\\hat { \\mathbf { c } } _ { 1 }$ and $\\hat { \\mathbf { c } } _ { 2 }$ won’t influence the final result, which will be shown soon after. To simplify the derivation, we can assume ground truth unit vector $\\hat { \\mathbf { x } } _ { g t }$ is known and choose cˆ1 = Logxˆ(xˆgt)kLog (xˆgt)k $\\begin{array} { r } { \\hat { \\mathbf { c } } _ { 1 } = \\frac { \\mathrm { L o g } _ { \\hat { \\mathbf { x } } } \\left( \\hat { \\mathbf { x } } _ { g t } \\right) } { \\left\\| \\mathrm { L o g } _ { \\hat { \\mathbf { x } } } \\left( \\hat { \\mathbf { x } } _ { g t } \\right) \\right\\| } = \\frac { \\hat { \\mathbf { x } } _ { g t } - \\left( \\hat { \\mathbf { x } } _ { g t } \\cdot \\hat { \\mathbf { x } } \\right) } { \\left\\| \\hat { \\mathbf { x } } _ { g t } - \\left( \\hat { \\mathbf { x } } _ { g t } \\cdot \\hat { \\mathbf { x } } \\right) \\right\\| } } \\end{array}$ and $\\hat { \\mathbf { c } } _ { 2 } = \\hat { \\mathbf { x } } \\times \\hat { \\mathbf { c } } _ { 1 }$ . Then we can say ${ \\boldsymbol { \\phi } } ^ { \\wedge } = \\phi _ { 1 } { \\hat { \\mathbf { c } } } _ { 1 } + \\phi _ { 2 } { \\hat { \\mathbf { c } } } _ { 2 }$ , where $\\phi = ( \\phi _ { 1 } , \\phi _ { 2 } ) \\in \\mathbb { R } ^ { 2 }$ . The gradient of exponential mapping with respect to $\\phi$ is ",
+        "bbox": [
+            76,
+            607,
+            468,
+            755
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left. \\frac {\\partial}{\\partial \\phi_ {1}} \\operatorname {E x p} _ {\\hat {\\mathbf {x}}} (\\phi) \\right| _ {\\phi = \\mathbf {0}} \\\\ = \\frac {\\partial}{\\partial \\phi_ {1}} (\\cos (\\| \\phi_ {1} \\hat {\\mathbf {c}} _ {1} \\|) \\hat {\\mathbf {x}} + \\sin (\\| \\phi_ {1} \\hat {\\mathbf {c}} _ {1} \\|) \\frac {\\phi_ {1} \\hat {\\mathbf {c}} _ {1}}{\\| \\phi_ {1} \\hat {\\mathbf {c}} _ {1} \\|}) \\Bigg | _ {\\phi = 0} \\\\ = \\hat {\\mathbf {c}} _ {1} \\tag {33} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            114,
+            765,
+            468,
+            848
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Similarly, we have $\\begin{array} { r } { \\frac { \\partial } { \\partial \\phi _ { 2 } } \\mathrm { E x p } _ { \\hat { \\mathbf { x } } } ( \\phi ) \\Big | _ { \\phi = \\mathbf { 0 } } = \\hat { \\mathbf { c } } _ { 2 } } \\end{array}$ ∂φ2 cˆ2. ",
+        "bbox": [
+            76,
+            859,
+            369,
+            886
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "When using L2 loss, we can have ",
+        "bbox": [
+            96,
+            886,
+            320,
+            900
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\operatorname {g r a d} \\mathcal {L} f (\\hat {\\mathbf {x}}) = (\\nabla f (\\hat {\\mathbf {x}})) ^ {\\wedge} = (\\nabla \\phi) ^ {\\wedge} \\\\ = \\left(\\frac {\\partial f (\\hat {\\mathbf {x}})}{\\partial \\hat {\\mathbf {x}}} \\frac {\\partial}{\\partial \\phi} \\mathrm {E x p} _ {\\hat {\\mathbf {x}}} (\\phi) \\Bigg | _ {\\phi = \\mathbf {0}}\\right) ^ {\\wedge} \\\\ = \\left(\\left(2 (\\hat {\\mathbf {x}} - \\hat {\\mathbf {x}} _ {g t}) \\hat {\\mathbf {c}} _ {1}, 2 (\\hat {\\mathbf {x}} - \\hat {\\mathbf {x}} _ {g t}) \\hat {\\mathbf {c}} _ {2}\\right)\\right) ^ {\\wedge} \\\\ = 2 \\left(\\left(\\hat {\\mathbf {x}} \\cdot \\hat {\\mathbf {x}} _ {g t}\\right) \\hat {\\mathbf {x}} - \\hat {\\mathbf {x}} _ {g t}\\right) \\tag {34} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            545,
+            90,
+            890,
+            183
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Note that this expression doesn’t depend on the choice of $\\hat { \\mathbf { c } } _ { 1 }$ and $\\hat { \\mathbf { c } } _ { 2 }$ . ",
+        "bbox": [
+            498,
+            194,
+            893,
+            222
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Similar to Eq 18, we can also solve a τconverge ",
+        "bbox": [
+            517,
+            222,
+            828,
+            237
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\tau_ {c o n v e r g e} = \\lim  _ {<   \\hat {\\mathbf {x}}, \\hat {\\mathbf {x}} _ {\\mathrm {g t}} > \\rightarrow 0} - \\frac {\\operatorname {L o g} _ {\\hat {\\mathbf {x}}} (\\hat {\\mathbf {x}} _ {\\mathrm {g t}})}{\\operatorname {g r a d} \\mathcal {L} f (\\hat {\\mathbf {x}})} = \\lim  _ {\\theta \\rightarrow 0} \\frac {\\theta \\hat {\\mathbf {c}} _ {1}}{2 \\sin \\theta \\hat {\\mathbf {c}} _ {1}} = \\frac {1}{2} \\tag {35}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            517,
+            248,
+            890,
+            273
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "where $\\theta = < \\hat { \\mathbf { x } } , \\hat { \\mathbf { x } } _ { g t } >$ . Note that in Experiment 5.4, we change the schedule of $\\tau$ according to this conclusion. We increase $\\tau$ from 0.1 to 0.5 by uniform steps. ",
+        "bbox": [
+            498,
+            281,
+            890,
+            327
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "C.2. Inverse Projection ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            335,
+            679,
+            353
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Similar to quaternion, we can have ${ \\bf x } _ { g p } = ( { \\bf x } \\cdot \\hat { \\bf x } _ { g } ) \\hat { \\bf x } _ { g }$ . For the detail of derivation, see Section B.2. ",
+        "bbox": [
+            498,
+            359,
+            890,
+            390
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "D. Computational Cost ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            404,
+            697,
+            422
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Our method does not alter the forward pass and thus incurs no cost at test time. For backward pass at training, we observe that, before and after inserting RMPG layers, the backward time for quaternion $/ \\mathrm { 6 D / 9 D / 1 0 D }$ representations, averaged among 1K iterations on a GeForce RTX 3090, changes from $4 . 3 9 \\mathrm { ~ / ~ } 4 . 4 8 \\mathrm { ~ / ~ } 4 . 4 8 \\mathrm { ~ / ~ } 4 . 5 3$ to $4 . 4 5 \\ : / \\ : 4 . 4 3$ $/ \\ 4 . 4 9 \\ / \\ 4 . 6 3$ (unit: $1 0 ^ { - 2 } \\mathrm { ~ s ~ }$ ), and the memory cost changes from $1 1 4 4 9 \\mathrm { ~ / ~ } 1 1 4 1 5 \\mathrm { ~ / ~ } 1 0 7 8 1 \\mathrm { ~ / ~ } 1 1 3 6 3$ to $1 1 4 5 7 \\ / \\ 1 1 4 5 9 \\ /$ 11545 / 11447 (unit: MiB). Note that the runtime is almost keep the same, as Riemannian optimization only performs an additional projection and we derive and always use analytical solutions in representation mapping, inversion and projection steps. RPMG also has a very marginal cost on the memory, as it does not introduce any weights but only a few intermediate variables. ",
+        "bbox": [
+            496,
+            430,
+            890,
+            655
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "E. More Experiments ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            670,
+            684,
+            686
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "E.1. Pascal3D+ ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            695,
+            619,
+            709
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Pascal3D+ [41] is a standard benchmark for object pose estimation from real images. We follow the same setting as in [25] to estimate object poses from single images. For training we discard occluded or truncated objects and augment with rendered images from [30]. In the Table 6 and Table 7, we report our results on sofa and bicycle categories. We use the same batch size as in [25]. As for the learning rate, we use the same strategy as in Experiment 5.2. See the discussion in Section F.2. ",
+        "bbox": [
+            496,
+            718,
+            890,
+            853
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "It can be seen that our method leads to consistent improvements to quaternion, 6D, 9D and 10D representations on both sofa and bicycle classes. One may be curious about ",
+        "bbox": [
+            496,
+            854,
+            890,
+            900
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            935
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "table",
+        "img_path": "images/dc6d85a1323477d84ada8301cb012772e4e9664030c7ea8ead98f31c1bf9b609.jpg",
+        "table_caption": [],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Methods</td><td colspan=\"3\">Accuracy(%)</td><td>Med(°)↓</td></tr><tr><td>10°</td><td>15°</td><td>20°</td><td>Err</td></tr><tr><td>Euler</td><td>60.2</td><td>80.9</td><td>90.6</td><td>8.3</td></tr><tr><td>Axis-Angle</td><td>45.0</td><td>70.9</td><td>85.1</td><td>11.0</td></tr><tr><td>Quaternion</td><td>34.3</td><td>60.8</td><td>73.5</td><td>13.2</td></tr><tr><td>6D</td><td>50.8</td><td>76.7</td><td>89.0</td><td>9.9</td></tr><tr><td>9D</td><td>52.4</td><td>79.6</td><td>90.3</td><td>9.2</td></tr><tr><td>9D-Inf</td><td>70.9</td><td>88.0</td><td>93.5</td><td>6.7</td></tr><tr><td>10D</td><td>50.2</td><td>77.0</td><td>89.6</td><td>9.8</td></tr><tr><td>RPMG-Quat</td><td>56.6</td><td>79.6</td><td>90.9</td><td>8.9</td></tr><tr><td>RPMG-6D</td><td>69.6</td><td>86.1</td><td>92.2</td><td>6.7</td></tr><tr><td>RPMG-9D</td><td>72.5</td><td>88.0</td><td>95.8</td><td>6.7</td></tr><tr><td>RPMG-10D</td><td>69.3</td><td>87.1</td><td>93.9</td><td>7.0</td></tr></table>",
+        "bbox": [
+            138,
+            88,
+            364,
+            229
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/f6dbf5dc8041992f8963ea7bce33c547395b11f3fb65da450f1f8fd062098f18.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            366,
+            98,
+            594,
+            218
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/3446abf098e9cb1778ceb1a6454d892ce8bab6fe62764ef71908724d58a4f44f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            596,
+            99,
+            828,
+            220
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Table 6. Pose estimation from PASCAL3D $^ +$ sofa images. Left: a comparison of methods by $1 0 ^ { \\circ } / 1 5 ^ { \\circ } / 2 0 ^ { \\circ }$ accuracy of (geodesic) errors and median errors after 60k training steps. Middle: median test error at different iterations during training. Right: test error percentiles after training completes. The legend on the right applies to both plots. ",
+        "bbox": [
+            75,
+            239,
+            893,
+            284
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "table",
+        "img_path": "images/5f964a78effd926bf21202a0e68c0ed5f553f7551a552fde1f51f2849ffa24ca.jpg",
+        "table_caption": [
+            "Table 7. Pose estimation from PASCAL3D+ bicycle images. We report the same metrics as Table 6; see the caption there. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Methods</td><td colspan=\"3\">Accuracy(%)</td><td>Med(°) ↓</td></tr><tr><td>10°</td><td>15°</td><td>20°</td><td>Err</td></tr><tr><td>Euler</td><td>28.2</td><td>48.1</td><td>62.7</td><td>15.7</td></tr><tr><td>Axis-Angle</td><td>5.3</td><td>8.1</td><td>10.1</td><td>79.7</td></tr><tr><td>Quaternion</td><td>20.8</td><td>38.8</td><td>54.6</td><td>18.7</td></tr><tr><td>6D</td><td>21.8</td><td>39.0</td><td>55.3</td><td>18.1</td></tr><tr><td>9D</td><td>20.6</td><td>37.6</td><td>56.9</td><td>18.0</td></tr><tr><td>9D-Inf</td><td>38.0</td><td>53.3</td><td>69.9</td><td>13.4</td></tr><tr><td>10D</td><td>23.9</td><td>42.3</td><td>56.7</td><td>17.9</td></tr><tr><td>RPMG-Quat</td><td>32.3</td><td>50.0</td><td>65.6</td><td>15.0</td></tr><tr><td>RPMG-6D</td><td>35.4</td><td>57.2</td><td>70.6</td><td>13.5</td></tr><tr><td>RPMG-9D</td><td>36.8</td><td>57.4</td><td>71.8</td><td>12.5</td></tr><tr><td>RPMG-10D</td><td>40.0</td><td>57.7</td><td>71.3</td><td>12.9</td></tr></table>",
+        "bbox": [
+            138,
+            295,
+            364,
+            439
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/022bf0fd753ffab47f778aba341738f553fa204af8171e100b8b836cf2c2726f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            366,
+            306,
+            594,
+            425
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/e052fc89c1c33fc9469a9d4d381f16e1355d8aedc1ef3917198ad673c9e1da27.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            596,
+            308,
+            828,
+            426
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "why our method can only outperform 9D-inf for a margin. We think that this is because this dataset is quite challenging. The number of annotated real image for training is only around 200 for each category. Though there are a lot of synthetic images generated from [30] for training, these images suffer from sim-to-real domain gap. Therefore, we argue that the bottleneck here is not in optimization, which makes the gains from less noise in gradient smaller(Note that 9Dinf is just a special case of our methods with $\\lambda = 1$ and $\\tau = \\tau _ { g t } ,$ ). But compared to vanilla 4D/6D/9D/10D representation, our methods can still bring a great improvement. ",
+        "bbox": [
+            75,
+            488,
+            472,
+            655
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "E.2. Using Flow Loss for Rotation Estimation from Point Clouds. ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            664,
+            468,
+            695
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Apart from the most widely used L2 loss, our method can also be applied to the loss of other forms, e.g. flow loss. ",
+        "bbox": [
+            75,
+            703,
+            468,
+            733
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "We mainly follow the setting in Experiment 5.1 with airplane point clouds dataset and the only difference is that we use flow loss $\\| \\mathbf { R } X - \\mathbf { R } _ { g t } X \\| _ { F } ^ { 2 }$ here, where $X$ is the complete point clouds. ",
+        "bbox": [
+            75,
+            734,
+            468,
+            794
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Since the format of loss is changed, the previous schedule of $\\tau$ is not suitable anymore, and we have to change the value of $\\tau$ accordingly. Our selection skill is to first choose a $\\tau$ as we like and visualize the mean geodesic distance between predicted $\\mathbf { R }$ and $\\mathbf { R } _ { g }$ during training. Then we can roughly adjust $\\tau$ to make the geodesic distance looked reasonable. For this experiment, we use $\\tau = 5 0$ and $\\lambda = 0 . 0 1$ . ",
+        "bbox": [
+            75,
+            795,
+            468,
+            901
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "In Table 8, we show our methods again outperform vanilla methods as well as 9D-inf. ",
+        "bbox": [
+            498,
+            488,
+            890,
+            518
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "table",
+        "img_path": "images/7dfdf697f21fd8df98807e8534e099a8b073f6ba74cb127391ecefdf6bdec7df.jpg",
+        "table_caption": [
+            "Table 8. Flow Loss for Rotation Estimation from Point Clouds. All models are trained for 30K iterations. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Methods</td><td>Mean (°)</td><td>Med (°)</td><td>5° Acc (%)</td></tr><tr><td>Euler</td><td>12.14</td><td>6.91</td><td>33.6</td></tr><tr><td>Axis-Angle</td><td>35.49</td><td>20.80</td><td>4.7</td></tr><tr><td>Quaternion</td><td>11.54</td><td>7.67</td><td>29.8</td></tr><tr><td>6D</td><td>14.13</td><td>9.41</td><td>23.4</td></tr><tr><td>9D</td><td>11.44</td><td>8.01</td><td>23.8</td></tr><tr><td>9D-Inf</td><td>4.07</td><td>3.28</td><td>76.7</td></tr><tr><td>10D</td><td>9.28</td><td>7.05</td><td>32.6</td></tr><tr><td>RPMG-Quat</td><td>4.86</td><td>3.25</td><td>75.8</td></tr><tr><td>RPMG-6D</td><td>2.71</td><td>2.04</td><td>92.1</td></tr><tr><td>RPMG-9D</td><td>3.75</td><td>2.10</td><td>91.1</td></tr><tr><td>RPMG-10D</td><td>3.30</td><td>2.70</td><td>86.8</td></tr></table>",
+        "bbox": [
+            540,
+            531,
+            849,
+            705
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "E.3. Camera Relocalization ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            768,
+            714,
+            784
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "The task of camera relocalization is to estimate a 6 Degree-of-Freedom camera pose (rotation and translation) from visual observations, which is a fundamental component of many computer vision and robotic applications. In this experiment, we use all the settings (data, network, training strategy, hyperparameters, etc.) of PoseLSTM [36] except that we modify the rotation representations and the ",
+        "bbox": [
+            496,
+            795,
+            893,
+            900
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "15 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "table",
+        "img_path": "images/9f6080639c791d8c0cab8b05106275410edc670fb9c0b2d4670ba1a4897e7b3b.jpg",
+        "table_caption": [
+            "Table 9. Camera relocalization on Cambridge Landscape dataset. We report the median error of translation and rotation of the best checkpoint, which is chosen by minimizing the median of rotation. We only care about the rotation error here. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Methods</td><td colspan=\"2\">King&#x27;s College</td><td colspan=\"2\">Old Hospital</td><td colspan=\"2\">Shop Facade</td><td colspan=\"2\">St Mary&#x27;s Church</td><td colspan=\"2\">Average</td></tr><tr><td>T(m)</td><td>R(°)</td><td>T(m)</td><td>R(°)</td><td>T(m)</td><td>R(°)</td><td>T(m)</td><td>R(°)</td><td>T(m)</td><td>R(°)</td></tr><tr><td>Euler</td><td>1.16</td><td>2.85</td><td>2.54</td><td>2.95</td><td>1.25</td><td>6.48</td><td>1.98</td><td>6.97</td><td>1.73</td><td>4.81</td></tr><tr><td>Axis-Angle</td><td>1.12</td><td>2.63</td><td>2.41</td><td>3.38</td><td>0.84</td><td>5.05</td><td>2.16</td><td>7.58</td><td>1.63</td><td>4.66</td></tr><tr><td>Quaternion</td><td>0.98</td><td>2.50</td><td>2.39</td><td>3.44</td><td>1.06</td><td>6.01</td><td>2.59</td><td>8.81</td><td>1.76</td><td>5.19</td></tr><tr><td>6D</td><td>1.10</td><td>2.56</td><td>2.21</td><td>3.43</td><td>1.01</td><td>5.43</td><td>1.73</td><td>5.82</td><td>1.51</td><td>4.31</td></tr><tr><td>9D</td><td>1.14</td><td>3.03</td><td>2.11</td><td>3.50</td><td>0.88</td><td>6.39</td><td>1.95</td><td>5.95</td><td>1.52</td><td>4.72</td></tr><tr><td>9D-Inf</td><td>0.98</td><td>2.32</td><td>1.89</td><td>3.32</td><td>1.15</td><td>6.36</td><td>1.96</td><td>6.25</td><td>1.50</td><td>4.56</td></tr><tr><td>10D</td><td>1.54</td><td>2.62</td><td>2.32</td><td>3.39</td><td>1.20</td><td>5.76</td><td>1.85</td><td>6.69</td><td>1.73</td><td>4.62</td></tr><tr><td>RPMG-Quat</td><td>1.04</td><td>1.91</td><td>2.42</td><td>2.72</td><td>0.98</td><td>4.28</td><td>1.82</td><td>4.89</td><td>1.57</td><td>3.45</td></tr><tr><td>RPMG-6D</td><td>1.55</td><td>1.70</td><td>2.62</td><td>3.09</td><td>0.95</td><td>5.01</td><td>2.44</td><td>5.18</td><td>1.89</td><td>3.75</td></tr><tr><td>RPMG-9D</td><td>1.57</td><td>1.82</td><td>4.37</td><td>3.12</td><td>0.93</td><td>4.17</td><td>1.92</td><td>4.69</td><td>2.20</td><td>3.45</td></tr><tr><td>RPMG-10D</td><td>1.30</td><td>1.74</td><td>3.21</td><td>2.59</td><td>1.10</td><td>3.47</td><td>2.20</td><td>5.09</td><td>1.95</td><td>3.22</td></tr></table>",
+        "bbox": [
+            145,
+            85,
+            823,
+            306
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "gradient layers. We report the results on the outdoor Cambridge Landscape dataset [23] in Table 9. ",
+        "bbox": [
+            75,
+            371,
+            468,
+            401
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Notice that our RPMG layer performs the best on the rotation regression task, but not on the translation regression. We believe this results from a loss imbalance. We does not change the weights of the rotation loss and translation loss, otherwise it leads to an unfair comparison with existing results. We only care about the rotation error here. ",
+        "bbox": [
+            75,
+            402,
+            470,
+            494
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "F. More Implementation Details ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            508,
+            352,
+            527
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "F.1. Experiment 5.1 & 5.3 & 5.4 ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            535,
+            326,
+            551
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Data We generate the data from ModelNet dataset [40] by sampling 1024 points on the mesh surface, following the same generation method as in [46]. We uniformly sample M rotations for each data point and set them as the ground truth. We apply the sampled rotations on the canonical point clouds to obtain the input data. ",
+        "bbox": [
+            75,
+            559,
+            468,
+            648
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Network Architecture We use a PointNet++ MSG [28] backbone as our feature extractor. Our network takes input a point cloud with a resolution of 1024. It them performs three set abstractions to lower the resolution to 512, 128, and finally 1, resulting in a global feature of dimensionality 1024. The feature is finally pushed through a three-layer MLP $[ 1 0 2 4 , 5 1 2 , N ]$ to regress rotation, where $N$ is the dimension of the rotation representation. ",
+        "bbox": [
+            75,
+            651,
+            468,
+            772
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Training details The learning rate is set to 1e-3 and decayed by 0.7 every 3k iterations. The batch size is 20. For each experiment, we train the network on one NVIDIA TI-TAN Xp GPU for 30k iterations. ",
+        "bbox": [
+            75,
+            773,
+            470,
+            834
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "F.2. Experiment 5.2 ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            845,
+            232,
+            862
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Most of the training settings and strategies are all the same as [25] except learning rate. We find setting initial ",
+        "bbox": [
+            76,
+            869,
+            470,
+            902
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "learning rate $l r = 1 e - 3$ and decaying to $1 e - 5$ can perform much better than using $l r = 1 e - 5$ as in [25], which accounts for the inconsistency of the results of those baseline methods compared to [25]. We believe that the methods should be compared under hyperparameters as optimal as possible. Thus, we stick to our $l r$ schedule. ",
+        "bbox": [
+            498,
+            371,
+            893,
+            463
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "image",
+        "img_path": "images/b89c0c928f22b6c76a79deef26feb3800f40877617e7fd3e2066acd1453dac2a.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            501,
+            473,
+            694,
+            571
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "image",
+        "img_path": "images/bdce6fefa5cdc7340e8bcae612bc7807c224dff03a1761f81116ed97211c55af.jpg",
+        "image_caption": [
+            "Table 10. Test error percentiles for Experiment 5.1 & 5.2 Left: test error percentiles of airplane for Experiment 5.1 after training completes. Right: test error percentiles of chair for Experiment 5.2 after training completes. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            696,
+            474,
+            880,
+            570
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "G. Addition on Rotation Representations ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            664,
+            846,
+            681
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Standard mapping between rotation matrix and unit quaternion The rotation mapping $\\phi : { \\textbf { q } } \\mapsto { \\textbf { R } }$ algebraically manipulates a unit quaternion q into a rotation matrix: ",
+        "bbox": [
+            498,
+            688,
+            892,
+            739
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\phi (\\mathbf {q}) = \\left( \\begin{array}{l l l} 2 \\left(q _ {0} ^ {2} + q _ {1} ^ {2}\\right) - 1 & 2 \\left(q _ {1} q _ {2} - q _ {0} q _ {3}\\right) & 2 \\left(q _ {1} q _ {3} + q _ {0} q _ {2}\\right) \\\\ 2 \\left(q _ {1} q _ {2} + q _ {0} q _ {3}\\right) & 2 \\left(q _ {0} ^ {2} + q _ {2} ^ {2}\\right) - 1 & 2 \\left(q _ {2} q _ {3} - q _ {0} q _ {1}\\right) \\\\ 2 \\left(q _ {1} q _ {3} - q _ {0} q _ {2}\\right) & 2 \\left(q _ {2} q _ {3} + q _ {0} q _ {1}\\right) & 2 \\left(q _ {0} ^ {2} + q _ {3} ^ {2}\\right) - 1 \\end{array} \\right) \\tag {36}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            509,
+            747,
+            890,
+            785
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { q } = ( q _ { 0 } , q _ { 1 } , q _ { 2 } , q _ { 3 } ) \\in \\mathcal { S } ^ { 3 }$ . ",
+        "bbox": [
+            500,
+            792,
+            715,
+            809
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "In the reverse direction, the representation mapping $\\psi ( \\mathbf { R } )$ can be expressed as: ",
+        "bbox": [
+            500,
+            809,
+            890,
+            837
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\{ \\begin{array}{l} q _ {0} = \\sqrt {1 + R _ {0 0} + R _ {1 1} + R _ {2 2}} / 2 \\\\ q _ {1} = \\left(R 2 1 - R _ {1 2}\\right) / \\left(4 * q _ {0}\\right) \\\\ q _ {2} = \\left(R _ {0 2} - R _ {2 0}\\right) / \\left(4 * q _ {0}\\right) \\\\ q _ {3} = \\left(R _ {1 0} - R _ {0 1}\\right) / \\left(4 * q _ {0}\\right) \\end{array} \\right. \\tag {37}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            581,
+            845,
+            890,
+            904
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            475,
+            924,
+            495,
+            936
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Note that $\\begin{array} { r l r } { \\textbf { q } } & { { } = } & { \\left( q _ { 0 } , q _ { 1 } , q _ { 2 } , q _ { 3 } \\right) } \\end{array}$ and $\\qquad - { \\bf q } \\quad = \\quad$ $\\left( - q _ { 0 } , - q _ { 1 } , - q _ { 2 } , - q _ { 3 } \\right)$ both are the valid quaternions parameterizing the same $\\mathbf { R }$ . ",
+        "bbox": [
+            76,
+            90,
+            468,
+            136
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "17 ",
+        "bbox": [
+            475,
+            922,
+            495,
+            936
+        ],
+        "page_idx": 16
+    }
+]

@@ -1,0 +1,3758 @@
+[
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.129,
+                0.13,
+                0.842,
+                0.154
+            ],
+            "angle": 0,
+            "content": "Movies2Scenes: Using Movie Metadata to Learn Scene Representation"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.113,
+                0.181,
+                0.856,
+                0.216
+            ],
+            "angle": 0,
+            "content": "Shixing Chen Chun-Hao Liu Xiang Hao Xiaohan Nie Maxim Arap Raffay Hamid Amazon Prime Video"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.191,
+                0.22,
+                0.774,
+                0.235
+            ],
+            "angle": 0,
+            "content": "{shixic, chunhaol, xianghao, nxiaohan, maxarap, raffay}@amazon.com"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.235,
+                0.269,
+                0.314,
+                0.284
+            ],
+            "angle": 0,
+            "content": "Abstract"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.29,
+                0.473,
+                0.624
+            ],
+            "angle": 0,
+            "content": "Understanding scenes in movies is crucial for a variety of applications such as video moderation, search, and recommendation. However, labeling individual scenes is a time-consuming process. In contrast, movie level metadata (e.g., genre, synopsis, etc.) regularly gets produced as part of the film production process, and is therefore significantly more commonly available. In this work, we propose a novel contrastive learning approach that uses movie metadata to learn a general-purpose scene representation. Specifically, we use movie metadata to define a measure of movie similarity, and use it during contrastive learning to limit our search for positive scene-pairs to only the movies that are considered similar to each other. Our learned scene representation consistently outperforms existing state-of-the-art methods on a diverse set of tasks evaluated using multiple benchmark datasets. Notably, our learned representation offers an average improvement of \\(7.9\\%\\) on the seven classification tasks and \\(9.7\\%\\) improvement on the two regression tasks in LVU dataset. Furthermore, using a newly collected movie dataset, we present comparative results of our scene representation on a set of video moderation tasks to demonstrate its generalizability on previously less explored tasks."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.634,
+                0.21,
+                0.649
+            ],
+            "angle": 0,
+            "content": "1. Introduction"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.659,
+                0.47,
+                0.765
+            ],
+            "angle": 0,
+            "content": "Automatic understanding of movie scenes is a challenging problem [53] [26] that offers a variety of downstream applications including video moderation, search, and recommendation. However, the long-form nature of movies makes labeling of their scenes a laborious process, which limits the effectiveness of traditional end-to-end supervised learning methods for tasks related to automatic scene understanding."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.766,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": "The general problem of learning from limited labels has been explored from multiple perspectives [51], among which contrastive learning [28] has emerged as a particularly promising direction. Specifically, using natural language supervision to guide contrastive learning [41] has shown impressive results specially for zero-shot image-classification tasks. However, these methods rely on imagetext pairs which are hard to collect for long-form videos. Another important set of methods within the space of con"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.27,
+                0.895,
+                0.348
+            ],
+            "angle": 0,
+            "content": "trastive learning use a pretext task to contrast similar datapoints with randomly selected ones [23] [9]. However, most of the standard data-augmentation schemes [23] used to define the pretext tasks for these approaches have been shown to be not as effective for scene understanding [8]."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.352,
+                0.895,
+                0.7
+            ],
+            "angle": 0,
+            "content": "To address these challenges, we propose a novel contrastive learning approach to find a general-purpose scene representation that is effective for a variety of scene understanding tasks. Our key intuition is that commonly available movie metadata (e.g., co-watch, genre, synopsis) can be used to effectively guide the process of learning a generalizable scene representation. Specifically, we use such movie metadata to define a measure of movie-similarity, and use it during contrastive learning to limit our search for positive scene-pairs to only the movies that are considered similar to each other. This allows us to find positive scenepairs that are not only visually similar but also semantically relevant, and can therefore provide us with a much richer set of geometric and thematic data-augmentations compared to previously employed augmentation schemes [23] [8] (see Figure 1 for illustration). Furthermore, unlike previous contrastive learning approaches that mostly focus on images [23] [9] [13] or shots (\\(\\S\\) 3 for definition) [8], our approach builds on the recent developments in vision transformers [12] to allow using variable-length multi-shot inputs. This enables our method to seamlessly incorporate the interplay among multiple shots resulting in a more general-purpose scene representation."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.705,
+                0.897,
+                0.903
+            ],
+            "angle": 0,
+            "content": "Using a newly collected internal dataset MovieCL30K containing 30, 340 movies to learn our scene representation, we demonstrate the flexibility of our approach to handle both individual shots as well as multi-shot scenes provided as inputs to outperform existing state-of-the-art results on diverse downstream tasks using multiple public benchmark datasets [53] [26] [42]. Furthermore, as an important practical application of long-form video understanding, we apply our scene representation to another newly collected dataset MCD focused on large-scale video moderation with 44, 581 video clips from 18, 330 movies and TV episodes containing sex, violence, and drug-use activities. We show that learning our general-purpose scene representation is crucial"
+        },
+        {
+            "type": "aside_text",
+            "bbox": [
+                0.023,
+                0.26,
+                0.058,
+                0.709
+            ],
+            "angle": 270,
+            "content": "arXiv:2202.10650v3 [cs.CV] 30 Mar 2023"
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "bbox": [
+                0.118,
+                0.079,
+                0.852,
+                0.248
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.075,
+                0.253,
+                0.895,
+                0.311
+            ],
+            "angle": 0,
+            "content": "Figure 1. Approach Overview - We employ commonly available movie metadata (e.g., co-watch, genre, synopsis) to define movie similarities. The figure illustrates a pair of similar movies where movie similarity is defined based on co-watch information, i.e., viewers who watched one movie often watched the second movie as well. Our approach automatically selects thematically similar scenes from such similar movie-pairs and uses them to learn scene-level representations that can be used for a variety of downstream tasks."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.329,
+                0.471,
+                0.376
+            ],
+            "angle": 0,
+            "content": "to recognize such age-appropriate video-content where existing representations learned for short-form action recognition or image classification are significantly less effective."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.39,
+                0.22,
+                0.406
+            ],
+            "angle": 0,
+            "content": "2. Related Work"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.075,
+                0.414,
+                0.474,
+                0.793
+            ],
+            "angle": 0,
+            "content": "a. Long-Form Video Understanding: Recent work on semantic understanding of long-form movies and TV episodes have used multi-shot scenes as their processing unit. For example in MovieNet [26], manually annotated multi-shot scenes were used to train various recently proposed models [7] [16] to evaluate their performance on multiple tasks related to scene tagging, e.g., recognizing places or actions in those scenes. In [36], multi-shot clips of movies and TV episodes were categorized into 25 event classes for their temporal localization. The results in [36] show that state-of-the-art event localization models [57] [59] do not perform as well on long-form movies and TV episodes compared to their performance on short-form video datasets like THUMOS14 [29]. A long-form video understanding (LVU) dataset was recently proposed in [53] with nine different tasks related to semantic understanding of video-clips that were cut-out from full-length movies. This work also proposed an object-centric transformer-based video recognition architecture that outperformed SlowFast [16] and VideoBert [46] models on their LVU [53] dataset. To complement existing datasets focusing on regular everyday activity-categories, we collect a new dataset focusing on video moderation of sensitive activities including sex, violence, and drug-use, and show how our scene representation can be applied to recognize these activities."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.796,
+                0.471,
+                0.903
+            ],
+            "angle": 0,
+            "content": "b. Contrastive Learning: As an important subset of self-supervised learning [30], contrastive learning [32] attempts to learn data representations by contrasting similar data against dissimilar data while using a contrastive loss. Recent approaches for contrastive learning [23] [9] have successfully been extended for a variety of applications in image classification [47] [25] [20] as well as video understand-"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.328,
+                0.895,
+                0.45
+            ],
+            "angle": 0,
+            "content": "ing [22] [8] [61]. More recently, various visio-linguistic models [41] have adopted natural language supervision during contrastive learning to learn correspondences between image and text pairs, which has achieved impressive results especially for zero-shot image classification tasks. Most of these approaches however focus on images or short-videos, and our experiments show that they do not perform as well on tasks related to long-form video understanding."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.452,
+                0.895,
+                0.635
+            ],
+            "angle": 0,
+            "content": "c. Vision Transformer: Derived from the work on self-attention [49], transformers have been extensively studied in NLP [52] [11]. Building on this line of work, recently proposed vision transformer (ViT) [12] has successfully exceeded state-of-the-art results when pre-trained on large-scale datasets. The data-efficiency of ViT was recently improved in [48] by using token-based distillation for model training. More recently, ViT-based architectures were adopted for video recognition, e.g., TimeSformer [3], ViViT [2], and MViT [14]. These models take images or short-form videos as inputs, and therefore cannot be effectively applied to longer videos without additional tuning."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.648,
+                0.593,
+                0.664
+            ],
+            "angle": 0,
+            "content": "3. Method"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.674,
+                0.892,
+                0.795
+            ],
+            "angle": 0,
+            "content": "For consistency, let us define a shot as a series of frames captured from the same camera over a consecutive period of time [45]. We define a scene as a series of consecutive shots without requiring manually annotated sceneboundaries. Note that our definition of scenes is less constrained than what has previously been used [26] [42] [8], and enables our approach to work seamlessly with settings that do [26] or do not have [53] scene boundaries available."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.796,
+                0.895,
+                0.903
+            ],
+            "angle": 0,
+            "content": "Our approach consists of four key steps. First, we train a shot encoder to provide appearance-based representations using unlabeled movie-shots. Second, we use commonly available movie metadata (e.g., co-watch, genre or synopsis) to define a movie-level similarity \\( S \\) (see § 4.1.1 for details). We use \\( S \\) as pseudo-labels to train a movie-level encoder that maximizes the similarity between scenes"
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.281,
+                0.092,
+                0.612,
+                0.104
+            ],
+            "angle": 0,
+            "content": "pre-processing for automatic similar scene-pair selection"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.08,
+                0.108,
+                0.882,
+                0.226
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.23,
+                0.894,
+                0.272
+            ],
+            "angle": 0,
+            "content": "Figure 2. Movie Similarity Learning - Shots of a movie-pair \\(\\mathbf{m}_1\\) and \\(\\mathbf{m}_2\\) are first provided to \\(\\mathbf{E}_{\\mathrm{shot}}\\) and \\(\\mathbf{E}_{\\mathrm{movie}}\\) to extract d-dimensional features with numbers of u and v shots, respectively. We take the dot-product of shot-feature matrices followed by successive pooling and flattening operations to get an output vector \\(\\mathbf{V}\\), which is then regressed against defined movie-level similarity \\(S\\) between \\(\\mathbf{m}_1\\) and \\(\\mathbf{m}_2\\)."
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.078,
+                0.298,
+                0.468,
+                0.392
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.397,
+                0.47,
+                0.48
+            ],
+            "angle": 0,
+            "content": "Figure 3. Contrastive Scene Representation Learning - Given a pair of similar movies \\(\\mathbf{m}_1\\) and \\(\\mathbf{m}_2\\) as determined by \\(S\\), we use a set of pre-processing operations (as shown in Figure 2) to select similar scene-pairs (see supplementary material for more examples). This process is applied to all similar movie-pairs to get a set of paired scenes that is used for scene-level contrastive learning."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.487,
+                0.47,
+                0.548
+            ],
+            "angle": 0,
+            "content": "from similar movies (as defined by \\( S \\)). Third, we use this trained movie-level encoder to select similar scene-pairs for contrastive learning of scene encoder. Lastly, we use the learned scene representation for downstream tasks."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.557,
+                0.318,
+                0.573
+            ],
+            "angle": 0,
+            "content": "3.1. Movie Similarity Learning"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.58,
+                0.227,
+                0.593
+            ],
+            "angle": 0,
+            "content": "3.1.1 Shot Encoder"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.604,
+                0.469,
+                0.709
+            ],
+            "angle": 0,
+            "content": "As it is generally inefficient to directly train a network with all shots from movies as input in an end-to-end manner [42] [26] [8], we divide movie-level training into two stages, i.e.; (a) shot encoder training, and (b) movie encoder training. During the first stage, we train a shot encoder end-to-end to provide features mostly focusing on appearance-related information without much contextual meaning."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.71,
+                0.469,
+                0.784
+            ],
+            "angle": 0,
+            "content": "Given a query shot \\(\\mathbf{x_t}\\) at time \\(t\\), we use its neighboring shots \\(\\mathbf{x}_{t - 2}\\) and \\(\\mathbf{x}_{t + 2}\\) as a pair of potential positive keys. We train our shot encoder to distinguish a positive key shot from randomly selected negative key shots, where the positive logits are defined as:"
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.087,
+                0.793,
+                0.469,
+                0.809
+            ],
+            "angle": 0,
+            "content": "\\[\n\\left. \\max  \\left(\\mathbf {E} _ {\\text {s h o t}} \\left(\\mathbf {x} _ {\\mathrm {t}}\\right) \\cdot \\mathbf {E} _ {\\text {s h o t}} \\left(\\mathbf {x} _ {\\mathrm {t} - 2}\\right), \\mathbf {E} _ {\\text {s h o t}} \\left(\\mathbf {x} _ {\\mathrm {t}}\\right) \\cdot \\mathbf {E} _ {\\text {s h o t}} \\left(\\mathbf {x} _ {\\mathrm {t} + 2}\\right)\\right) \\right. \\tag {1}\n\\]"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.817,
+                0.238,
+                0.831
+            ],
+            "angle": 0,
+            "content": "3.1.2 Movie Encoder"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.841,
+                0.469,
+                0.902
+            ],
+            "angle": 0,
+            "content": "After training the shot encoder, we fix it to extract shot representations and add a light-weight encoder on top it as movie encoder. As illustrated in Figure 2, we divide a given movie-pair \\(\\mathbf{m}_1\\) and \\(\\mathbf{m}_2\\) into their constituent shots [44] \\(\\mathbf{x}_1\\)"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.299,
+                0.892,
+                0.39
+            ],
+            "angle": 0,
+            "content": "and \\(\\mathbf{x}_2\\) respectively. We extract features of these shots using the fixed shot encoder \\(\\mathbf{E}_{\\mathrm{shot}}\\), so that \\(\\mathbf{x}_1\\) and \\(\\mathbf{x}_2\\) are represented by two feature matrices \\(\\mathbf{E}_{\\mathrm{shot}}(\\mathbf{x}_1)\\) and \\(\\mathbf{E}_{\\mathrm{shot}}(\\mathbf{x}_2)\\) respectively, which are passed through an encoder with learnable parameters \\(\\mathbf{E}_{\\mathrm{movie}}\\), followed by their dot-product to create a shot-adjacency matrix \\(\\mathbf{A}_{\\mathbf{x}_1,\\mathbf{x}_2}\\), i.e.,"
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.528,
+                0.41,
+                0.892,
+                0.427
+            ],
+            "angle": 0,
+            "content": "\\[\n\\mathbf {A} _ {\\mathbf {x} _ {1}, \\mathbf {x} _ {2}} = \\mathbf {E} _ {\\text {m o v i e}} \\left(\\mathbf {E} _ {\\text {s h o t}} (\\mathbf {x} _ {1})\\right) \\cdot \\mathbf {E} _ {\\text {m o v i e}} \\left(\\mathbf {E} _ {\\text {s h o t}} (\\mathbf {x} _ {2})\\right) \\tag {2}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.451,
+                0.892,
+                0.482
+            ],
+            "angle": 0,
+            "content": "Note that entries in \\(\\mathbf{A}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) represent pair-wise similarities between shots in movies \\(\\mathbf{m}_1\\) and \\(\\mathbf{m}_2\\)."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.487,
+                0.893,
+                0.744
+            ],
+            "angle": 0,
+            "content": "Using \\(\\mathbf{k}_{\\mathrm{a}}\\) contiguous shots as scenes, we convert the shot-adjacency matrix \\(\\mathbf{A}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) into a scene-adjacency matrix \\(\\mathbf{B}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) by applying average pooling with kernel size \\(\\mathbf{k}_{\\mathrm{a}}\\) and stride \\(\\mathbf{s}_{\\mathrm{a}}\\) on \\(\\mathbf{A}_{\\mathbf{x}_1\\mathbf{x}_2}\\) to calculate the average values in each \\(\\mathbf{k}_{\\mathrm{a}} \\times \\mathbf{k}_{\\mathrm{a}}\\) window in \\(\\mathbf{A}_{\\mathbf{x}_1,\\mathbf{x}_2}\\). Furthermore, we apply max pooling with kernel size \\(\\mathbf{k}_{\\mathrm{m}}\\) and stride \\(\\mathbf{s}_{\\mathrm{m}}\\) on \\(\\mathbf{B}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) followed by flattening the output to get the vector \\(\\mathbf{V}_{\\mathbf{x}_1,\\mathbf{x}_2}\\). Intuitively, this step finds the most similar scene-pairs between \\(\\mathbf{x}_1\\) and \\(\\mathbf{x}_2\\), where each value in \\(\\mathbf{V}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) represents the highest similarity of the scene-pair in a neighborhood of \\(\\mathbf{k}_{\\mathrm{m}} \\times \\mathbf{k}_{\\mathrm{m}}\\) scenes in \\(\\mathbf{B}_{\\mathbf{x}_1,\\mathbf{x}_2}\\). Finally, we learn the projection between \\(\\mathbf{V}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) and the output using layer \\(\\mathbf{L}_{\\mathrm{output}}\\), where our goal is to predict if \\(\\mathbf{x}_1\\) and \\(\\mathbf{x}_2\\) are similar at movie-level. That is, if \\(\\mathbf{x}_1\\) and \\(\\mathbf{x}_2\\) are shots from similar movies as defined by \\(S\\), our target label is 1, and 0 otherwise. During training, we use cross-entropy loss to update \\(\\mathbf{E}_{\\mathrm{movie}}\\) and \\(\\mathbf{L}_{\\mathrm{output}}\\) while \\(\\mathbf{E}_{\\mathrm{shot}}\\) remains unchanged."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.747,
+                0.894,
+                0.899
+            ],
+            "angle": 0,
+            "content": "A useful way to interpret our movie similarity learning step is to view it from a multiple instance learning (MIL) perspective [5]. The shot-adjacency matrix \\(\\mathbf{A}_{\\mathbf{x}_1,\\mathbf{x}_2}\\) can be considered as a bag, while similar scene-pairs can be thought of as positive instances. Unlike some recent MIL-based approaches [1] [17] [34], we simplify our learning process by adopting standard network operations and loss function instead of specially designed ones, which allows us to use existing well-engineered implementations to get better efficiency and scalability in practice."
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.091,
+                0.327,
+                0.108
+            ],
+            "angle": 0,
+            "content": "3.2. Scene Contrastive Learning"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.113,
+                0.47,
+                0.236
+            ],
+            "angle": 0,
+            "content": "Given a similar movie-pair as defined by \\( S \\), we apply \\( \\mathbf{E}_{\\mathrm{movie}}(\\mathbf{E}_{\\mathrm{shot}}(\\cdot)) \\) to their constituent shots, followed by successive pooling operations to find the scene adjacency matrix \\( \\mathbf{B} \\), which is used to rank the similarity of scene-pairs. We apply this selection process to all pairs of similar movies to get a collection of paired scenes \\( \\mathbf{P}_{\\mathrm{scene}} \\) that is used for scene-level contrastive learning. Our contrastive learning approach is shown in Figure 3, and explained below."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.254,
+                0.236,
+                0.269
+            ],
+            "angle": 0,
+            "content": "3.2.1 Scene Encoder"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.278,
+                0.469,
+                0.367
+            ],
+            "angle": 0,
+            "content": "As the inputs to our encoder \\(\\mathbf{E}_{\\mathrm{scene}}\\) for scene contrastive learning are multi-shot sequences, it is important to design \\(\\mathbf{E}_{\\mathrm{scene}}\\) so that it can effectively model the various relationships among input shots. To this end, we build on recent work of ViT [12], and propose a transformer based \\(\\mathbf{E}_{\\mathrm{scene}}\\) that treats patches in input shots as tokens."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.368,
+                0.469,
+                0.612
+            ],
+            "angle": 0,
+            "content": "Specifically, following [12] [41], for a \\(k\\)-frame shot of dimension \\((k,w,h,c)\\), we first divide it into a sequence of \\((k,\\frac{w}{p},\\frac{h}{p},c)\\) patches, where \\((p,p)\\) is the size of each patch. To input the shot to a transformer with latent vector size of D dimensions, we apply \\(\\mathrm{D}\\times c\\) convolutional kernels with kernel size \\((p,p)\\) and stride \\((p,p)\\) to the \\((k,\\frac{w}{p},\\frac{h}{p},c)\\) patches. This converts the shot into patch embeddings with dimension \\((k,\\frac{h}{p},\\frac{w}{p},\\mathrm{D})\\), which is further flattened to a \\((k,\\mathrm{N},\\mathrm{D})\\)-dimensional tensor where \\(\\mathrm{N} = (w\\cdot h) / p^2\\). Furthermore, we prepend a learnable embedding to the patch embeddings similar to the class token used in [11]. After permutation, the result is \\((\\mathrm{N} + 1,\\mathrm{D})\\)-dimensional patch embeddings for each of the \\(k\\) frames. We add \\((\\mathrm{N} + 1,\\mathrm{D})\\)-dimensional positional embeddings to patch embeddings to retain positional information, and pass them to successive multi-headed self-attention (MSA) layers as done in [12]."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.613,
+                0.469,
+                0.81
+            ],
+            "angle": 0,
+            "content": "Similarly, for the input of a scene with \\( n \\) shots, we first divide it into a sequence of \\( (n \\cdot k, \\frac{w}{p}, \\frac{h}{p}, c) \\) patches. After convolution and flattening, we get \\( (\\mathbf{N} \\cdot n \\cdot k, \\mathbf{D}) \\)-dimensional patch embeddings. Notice that this is different from the dimension of a frame, and does not match with the dimension of positional embeddings. Inspired by [12] where they mentioned that positional embeddings can be interpolated to take input of higher resolutions, we propose to generalize this property from frame to shot and scene. That is, we interpolate the N-dimensional positional embeddings to \\( \\mathbf{N} \\cdot n \\cdot k \\), excluding the 1 dimension corresponding to class token, and add the interpolated positional embeddings to patch embeddings before providing them to MSA layers."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.811,
+                0.469,
+                0.901
+            ],
+            "angle": 0,
+            "content": "This operation offers flexibility and efficiency for downstream tasks. That is, using 2-D interpolation to the positional embeddings of our encoder allows it to take variable-length shot-sequences as inputs. This enables our approach to be applicable to the common setting where the lengths of multi-shot sequences in contrastive learning are different"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.091,
+                0.892,
+                0.168
+            ],
+            "angle": 0,
+            "content": "from those available in downstream tasks. Moreover, as using 2-D interpolation to the positional embeddings of our encoder does not add extra computation along the temporal dimension, it allows us to perform training efficiently which is particularly important for large-scale settings."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.178,
+                0.707,
+                0.194
+            ],
+            "angle": 0,
+            "content": "3.2.2 Contrastive Learning"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.201,
+                0.892,
+                0.352
+            ],
+            "angle": 0,
+            "content": "Our scene contrastive learning step follows some of the recent works [23] [8] with two key differences: (a) unlike the image or shot-augmentation focused pretext tasks previously used, we define scene-level pretext task that uses commonly available movie metadata making it more effective for long-form video understanding, and (b) our use of ViT-based [12] scene encoder allows variable-length inputs and the possibility to adopt large-scale pre-trained models, which is not something that previously used ResNet-based encoders [8] could offer."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.353,
+                0.892,
+                0.473
+            ],
+            "angle": 0,
+            "content": "Specifically, we define our pretext task as a dictionary look-up for the scenes selected at the end of our movie similarity learning step. That is, given a query scene \\( q \\), its positive key scene \\( k_{0} \\) is determined in \\( \\mathbf{P}_{\\mathrm{scene}} \\), and the objective is to find \\( k_{0} \\) among a set of random scenes \\( \\{k_{1}, k_{2}, \\dots, k_{K}\\} \\). The problem is converted to a \\( (K + 1) \\)-way classification task by calculating similarity with dot-product, and we use InfoNCE as the contrastive loss function [40]:"
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.557,
+                0.482,
+                0.891,
+                0.533
+            ],
+            "angle": 0,
+            "content": "\\[\n\\mathcal {L} _ {q} = - \\log \\frac {\\exp (f (q | \\theta_ {q}) \\cdot g \\left(k _ {0} | \\theta_ {k}\\right) / \\tau)}{\\sum_ {i = 0} ^ {K} \\exp (f (q | \\theta_ {q}) \\cdot g \\left(k _ {i} | \\theta_ {k}\\right) / \\tau)} \\tag {3}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.542,
+                0.892,
+                0.603
+            ],
+            "angle": 0,
+            "content": "where \\( f(\\cdot |\\theta_q) \\) is the query encoder with parameters \\( \\theta_{q} \\) updated during back-propagation, \\( g(\\cdot |\\theta_k) \\) is the key encoder with parameters \\( \\theta_{k} \\) learned by momentum update as done in [23], and \\( \\tau \\) is the temperature as illustrated in [55]."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.604,
+                0.892,
+                0.679
+            ],
+            "angle": 0,
+            "content": "During contrastive learning, the scene encoder \\(\\mathbf{E}_{\\mathrm{scene}}\\) is the query encoder \\(q\\) without the last fully-connected layer, and is updated based on the selected similar scenes \\(\\mathbf{P}_{\\mathrm{scene}}\\). After training converges, \\(\\mathbf{E}_{\\mathrm{scene}}\\) is the outcome from this stage, which can then be used for downstream tasks."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.692,
+                0.634,
+                0.709
+            ],
+            "angle": 0,
+            "content": "4. Experiments"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.717,
+                0.892,
+                0.899
+            ],
+            "angle": 0,
+            "content": "We first discuss one of our newly collected movie datasets MovieCL30K that we used to learn our scene representation followed by describing the implementation details of our algorithm. We then present comparative results on multiple benchmark datasets [53] [26] [42] demonstrating significant gains of our approach over existing state-of-the-art models for a diverse set of downstream tasks in LVU [53] and MovieNet [26]. To further demonstrate the generalizability of our learned scene representation, we test it on another newly collected dataset MCD focused on large-scale moderation of age-sensitive activities and show substantial gains over existing state-of-the-art approaches."
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.091,
+                0.332,
+                0.107
+            ],
+            "angle": 0,
+            "content": "4.1. Dataset and Implementation"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.115,
+                0.227,
+                0.129
+            ],
+            "angle": 0,
+            "content": "4.1.1 MovieCL30K"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.139,
+                0.468,
+                0.246
+            ],
+            "angle": 0,
+            "content": "We compiled a new dataset called MovieCL30K with 30,340 movies from 11 genres with the genre-distribution of [action, drama, comedy, horror, doc, foreign, animation, kids, sci-fi, romance, other] being \\([27.4\\%, 21.6\\%, 17.5\\%, 6.5\\%, 4.6\\%, 4.6\\%, 4.1\\%, 3.1\\%, 2.8\\%, 1.2\\%, 6.1\\%]\\). We empirically compare commonly available movie metadata including: (i) co-watch, (ii) genre, and (iii) synopsis."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.246,
+                0.468,
+                0.457
+            ],
+            "angle": 0,
+            "content": "We collect movie co-watch information based on the watch history of movies. That is, for each movie \\(\\mathbf{m}_1\\), we keep records of movies that are watched after \\(\\mathbf{m}_1\\), and then rank the records to build a set of movies that are most frequently watched after \\(\\mathbf{m}_1\\). To use genre to find movies similar to an input movie, we randomly select movies with the same genre as the input movie. Lastly, to use synopsis for movie-level similarity, we first extract textual-embeddings of synopsis using a pre-trained natural language processing model [37], and then compute pair-wise movie-similarities as the dot-product of their textual-embeddings followed by selecting the closest movies. When using any of the aforementioned movie-similarity measures, we select three most similar movies on average for each movie in MovieCL30K."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.48,
+                0.295,
+                0.495
+            ],
+            "angle": 0,
+            "content": "4.1.2 Implementation Details"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.504,
+                0.468,
+                0.67
+            ],
+            "angle": 0,
+            "content": "We divide movies in MovieCL30K into their constituent \\(\\sim 33\\) million shots, and only keep one frame per shot for efficiency. We first use ViT [12] as our shot encoder \\(\\mathbf{E}_{\\mathrm{shot}}\\) and train it with \\(30\\%\\) of all shots forming query and key pairs. Then we fix and use \\(\\mathbf{E}_{\\mathrm{shot}}\\) to extract representations of all shots as shown in Figure 2. The movie-level encoder \\(\\mathbf{E}_{\\mathrm{movie}}\\) comprises of two fully-connected layers each with 512 dimensions, and a dropout layer with 0.5 probability between them. We keep length of each movie to be 1, 024 shots, and zero-pad the movies shorter than that. Kernel size for both max and average pooling are set to 16, with a stride of 8."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.671,
+                0.468,
+                0.837
+            ],
+            "angle": 0,
+            "content": "After movie-level similarity learning (Figure 2), we only keep the top \\(50\\%\\) of most similar scene-pairs selected in each movie-pair because we empirically found that the scene-pairs can get noisier and become less informative beyond this ratio. We follow the implementation in [23] for momentum contrastive learning and use ViT [12] as our scene encoder instead of ResNet [24] used in [23]. Moreover, we optimize with AdamW [38] instead of SGD [19]. For scene representation learning, we interpolate the positional embeddings (see § 3.2.1) so that the encoder can take variable-length multi-shot sequences as input."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.838,
+                0.468,
+                0.898
+            ],
+            "angle": 0,
+            "content": "For supervised learning on downstream tasks, unless otherwise specified, we use a simple multilayer perceptron (MLP) with two hidden layers, where the output layer is modified for each various classification or regression task."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.091,
+                0.797,
+                0.107
+            ],
+            "angle": 0,
+            "content": "4.2. Comparisons on LVU Benchmark"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.115,
+                0.892,
+                0.19
+            ],
+            "angle": 0,
+            "content": "To ensure that there is no overlap between pre-training and downstream evaluation, during the representation learning step, we exclude movies from MovieCL30K that have the same IMDb IDs as the ones in validation and test sets of compared benchmark datasets."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.191,
+                0.892,
+                0.343
+            ],
+            "angle": 0,
+            "content": "We first evaluate our model using the benchmark LVU dataset [53] which contains nine diverse tasks including: place (scene), director, relationship, way-of-speaking, writer, year, genre, view-count, and like-ratio. The total number of labeled videos in LVU dataset [53] is \\(\\sim 11\\mathrm{K}\\) with the splits of training, validation, and testing sets to be \\(70\\%\\), \\(15\\%\\), and \\(15\\%\\), respectively. Following [53], view-count and like-ratio are evaluated by mean-squared-error in regression (lower is better), while other seven tasks are evaluated using top-1 accuracy in classification (higher is better)."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.368,
+                0.661,
+                0.383
+            ],
+            "angle": 0,
+            "content": "4.2.1 Ablation Study"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.393,
+                0.892,
+                0.635
+            ],
+            "angle": 0,
+            "content": "To assess the effectiveness of different components in our model, we present the ablative comparisons in Table 1 regarding factors including: 1) number of movies used during pre-training, 2) whether the shot encoder is initialized using CLIP [41] visual encoder and kept fixed or randomly initialized and trained by our method, 3) whether the scene encoder is initialized with CLIP [41] weights or randomly, 4) influence of number of shots in each scene and number of frames in each shot, 5) different backbone architectures, 6) hyper-parameters including batch size and input resolution, 7) how long it takes for the training to complete compared to row 1 as one unit time, 8) the metadata used to define similar movie-pairs. Results on validation-set of nine tasks in LVU [53] are presented for each setting. The insights from these comparisons are summarized as follows, where the results are compared against row 1 as the base case."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.64,
+                0.892,
+                0.761
+            ],
+            "angle": 0,
+            "content": "a. Training scale is critical for model performance. From rows 1 to 5 in Table 1, we compare different scales of pretraining. We can see that our model can work with as little as \\(3\\mathrm{K}\\) pre-training movies, but it takes about \\(15\\mathrm{K}\\) movies for our method to compare favorably with previous state-of-the-art results [53]. Since we do not need any manually labeled data for pre-training, we can scale our approach for better performance relatively more easily."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.765,
+                0.892,
+                0.901
+            ],
+            "angle": 0,
+            "content": "b. Number of shots is important. From rows 6 and 7, comparing with row 1, the performance would be improved when we increase the number of shots per scene. This is reasonable since we can incorporate more information with more shots. However, when we further increase the number to 16 shots per scene in row 8, the performance drops. This is possibly because with the longer context, some scenes may cross scene boundaries, and thus provide noisy or irrelevant information from different scenes. Also,"
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "bbox": [
+                0.087,
+                0.087,
+                0.887,
+                0.362
+            ],
+            "angle": 0,
+            "content": "<table><tr><td rowspan=\"2\"></td><td rowspan=\"2\">pre-train movies</td><td rowspan=\"2\">shot enc.</td><td rowspan=\"2\">scene init.</td><td rowspan=\"2\"># of shots -frames</td><td rowspan=\"2\">backbone</td><td colspan=\"2\">hyper-params</td><td rowspan=\"2\">unit time</td><td rowspan=\"2\">metadata</td><td colspan=\"7\">classification ↑</td><td rowspan=\"2\">regression ↓ view like</td></tr><tr><td>bat.-res.</td><td>time</td><td>place</td><td>director</td><td>relation</td><td>speak</td><td>writer</td><td>year</td><td>genre</td></tr><tr><td colspan=\"18\">Various pre-training scales</td></tr><tr><td>1</td><td>30K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>co-watch</td><td>63.2</td><td>69.8</td><td>68.7</td><td>40.1</td><td>60.1</td><td>54.1</td><td>55.5</td><td>2.62</td><td>0.161</td></tr><tr><td>2</td><td>15K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>0.5</td><td>co-watch</td><td>59.1</td><td>66.3</td><td>63.3</td><td>37.5</td><td>55.9</td><td>50.3</td><td>52.7</td><td>3.02</td><td>0.254</td></tr><tr><td>3</td><td>7.5K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>0.25</td><td>co-watch</td><td>55.7</td><td>60.9</td><td>59.4</td><td>35.8</td><td>52.7</td><td>48.3</td><td>48.8</td><td>3.19</td><td>0.307</td></tr><tr><td>4</td><td>3K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>0.1</td><td>co-watch</td><td>45.3</td><td>49.5</td><td>52.2</td><td>34.6</td><td>47.6</td><td>41.2</td><td>43.6</td><td>3.47</td><td>0.352</td></tr><tr><td>5</td><td>300</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>0.01</td><td>co-watch</td><td>31.2</td><td>29.8</td><td>35.7</td><td>27.5</td><td>30.1</td><td>28.9</td><td>34.3</td><td>4.55</td><td>0.496</td></tr><tr><td colspan=\"18\">Different numbers of shots and frames</td></tr><tr><td>6</td><td>30K</td><td>random</td><td>random</td><td>1-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>co-watch</td><td>46.5</td><td>48.2</td><td>44.1</td><td>30.3</td><td>31.1</td><td>34.4</td><td>45.8</td><td>3.89</td><td>0.401</td></tr><tr><td>7</td><td>30K</td><td>random</td><td>random</td><td>4-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>co-watch</td><td>55.6</td><td>60.1</td><td>57.2</td><td>33.4</td><td>50.3</td><td>49.8</td><td>51.1</td><td>3.07</td><td>0.246</td></tr><tr><td>8</td><td>30K</td><td>random</td><td>random</td><td>16-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>co-watch</td><td>62.4</td><td>66.2</td><td>65.3</td><td>39.7</td><td>56.2</td><td>54.3</td><td>52.4</td><td>2.93</td><td>0.173</td></tr><tr><td>9</td><td>30K</td><td>random</td><td>random</td><td>9-3</td><td>ViT-B/16</td><td>128-128</td><td>3</td><td>co-watch</td><td>63.5</td><td>70.1</td><td>69.3</td><td>40.4</td><td>59.7</td><td>54.9</td><td>54.7</td><td>2.59</td><td>0.159</td></tr><tr><td colspan=\"18\">Different similarity measures</td></tr><tr><td>10</td><td>30K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>random</td><td>49.2</td><td>48.8</td><td>51.5</td><td>34.6</td><td>37.2</td><td>36.7</td><td>49.1</td><td>3.94</td><td>0.454</td></tr><tr><td>11</td><td>30K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>genre</td><td>62.9</td><td>58.1</td><td>66.3</td><td>39.5</td><td>47.3</td><td>45.2</td><td>56.2</td><td>3.85</td><td>0.351</td></tr><tr><td>12</td><td>30K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>synopsis</td><td>56.7</td><td>54.1</td><td>65.3</td><td>36.8</td><td>45.9</td><td>34.5</td><td>50.7</td><td>3.87</td><td>0.471</td></tr><tr><td>13</td><td>30K</td><td>random</td><td>random</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>gen.+syn.</td><td>64.1</td><td>65.5</td><td>69.6</td><td>41.5</td><td>52.3</td><td>51.1</td><td>56.7</td><td>2.94</td><td>0.199</td></tr><tr><td colspan=\"18\">Comparisons on weight initialization and backbone</td></tr><tr><td>14</td><td>30K</td><td>CLIP</td><td>CLIP</td><td>9-1</td><td>ViT-B/16</td><td>128-128</td><td>1</td><td>co-watch</td><td>61.2</td><td>65.3</td><td>67.4</td><td>43.7</td><td>54.1</td><td>53.5</td><td>56.3</td><td>2.75</td><td>0.178</td></tr><tr><td>15</td><td>3K</td><td>random</td><td>random</td><td>9-1</td><td>MVItv2-S</td><td>32-224</td><td>1</td><td>co-watch</td><td>47.6</td><td>51.2</td><td>51.3</td><td>35.3</td><td>45.1</td><td>44.7</td><td>43.7</td><td>3.51</td><td>0.343</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.077,
+                0.364,
+                0.892,
+                0.391
+            ],
+            "angle": 0,
+            "content": "Table 1. Ablation study results on validation-set of benchmark LVU dataset [53]. Note that for classification tasks higher is better, and for regression tasks lower is better."
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.087,
+                0.405,
+                0.887,
+                0.616
+            ],
+            "angle": 0,
+            "content": "<table><tr><td rowspan=\"2\"></td><td rowspan=\"2\">models</td><td rowspan=\"2\">pre-train data</td><td rowspan=\"2\">modalities</td><td rowspan=\"2\">frames /scene</td><td rowspan=\"2\">params sup. learn</td><td colspan=\"7\">classification ↑</td><td rowspan=\"2\">regression ↓ view like</td><td></td></tr><tr><td>place</td><td>director</td><td>relation</td><td>speak</td><td>writer</td><td>year</td><td>genre</td><td></td></tr><tr><td colspan=\"14\">End-to-end learning approaches</td><td></td></tr><tr><td>1</td><td>Video Bert [46]</td><td>30K LVU movie clips</td><td>visual</td><td>60</td><td>~8.77M</td><td>54.9</td><td>47.3</td><td>52.8</td><td>37.9</td><td>38.5</td><td>36.1</td><td>51.9</td><td>4.46</td><td>0.320</td></tr><tr><td>2</td><td>SlowFast R101 [16]</td><td>30K LVU movie clips</td><td>visual</td><td>60</td><td>~44M</td><td>54.7</td><td>44.9</td><td>52.4</td><td>35.8</td><td>36.3</td><td>52.5</td><td>53</td><td>3.77</td><td>0.386</td></tr><tr><td>3</td><td>OT [53]</td><td>30K LVU movie clips</td><td>visual</td><td>60</td><td>~27M</td><td>56.9</td><td>51.2</td><td>53.1</td><td>39.4</td><td>34.5</td><td>39.1</td><td>54.6</td><td>3.55</td><td>0.230</td></tr><tr><td>4</td><td>ViS4mer [27]</td><td>30K LVU movie clips</td><td>visual</td><td>60</td><td>~3.6M</td><td>67.4</td><td>62.6</td><td>57.1</td><td>40.7</td><td>48.8</td><td>44.7</td><td>54.7</td><td>3.63</td><td>0.260</td></tr><tr><td>5</td><td>Hierarchical OT [56]</td><td>240K Kinetics +23.5K VidSitu</td><td>visual</td><td>16</td><td>~27M</td><td>44.1</td><td>40.1</td><td>50.9</td><td>34.1</td><td>31.4</td><td>29.6</td><td>51.1</td><td>4.88</td><td>0.353</td></tr><tr><td colspan=\"15\">Representation-based approaches</td></tr><tr><td>6</td><td>CLIP [41]</td><td>400M image-text pairs</td><td>vis.+text</td><td>9</td><td>~0.7M</td><td>52.9</td><td>56.2</td><td>56.1</td><td>36.7</td><td>37.8</td><td>46.4</td><td>50.9</td><td>3.85</td><td>0.411</td></tr><tr><td>7</td><td>Merlot Reserve [58]</td><td>20M Youtube videos</td><td>vis.+text+aud.</td><td>8</td><td>~0.7M</td><td>59.2</td><td>54.4</td><td>60.0</td><td>41.1</td><td>38.5</td><td>49.7</td><td>54.6</td><td>3.03</td><td>0.217</td></tr><tr><td>8</td><td>ShotCoL [8]</td><td>2.5M movie shot pairs</td><td>visual</td><td>9</td><td>~1.3M</td><td>45.3</td><td>49.5</td><td>46.7</td><td>31.1</td><td>29.8</td><td>36.7</td><td>43.1</td><td>4.79</td><td>0.397</td></tr><tr><td>9</td><td>Bridge Former [18]</td><td>3.3M image+2.5M video</td><td>vis.+text</td><td>4</td><td>~0.4M</td><td>62.8</td><td>55.7</td><td>60.4</td><td>40.9</td><td>49.7</td><td>41.4</td><td>52.9</td><td>3.97</td><td>0.312</td></tr><tr><td>10</td><td>Ours</td><td>2.5M movie scene-pairs</td><td>visual</td><td>9</td><td>~0.7M</td><td>68.2</td><td>70.9</td><td>71.2</td><td>42.2</td><td>53.7</td><td>57.8</td><td>55.9</td><td>2.79</td><td>0.192</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>+0.8</td><td>+8.3</td><td>+10.8</td><td>+1.1</td><td>+4.0</td><td>+5.3</td><td>+1.2</td><td>-0.24</td><td>-0.025</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.076,
+                0.619,
+                0.893,
+                0.647
+            ],
+            "angle": 0,
+            "content": "Table 2. Quantitative comparisons on test-set of benchmark LVU dataset [53]. Our approach is evaluated on nine diverse tasks and compared against multiple state-of-the-art models. Note that for classification tasks higher is better, and for regression tasks lower is better."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.67,
+                0.47,
+                0.807
+            ],
+            "angle": 0,
+            "content": "the number of scene-pairs would decrease with more shots per scene, and thus provide fewer training samples for scene contrastive learning, which may further reduce the effectiveness of the learned scene representations. Adding more frames per shot as in row 9 can also increase the performance. However, when we have more frames to process, it takes significantly more time for training with only marginal performance gain. Thus, we choose to use 9 shots per scene with 1 frame per shot for all future experiments as default."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.811,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": "c. Movie metadata matters. In rows 10 to 12, we compare the representations learned using different type of movie metadata. We can see that co-watch, genre and synopsis are all effective measures for movie similarity. Using co-watch can achieve overall better results, which is likely due to the fact that it can incorporate more complex relationships be"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.67,
+                0.892,
+                0.852
+            ],
+            "angle": 0,
+            "content": "tween movies, and thus provide more diverse scene-pairs for representation learning. Moreover, when we concatenate the features separately learned by genre and synopsis, it offers similar or even better accuracy compared to co-watch, which indicates that further improvements can be achieved when combining scene representations learned from different metadata information. However, as shown in row 10, randomly picking movie-pairs from the 30K movies and applying our approach to them does not offer results that are comparable to what we get when using other types of metadata. This indicates that informative and meaningful metadata is necessary for our model to perform well."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.856,
+                0.893,
+                0.901
+            ],
+            "angle": 0,
+            "content": "d. Our method does not rely on pre-trained weights. In row 14, we swap our shot encoder to the visual encoder in CLIP [41] and use CLIP weights as initialization for scene"
+        }
+    ],
+    [
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.091,
+                0.47,
+                0.137
+            ],
+            "angle": 0,
+            "content": "encoder. We can see that the performance is comparable to random initialization, showing that our whole framework can be trained from scratch using solely movie metadata."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.141,
+                0.473,
+                0.368
+            ],
+            "angle": 0,
+            "content": "e. Model-complexity and training-scale trade-off. When comparing with different backbone architecture MViTv2-S [14] [35] in row 15, we notice that while recent architectures can improve performance, it may take significantly more time for training. For example, even when the number of parameters in ViT-B/16 (87.2M) is more than the one in MViTv2-S (26.1M) [14] [35], the expected time to complete the training of MViTv2-S with their default setting is more than \\(10 \\times\\) that of ViT-B/16 due to smaller batch size and larger input size. To keep \\(\\sim 1\\) unit time for training of MViTv2-S, we can only use 3K pre-training data. It performs better than row 4 using same amount of data but only requires 0.1 unit time, and it is not comparable with row 1 that can use \\(10 \\times\\) of data with 1 unit time. Thus, we keep our setting on row 1 as default."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.391,
+                0.414,
+                0.406
+            ],
+            "angle": 0,
+            "content": "4.2.2 Comparing with State-of-the-art Results"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.416,
+                0.47,
+                0.567
+            ],
+            "angle": 0,
+            "content": "In Table 2 we compare our approach with state-of-the-art results on LVU [53] test-set. There are two main parts of Table 2 where each model is considered as either an end-to-end learning or representation-based approach. For end-to-end methods, they generally use a smaller scale of pretraining data, followed by end-to-end fine-tuning on downstream tasks in LVU. Thus, they require to train a higher number of parameters during supervised training. A higher number of frames per scene is also used in end-to-end models, which enables them to incorporate more information."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.568,
+                0.47,
+                0.81
+            ],
+            "angle": 0,
+            "content": "For representation-based approaches, we compare with some recent large-scale pre-training models using various scales and modalities of data. We extract features from their fixed visual encoders and learn a simple MLP for downstream tasks, which significantly reduces the number of parameters needed during supervised learning. We can see that our method is significantly different from other existing representation-based approaches in terms of required modalities. That is, most existing methods rely on cross-modality information to learn representations, and this requires a more complex procedure for data process and collection. The only approach using single modality is ShotCoL [8]. However, since they learned shot-level representations that are most effective for scene boundary detection tasks, when applied to semantic understanding of content with longer context, they are not performing as well."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.811,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": "Overall, we can see that comparing with both end-to-end and representation-based approaches, our model can comfortably outperform other state-of-the-art results across different tasks, with a large margin on many of them. These comparisons further validate the effectiveness of our learned scene representations."
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.515,
+                0.096,
+                0.673,
+                0.19
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"2\">Models</td><td>mAP</td></tr><tr><td rowspan=\"2\">Fine-tuning</td><td>TSN [50]</td><td>8.33</td></tr><tr><td>I3D [7]</td><td>7.66</td></tr><tr><td rowspan=\"4\">Feature+MLP</td><td>ImgNet [10]</td><td>7.04</td></tr><tr><td>Place [60]</td><td>8.76</td></tr><tr><td>CLIP [41]</td><td>9.26</td></tr><tr><td>Ours</td><td>12.17</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.499,
+                0.195,
+                0.684,
+                0.321
+            ],
+            "angle": 0,
+            "content": "Table 3. Comparisons with state-of-the-art results on MovieNet place scene tagging using methods based on: (a) action recognition models fine-tuned for this task, and (b) commonly used pre-trained representations for generic downstream tasks."
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.699,
+                0.09,
+                0.892,
+                0.222
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Models</td><td>Pre-train data</td><td>AP</td></tr><tr><td>SimCLR [9]</td><td>same-domain</td><td>41.65</td></tr><tr><td>MoCo [23]</td><td>same-domain</td><td>42.51</td></tr><tr><td>ShotCoL [8]</td><td>same-domain</td><td>53.37</td></tr><tr><td>SCRL [54]</td><td>same-domain</td><td>54.82</td></tr><tr><td>BaSSL [39]</td><td>same-domain</td><td>57.40</td></tr><tr><td>LGSS [42]</td><td>cross-domain</td><td>47.1</td></tr><tr><td>CLIP [41]</td><td>cross-domain</td><td>47.4</td></tr><tr><td>ShotCoL [8]</td><td>cross-domain</td><td>48.4</td></tr><tr><td>Ours</td><td>cross-domain</td><td>55.03</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.698,
+                0.226,
+                0.884,
+                0.324
+            ],
+            "angle": 0,
+            "content": "Table 4. Comparisons with state-of-the-art results on SBD. Our approach outperforms all methods trained in cross-domain and provides competitive results to models trained in same-domain."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.341,
+                0.707,
+                0.356
+            ],
+            "angle": 0,
+            "content": "4.3. MovieNet Benchmark"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.364,
+                0.892,
+                0.516
+            ],
+            "angle": 0,
+            "content": "MovieNet is a large-scale movie understanding dataset with 1,100 movies covering a variety of tasks [26]. However, unlike LVU [53] where videos are publicly available, the movies in MovieNet are not publicly released yet due to copyright issues. Only keyframes from each shot are provided, which makes tasks that demand high frame-rate (e.g., action recognition) infeasible. We therefore focus our comparisons to two scene understanding related tasks in MovieNet that do not demand particularly high frame-rate, i.e.: (i) place tagging, and (ii) scene boundary detection."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.52,
+                0.893,
+                0.732
+            ],
+            "angle": 0,
+            "content": "a. Place Tagging: There are 90 categories of places with \\(19.6\\mathrm{K}\\) place tags in MovieNet [26]. The place tagging problem is formulated as a multi-label classification task where each manually labeled scene can have multiple place tags. The results are evaluated by mean average precision (mAP) on the test-set as shown in Table 3. We compare our approach with two sets of models: (i) fine-tuning models, and (ii) feature-based approaches. The results on fine-tuning are reported by [26] where they mentioned that standard action recognition models were adopted. For feature-based approaches, we compare our encoder with CLIP visual encoder [41] and ResNet50 [24] pre-trained on the Place dataset [60]. We can see that our model can significantly outperform all other compared methods on this task."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.735,
+                0.895,
+                0.902
+            ],
+            "angle": 0,
+            "content": "b. Scene Boundary Detection: Scene boundary detection (SBD) is a challenging and important problem for semantic movie understanding [42] [8]. We show that our learned general-purpose scene encoder can be seamlessly applied to this task and provide competitive results to state-of-the-art models. Following [8], we use the subset of 318 movies from MovieNet [42] [26] where manually annotated scene boundaries are provided. The training, testing and validation splits are also provided with 190, 64 and 64 movies respectively. The problem is formulated as binary classification to predict if a shot boundary is also a scene boundary,"
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "bbox": [
+                0.08,
+                0.09,
+                0.477,
+                0.186
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Models</td><td>Pre-training data</td><td>sex</td><td>violence</td><td>drug-use</td><td>average</td></tr><tr><td>SlowFast R50 [16]</td><td>K400 [31]</td><td>63.9</td><td>46.5</td><td>49.4</td><td>53.2</td></tr><tr><td>SlowFast R101 [16]</td><td>K600 [6] +AVA2.2 [33]</td><td>61.0</td><td>57.3</td><td>54.0</td><td>57.4</td></tr><tr><td>X3D-L [15]</td><td>K400 [31]</td><td>69.2</td><td>49.4</td><td>56.4</td><td>58.3</td></tr><tr><td>CLIP [41]</td><td>image-text pairs</td><td>78.5</td><td>62.1</td><td>55.1</td><td>65.2</td></tr><tr><td>Ours</td><td>MovieCL30K</td><td>81.5</td><td>70.2</td><td>61.8</td><td>71.1</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.076,
+                0.194,
+                0.47,
+                0.222
+            ],
+            "angle": 0,
+            "content": "Table 5. Comparison of our approach with state-of-the-art pretrained models on MCD dataset."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.234,
+                0.47,
+                0.355
+            ],
+            "angle": 0,
+            "content": "and the results are evaluated by average precision (AP) [26] [8]. Following ShotCoL [8], we use a four-shot sequence as a sample where representations for each shot are independently extracted and concatenated. Notice that in addition to Place Tagging and LVU tasks where our encoder can take multi-shot clips as input, for SBD, our encoder can take individual shots as input which demonstrates the flexibility of our approach for different types of inputs."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.356,
+                0.471,
+                0.55
+            ],
+            "angle": 0,
+            "content": "We report the AP results of the different compared approaches in Table 4, where approaches are categorized depending on whether the pre-training data comes from the same domain as the downstream task. For example, there are four encoders in LGSS [42] pre-trained in supervised manner on datasets that are different from MovieNet [26], and thus it is the cross-domain setting. For SCRL [54], BaSSL [39] and MoCo [23] implemented in [8], the representations were learned on the full MovieNet [26] dataset with 1,100 movies, and then applied to the subset of 318 movies on SBD, making it a same-domain setting. ShotCol [8] provided results for both settings with a significant performance gap between them."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.552,
+                0.47,
+                0.612
+            ],
+            "angle": 0,
+            "content": "As shown in Table 4, our approach outperforms state-of-the-art models pre-trained in cross-domain, and provides competitive results to models [8] [54] [39] that are dedicatedly designed for SBD and pre-trained in same-domain."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.621,
+                0.254,
+                0.637
+            ],
+            "angle": 0,
+            "content": "4.4. Video Moderation"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.645,
+                0.47,
+                0.78
+            ],
+            "angle": 0,
+            "content": "Large-scale video moderation is one of the most pressing challenges faced by video streaming services. However, most existing action recognition datasets (e.g., Kinetics [6, 31], THUMOS14 [29]) do not cover movies and TV episodes well, while existing movie datasets (AVA [21], MovieNet [26]) are not including age-sensitive activities. To this end, we focus on video moderation particularly to detect sex, violence, and drug-use activities (see supplementary materials for examples) in movies and TV episodes."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.781,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": "a. Mature Content Dataset (MCD): We constructed the MCD dataset by using Amazon SageMaker Ground Truth as our labeling tool. We provided annotation guidelines to annotators consisting of 17 instructions for sex, 34 for violence and 14 for drug-use. Examples of these instructions include: \"intentional murder and/or suicide that involves bloody injury\" for violence, and \"strip-tease or erotic dancing with full nudity\" for sex."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.092,
+                0.892,
+                0.212
+            ],
+            "angle": 0,
+            "content": "All our annotators were fluent English speakers which enabled them to understand their provided instructions. All annotators went through multiple training sessions to prepare for their assignment. Each annotator was asked to label sample-videos and received feedback on their labeling quality before they could start to label independently. Additionally, \\(20\\%\\) of the labeled samples were randomly selected and taken through a mandatory review to ensure quality."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.212,
+                0.892,
+                0.303
+            ],
+            "angle": 0,
+            "content": "MCD contains 44,581 clips from 18,330 movies and TV episodes with 4,580, 8,248, 8,271, and 23,482 clips containing sex, violence, drug-use, and none-of-the-above activities respectively. These clips have a mean duration of 5 seconds, and were divided into training, validation, and testing sets with \\(70\\%\\), \\(10\\%\\), and \\(20\\%\\) ratio respectively."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.304,
+                0.892,
+                0.515
+            ],
+            "angle": 0,
+            "content": "b. Results: We compare our representation with the ones from state-of-the-art models [16] [14] [15] [41] pre-trained on action recognition [31] [6] [21] as well as image classification datasets [41]. Specifically, we extract embeddings of MCD using different pre-trained encoders and use them as input to train a 4-class MLP for predicting age-appropriate activities. Table 5 presents the AP results on our test data, and shows that our scene representation outperforms the alternatives by a large margin. Notice that CLIP visual feature performed close to our representation on the task of sex but not other tasks. This might indicate that in the pretraining data of CLIP, there might be a considerable amount of image-text pairs related to sex concepts. Similar observations [4] have been made on other large-scale datasets [43]."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.543,
+                0.779,
+                0.56
+            ],
+            "angle": 0,
+            "content": "5. Conclusions and Future Work"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.569,
+                0.892,
+                0.78
+            ],
+            "angle": 0,
+            "content": "We presented a novel contrastive learning approach that uses movie metadata to learn a general-purpose scene-level representation. Our approach adopts recent developments in vision transformer, where by incorporating the interpolation of positional embedding, we were able to train a scene encoder that can take variable-length multi-shot inputs. We empirically demonstrated the effectiveness of our approach using different types of movie metadata including co-watch, genre, synopsis. Results on a variety of tasks from multiple benchmark datasets highlight the strengths of our approach. We also presented a new application of our scene representation for video moderation focused on three age-appropriate activities, where our approach outperformed state-of-the-art action recognition features."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.781,
+                0.892,
+                0.901
+            ],
+            "angle": 0,
+            "content": "Going forward, we will further improve the efficiency of our approach to help it scale even more. We will also explore other types of movie metadata to find a representation effective for additional downstream tasks. Furthermore, there are additional long-form content (e.g., music, news articles, books) where acquiring fine-grained labels is costly. We will apply our approach on these long-form content to enable downstream tasks from multiple domains."
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.079,
+                0.09,
+                0.176,
+                0.106
+            ],
+            "angle": 0,
+            "content": "References"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.117,
+                0.47,
+                0.158
+            ],
+            "angle": 0,
+            "content": "[1] Baptiste Angles, Yuhe Jin, Simon Kornblith, Andrea Tagliasacchi, and Kwang Moo Yi. Mist: Multiple instance spatial transformer. In CVPR, 2021. 3"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.161,
+                0.47,
+                0.202
+            ],
+            "angle": 0,
+            "content": "[2] Anurag Arnab, Mostafa Dehghani, Georg Heigold, Chen Sun, Mario Lučić, and Cordelia Schmid. Vivit: A video vision transformer. arXiv:2103.15691, 2021. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.204,
+                0.471,
+                0.245
+            ],
+            "angle": 0,
+            "content": "[3] Gedas Bertasius, Heng Wang, and Lorenzo Torresani. Is space-time attention all you need for video understanding? arXiv:2102.05095, 2021. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.249,
+                0.471,
+                0.29
+            ],
+            "angle": 0,
+            "content": "[4] Abeba Birhane, Vinay Uday Prabhu, and Emmanuel Kahembwe. Multimodal datasets: misogyny, pornography, and malignant stereotypes. arXiv:2110.01963, 2021. 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.293,
+                0.471,
+                0.348
+            ],
+            "angle": 0,
+            "content": "[5] Marc-Andre Carbonneau, Veronika Cheplygina, Eric Granger, and Ghyslain Gagnon. Multiple instance learning: A survey of problem characteristics and applications. Pattern Recognition, 2018. 3"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.351,
+                0.47,
+                0.392
+            ],
+            "angle": 0,
+            "content": "[6] Joao Carreira, Eric Noland, Andras Banki-Horvath, Chloe Hillier, and Andrew Zisserman. A short note about kinetics-600. arXiv:1808.01340, 2018. 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.395,
+                0.471,
+                0.435
+            ],
+            "angle": 0,
+            "content": "[7] Joao Carreira and Andrew Zisserman. Quo vadis, action recognition? a new model and the kinetics dataset. In CVPR, 2017. 2, 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.439,
+                0.471,
+                0.493
+            ],
+            "angle": 0,
+            "content": "[8] Shixing Chen, Xiaohan Nie, David Fan, Dongqing Zhang, Vimal Bhat, and Raffay Hamid. Shot contrastive self-supervised learning for scene boundary detection. In CVPR, 2021. 1, 2, 3, 4, 6, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.497,
+                0.471,
+                0.538
+            ],
+            "angle": 0,
+            "content": "[9] Ting Chen, Simon Kornblith, Mohammad Norouzi, and Geoffrey Hinton. A simple framework for contrastive learning of visual representations. In ICML, 2020. 1, 2, 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.541,
+                0.47,
+                0.581
+            ],
+            "angle": 0,
+            "content": "[10] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In CVPR, 2009. 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.584,
+                0.471,
+                0.638
+            ],
+            "angle": 0,
+            "content": "[11] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. Bert: Pre-training of deep bidirectional transformers for language understanding. arXiv:1810.04805, 2018.2,4"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.642,
+                0.471,
+                0.724
+            ],
+            "angle": 0,
+            "content": "[12] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby. An image is worth 16x16 words: Transformers for image recognition at scale. ICLR, 2021. 1, 2, 4, 5"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.728,
+                0.471,
+                0.783
+            ],
+            "angle": 0,
+            "content": "[13] Debidatta Dwibedi, Yusuf Aytar, Jonathan Tompson, Pierre Sermanet, and Andrew Zisserman. With a little help from my friends: Nearest-neighbor contrastive learning of visual representations. In ICCV, 2021. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.786,
+                0.471,
+                0.826
+            ],
+            "angle": 0,
+            "content": "[14] Haoqi Fan, Bo Xiong, Karttikeya Mangalam, Yanghao Li, Zhicheng Yan, Jitendra Malik, and Christoph Feichtenhofer. Multiscale vision transformers. In ICCV, 2021. 2, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.829,
+                0.471,
+                0.857
+            ],
+            "angle": 0,
+            "content": "[15] Christoph Feichtenhofer. X3d: Expanding architectures for efficient video recognition. In CVPR, 2020. 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.079,
+                0.859,
+                0.471,
+                0.9
+            ],
+            "angle": 0,
+            "content": "[16] Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He. Slowfast networks for video recognition. In ICCV, 2019. 2, 6, 8"
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.079,
+                0.117,
+                0.471,
+                0.9
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.093,
+                0.892,
+                0.133
+            ],
+            "angle": 0,
+            "content": "[17] Jia-Chang Feng, Fa-Ting Hong, and Wei-Shi Zheng. Mist: Multiple instance self-training framework for video anomaly detection. In CVPR, 2021. 3"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.137,
+                0.892,
+                0.178
+            ],
+            "angle": 0,
+            "content": "[18] Yuying Ge, Yixiao Ge, Xihui Liu, Dian Li, Ying Shan, Xiaohu Qie, and Ping Luo. Bridgeformer: Bridging video-text retrieval with multiple choice questions. In CVPR, 2022. 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.181,
+                0.892,
+                0.247
+            ],
+            "angle": 0,
+            "content": "[19] Priya Goyal, Piotr Dolkar, Ross Girshick, Pieter Noordhuis, Lukasz Wesolowski, Aapo Kyrola, Andrew Tulloch, Yangqing Jia, and Kaiming He. Accurate, large minibatch sgd: Training imagenet in 1 hour. arXiv:1706.02677, 2017. 5"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.252,
+                0.892,
+                0.333
+            ],
+            "angle": 0,
+            "content": "[20] Jean-Bastien Grill, Florian Strub, Florent Altché, Corentin Tallec, Pierre H Richemond, Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, et al. Bootstrap your own latent: A new approach to self-supervised learning. arXiv:2006.07733, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.337,
+                0.892,
+                0.406
+            ],
+            "angle": 0,
+            "content": "[21] Chunhui Gu, Chen Sun, David A Ross, Carl Vondrick, Caroline Pantofaru, Yeqing Li, Sudheendra Vijayanarasimhan, George Toderici, Susanna Ricco, Rahul Sukthankar, et al. Ava: A video dataset of spatio-temporally localized atomic visual actions. In CVPR, 2018. 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.409,
+                0.892,
+                0.45
+            ],
+            "angle": 0,
+            "content": "[22] Tengda Han, Weidi Xie, and Andrew Zisserman. Memory-augmented dense predictive coding for video representation learning. In ECCV, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.453,
+                0.892,
+                0.494
+            ],
+            "angle": 0,
+            "content": "[23] Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross Girshick. Momentum contrast for unsupervised visual representation learning. In CVPR, 2020. 1, 2, 4, 5, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.497,
+                0.892,
+                0.537
+            ],
+            "angle": 0,
+            "content": "[24] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In CVPR, 2016. 5, 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.541,
+                0.892,
+                0.596
+            ],
+            "angle": 0,
+            "content": "[25] Olivier J Henaff, Aravind Srinivas, Jeffrey De Fauw, Ali Razavi, Carl Doersch, S. M. Ali Eslami, and Aaron van den Oord. Data-efficient image recognition with contrastive predictive coding. In ICML, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.599,
+                0.892,
+                0.64
+            ],
+            "angle": 0,
+            "content": "[26] Qingqiu Huang, Yu Xiong, Anyi Rao, Jiaze Wang, and Dahua Lin. Movienet: A holistic dataset for movie understanding. In ECCV, 2020. 1, 2, 3, 4, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.643,
+                0.892,
+                0.683
+            ],
+            "angle": 0,
+            "content": "[27] Md Mohaiminul Islam and Gedas Bertasius. Long movie clip classification with state-space video models. In ECCV, 2022. 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.686,
+                0.892,
+                0.74
+            ],
+            "angle": 0,
+            "content": "[28] Ashish Jaiswal, Ashwin Ramesh Babu, Mohammad Zaki Zadeh, Debapriya Banerjee, and Fillia Makedon. A survey on contrastive self-supervised learning. Technologies, 2021. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.744,
+                0.892,
+                0.799
+            ],
+            "angle": 0,
+            "content": "[29] Y.-G. Jiang, J. Liu, A. Roshan Zamir, G. Toderici, I. Laptev, M. Shah, and R. Sukthankar. THUMOS challenge: Action recognition with a large number of classes. http://crcv.ucf.edu/THUMOS14/, 2014. 2, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.802,
+                0.892,
+                0.842
+            ],
+            "angle": 0,
+            "content": "[30] Longlong Jing and Yingli Tian. Self-supervised visual feature learning with deep neural networks: A survey. TPAMI, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.846,
+                0.892,
+                0.9
+            ],
+            "angle": 0,
+            "content": "[31] Will Kay, Joao Carreira, Karen Simonyan, Brian Zhang, Chloe Hillier, Sudheendra Vijayanarasimhan, Fabio Viola, Tim Green, Trevor Back, Paul Natev, et al. The kinetics human action video dataset. arXiv:1705.06950, 2017. 8"
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.503,
+                0.093,
+                0.892,
+                0.9
+            ],
+            "angle": 0,
+            "content": null
+        }
+    ],
+    [
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.092,
+                0.469,
+                0.133
+            ],
+            "angle": 0,
+            "content": "[32] Phuc H, Le-Khac, Graham Healy, and Alan F Smeaton. Contrastive representation learning: A framework and review. IEEE Access, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.134,
+                0.469,
+                0.189
+            ],
+            "angle": 0,
+            "content": "[33] Ang Li, Meghan Thotakuri, David A Ross, João Carreira, Alexander Vostrikov, and Andrew Zisserman. Theava-kinetics localized human actions video dataset. arXiv:2005.00214, 2020.8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.19,
+                0.469,
+                0.243
+            ],
+            "angle": 0,
+            "content": "[34] Bin Li, Yin Li, and Kevin W. Eliceiri. Dual-stream multiple instance learning network for whole slide image classification with self-supervised contrastive learning. In CVPR, 2021. 3"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.246,
+                0.469,
+                0.3
+            ],
+            "angle": 0,
+            "content": "[35] Yanghao Li, Chao-Yuan Wu, Haoqi Fan, Karttikeya Mangalam, Bo Xiong, Jitendra Malik, and Christoph Feichtenhofer. Mvitv2: Improved multiscale vision transformers for classification and detection. In CVPR, 2022. 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.302,
+                0.469,
+                0.342
+            ],
+            "angle": 0,
+            "content": "[36] Xiaolong Liu, Yao Hu, Song Bai, Fei Ding, Xiang Bai, and Philip H. S. Torr. Multi-shot temporal event localization: A benchmark. In CVPR, 2021. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.344,
+                0.469,
+                0.399
+            ],
+            "angle": 0,
+            "content": "[37] Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. Roberta: A robustly optimized bert pretraining approach. arXiv:1907.11692, 2019. 5"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.4,
+                0.469,
+                0.427
+            ],
+            "angle": 0,
+            "content": "[38] Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. In *ICLR*, 2019. 5"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.428,
+                0.469,
+                0.482
+            ],
+            "angle": 0,
+            "content": "[39] Jonghwan Mun, Minchul Shin, Gunsoo Han, Sangho Lee, Seongsu Ha, Joonseok Lee, and Eun-Sol Kim. Bassl: Boundary-aware self-supervised learning for video scene segmentation. In ACCV, 2022. 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.484,
+                0.469,
+                0.523
+            ],
+            "angle": 0,
+            "content": "[40] Aaron van den Oord, Yazhe Li, and Oriol Vinyals. Representation learning with contrastive predictive coding. arXiv:1807.03748, 2018. 4"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.525,
+                0.469,
+                0.594
+            ],
+            "angle": 0,
+            "content": "[41] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learning transferable visual models from natural language supervision. arXiv:2103.00020, 2021. 1, 2, 4, 5, 6, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.595,
+                0.469,
+                0.649
+            ],
+            "angle": 0,
+            "content": "[42] Anyi Rao, Linning Xu, Yu Xiong, Guodong Xu, Qingqiu Huang, Bolei Zhou, and Dahua Lin. A local-to-global approach to multi-modal movie scene segmentation. In CVPR, 2020. 1, 2, 3, 4, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.65,
+                0.469,
+                0.718
+            ],
+            "angle": 0,
+            "content": "[43] Christoph Schuhmann, Richard Vencu, Romain Beaumont, Robert Kaczmarczyk, Clayton Mullis, Aarush Katta, Theo Coombes, Jenia Jitsev, and Aran Komatsuzaki. Laion-400m: Open dataset of clip-filtered 400 million image-text pairs. arXiv:2111.02114, 2021. 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.72,
+                0.469,
+                0.789
+            ],
+            "angle": 0,
+            "content": "[44] Panagiotis Sidiropoulos, Vasileios Mezaris, Ioannis Kompatsiaris, Hugo Meinedo, Miguel Bugalho, and Isabel Trancoso. Temporal video segmentation to scenes using high-level audiovisual features. IEEE Transactions on Circuits and Systems for Video Technology, 2011. 3"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.79,
+                0.469,
+                0.816
+            ],
+            "angle": 0,
+            "content": "[45] Robert Sklar. Film: An international history of the medium. Thames and Hudson, 1990. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.818,
+                0.469,
+                0.859
+            ],
+            "angle": 0,
+            "content": "[46] Chen Sun, Austin Myers, Carl Vondrick, Kevin Murphy, and Cordelia Schmid. Videobert: A joint model for video and language representation learning. In ICCV, 2019. 2, 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.08,
+                0.86,
+                0.469,
+                0.9
+            ],
+            "angle": 0,
+            "content": "[47] Yonglong Tian, Chen Sun, Ben Poole, Dilip Krishnan, Cordelia Schmid, and Phillip Isola. What makes for good views for contrastive learning? arXiv:2005.10243, 2020. 2"
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.08,
+                0.092,
+                0.469,
+                0.9
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.092,
+                0.892,
+                0.147
+            ],
+            "angle": 0,
+            "content": "[48] Hugo Touvron, Matthieu Cord, Matthijs Douze, Francisco Massa, Alexandre Sablayrolles, and Hervé Jégou. Training data-efficient image transformers & distillation through attention. In ICML, 2021. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.149,
+                0.892,
+                0.19
+            ],
+            "angle": 0,
+            "content": "[49] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and Illia Polosukhin. Attention is all you need. In NeurIPS, 2017. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.192,
+                0.892,
+                0.246
+            ],
+            "angle": 0,
+            "content": "[50] Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaou Tang, and Luc Van Gool. Temporal segment networks: Towards good practices for deep action recognition. In ECCV, 2016. 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.249,
+                0.892,
+                0.29
+            ],
+            "angle": 0,
+            "content": "[51] Yaqing Wang, Quanming Yao, James T Kwok, and Lionel M Ni. Generalizing from a few examples: A survey on few-shot learning. ACM Computing Surveys, 2020. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.292,
+                0.892,
+                0.374
+            ],
+            "angle": 0,
+            "content": "[52] Thomas Wolf, Julien Chaumont, Lysandre Debut, Victor Sanh, Clement Delangue, Anthony Moi, Pierrick Cistac, Morgan Funtowicz, Joe Davison, Sam Shleifer, et al. Transformers: State-of-the-art natural language processing. In Conference on Empirical Methods in Natural Language Processing: System Demonstrations, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.376,
+                0.892,
+                0.403
+            ],
+            "angle": 0,
+            "content": "[53] Chao-Yuan Wu and Philipp Krahenbuhl. Towards long-form video understanding. In CVPR, 2021. 1, 2, 4, 5, 6, 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.405,
+                0.892,
+                0.459
+            ],
+            "angle": 0,
+            "content": "[54] Haoqian Wu, Keyu Chen, Yanan Luo, Ruizhi Qiao, Bo Ren, Haozhe Liu, Weicheng Xie, and Linlin Shen. Scene consistency representation learning for video scene segmentation. In CVPR, 2022. 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.461,
+                0.892,
+                0.502
+            ],
+            "angle": 0,
+            "content": "[55] Zhirong Wu, Yuanjun Xiong, X Yu Stella, and Dahua Lin. Unsupervised feature learning via non-parametric instance discrimination. In CVPR, 2018. 4"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.504,
+                0.892,
+                0.545
+            ],
+            "angle": 0,
+            "content": "[56] Fanyi Xiao, Kaustav Kundu, Joseph Tighe, and Davide Modolo. Hierarchical self-supervised representation learning for movie understanding. In CVPR, 2022. 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.547,
+                0.892,
+                0.587
+            ],
+            "angle": 0,
+            "content": "[57] Mengmeng Xu, Chen Zhao, David S Rojas, Ali Thabet, and Bernard Ghanem. G-tad: Sub-graph localization for temporal action detection. In CVPR, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.59,
+                0.892,
+                0.658
+            ],
+            "angle": 0,
+            "content": "[58] Rowan Zellers, Jiasen Lu, Ximing Lu, Youngjae Yu, Yanpeng Zhao, Mohammadreza Salehi, Aditya Kusupati, Jack Hessel, Ali Farhadi, and Yejin Choi. Merlot reserve: Multimodal neural script knowledge through vision and language and sound. In CVPR, 2022. 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.66,
+                0.892,
+                0.715
+            ],
+            "angle": 0,
+            "content": "[59] Runhao Zeng, Wenbing Huang, Mingkui Tan, Yu Rong, Peilin Zhao, Junzhou Huang, and Chuang Gan. Graph convolutional networks for temporal action localization. In ICCV, 2019. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.717,
+                0.892,
+                0.758
+            ],
+            "angle": 0,
+            "content": "[60] Bolei Zhou, Agata Lapedriza, Aditya Khosla, Aude Oliva, and Antonio Torralba. Places: A 10 million image database for scene recognition. TPAMI, 2017. 7"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.76,
+                0.892,
+                0.801
+            ],
+            "angle": 0,
+            "content": "[61] Mohammadreza Zolfaghari, Yi Zhu, Peter Gehler, and Thomas Brox. Crossclr: Cross-modal contrastive learning for multi-modal video representations. In ICCV, 2021. 2"
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.503,
+                0.092,
+                0.892,
+                0.801
+            ],
+            "angle": 0,
+            "content": null
+        }
+    ],
+    [
+        {
+            "type": "aside_text",
+            "bbox": [
+                0.023,
+                0.261,
+                0.058,
+                0.707
+            ],
+            "angle": 270,
+            "content": "arXiv:2202.10650v3 [cs.CV] 30 Mar 2023"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.13,
+                0.131,
+                0.842,
+                0.175
+            ],
+            "angle": 0,
+            "content": "Supplementary Material Movies2Scenes: Using Movie Metadata to Learn Scene Representation"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.113,
+                0.203,
+                0.856,
+                0.237
+            ],
+            "angle": 0,
+            "content": "Shixing Chen Chun-Hao Liu Xiang Hao Xiaohan Nie Maxim Arap Raffay Hamid Amazon Prime Video"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.191,
+                0.242,
+                0.774,
+                0.256
+            ],
+            "angle": 0,
+            "content": "{shixic, chunhaol, xianghao, nxiaohan, maxarap, raffay}@amazon.com"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.293,
+                0.473,
+                0.46
+            ],
+            "angle": 0,
+            "content": "In this supplementary material, we provide two sections to better support the arguments and results in the main paper: (a) more details of the specific settings in our experiments for better reproducibility, and (b) more extensive qualitative results to better demonstrate the interpretability of our learned representations. The sections will be presented with information corresponding to different datasets used in the main paper including: Movie Contrastive Learning 30K (MovieCL30K) dataset, Long-Form Video Understanding (LVU) dataset [18], MovieNet dataset [12] [17] and Mature Content Dataset (MCD)."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.475,
+                0.265,
+                0.492
+            ],
+            "angle": 0,
+            "content": "1. Experiment Details"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.501,
+                0.471,
+                0.579
+            ],
+            "angle": 0,
+            "content": "We use PyTorch 1.8 [15] as our deep learning library and NVIDIA Tesla A100/V100 GPUs for computation. During contrastive learning, we use 8 GPUs with distributed data and model parallelism. For supervised learning of MLP on downstream tasks, only 1 GPU is needed."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.589,
+                0.22,
+                0.604
+            ],
+            "angle": 0,
+            "content": "1.1. MovieCL30K"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.613,
+                0.428,
+                0.629
+            ],
+            "angle": 0,
+            "content": "This section corresponds to §4.1.2 in the main paper."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.63,
+                0.47,
+                0.902
+            ],
+            "angle": 0,
+            "content": "a. Shot-encoder: Our shot encoder has two key differences comparing with ShotCoL [2]. First, we can select the positive keys during training, which makes training more efficient where we do not use the stale positive keys for epochs before updating them. Second, ShotCoL [2] focused on learning a representation that is most useful for the scene boundary detection task, so it could benefit from contextual and semantic information in a neighborhood size similar to the length of a scene. However, we observed that when the neighborhood size is relatively large (e.g., 16) as selected in ShotCoL, the positive key may end up being almost identical to the query. This is still useful information for scene boundary detection task because there could be almost identical shots in a scene. However, for our objective to learn a representation that focuses on appearance, this may reduce the effectiveness of representations because the positive key is more similar to augmented images which were demonstrated to be less effective in [2]."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.293,
+                0.895,
+                0.459
+            ],
+            "angle": 0,
+            "content": "b. Movie-level similarity learning: When using movie metadata to train the movie encoder (Figure 2 in the main paper) on MovieCL30K, we used SGD to optimize with a learning rate of 0.1, batch size of 256 and epoch number of 100. The same set of hyper-parameters was applied to all three types of movie metadata (co-watch, genre, and synopsis). Recall that within each batch, there are 256 pairs of movies represented by feature matrices extracted from our shot encoder, and the dimension of each feature matrix is \\(1024 \\times 512\\). These pairs are passed through \\(\\mathbf{E}_{\\mathrm{movie}}\\) to predict whether two movies are similar based on movie metadata."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.461,
+                0.895,
+                0.748
+            ],
+            "angle": 0,
+            "content": "c. Scene contrastive learning: After movie-level similarity learning, we select the set of similar scene-pairs based on the learned space in \\(\\mathbf{E}_{\\mathrm{movie}}\\). Specifically, after extracting features of all shots in each input movie by \\(\\mathbf{E}_{\\mathrm{shot}}\\), the movie is represented as a matrix of \\(M \\times 512\\), where \\(M\\) is the number of shots in the movie. Notice that the length of the movie is no longer restricted to 1024, so that all shots can be considered during similar scene selection. The feature matrix is then passed to \\(\\mathbf{E}_{\\mathrm{movie}}\\) before the last fully-connected layer, and becomes a new feature matrix. Similar process is done on another movie considered similar to the input movie with \\(N\\) shots, and the shot adjacency matrix \\(\\mathbf{A}\\) of these two movies takes the size of \\(M \\times N\\). We then go through all \\(9 \\times 9\\) windows in \\(\\mathbf{A}\\) with stride 1, and calculate the average value in each window to represent the scene-level similarity of the two movies. Finally, we pop the scene-pairs with top \\(50\\%\\) highest scene-level similarity scores while keeping the selected scenes to be non-overlapping. This generates a set of scene-pairs for each type of movie metadata."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.75,
+                0.895,
+                0.902
+            ],
+            "angle": 0,
+            "content": "With the generated set of scene pairs, we use them for scene contrastive learning following the MoCo framework [9], while substituting encoder to be ViT [4] and optimization to be AdamW [14] instead of SGD [8]. Specifically, following [9], we use feature dimension of 128, queue size of 65, 536, MoCo momentum of 0.999 and softmax temperature of 0.07 during momentum contrastive learning. Following [4] [3], we use learning rate of \\(1.5\\mathrm{e} - 4\\), weight decay of 0.01, number of warm-up epochs of 40, batch size of 128 and number of epoch of 100."
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.481,
+                0.925,
+                0.49,
+                0.937
+            ],
+            "angle": 0,
+            "content": "1"
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "bbox": [
+                0.216,
+                0.088,
+                0.758,
+                0.178
+            ],
+            "angle": 0,
+            "content": "<table><tr><td rowspan=\"2\">Hyper-parameters</td><td colspan=\"7\">Classification</td><td rowspan=\"2\" colspan=\"2\">Regression view like</td></tr><tr><td>place</td><td>director</td><td>relation</td><td>speak</td><td>writer</td><td>year</td><td>genre</td></tr><tr><td>learning rate</td><td>0.1</td><td>1.0</td><td>0.01</td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.1</td><td>0.01</td><td>0.1</td></tr><tr><td>batch size</td><td>128</td><td>256</td><td>16</td><td>256</td><td>32</td><td>128</td><td>256</td><td>16</td><td>16</td></tr><tr><td>epoch</td><td>400</td><td>400</td><td>400</td><td>400</td><td>400</td><td>400</td><td>400</td><td>500</td><td>500</td></tr><tr><td>dropout</td><td>0.1</td><td>0.5</td><td>0.5</td><td>0.1</td><td>0.25</td><td>0.75</td><td>0.1</td><td>0.8</td><td>0.5</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.305,
+                0.193,
+                0.665,
+                0.208
+            ],
+            "angle": 0,
+            "content": "Table 1. Hyper-parameters used in the MLPs for LVU tasks."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.233,
+                0.151,
+                0.248
+            ],
+            "angle": 0,
+            "content": "1.2.LVU"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.257,
+                0.471,
+                0.379
+            ],
+            "angle": 0,
+            "content": "When producing the results in Table 2 in the main paper, following [18] where the model of each task is trained separately with parameters selected by validation set, we selected the parameters and hyper-parameters of MLP for each task by the validation set in LVU and presented corresponding results on test set. The hyper-parameters used in MLPs of each task on representations pre-trained by cowatch is shown in Table 1."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.389,
+                0.189,
+                0.403
+            ],
+            "angle": 0,
+            "content": "1.3. MovieNet"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.413,
+                0.414,
+                0.428
+            ],
+            "angle": 0,
+            "content": "This section corresponds to \\(\\S 4.3\\) in the main paper."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.428,
+                0.469,
+                0.517
+            ],
+            "angle": 0,
+            "content": "a. Place tagging: For the results of Ours in Table 3 in the main paper, we used MLP with two 512-dimensional hidden layers optimized by SGD with leaning rate of 5.0, dropout of 0.25, epoch number of 200 and batch size of 512. The problem was formulated as a multi-label classification task and optimized by BCEWithLogitsLoss [15]."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.519,
+                0.469,
+                0.593
+            ],
+            "angle": 0,
+            "content": "b. Scene boundary detection: For the results of Ours in Table 4 in the main paper, we used MLP with two 512-dimensional hidden layers optimized by SGD with leaning rate of 0.03, dropout of 0.8, epoch number of 800 and batch size of 4096."
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.076,
+                0.428,
+                0.469,
+                0.593
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.605,
+                0.158,
+                0.62
+            ],
+            "angle": 0,
+            "content": "1.4.MCD"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.629,
+                0.47,
+                0.901
+            ],
+            "angle": 0,
+            "content": "We used SlowFast 8x8 R50 and SlowFast 8x8 R101 for the SlowFast models [6] used in Table 5 in the main paper. Both models take 64 frames from each video clips. When extracting representation from the SlowFast models, we used the average pooling layers before the final classification layer, and the representation has 2304 dimensions concatenated from the slow and fast pathways. Similarly for the X3D-L model [5], we used the fully connected layer before the final classification layer, which has 2048 dimensions, and the X3D-L model takes 16 frames from each video clips. For the CLIP model [16], we used ViT-B/16 based visual encoder, and it takes the same 9 frames as the input to our model from each video clip. We first extracted the embeddings with 512 dimensions from each frame and then do an average pooling across all 9 frames, which is used as the representation for the CLIP model. For training the model to classify the age-appropriate activities, we used a 3-layer MLP model with 512 nodes in the hidden layers."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.499,
+                0.233,
+                0.681,
+                0.248
+            ],
+            "angle": 0,
+            "content": "2. Additional Results"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.257,
+                0.642,
+                0.273
+            ],
+            "angle": 0,
+            "content": "2.1. MovieCL30K"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.281,
+                0.895,
+                0.599
+            ],
+            "angle": 0,
+            "content": "We present the similar scene pairs selected by our scene representation learned on co-watch in Figure 1. We also present the similar scene-pairs found by pre-trained CLIP visual features [16] in Figure 2 and the ones found by pretrained Merlot Reserve visual features [19] in Figure 3, respectively. We can see that scene-pairs found by our approach are significantly more thematically similar, while the ones found by other features focus much more on appearance similarity. Moreover, CLIP [16] and Merlot Reserve [19] features produce results that are mostly related to human faces, which is not sufficiently useful for general-purpose semantic scene understanding. These observations provide insights about the effectiveness of our approach on a wide variety of downstream tasks related to semantic scene understanding compared to other state-of-the-art representations. Lastly, we can also noticed that the scenes pairs found by Merlot Reserve visual features [19] are similar to the ones found by CLIP visual features [16], which can indicate that the added audio modality in Merlot Reserve in not directly influencing the distribution of embedding in visual encoder before the modalities are fused."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.606,
+                0.574,
+                0.621
+            ],
+            "angle": 0,
+            "content": "2.2.LVU"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.629,
+                0.894,
+                0.78
+            ],
+            "angle": 0,
+            "content": "To demonstrate the effectiveness of our learned scene-representation, we use the place-labeled scenes from LVU data [18] in a retrieval-setting. Specifically, using query scenes each with a particular place-label from the validation-set, we retrieve 1, 5, and 10 nearest neighbors from the training-set using their \\(\\mathrm{L}_2\\) distances. Precision results for various settings are given in Table 2 where our encoder is compared with the pre-trained visual encoder of CLIP [16] and the SlowFast model [6] pre-trained on Kinetics [1] and AVA [13]."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.781,
+                0.895,
+                0.902
+            ],
+            "angle": 0,
+            "content": "Moreover, to provide qualitative insights into the effectiveness of our learned scene-representation, Figure 4 shows the retrieval results using an example query for 4 of the 6 categories based on ours as well as CLIP [16] visual representation. It can be seen that although CLIP visual representation can capture local appearance-based patterns effectively, it is not able to capture longer-duration semantic aspects of scenes. In contrast, our representation is able to"
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.247,
+                0.087,
+                0.718,
+                0.102
+            ],
+            "angle": 0,
+            "content": "similar scene-pairs found by our method in a pair of similar movies"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.198,
+                0.109,
+                0.397,
+                0.123
+            ],
+            "angle": 0,
+            "content": "scenes from Need for Speed"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.516,
+                0.109,
+                0.822,
+                0.124
+            ],
+            "angle": 0,
+            "content": "scenes from The Fast & Furious: Tokyo Drift"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.123,
+                0.125,
+                0.845,
+                0.852
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.853,
+                0.892,
+                0.923
+            ],
+            "angle": 0,
+            "content": "Figure 1. Similar scene-pairs found by our representation - Given a similar movie-pair Need For Speed and The Fast & Furious: Tokyo Drift, we present representative examples from the set of similar scene-pairs (connected by orange arrow) found by our representation (sorted by similarity). Comparing with the ones found by CLIP visual feature [16] in Figure 2 and Merlot Reserve feature [19] in Figure 3, these scene-pairs are more thematically meaningful, which contributes to the effectiveness of our representation on downstream tasks related to semantic scene understanding."
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "bbox": [
+                0.121,
+                0.086,
+                0.845,
+                0.844
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.848,
+                0.897,
+                0.906
+            ],
+            "angle": 0,
+            "content": "Figure 2. Similar scene-pairs found by CLIP - Given a similar movie-pair Need For Speed and The Fast & Furious: Tokyo Drift, we present representative examples from the set of similar scene-pairs (connected by orange arrow) found by CLIP visual feature [16] (sorted by similarity). Comparing with the ones found by our representation in Figure 1, these scene-pairs focus more on appearance-based similarity and are mostly related to human faces, which are not sufficiently semantically meaningful for semantic scene understanding."
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "bbox": [
+                0.121,
+                0.088,
+                0.849,
+                0.852
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.854,
+                0.897,
+                0.925
+            ],
+            "angle": 0,
+            "content": "Figure 3. Similar scene-pairs found by Merlot Reserve - Given a similar movie-pair Need For Speed and The Fast & Furious: Tokyo Drift, we present representative examples from the set of similar scene-pairs (connected by orange arrow) found by Merlot Reserve visual feature [19] (sorted by similarity). Comparing with the ones found by our representation in Figure 1, these scene pairs are more similar to the ones found by CLIP in Figure 2, which focus more on appearance-based similarity and are mostly related to human faces, which are not sufficiently semantically meaningful for semantic scene understanding."
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "bbox": [
+                0.234,
+                0.088,
+                0.739,
+                0.247
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Models</td><td colspan=\"3\">CLIP [16]</td><td colspan=\"3\">SlowFast [6]</td><td colspan=\"3\">Ours</td></tr><tr><td>Architecture</td><td colspan=\"3\">ViT-B/16 [4]</td><td colspan=\"3\">ResNet-101 [11]</td><td colspan=\"3\">ViT-B/16 [4]</td></tr><tr><td>Pre-training data</td><td colspan=\"3\">400M image-text pairs</td><td colspan=\"3\">Kinetics [1]+AVA [13]</td><td colspan=\"3\">MovieCL30K</td></tr><tr><td>Pre-training task</td><td colspan=\"3\">image-text similarity</td><td colspan=\"3\">action recognition</td><td colspan=\"3\">scene contrast</td></tr><tr><td></td><td>top-1</td><td>top-5</td><td>top-10</td><td>top-1</td><td>top-5</td><td>top-10</td><td>top-1</td><td>top-5</td><td>top-10</td></tr><tr><td>office</td><td>30</td><td>20</td><td>19</td><td>0</td><td>16</td><td>17</td><td>30</td><td>36</td><td>26</td></tr><tr><td>airport</td><td>0</td><td>15</td><td>10</td><td>0</td><td>0</td><td>10</td><td>0</td><td>15</td><td>10</td></tr><tr><td>school</td><td>28.57</td><td>26.66</td><td>25</td><td>76.19</td><td>20.47</td><td>32.14</td><td>50</td><td>49.04</td><td>45.95</td></tr><tr><td>hotel</td><td>35.71</td><td>28.57</td><td>29.28</td><td>0</td><td>0</td><td>10</td><td>42.85</td><td>20</td><td>24.28</td></tr><tr><td>prison</td><td>52.94</td><td>42.94</td><td>42.94</td><td>35.29</td><td>40</td><td>20.29</td><td>58.82</td><td>45.88</td><td>40</td></tr><tr><td>restaurant</td><td>20</td><td>13.99</td><td>13.99</td><td>0</td><td>20</td><td>10</td><td>40</td><td>16</td><td>14</td></tr><tr><td>all queries</td><td>35.08</td><td>29.64</td><td>28.85</td><td>38.59</td><td>22.63</td><td>21.84</td><td>47.36</td><td>39.29</td><td>35.70</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.076,
+                0.252,
+                0.895,
+                0.294
+            ],
+            "angle": 0,
+            "content": "Table 2. The place-labeled scenes in LVU data [18] are formulated to a retrieval setting, where the goal is to retrieve similar scenes from training-set given query scenes from validation-set. Representations pre-trained on different configurations as specified in the table are compared. The precision results for different place categories are reported with the size of retrieved set to be 1, 5 and 10."
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.116,
+                0.308,
+                0.852,
+                0.542
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.546,
+                0.893,
+                0.588
+            ],
+            "angle": 0,
+            "content": "Figure 4. Qualitative results of place retrieval using LVU data [18] are shown. For each query scene in validation-set, two similar scenes from training-set are retrieved based on ours and CLIP visual representation [16]. Example results show that our feature can capture both scene-appearance as well as their broader thematic signature, while CLIP [16] can only capture scene-appearance effectively."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.611,
+                0.471,
+                0.656
+            ],
+            "angle": 0,
+            "content": "capture the appearance as well as semantic aspects of scenes effectively, and is therefore able to avoid the types of confusions that confound the CLIP representation."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.658,
+                0.47,
+                0.793
+            ],
+            "angle": 0,
+            "content": "We applied average pooling instead of concatenation on CLIP feature [16] because during retrieval, we do not want the order of shots to influence the results, thus, having one vector per input scene is reasonable. Notice that for the place of airport, both our representation and CLIP have top-1 accuracy of 0, it is because the number of query is very limited in the validation set of LVU [18] (4 airport-labeled scenes), and thus the airport example presented in Figure 4 comes from the top-2 retrieval result."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.796,
+                0.471,
+                0.903
+            ],
+            "angle": 0,
+            "content": "In Figure 5, we show five example scenes with their ground truth genre in LVU as well as our prediction. We can see that our model was able to capture the feature that is useful for correct genre prediction in most cases. For cases like example 5 on the last row, we assume it is because it is sometimes difficult to identify genre from just one scene in the movie, and since the meta information like genre in"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.5,
+                0.611,
+                0.892,
+                0.642
+            ],
+            "angle": 0,
+            "content": "LVU was retrieved from IMDB entries [18], they can not always reflect the genre of a specific scene."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.675,
+                0.893,
+                0.901
+            ],
+            "angle": 0,
+            "content": "In Figure 6, we show six examples from the way-of-speaking prediction task in LVU. We can see that when the visual information is sufficient to make predictions, our model can perform well, but for cases like example 6 on the last row, it can be insufficient to predict just based on visual cues, and this might indicate that for tasks like way-of-speaking prediction, it may be beneficial to include audio modality for better accuracy. This also corresponds to the results in Table 2 of the main paper, where the accuracy of way-of-speaking is lower than other tasks. For relationship prediction in Figure 7 we can see that the model can make ambiguous predictions when there are more than one pairs of characters in the scene, and this may indicate that when analyzing relationship in scenes, it can be helpful to focus more on leading characters."
+        }
+    ],
+    [
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.191,
+                0.093,
+                0.362,
+                0.104
+            ],
+            "angle": 0,
+            "content": "E.g. 1 label: action predict: action"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.106,
+                0.11,
+                0.172,
+                0.164
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.174,
+                0.11,
+                0.242,
+                0.164
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.244,
+                0.11,
+                0.311,
+                0.164
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.313,
+                0.11,
+                0.38,
+                0.164
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.381,
+                0.11,
+                0.448,
+                0.164
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.18,
+                0.174,
+                0.373,
+                0.185
+            ],
+            "angle": 0,
+            "content": "E.g. 2 label: romance predict: romance"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.106,
+                0.191,
+                0.172,
+                0.244
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.174,
+                0.191,
+                0.242,
+                0.244
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.244,
+                0.191,
+                0.311,
+                0.244
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.313,
+                0.191,
+                0.38,
+                0.244
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.381,
+                0.191,
+                0.448,
+                0.244
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.19,
+                0.255,
+                0.364,
+                0.266
+            ],
+            "angle": 0,
+            "content": "E.g.3 label: thriller predict: thriller"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.106,
+                0.272,
+                0.172,
+                0.325
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.174,
+                0.272,
+                0.242,
+                0.325
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.244,
+                0.272,
+                0.311,
+                0.325
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.313,
+                0.272,
+                0.38,
+                0.325
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.381,
+                0.272,
+                0.448,
+                0.325
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.185,
+                0.336,
+                0.37,
+                0.348
+            ],
+            "angle": 0,
+            "content": "E.g.4 label: comedy predict: comedy"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.106,
+                0.353,
+                0.172,
+                0.406
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.174,
+                0.353,
+                0.242,
+                0.406
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.244,
+                0.353,
+                0.311,
+                0.406
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.313,
+                0.353,
+                0.38,
+                0.406
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.381,
+                0.353,
+                0.448,
+                0.406
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.188,
+                0.418,
+                0.366,
+                0.428
+            ],
+            "angle": 0,
+            "content": "E.g. 5 label: comedy predict: action"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.106,
+                0.435,
+                0.172,
+                0.487
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.174,
+                0.435,
+                0.242,
+                0.487
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.244,
+                0.435,
+                0.311,
+                0.487
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.313,
+                0.435,
+                0.38,
+                0.487
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.381,
+                0.435,
+                0.448,
+                0.487
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.504,
+                0.471,
+                0.616
+            ],
+            "angle": 0,
+            "content": "Figure 5. Additional qualitative results on LVU datasets [18]. Five example scenes with their ground truth genre labels as well as our predictions are shown. For example 5, our prediction is different from the label even though looking only at the visual content of this particular scene it makes sense to infer it as a romantic scene. Our hypothesis is that as the genre label of the LVU dataset was acquired from movie-level meta data, sometimes it is not directly applicable to the genre of all of the constituent scenes of a movie."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.077,
+                0.63,
+                0.19,
+                0.644
+            ],
+            "angle": 0,
+            "content": "2.3. MovieNet"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.656,
+                0.47,
+                0.807
+            ],
+            "angle": 0,
+            "content": "We present qualitative results on MovieNet [12] [17] dataset in Figure 8. This corresponds to Table 3 and Table 4 in the main paper and includes examples on place tagging as well as scene boundary detection (SBD) tasks. We show three examples from test set of MovieNet, and in each example, there are two scenes divided by the green dotted line. For each scene, the task is to predict what are the multi-label place tags of the scene, and for the two scenes together, the goal is to predict whether the shot boundaries between each pair of shots are also scene boundaries."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.811,
+                0.471,
+                0.902
+            ],
+            "angle": 0,
+            "content": "We can see that for SBD, our model can perform well to clearly identify the scene boundaries. For place tagging, it is a much more difficult task involving holistic understanding of the scenes, and although our model outperformed existing state-of-the-art models by a large margin in Table 3 in the main paper, it is still a really challenging and unsolved"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.606,
+                0.075,
+                0.789,
+                0.086
+            ],
+            "angle": 0,
+            "content": "E.g. 1 label: explain predict: explain"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.521,
+                0.092,
+                0.591,
+                0.146
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.592,
+                0.092,
+                0.661,
+                0.146
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.663,
+                0.092,
+                0.732,
+                0.146
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.733,
+                0.092,
+                0.802,
+                0.146
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.804,
+                0.092,
+                0.874,
+                0.146
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.6,
+                0.159,
+                0.795,
+                0.17
+            ],
+            "angle": 0,
+            "content": "E.g.2 label: confront predict: confront"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.521,
+                0.177,
+                0.591,
+                0.231
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.592,
+                0.177,
+                0.661,
+                0.231
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.663,
+                0.177,
+                0.732,
+                0.231
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.733,
+                0.177,
+                0.802,
+                0.231
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.804,
+                0.177,
+                0.874,
+                0.231
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.606,
+                0.244,
+                0.788,
+                0.256
+            ],
+            "angle": 0,
+            "content": "E.g.3 label: discuss predict: discuss"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.521,
+                0.262,
+                0.591,
+                0.316
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.592,
+                0.262,
+                0.661,
+                0.316
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.663,
+                0.262,
+                0.732,
+                0.316
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.733,
+                0.262,
+                0.802,
+                0.316
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.804,
+                0.262,
+                0.874,
+                0.316
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.613,
+                0.329,
+                0.78,
+                0.34
+            ],
+            "angle": 0,
+            "content": "E.g.4 label:teach predict:teach"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.521,
+                0.347,
+                0.591,
+                0.401
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.592,
+                0.347,
+                0.661,
+                0.401
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.663,
+                0.347,
+                0.732,
+                0.401
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.733,
+                0.347,
+                0.802,
+                0.401
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.804,
+                0.347,
+                0.874,
+                0.401
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.6,
+                0.414,
+                0.795,
+                0.426
+            ],
+            "angle": 0,
+            "content": "E.g.5 label: threaten predict: threaten"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.521,
+                0.432,
+                0.591,
+                0.486
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.592,
+                0.432,
+                0.661,
+                0.486
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.663,
+                0.432,
+                0.732,
+                0.486
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.733,
+                0.432,
+                0.802,
+                0.486
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.804,
+                0.432,
+                0.874,
+                0.486
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.6,
+                0.498,
+                0.794,
+                0.51
+            ],
+            "angle": 0,
+            "content": "E.g.6 label: explains predict: threaten"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.521,
+                0.517,
+                0.591,
+                0.571
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.592,
+                0.517,
+                0.661,
+                0.571
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.663,
+                0.517,
+                0.732,
+                0.571
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.733,
+                0.517,
+                0.802,
+                0.571
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.804,
+                0.517,
+                0.874,
+                0.571
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.498,
+                0.585,
+                0.892,
+                0.656
+            ],
+            "angle": 0,
+            "content": "Figure 6. Six examples from the way-of-speaking prediction task in LVU [18]. Results show that when visual information is sufficient to predict way-of-speaking, our method can perform well, and for cases like example 6, it might be beneficial to add audio modality to further improve the accuracy."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.671,
+                0.892,
+                0.779
+            ],
+            "angle": 0,
+            "content": "task. For example, some places are not easy to identify based on a few frames (e.g. playground), and some places can vary a lot in term of appearance but have same place tag (e.g. car). This is also partially caused by the lack of labeled data, where for the 90-category multi-label problem, there are \\(19.6\\mathrm{K}\\) place tags, with \\(\\sim 11.7\\mathrm{K}\\) for training, leading to \\(\\sim 130\\) labeled training tags per category on average."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.5,
+                0.787,
+                0.58,
+                0.802
+            ],
+            "angle": 0,
+            "content": "2.4.MCD"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.811,
+                0.892,
+                0.901
+            ],
+            "angle": 0,
+            "content": "Representative examples from the three age-appropriate activities in MCD dataset are provided in Figure 9. We also show the samples for each of the 4 classes of our MCD dataset in Figure 10 along with the corresponding detection results (i.e., the class with maximum probability) from both our model and CLIP model. For sex examples, we"
+        }
+    ],
+    [
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.191,
+                0.093,
+                0.351,
+                0.104
+            ],
+            "angle": 0,
+            "content": "E.g.1 label: friend predict: friend"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.107,
+                0.111,
+                0.437,
+                0.164
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.159,
+                0.179,
+                0.383,
+                0.19
+            ],
+            "angle": 0,
+            "content": "E.g.2 label: husband wife predict: husband wife"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.107,
+                0.198,
+                0.437,
+                0.251
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.162,
+                0.265,
+                0.38,
+                0.276
+            ],
+            "angle": 0,
+            "content": "E.g.3 label: friend predict: boyfriend girlfriend"
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.107,
+                0.283,
+                0.436,
+                0.335
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.342,
+                0.471,
+                0.44
+            ],
+            "angle": 0,
+            "content": "Figure 7. Examples of relationship prediction task in LVU [18]. Sometimes the relationship can be ambiguous when there are more than two leading characters in the scene. Also, the uncertainty of some relationships makes prediction even more challenging. For example, it can be difficult to distinguish husband wife and boyfriend girlfriend without semantically understanding of context and plot."
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.091,
+                0.456,
+                0.475,
+                0.774
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.076,
+                0.785,
+                0.471,
+                0.869
+            ],
+            "angle": 0,
+            "content": "Figure 8. Qualitative results on MovieNet place tagging [12] and scene boundary detection tasks [17]. Although our model outperformed existing state-of-the-art models by a large margin in Table 3 in the main paper, multi-labeled place tagging is still a really challenging problem. Some tags may not be apparent and the intra-category variance is large in this task."
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.504,
+                0.089,
+                0.891,
+                0.168
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.499,
+                0.171,
+                0.893,
+                0.214
+            ],
+            "angle": 0,
+            "content": "Figure 9. Examples of 3 types of age-appropriate activities in our data. Sensitive parts of images have been intentionally redacted here. See supplementary materials for more examples."
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.506,
+                0.231,
+                0.891,
+                0.504
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.499,
+                0.515,
+                0.892,
+                0.557
+            ],
+            "angle": 0,
+            "content": "Figure 10. Representative examples in MCD comparing the predictions based on our representation with CLIP visual feature. Sensitive parts of some images are intentionally redacted here."
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.502,
+                0.569,
+                0.897,
+                0.638
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Models</td><td>Pre-training data</td><td>sex</td><td>violence</td><td>drug-use</td><td>average</td></tr><tr><td>ShotCoL [2]</td><td>movie shot pairs</td><td>62.3</td><td>58.7</td><td>47.1</td><td>56.0</td></tr><tr><td>MerlotReserve [19]</td><td>Youtube videos</td><td>77.0</td><td>68.2</td><td>53.4</td><td>66.2</td></tr><tr><td>BridgeFormer [7]</td><td>image+video</td><td>74.8</td><td>61.4</td><td>61.2</td><td>65.8</td></tr><tr><td>Ours</td><td>MovieCL30K</td><td>81.5</td><td>70.2</td><td>61.8</td><td>71.1</td></tr></table>"
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.51,
+                0.643,
+                0.881,
+                0.658
+            ],
+            "angle": 0,
+            "content": "Table 3. Comparisons on MCD with other pre-trained models."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.498,
+                0.675,
+                0.892,
+                0.901
+            ],
+            "angle": 0,
+            "content": "can see that our model has higher confidence scores compared to CLIP model especially when the images have dark illumination. For violence, the CLIP model sometimes mistakes scenes with two closed persons as sex as shown in the first example. Similarly for drug-use examples, our model classifies them more confidently, and CLIP model misses the small cigarette in the third example and classifies it as none. The none examples show that the CLIP model often mistakes them with other classes, such as violence and drug-use, while our model is able to classify them correctly. This indicates our scene representation performs better than CLIP on age-appropriate activities, demonstrating the effectiveness of our representation in video moderation. Additional quantitative results on MCD are provided in Table 3 for comparisons with other pre-trained large models."
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "bbox": [
+                0.078,
+                0.09,
+                0.264,
+                0.108
+            ],
+            "angle": 0,
+            "content": "3. Additional Insights"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.077,
+                0.116,
+                0.473,
+                0.358
+            ],
+            "angle": 0,
+            "content": "a. Details of scene adjacency matrix: Consider an example movie-pair \\(\\mathbf{x}_1\\) and \\(\\mathbf{x}_2\\) with \\(\\mathbf{m}\\) and \\(\\mathbf{n}\\) number of scenes respectively. The shape of their scene adjacency matrix \\(\\mathbf{B}\\) is \\(\\mathbf{m} \\times \\mathbf{n}\\). Each value in \\(\\mathbf{B}\\) indicates the similarity score between two scenes, one from each movie. We rank all the similarity scores in \\(\\mathbf{B}\\) so that we know which pairs of scenes are most similar. We first select the scene-pair (say \\(\\mathbf{m}_0\\) and \\(\\mathbf{n}_0\\)) in \\(\\mathbf{B}\\) with the highest similarity score and add it to \\(\\mathbf{P}_{\\text {scene }}\\). Moreover, we keep a record of this scene-pair, so that \\(\\mathbf{m}_0\\) and \\(\\mathbf{n}_0\\) will not be selected again from movie-pair \\(\\mathbf{x}_1\\) and \\(\\mathbf{x}_2\\). We then move on to the scene-pair corresponding to the second highest value in \\(\\mathbf{B}\\), and only add it to \\(\\mathbf{P}_{\\text {scene }}\\) if neither of the scenes in that scene-pair is \\(\\mathbf{m}_0\\) or \\(\\mathbf{n}_0\\). We carry out this process for the top \\(50\\%\\) of the most similar scene-pairs in \\(\\mathbf{B}\\). This movie-pair level routine is repeated for all pairs of movies in our dataset to build \\(\\mathbf{P}_{\\text {scene }}\\)."
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.076,
+                0.36,
+                0.473,
+                0.511
+            ],
+            "angle": 0,
+            "content": "b. Effectiveness of pre-trained CLIP weights: In general, it has been demonstrated that pre-training does not always result in improvements [10]. Specifically for our case, there are two key reasons why using pre-trained CLIP does not offer additional benefits. First, the domain gap between pre-trained CLIP (internet images and texts) and our data (movies) is quite high. Second, CLIP uses individual images and incorporates no temporal information. However, our use of scenes heavily relies on information among frames and shots."
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.079,
+                0.527,
+                0.175,
+                0.543
+            ],
+            "angle": 0,
+            "content": "References"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.554,
+                0.47,
+                0.594
+            ],
+            "angle": 0,
+            "content": "[1] Joao Carreira, Eric Noland, Andras Banki-Horvath, Chloe Hillier, and Andrew Zisserman. A short note about kinetics-600. arXiv:1808.01340, 2018. 2, 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.598,
+                0.472,
+                0.652
+            ],
+            "angle": 0,
+            "content": "[2] Shixing Chen, Xiaohan Nie, David Fan, Dongqing Zhang, Vimal Bhat, and Raffay Hamid. Shot contrastive self-supervised learning for scene boundary detection. In CVPR, 2021. 1, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.656,
+                0.47,
+                0.697
+            ],
+            "angle": 0,
+            "content": "[3] Xinlei Chen*, Saining Xie*, and Kaiming He. An empirical study of training self-supervised vision transformers. arXiv preprint arXiv:2104.02057, 2021. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.7,
+                0.47,
+                0.782
+            ],
+            "angle": 0,
+            "content": "[4] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby. An image is worth 16x16 words: Transformers for image recognition at scale. ICLR, 2021. 1, 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.785,
+                0.47,
+                0.813
+            ],
+            "angle": 0,
+            "content": "[5] Christoph Feichtenhofer. X3d: Expanding architectures for efficient video recognition. In CVPR, 2020. 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.816,
+                0.47,
+                0.856
+            ],
+            "angle": 0,
+            "content": "[6] Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He. Slowfast networks for video recognition. In ICCV, 2019. 2, 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.087,
+                0.859,
+                0.47,
+                0.901
+            ],
+            "angle": 0,
+            "content": "[7] Yuying Ge, Yixiao Ge, Xihui Liu, Dian Li, Ying Shan, Xiaohu Qie, and Ping Luo. Bridgeformer: Bridging video-text retrieval with multiple choice questions. In CVPR, 2022. 8"
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.087,
+                0.554,
+                0.472,
+                0.901
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.51,
+                0.093,
+                0.892,
+                0.161
+            ],
+            "angle": 0,
+            "content": "[8] Priya Goyal, Piotr Dólar, Ross Girshick, Pieter Noordhuis, Lukasz Wesolowski, Aapo Kyrola, Andrew Tulloch, Yangqing Jia, and Kaiming He. Accurate, large minibatch sgd: Training imagenet in 1 hour. arXiv:1706.02677, 2017. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.51,
+                0.164,
+                0.892,
+                0.204
+            ],
+            "angle": 0,
+            "content": "[9] Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross Girshick. Momentum contrast for unsupervised visual representation learning. In CVPR, 2020. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.206,
+                0.892,
+                0.26
+            ],
+            "angle": 0,
+            "content": "[10] Kaiming He, Ross Girshick, and Piotr Dollar. Rethinking imagenet pre-training. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), October 2019. 9"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.503,
+                0.263,
+                0.892,
+                0.302
+            ],
+            "angle": 0,
+            "content": "[11] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In CVPR, 2016. 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.306,
+                0.892,
+                0.346
+            ],
+            "angle": 0,
+            "content": "[12] Qingqiu Huang, Yu Xiong, Anyi Rao, Jiaze Wang, and Dahua Lin. Movienet: A holistic dataset for movie understanding. In ECCV, 2020. 1, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.349,
+                0.892,
+                0.403
+            ],
+            "angle": 0,
+            "content": "[13] Ang Li, Meghanana Thotakuri, David A Ross, João Carreira, Alexander Vostrikov, and Andrew Zisserman. The ava-kinetics localized human actions video dataset. arXiv:2005.00214, 2020. 2, 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.406,
+                0.892,
+                0.432
+            ],
+            "angle": 0,
+            "content": "[14] Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. In *ICLR*, 2019. 1"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.434,
+                0.892,
+                0.543
+            ],
+            "angle": 0,
+            "content": "[15] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison, Andreas Kopf, Edward Yang, Zachary DeVito, Martin Raison, Alykhan Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu Fang, Junjie Bai, and Soumith Chintala. Pytorch: An imperative style, high-performance deep learning library. In NeurIPS, 2019. 1, 2"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.546,
+                0.892,
+                0.614
+            ],
+            "angle": 0,
+            "content": "[16] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learning transferable visual models from natural language supervision. arXiv:2103.00020, 2021. 2, 3, 4, 6"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.617,
+                0.892,
+                0.67
+            ],
+            "angle": 0,
+            "content": "[17] Anyi Rao, Linning Xu, Yu Xiong, Guodong Xu, Qingqiu Huang, Bolei Zhou, and Dahua Lin. A local-to-global approach to multi-modal movie scene segmentation. In CVPR, 2020. 1, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.673,
+                0.892,
+                0.699
+            ],
+            "angle": 0,
+            "content": "[18] Chao-Yuan Wu and Philipp Krahenbuhl. Towards long-form video understanding. In CVPR, 2021. 1, 2, 6, 7, 8"
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.504,
+                0.702,
+                0.892,
+                0.77
+            ],
+            "angle": 0,
+            "content": "[19] Rowan Zellers, Jiasen Lu, Ximing Lu, Youngjae Yu, Yanpeng Zhao, Mohammadreza Salehi, Aditya Kusupati, Jack Hessel, Ali Farhadi, and Yejin Choi. Merlot reserve: Multimodal neural script knowledge through vision and language and sound. In CVPR, 2022. 2, 3, 5, 8"
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.503,
+                0.093,
+                0.892,
+                0.77
+            ],
+            "angle": 0,
+            "content": null
+        }
+    ]
+]

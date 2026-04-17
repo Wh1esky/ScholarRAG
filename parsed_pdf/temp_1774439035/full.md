@@ -1,0 +1,510 @@
+# Semi-Supervised Semantic Segmentation Using Unreliable Pseudo-Labels
+
+Yuchao Wang1† Haochen Wang1† Yujun Shen2 Jingjing Fei3 Wei Li3 Guoqiang Jin3 Liwei Wu3 Rui Zhao1,3‡ Xinyi Le1∗
+
+1Shanghai Jiao Tong University 2The Chinese University of Hong Kong 3SenseTime Research
+
+{44442222, wanghaochen0409, lexinyi}@sjtu.edu.cn shenyujun0302@gmail.com {feijingjing1, liwei1, jinguoqiang, wuliwei, zhaorui}@sensetime.com
+
+# Abstract
+
+The crux of semi-supervised semantic segmentation is to assign adequate pseudo-labels to the pixels of unlabeled images. A common practice is to select the highly confident predictions as the pseudo ground-truth, but it leads to a problem that most pixels may be left unused due to their unreliability. We argue that every pixel matters to the model training, even its prediction is ambiguous. Intuitively, an unreliable prediction may get confused among the top classes (i.e., those with the highest probabilities), however, it should be confident about the pixel not belonging to the remaining classes. Hence, such a pixel can be convincingly treated as a negative sample to those most unlikely categories. Based on this insight, we develop an effective pipeline to make sufficient use of unlabeled data. Concretely, we separate reliable and unreliable pixels via the entropy of predictions, push each unreliable pixel to a category-wise queue that consists of negative samples, and manage to train the model with all candidate pixels. Considering the training evolution, where the prediction becomes more and more accurate, we adaptively adjust the threshold for the reliable-unreliable partition. Experimental results on various benchmarks and training settings demonstrate the superiority of our approach over the stateof-the-art alternatives.1
+
+# 1. Introduction
+
+Semantic segmentation is a fundamental task in the computer vision field, and has been significantly advanced along
+
+![](images/3dea8d1a38911a0d9776eb056e027cfe7f9b010f59a5d8c69797c8d52a41a9a6.jpg)  
+Figure 1. Category-wise performance and statistics on number of pixels with reliable and unreliable predictions. Model is trained using 732 labeled images on PASCAL VOC 2012 [14] and evaluated on the remaining 9, 850 images.
+
+with the rise of deep neural networks [5,29,35,46]. Existing supervised approaches rely on large-scale annotated data, which can be too costly to acquire in practice. To alleviate this problem, many attempts [1, 4, 9, 15, 21, 33, 43, 48] have been made towards semi-supervised semantic segmentation, which learns a model with only a few labeled samples and numerous unlabeled ones. Under such a setting, how to adequately leverage the unlabeled data becomes critical.
+
+A typical solution is to assign pseudo-labels to the pixels without annotations. Concretely, given an unlabeled image, prior arts [27,41] borrow predictions from the model trained on labeled data, and use the pixel-wise prediction as the “ground-truth” to in turn boost the supervised model. To mitigate the problem of confirmation bias [2], where the model may suffer from incorrect pseudo-labels, existing approaches propose to filter the predictions with their confidence scores [42, 43, 50, 51]. In other words, only the highly confident predictions are used as the pseudo-labels, while the ambiguous ones are discarded.
+
+However, one potential problem caused by only using reliable predictions is that some pixels may never be learned
+
+in the entire training process. For example, if the model cannot satisfyingly predict some certain class (e.g., chair in Fig. 1), it becomes difficult to assign accurate pseudolabels to the pixels regarding such a class, which may lead to insufficient and categorically imbalanced training. From this perspective, we argue that, to make full use of the unlabeled data, every pixel should be properly utilized.
+
+As discussed above, directly using the unreliable predictions as the pseudo-labels will cause the performance degradation [2]. In this paper, we propose an alternative way of Using Unreliable Pseudo-Labels. We call our framework as $\mathrm { U } ^ { \mathrm { 2 } } \mathrm { P } \mathrm { L }$ . First, we observe that, an unreliable prediction usually gets confused among only a few classes instead of all classes. Taking Fig. 2 as an instance, the pixel with white cross receives similar probabilities on class motorbike and person, but the model is pretty sure about this pixel not belonging to class car and train. Based on this observation, we reconsider the confusing pixels as the negative samples to those unlikely categories. Specifically, after getting the prediction from an unlabeled image, we employ the per-pixel entropy as the metric (see Fig. 2a) to separate all pixels into two groups, i.e., a reliable one and an unreliable one. All reliable predictions are used to derive positive pseudo-labels, while the pixels with unreliable predictions are pushed into a memory bank, which is full of negative samples. To avoid all negative pseudo-labels only coming from a subset of categories, we employ a queue for each category. Such a design ensures that the number of negative samples for each class is balanced. Meanwhile, considering that the quality of pseudo-labels becomes higher along with the model gets more and more accurate, we come up with a strategy to adaptively adjust the threshold for the partition of reliable and unreliable pixels.
+
+We evaluate the proposed $\mathrm { U ^ { 2 } P L }$ on PASCAL VOC 2012 [14] and Cityscapes [10] under a wide range of training settings, where our approach surpasses the stateof-the-art competitors. Furthermore, through visualizing the segmentation results, we find that our method achieves much better performance on those ambiguous regions (e.g., the border between different objects), thanks to our adequate use of the unreliable pseudo-labels.
+
+# 2. Related Work
+
+Semi-Supervised Learning has two typical paradigms: consistency regularization [3, 15, 33, 36, 42] and entropy minimization [4, 16]. Recently, a more intuitive but effective framework: self-training [27], has become the mainstream. Several methods [15, 43, 44] utilize strong data augmentation such as CutOut [13], CutMix [45], and ClassMix [31] based on self-training. However, these methods do not pay much attention to the characteristics of semantic segmentation, while our method focuses on those
+
+![](images/00c8c087ab8a273afec8c5e2fb1c2af5a52c9ff7d9774ee5e390a4768df88bf6.jpg)  
+(a) Input image with entropy map.
+
+![](images/3503f77f5d3579e9b80db45e6645d2e3ee838015deacb9453c560d2ed1021a8c.jpg)  
+(b) Pseudo-label after filtering.
+
+![](images/7fd4e3bb90025835cb9923d97912e2ff04a856941dd3715f940b38b26e0e0751.jpg)  
+(c) Reliable prediction (yellow cross).
+
+![](images/839d2ed31463f5228e7cf3c2b59b103ab3267ab30155633968b522cd22f1c134.jpg)  
+(d) Unreliable prediction (white cross).   
+Figure 2. Illustration on unreliable pseudo-labels. (a) Pixelwise entropy predicted from an unlabeled image, where lowentropy pixels and high-entropy pixels indicate reliable and unreliable predictions, respectively. (b) Pixel-wise pseudo-labels from reliable predictions only, where pixels within the white region are not assigned a pseudo-label. (c) Category-wise probability of a reliable prediction (i.e., the yellow cross), which is confident enough for supervising the class person. (d) Category-wise probability of an unreliable prediction (i.e., the white cross), which hovers between motorbike and person, yet is confident enough of not belonging to car and train.
+
+unreliable pixels which will be filtered out by most of selftraining based methods [34, 43, 44].
+
+Pseudo-Labeling is applied to prevent overfitting to incorrect pseudo-labels when generating predictions of input images from the teacher network [2, 27]. FixMatch [37] utilizes a confidence threshold to select reliable pseudolabels. UPS [34], a method based on FixMatch [37], takes model uncertainty and data uncertainty into consideration. However, in semi-supervised semantic segmentation, our experiments show including unreliable pixels into training can boost performance.
+
+Model Uncertainty in computer vision is mostly measured by Bayesian deep learning approaches [12, 23, 30]. In our settings, we do not focus on how to measure uncertainty. We simply use the entropy of pixel-wise probability distribution to be the metric.
+
+Contrastive Learning is applied by many successful works in self-supervised learning [7, 8, 17]. In semantic segmentation, contrastive learning has become a promising new paradigm [1, 28, 40,47, 49]. However, these methods ignore the common false negative samples in semi-supervised
+
+segmentation, and unreliable pixels may be wrongly pushed away in contrastive loss. Discriminating the unlikely categories of unreliable pixels can addresses this problem.
+
+Negative Learning aims at decreasing the risk of incorrect information by lowering the probability of negative samples [24, 25, 34, 39], but those negative samples are selected with high confidence. In other words, these methods still utilizes pixels with reliable predictions. By contrast, we propose to make sufficient use of those unreliable predictions for learning instead of filtering them out.
+
+# 3. Method
+
+In this section, we establish our problem mathematically and give an overview of our proposed method in Sec. 3.1 first. Our strategies about filtering reliable pseudo-labels are introduced in Sec. 3.2. Finally, we describe how to use unreliable pseudo-labels in Sec. 3.3.
+
+# 3.1. Overview
+
+Given a labeled set $\mathcal { D } _ { l } ~ = ~ \{ ( \mathbf { x } _ { i } ^ { l } , \mathbf { y } _ { i } ^ { l } ) \} _ { i = 1 } ^ { N _ { l } }$ and a much larger unlabeled set $\mathcal { D } _ { u } ~ = ~ \{ \mathbf { x } _ { i } ^ { u } \} _ { i = 1 } ^ { N _ { u } }$ , our goal is to train a semantic segmentation model by leveraging both a large amount of unlabeled data and a smaller set of labeled data.
+
+Fig. 3 gives an overview of $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ , which follows the typical self-training framework with two models of the same architecture, named teacher and student respectively. The two models differ only when updating their weights. The student model’s weights $\theta _ { s }$ are updated consistent with the common practice while the teacher model’s weights $\theta _ { t }$ are exponential moving average (EMA) updated by the student model’s weights. Each model consists of a CNNbased encoder $h$ , a decoder with a segmentation head $f$ , and a representation head $g$ . At each training step, we equally sample $B$ labeled images $\boldsymbol { B } _ { l }$ and $B$ unlabeled images $B _ { u }$ . For every labeled image, our goal is to minimize the standard cross-entropy loss in Eq. (2). As for each unlabeled image, we first take it into the teacher model and get predictions. Then, based on pixel-level entropy, we ignore unreliable pixel-level pseudo-labels when computing unsupervised loss in Eq. (3). This part will be introduced in section Sec. 3.2 in detail. Finally, we use the contrastive loss to make full use of the unreliable pixels excluded in the unsupervised loss, which will be introduced in Sec. 3.3.
+
+Our optimization target is to minimize the overall loss, which can be formulated as:
+
+$$
+\mathcal {L} = \mathcal {L} _ {s} + \lambda_ {u} \mathcal {L} _ {u} + \lambda_ {c} \mathcal {L} _ {c}, \tag {1}
+$$
+
+where $\mathcal { L } _ { s }$ and $\mathcal { L } _ { u }$ represent supervised loss and unsupervised loss applied on labeled images and unlabeled images respectively, and $\mathcal { L } _ { c }$ is the contrastive loss to make full use of unreliable pseudo-labels. $\lambda _ { u }$ and $\lambda _ { c }$ are weights of
+
+unsupervised loss and contrastive loss respectively. Both $\mathcal { L } _ { s }$ and $\mathcal { L } _ { u }$ are cross-entropy (CE) loss:
+
+$$
+\mathcal {L} _ {s} = \frac {1}{| \mathcal {B} _ {l} |} \sum_ {\left(\mathbf {x} _ {i} ^ {l}, \mathbf {y} _ {i} ^ {l}\right) \in \mathcal {B} _ {l}} \ell_ {c e} \left(f \circ h \left(\mathbf {x} _ {i} ^ {l}; \theta\right), \mathbf {y} _ {i} ^ {l}\right), \tag {2}
+$$
+
+$$
+\mathcal {L} _ {u} = \frac {1}{| \mathcal {B} _ {u} |} \sum_ {\mathbf {x} _ {i} ^ {u} \in \mathcal {B} _ {u}} \ell_ {c e} \left(f \circ h \left(\mathbf {x} _ {i} ^ {u}; \theta , \hat {\mathbf {y}} _ {i} ^ {u}\right), \right. \tag {3}
+$$
+
+where $\mathbf { y } _ { i } ^ { l }$ represents the hand-annotated mask label for the $i$ -th labeled image, and $\hat { \mathbf { y } } _ { i } ^ { u }$ is the pseudo-label for the $i$ -th unlabeled image. $f \circ h$ is the composition function of $h$ and $f$ , which means the images are first fed into $h$ and then $f$ to get segmentation results. $\mathcal { L } _ { c }$ is the pixel-level InfoNCE [32] loss defined as:
+
+$$
+\begin{array}{l} \mathcal {L} _ {c} = - \frac {1}{C \times M} \sum_ {c = 0} ^ {C - 1} \sum_ {i = 1} ^ {M} \\ \log \left[ \frac {e ^ {\langle \mathbf {z} _ {c i} , \mathbf {z} _ {c i} ^ {+} \rangle / \tau}}{e ^ {\langle \mathbf {z} _ {c i} , \mathbf {z} _ {c i} ^ {+} \rangle / \tau} + \sum_ {j = 1} ^ {N} e ^ {\langle \mathbf {z} _ {c i} , \mathbf {z} _ {c i j} ^ {-} \rangle / \tau}} \right], \tag {4} \\ \end{array}
+$$
+
+where $M$ is the total number of anchor pixels, and $\mathbf { z } _ { c i }$ denotes the representation of the $i$ -th anchor of class $c$ . Each anchor pixel is followed with a positive sample and $N$ negative samples, whose representations are ${ \bf z } _ { c i } ^ { + }$ and $\mathbf { z } _ { c i j } ^ { - }$ respectively. Note that ${ \textbf { z } } = {  { g o h } } ( \mathbf { x } )$ is the output of the representation head. $\langle \cdot , \cdot \rangle$ is the cosine similarity between features from two different pixels, whose range is limited between $- 1$ to 1, hence the need of temperature $\tau$ . Following [28], we set $M = 5 0$ , $N = 2 5 6$ and $\tau = 0 . 5$ .
+
+# 3.2. Pseudo-Labeling
+
+To avoid overfitting incorrect pseudo-labels, we utilize entropy of every pixel’s probability distribution to filter high quality pseudo-labels for further supervision. Specifically, we denote $\mathbf { p } _ { i j } \in \mathbb { R } ^ { C }$ as the softmax probabilities generated by the segmentation head of the teacher model for the $i$ - th unlabeled image at pixel $j$ , where $C$ is the number of classes. Its entropy is computed by:
+
+$$
+\mathcal {H} \left(\mathbf {p} _ {i j}\right) = - \sum_ {c = 0} ^ {C - 1} p _ {i j} (c) \log p _ {i j} (c), \tag {5}
+$$
+
+where $p _ { i j } ( c )$ is the value of $\mathbf { p } _ { i j }$ at $c$ -th dimension.
+
+Then, we define pixels whose entropy on top $\alpha _ { t }$ as unreliable pseudo-labels at training epoch $t$ . Such unreliable pseudo-labels are not qualified for supervision. Therefore, we define the pseudo-label for the $i$ -th unlabeled image at pixel $j$ as:
+
+$$
+\hat {y} _ {i j} ^ {u} = \left\{ \begin{array}{l l} \arg \max  _ {c} p _ {i j} (c), & \text {i f} \mathcal {H} (\mathbf {p} _ {i j}) <   \gamma_ {t}, \\ \text {i g n o r e ,} & \text {o t h e r w i s e ,} \end{array} \right. \tag {6}
+$$
+
+![](images/14403880caec8e4ccd0a153f7d7cb9b744c9311e5ad85436f3701597e203f6dc.jpg)  
+Figure 3. An overview of our proposed $\mathbf { U } ^ { 2 } \mathbf { P } \mathbf { L }$ method. $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ contains a student network and a teacher network, where the teacher is momentum-updated with the student. Labeled data is directly fed into the student network for supervised training. Given an unlabeled image, we first use the teacher model to make a prediction, and then separate the pixels into reliable ones and unreliable ones based on their entropy. Such a process is formulated as Eq. (6). The reliable predictions are directly used as the pseudo-labels to advise the student, while each unreliable prediction is pushed into a category-wise memory bank. Pixels in each memory bank are regarded as the negative samples to the corresponding class, which is formulated as Eq. (4).
+
+where $\gamma _ { t }$ represents the entropy threshold at $t$ -th training step. We set $\gamma _ { t }$ as the quantile corresponding to $\alpha _ { t }$ , i.e., $\gamma _ { t } { = } \mathrm { n p }$ .percentile(H.flatten(), $1 0 0 \star ( 1 - \alpha _ { t } )$ ), where H is per-pixel entropy map. We adopt the following adjustment strategies in the pseudo-labeling process for better performance.
+
+Dynamic Partition Adjustment. During the training procedure, the pseudo-labels tend to be reliable gradually. Base on this intuition, we adjust unreliable pixels’ proportion $\alpha _ { t }$ with linear strategy every epoch:
+
+$$
+\alpha_ {t} = \alpha_ {0} \cdot \left(1 - \frac {t}{\text {t o t a l e p o c h}}\right), \tag {7}
+$$
+
+where $\alpha _ { 0 }$ is the initial proportion and is set to $2 0 \%$ , and $t$ is the current training epoch.
+
+Adaptive Weight Adjustment. After obtaining reliable pseudo-labels, we involve them in the unsupervised loss in Eq. (3). The weight $\lambda _ { u }$ for this loss is defined as the reciprocal of the percentage of pixels with entropy smaller than threshold $\gamma _ { t }$ in the current mini-batch multiplied by a base weight $\eta$ :
+
+$$
+\lambda_ {u} = \eta \cdot \frac {\left| \mathcal {B} _ {u} \right| \times H \times W}{\sum_ {i = 1} ^ {\left| \mathcal {B} _ {u} \right|} \sum_ {j = 1} ^ {H \times W} \mathbb {1} \left[ \hat {y} _ {i j} ^ {u} \neq \mathrm {i g n o r e} \right]}, \tag {8}
+$$
+
+where $\mathbb { 1 } ( \cdot )$ is the indicator function and $\eta$ is set to 1.
+
+# 3.3. Using Unreliable Pseudo-Labels
+
+In semi-supervised learning tasks, discarding unreliable pseudo-labels or reducing their weights is widely used to prevent degradation of model’s performance [37,41,43,50].
+
+We follow this intuition by filtering out unreliable pseudolabels based on Eq. (6).
+
+However, such contempt for unreliable pseudo-labels may result in information loss. It is obvious that unreliable pseudo-labels can provide information for better discrimination. For example, the white cross in Fig. 2, is a typical unreliable pixel. Its distribution demonstrates model’s uncertainty to distinguish between class person and class motorbike. However, this distribution also demonstrates model’s certainty to not to discriminate this pixel as class car, class train, class bicycle and so on. Such characteristic gives us the main insight to propose our $\mathrm { U ^ { 2 } P L }$ to use unreliable pseudo-labels for semi-supervised semantic segmentation.
+
+$\mathrm { U ^ { 2 } P L }$ , with a goal to use the information of unreliable pseudo-labels for better discrimination, coincides with recent popular contrastive learning paradigm in distinguishing representation. But due to the lack of labeled images in semi-supervised semantic segmentation tasks, our $\mathrm { U } ^ { \mathrm { 2 } } \mathrm { P } \mathrm { L }$ is built on more complicated strategies. $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ has three components, named anchor pixels, positive candidates and negative candidates. These components are obtained in a sampling manner from certain sets to alleviate huge computational cost. Next, we will introduce how to selecting: (a) anchor pixels (queries); (b) positive samples for each anchor; (c) negative samples for each anchor.
+
+Anchor Pixels. During training, we sample anchor pixels (queries) for each class that appears in the current mini batch. We denote the set of features of all labeled candidate anchor pixels for class $c$ as $\mathcal { A } _ { c } ^ { l }$ ,
+
+$$
+\mathcal {A} _ {c} ^ {l} = \left\{\mathbf {z} _ {i j} \mid y _ {i j} = c, p _ {i j} (c) > \delta_ {p} \right\}, \tag {9}
+$$
+
+where $y _ { i j }$ is the ground-truth for the $j$ -th pixel of labeled image $i$ , and $\delta _ { p }$ denotes the positive threshold for a particular class and is set to 0.3 following [28]. $\mathbf { z } _ { i j }$ means the representation of the $j$ -th pixel of labeled image $i$ . For unlabeled data, counterpart $\mathcal { A } _ { c } ^ { u }$ can be computed as:
+
+$$
+\mathcal {A} _ {c} ^ {u} = \left\{\mathbf {z} _ {i j} \mid \hat {y} _ {i j} = c, p _ {i j} (c) > \delta_ {p} \right\}. \tag {10}
+$$
+
+It is similar to $\mathcal { A } _ { c } ^ { l }$ , and the only difference is that we use pseudo-label $\hat { y } _ { i j }$ based on Eq. (6) rather than handannotated label, which implies that qualified anchor pixels are reliable, i.e., $\mathcal { H } ( \mathbf { p } _ { i j } ) \leq \gamma _ { t }$ . Therefore, for class $c$ , the set of all qualified anchors is
+
+$$
+\mathcal {A} _ {c} = \mathcal {A} _ {c} ^ {l} \cup \mathcal {A} _ {c} ^ {u}. \tag {11}
+$$
+
+Positive Samples. The positive sample is the same for all anchors from the same class. It is the center of all possible anchors:
+
+$$
+\mathbf {z} _ {c} ^ {+} = \frac {1}{| \mathcal {A} _ {c} |} \sum_ {\mathbf {z} _ {c} \in \mathcal {A} _ {c}} \mathbf {z} _ {c}. \tag {12}
+$$
+
+Negative Samples. We define a binary variable $n _ { i j } ( c )$ to identify whether the $j$ -th pixel of image $i$ is qualified to be negative samples of class $c$ .
+
+$$
+n _ {i j} (c) = \left\{ \begin{array}{l l} n _ {i j} ^ {l} (c), & \text {i f i m a g e i i s l a b e l e d}, \\ n _ {i j} ^ {u} (c), & \text {o t h e r w i s e}, \end{array} \right. \tag {13}
+$$
+
+where $n _ { i j } ^ { l } ( c )$ and $n _ { i j } ^ { u } ( c )$ are indicators of whether the $j$ -th pixel of labeled and unlabeled image $i$ is qualified to be negative samples of class $c$ respectively.
+
+For $i$ -th labeled image, a qualified negative sample for class $c$ should be: (a) not belonging to class c; (b) difficult to distinguish between class $c$ and its groundtruth category. Therefore, we introduce the pixel-level category order $\mathcal { O } _ { i j } = \mathop { \mathrm { a r g s o r t } } ( \mathbf { p } _ { i j } )$ . Obviously, we have $\mathcal { O } _ { i j } ( \arg \operatorname* { m a x } { \mathbf { p } _ { i j } } ) = 0$ and $\mathcal { O } _ { i j } ( \arg \operatorname* { m i n } \mathbf { p } _ { i j } ) = C - 1$ .
+
+$$
+n _ {i j} ^ {l} (c) = \mathbb {1} [ y _ {i j} \neq c ] \cdot \mathbb {1} [ 0 \leq \mathcal {O} _ {i j} (c) <   r _ {l} ], \tag {14}
+$$
+
+where $r _ { l }$ is the low rank threshold and is set to 3. The two indicators reflect feature (a) and (b) respectively.
+
+For $i$ -th unlabeled image, a qualified negative sample for class $c$ should: (a) be unreliable; (b) probably not belongs to class $c { \mathrm { : } }$ (c) not belongs to most unlikely classes. Similarly, we also use $\mathcal { O } _ { i j }$ to define $n _ { i j } ^ { u } ( c )$ :
+
+$$
+n _ {i j} ^ {u} (c) = \mathbb {1} \left[ \mathcal {H} \left(\mathbf {p} _ {i j}\right) > \gamma_ {t} \right] \cdot \mathbb {1} \left[ r _ {l} \leq \mathcal {O} _ {i j} (c) <   r _ {h} \right], \tag {15}
+$$
+
+where $r _ { h }$ is the high rank threshold and is set to 20. Finally, the set of negative samples of class $c$ is
+
+$$
+\mathcal {N} _ {c} = \left\{\mathbf {z} _ {i j} \mid n _ {i j} (c) = 1 \right\}. \tag {16}
+$$
+
+Category-wise Memory Bank. Due to the long tail phenomenon of the dataset, negative candidates in some
+
+Algorithm 1: Using Unreliable Pseudo-Labels   
+1 Initialize $\mathcal{L}\gets 0$ 2 Sample labeled images $\mathcal{B}_l$ and unlabeled images $\mathcal{B}_u$ .   
+3 for $\mathbf{x}_i\in \mathcal{B}_l\cup \mathcal{B}_u$ do   
+4 Get probabilities: $\mathbf{p}_i\gets f\circ h(\mathbf{x}_i;\theta_t)$ 5 Get representations: $\mathbf{z}_i\gets g\circ h(\mathbf{x}_i;\theta_s)$ 6 for $c\gets 0$ to $C - 1$ do   
+7 Get anchors $\mathcal{A}_c$ based on Eq. (11);   
+8 Sample $M$ anchors: $\mathcal{B}_A\gets$ sample $(\mathcal{A}_c)$ 9 Get negatives $\mathcal{N}_c$ based on Eq. (16);   
+10 Push $\mathcal{N}_c$ into memory bank $\mathcal{Q}_c$ 11 Pop oldest ones out of $\mathcal{Q}_c$ if necessary;   
+12 Sample $N$ negatives: $\mathcal{B}_N\gets$ sample $(\mathcal{Q}_c)$ 13 Get $\mathbf{z}^{+}$ based on Eq. (12);   
+14 $\mathcal{L}\leftarrow \mathcal{L} + \ell (\mathcal{B}_A,\mathcal{B}_N,\mathbf{z}^{+})$ based on Eq. (4);   
+15 end   
+16 end Output: contrastive loss $\mathcal{L}_c\gets \frac{1}{|\mathcal{B}| \times C}\mathcal{L}$
+
+particular categories are extremely limited in a mini-batch. In order to maintain a stable number of negative samples, we use category-wise memory bank $\mathcal { Q } _ { c }$ (FIFO queue) to store the negative samples for class $c$ .
+
+Finally, the whole process to use unreliable pseudolabels is shown in Algorithm 1. All features of anchors are attach to gradient, come from student hence, while features of positive and negative samples are from teacher.
+
+# 4. Experiments
+
+# 4.1. Setup
+
+Datasets. PASCAL VOC 2012 [14] Dataset is a standard semantic segmentation benchmark with 20 semantic classes of objects and 1 class of background. The training set and the validation set include 1, 464 and 1, 449 images respectively. Following [9, 21, 43], we use SBD [18] as the augmented set with 9, 118 additional training images. Since the SBD [18] dataset is coarsely annotated, PseudoSeg [50] takes only the standard 1, 464 images as the whole labeled set, while other methods [9, 21] take all 10, 582 images as candidate labeled data. Therefore, we evaluate our method on both the classic set (1, 464 candidate labeled images) and the blender set (10, 582 candidate labeled images). Cityscapes [10], a dataset designed for urban scene understanding, consists of 2, 975 training images with fine-annotated masks and 500 validation images. For each dataset, we compare $\mathrm { U } ^ { \mathrm { 2 } } \mathrm { P } \mathrm { L }$ with other methods under $1 / 2$ $1 / 4 , 1 / 8$ , and $1 / 1 6$ partition protocols.
+
+Network Structure. We use ResNet-101 [19] pre-trained on ImageNet [11] as the backbone and DeepLabv $^ { 3 + }$ [6] as the decoder. Both of the segmentation head and the rep-
+
+Table 1. Comparison with state-of-the-art methods on classic PASCAL VOC 2012 val set under different partition protocols. The labeled images are selected from the original VOC train set, which consists of 1, 464 samples in total. The fractions denote the percentage of labeled data used for training, followed by the actual number of images. All the images from SBD [18] are regarded as unlabeled data. “SupOnly” stands for supervised training without using any unlabeled data. $^ \dagger$ means we reproduce the approach.   
+
+<table><tr><td>Method</td><td>1/16 (92)</td><td>1/8 (183)</td><td>1/4 (366)</td><td>1/2 (732)</td><td>Full (1464)</td></tr><tr><td>SupOnly</td><td>45.77</td><td>54.92</td><td>65.88</td><td>71.69</td><td>72.50</td></tr><tr><td>\(MT^{\dagger}\)[38]</td><td>51.72</td><td>58.93</td><td>63.86</td><td>69.51</td><td>70.96</td></tr><tr><td>\(CutMix^{\dagger}\)[15]</td><td>52.16</td><td>63.47</td><td>69.46</td><td>73.73</td><td>76.54</td></tr><tr><td>PseudoSeg [50]</td><td>57.60</td><td>65.50</td><td>69.14</td><td>72.41</td><td>73.23</td></tr><tr><td>\(PC^2Seg\) [48]</td><td>57.00</td><td>66.28</td><td>69.78</td><td>73.05</td><td>74.15</td></tr><tr><td>\(U^2PL(w/CutMix)\)</td><td>67.98 (+15.82)</td><td>69.15 (+5.68)</td><td>73.66 (+4.20)</td><td>76.16 (+2.43)</td><td>79.49 (+2.95)</td></tr></table>
+
+resentation head consists of two Conv-BN-ReLU blocks, where both blocks preserve the feature map resolution and the first block halves the number of channels. The segmentation head can be seen as a pixel-level classifier, mapping the 512 dimensional features output from ASPP module into $C$ classes. The representation head maps the same features into 256 dimensional representation space.
+
+Evaluation. Following previous methods [15, 21, 33, 48], the images are center cropped into a fixed resolution for PASCAL VOC 2012. For Cityscapes, previous methods apply slide window evaluation, so do we. Then we adopt the mean of Intersection over Union (mIoU) as the metric to evaluate these cropped images. All results are measured on the val set on both Cityscapes [10] and PASCAL VOC 2012 [14]. Ablation studies are conducted on the blender PASCAL VOC 2012 [14] val set under 1/4 and 1/8 partition protocol.
+
+Implementation Details. For the training on the blender and classic PASCAL VOC 2012 dataset, we use stochastic gradient descent (SGD) optimizer with initial learning rate 0.001, weight decay as 0.0001, crop size as $5 1 3 \times 5 1 3$ , batch size as 16 and training epochs as 80. For the training on the Cityscapes dataset, we also use stochastic gradient descent (SGD) optimizer with initial learning rate 0.01, weight decay as 0.0005, crop size as $7 6 9 \times 7 6 9$ , batch size as 16 and training epochs as 200. In all experiments, the decoder’s learning rate is ten times that of the backbone. We use the poly scheduling to decay the learning rate during the training process: $\begin{array} { r } { l r = \dot { l } r _ { \mathrm { b a s e } } \cdot \dot { ( } 1 - \frac { \mathrm { i t e r } } { \mathrm { \ t o t a l \ i t e r } } \dot { ) } ^ { 0 . 9 } } \end{array}$ .
+
+# 4.2. Comparison with Existing Alternatives
+
+We compare our method with following recent semisupervised semantic segmentation methods: Mean Teacher (MT) [38], CCT [33], GCT [22], PseudoSeg [50], Cut-Mix [15], CPS [9], PC2Seg [48], AEL [21]. We reimplement MT [38], CutMix [45] for a fair comparison. For Cityscapes [10], we also reproduce CPS [9] and AEL [21]. All results are equipped with the same network architecture (DeepLabv3+ as decoder and ResNet-101 as encoder). It is
+
+Table 2. Comparison with state-of-the-art methods on blender PASCAL VOC 2012 val set under different partition protocols. All labeled images are selected from the augmented VOC train set, which consists of 10, 582 samples in total. “SupOnly” stands for supervised training without using any unlabeled data. † means we reproduce the approach.   
+
+<table><tr><td>Method</td><td>1/16 (662)</td><td>1/8 (1323)</td><td>1/4 (2646)</td><td>1/2 (5291)</td></tr><tr><td>SupOnly</td><td>67.87</td><td>71.55</td><td>75.80</td><td>77.13</td></tr><tr><td>\( MT^{\dagger} \)[38]</td><td>70.51</td><td>71.53</td><td>73.02</td><td>76.58</td></tr><tr><td>\( CutMix^{\dagger} \)[15]</td><td>71.66</td><td>75.51</td><td>77.33</td><td>78.21</td></tr><tr><td>CCT [33]</td><td>71.86</td><td>73.68</td><td>76.51</td><td>77.40</td></tr><tr><td>GCT [22]</td><td>70.90</td><td>73.29</td><td>76.66</td><td>77.98</td></tr><tr><td>CPS [9]</td><td>74.48</td><td>76.44</td><td>77.68</td><td>78.64</td></tr><tr><td>AEL [21]</td><td>77.20</td><td>77.57</td><td>78.06</td><td>80.29</td></tr><tr><td>\( U^{2}PL(w/CutMix) \)</td><td>77.21 (+5.55)</td><td>79.01 (+3.50)</td><td>79.30 (+1.97)</td><td>80.50 (+2.29)</td></tr></table>
+
+Table 3. Comparison with state-of-the-art methods on Cityscapes val set under different partition protocols. All labeled images are selected from the Cityscapes train set, which consists of 2, 975 samples in total. “SupOnly” stands for supervised training without using any unlabeled data. $^ \dagger$ means we reproduce the approach.   
+
+<table><tr><td>Method</td><td>1/16 (186)</td><td>1/8 (372)</td><td>1/4 (744)</td><td>1/2 (1488)</td></tr><tr><td>SupOnly</td><td>65.74</td><td>72.53</td><td>74.43</td><td>77.83</td></tr><tr><td>\( MT^{\dagger} \)[38]</td><td>69.03</td><td>72.06</td><td>74.20</td><td>78.15</td></tr><tr><td>\( CutMix^{\dagger} \)[15]</td><td>67.06</td><td>71.83</td><td>76.36</td><td>78.25</td></tr><tr><td>CCT [33]</td><td>69.32</td><td>74.12</td><td>75.99</td><td>78.10</td></tr><tr><td>GCT [22]</td><td>66.75</td><td>72.66</td><td>76.11</td><td>78.34</td></tr><tr><td>\( CPS^{\dagger} \)[9]</td><td>69.78</td><td>74.31</td><td>74.58</td><td>76.81</td></tr><tr><td>\( AEL^{\dagger} \)[21]</td><td>74.45</td><td>75.55</td><td>77.48</td><td>79.01</td></tr><tr><td>\( U^{2}PL(w/CutMix) \)</td><td>70.30 (+3.24)</td><td>74.37 (+2.54)</td><td>76.47 (+0.11)</td><td>79.05 (+0.80)</td></tr><tr><td>\( U^{2}PL(w/AEL) \)</td><td>74.90 (+0.45)</td><td>76.48 (+0.93)</td><td>78.51 (+1.03)</td><td>79.12 (+0.11)</td></tr></table>
+
+important to note the classic PASCAL VOC 2012 Dataset and blender PASCAL VOC 2012 Dataset only differ in training set. Their validation set are the same common one with 1, 449 images.
+
+Results on classic PASCAL VOC 2012 Dataset. Tab. 1 compares our method with the other state-of-the-art methods on classic PASCAL VOC 2012 Dataset. $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ outperforms the supervised baseline by $+ 2 2 . 2 1 \%$ , $+ 1 4 . 2 3 \%$ , $+ 7 . 7 8 \%$ and $+ 4 . 4 7 \%$ under 1/16, 1/8, 1/4 and 1/2 partition protocols respectively. For a fair comparison, we only list the methods tested on classic PASCAL VOC
+
+2012. Our method $\mathrm { U ^ { 2 } P L }$ outperform $\mathrm { P C ^ { 2 } S e g }$ under all partition protocols by $+ 1 0 . 9 8 \%$ , $+ 2 . 8 7 \%$ , $+ 3 . 8 8 \%$ and $+ 3 . 1 1 \%$ under $1 / 1 6 , 1 / 8 , 1 / 4$ and $1 / 2$ partition protocols respectively. Even under full supervision, our method outperform $\mathrm { P C ^ { 2 } S e g }$ by $+ 5 . 3 4 \%$ .
+
+Results on blender PASCAL VOC 2012 Dataset. Tab. 2 shows the comparison results on blender PASCAL VOC 2012 Dataset. Our method $\mathrm { U ^ { 2 } P L }$ outperforms all the other methods under most partition protocols. Compared with the baseline model (trained with only supervised data), $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ achieves all improvements of $+ 9 . 3 4 \%$ , $+ 7 . 4 6 \%$ , $+ 3 . 5 0 \%$ and $+ 3 . 3 7 \%$ under 1/16, 1/8, 1/4 and 1/2 partition protocols respectively. Compared with the existing stateof-the-art methods, $\mathrm { U } ^ { \mathrm { 2 } } \mathrm { P } \mathrm { L }$ surpasses them under all partition protocols. Especially under $1 / 8$ protocol and 1/4 protocol, $\mathrm { U ^ { 2 } P L }$ outperforms AEL by $+ 1 . 4 4 \%$ and $+ 1 . 2 4 \%$ .
+
+Results on Cityscapes Dataset. Tab. 3 illustrates the comparison results on the Cityscapes val set. $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ achieves consistent performance gains over the supervised only baseline by $+ 9 . 1 6 \%$ , $+ 3 . 9 5 \%$ , $+ 4 . 0 8 \%$ and $+ 1 . 2 9 \%$ under $1 / 1 6 , 1 / 8 , 1 / 4$ and $1 / 2$ partition protocols. $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ outperforms the existing state-of-the-art method by a notable margin. In particular, $\mathrm { U ^ { 2 } P L }$ outperforms AEL by $+ 0 . 4 5 \%$ , $+ 0 . 9 3 \%$ , $+ 1 . 0 3 \%$ and $+ 0 . 1 1 \%$ under $1 / 1 6 , 1 / 8$ , $1 / 4$ and 1/2 partition protocols.
+
+Note that when labeled data is extremely limited, e.g., when we only have 92 labeled data, our $\mathrm { U ^ { 2 } P L }$ outperforms previous methods by a large margin $\cdot + 1 0 . 9 8 \%$ under $1 / 1 6$ split for classic PASCAL VOC 2012), proofing the efficiency of using unreliable pseudo-labels.
+
+# 4.3. Ablation Studies
+
+Effectiveness of Using Unreliable Pseudo-Labels. To prove our core insight, i.e., using unreliable pseudolabels promotes semi-supervised semantic segmentation, we conduct experiments about selecting negative candidates (Sec. 3.3) with different reliability. Tab. 4 demonstrates the mIoU results on PASCAL VOC 2012 val set. “Unreliable” outperforms other options, proving using unreliable pseudo-labels does help. Appendix B shows the effectiveness of using unreliable pseudo-labels on Cityscapes.
+
+Effectiveness of Probability Rank Threshold. Sec. 3.3 proposes to use probability rank threshold to balance informativeness and confusion caused by unreliable pixels. Tab. 5 provides a verification that such balance promotes the performance. $r _ { l } = 3$ and $r _ { h } ~ = ~ 2 0$ outperform other options by a large margin. When $r _ { l } ~ = ~ 1$ , false negative candidates would not be filtered out, causing the intra-class features of pixels incorrectly distinguished by $\mathcal { L } _ { c }$ . When $r _ { l } ~ = ~ 1 0$ , negative candidates tend to become irrelevant with corresponding anchor pixels in semantic, making such discrimination less informative. Appendix D.2 studies PRT and $\alpha _ { 0 }$ on Cityscapes.
+
+Table 4. Ablation study on using pseudo pixels with different reliability, which is measured by the entropy of pixel-wise prediction (see Sec. 3.3). “Unreliable” denotes selecting negative candidates from pixels with top $20 \%$ highest entropy scores. “Reliable” denotes the bottom $20 \%$ counterpart. “All” denotes sampling regardless of entropy.
+
+<table><tr><td></td><td>Unreliable</td><td>Reliable</td><td>All</td></tr><tr><td>1/8 (1323)</td><td>79.01</td><td>77.30</td><td>77.40</td></tr><tr><td>1/4 (2646)</td><td>79.30</td><td>77.35</td><td>77.57</td></tr></table>
+
+Table 5. Ablation study on the probability rank threshold, which is described in Sec. 3.3.   
+
+<table><tr><td>rl</td><td>rh</td><td>1/8 (1323)</td><td>1/4 (2646)</td></tr><tr><td>1</td><td>3</td><td>78.57</td><td>79.03</td></tr><tr><td>1</td><td>20</td><td>78.64</td><td>79.07</td></tr><tr><td>3</td><td>10</td><td>78.27</td><td>78.91</td></tr><tr><td>3</td><td>20</td><td>79.01</td><td>79.30</td></tr><tr><td>10</td><td>20</td><td>78.62</td><td>78.94</td></tr></table>
+
+Table 6. Ablation study on the effectiveness of various components in our $\mathbf { U } ^ { 2 } \mathbf { P } \mathbf { L }$ , including unsupervised loss $\mathcal { L } _ { u }$ , contrastive loss $\mathcal { L } _ { c }$ , category-wise memory bank $\mathcal { Q } _ { c }$ , Dynamic Partition Adjustment (DPA), Probability Rank Threshold (PRT), and high entropy filtering (Unreliable).   
+
+<table><tr><td>\( \mathcal{L}_c \)</td><td>\( Q_c \)</td><td>DPA</td><td>PRT</td><td>Unreliable</td><td>1/4 (2646)</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td>73.02</td></tr><tr><td>✓</td><td></td><td></td><td></td><td></td><td>77.08</td></tr><tr><td>✓</td><td>✓</td><td></td><td>✓</td><td>✓</td><td>78.49</td></tr><tr><td>✓</td><td>✓</td><td>✓</td><td></td><td>✓</td><td>79.07</td></tr><tr><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td>77.57</td></tr><tr><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>79.30</td></tr></table>
+
+Table 7. Ablation study on $\alpha _ { 0 }$ in Eq. (7), which controls the initial proportion between reliable and unreliable pixels.   
+
+<table><tr><td>α0</td><td>40%</td><td>30%</td><td>20%</td><td>10%</td></tr><tr><td>1/8 (1323)</td><td>76.77</td><td>77.34</td><td>79.01</td><td>77.80</td></tr><tr><td>1/4 (2646)</td><td>76.92</td><td>77.38</td><td>79.30</td><td>77.95</td></tr></table>
+
+Effectiveness of Components. We conduct experiments in Tab. 6 to ablate each component of $\mathrm { U ^ { 2 } P L }$ step by step. For a fair comparison, all the ablations are under 1/4 partition protocol on blender PASCAL VOC 2012 Dataset. Above all, we use no $\mathcal { L } _ { c }$ trained model as our baseline, achieving mIoU of $7 3 . 0 2 \%$ (MT in Tab. 2). Simply adding $\mathcal { L } _ { c }$ without DPA strategy improves the baseline by $+ 4 . 0 6 \%$ . Categorywise memory bank $\mathcal { Q } _ { c }$ , along with PRT and high entropy filtering brings an improvement by $+ 5 . 4 7 \%$ to baseline. Dynamic Partition Adjustment (DPA) together with high entropy filtering, brings an improvement by $+ 6 . 0 5 \%$ to baseline. Note that DPA is a linear adjustment without tuning (refer to Eq. (7)), which is simple yet efficient.
+
+![](images/79ef5a929d7ba3e35c4dc9a85f946aafd14bd9f2641b0c01e9bc83a983dc35df.jpg)
+
+![](images/0b086ae2dd6b6b2512e042fa94e41102111f7e05ed6ccfc0d1581fb7de26970b.jpg)
+
+![](images/0ef4a905b8f6f9701d394354236471f813b79c9f65425631732399761e15c7d9.jpg)
+
+![](images/a70516d39803d4c4e580a6f86d536ffd4886491ff21cdbcc38f78eaf70bda336.jpg)
+
+![](images/0a3c75deb1c990ca88a4978cd651e2896ff73ee0ef269307bc06829bea105882.jpg)
+
+![](images/6ae35e55d3c8046969075a10cdf345a91904b859a89e315f48d74b2a0423d843.jpg)
+
+![](images/a38d6fa90d5f8371b3b77b5d8dbd21ed32da1e008eca7a1465c4e13cd12a95f9.jpg)
+
+![](images/a34396d389a58843144a3f83e8cf8210ffe1edb987b51a5e6d85b50ccec8e681.jpg)
+
+![](images/cc42a3f334118e8aae8f8ad81e77bf244ac62aa07d4a8919a483a8825296af8b.jpg)
+
+![](images/1f6fb1b7b1f71536cd30cc7ba2e3c2c5c56b124af3448ac5c0a5cbbc2fd5bff2.jpg)
+
+![](images/cec38c79523329a822997c8d606d20a1ccf9484fa2ed8932d85de5c80a3ed7bb.jpg)
+
+![](images/b85a3f1e2c9174e170ea08c5260867dd5063aaf341d41db8f5cd73fa05c4b3ac.jpg)
+
+![](images/441e0dcaca47bdd07423697da2ac39b1aed39fe20b64e109cbfb4cd37f31a260.jpg)
+
+![](images/e68e830cd6c0f46c0f3c96171ac012ee44a8f3b4db12cef95cae64be964e4494.jpg)
+
+![](images/cd57afeb1a341d6781a2034e1c85707e3fe0642c880904dd5a55f97722957bf0.jpg)
+
+![](images/df900acb05fc2b495dd3e650a18bc0c4eae0a91466f28cc34be873922a878dd8.jpg)  
+(a) Image
+
+![](images/8297b61c041bee793325ae20e64e173d3cea2e990990781c27e0e4685ec157a0.jpg)  
+(b) Ground-Truth
+
+![](images/2042e49fa1ee9e86ee69b0adbf8b299b7d57845b9c5dbc81d06997c687d8b15f.jpg)  
+(c) Supervised Only
+
+![](images/0899891d48af0f7d94b6bb65e75dc0b3e62c2c78d636bb69e6c543e9c922ace6.jpg)  
+(d) Plain $\mathcal { L } _ { c }$
+
+![](images/6b4af3708f851c75c618cd0e81236a00717c6c36764afc43a2458a58116e0c0e.jpg)  
+(e) U2PL   
+Figure 4. Qualitative results on PASCAL VOC 2012 val set. All models are trained under the $1 / 4$ partition protocol of blender set, which contains 2, 646 labeled images and 7, 396 unlabeled images. (a) Input images. (b) Hand-annotated labels for the corresponding image. (c) Only labeled images are used for training without any unlabeled data. (d) The vanilla contrastive learning framework, where all pixels are used as negative samples without entropy filtering. (e) Predictions from our $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ . Yellow rectangles highlight the promotion of segmentation results by adequately using unreliable pseudo-labels.
+
+For Probability Rank Threshold (PRT) component, we set corresponding parameter according to Tab. 5. Without high entropy filtering, the improvement decreased significantly at $+ 4 . 5 5 \%$ . Finally, when adding all the contribution together, our method achieves state-of-the-art result under $1 / 4$ partition protocol with mIoU of $7 9 . 3 0 \%$ . Following this result, we apply these components and corresponding parameters in all experiments on Tab. 2 and Tab. 1.
+
+Ablation Study on Hyper-parameters. We ablate following important parameter for $\mathrm { U ^ { 2 } P L }$ . Tab. 7 studies the impact of different initial reliable-unreliable partition. This parameter $\alpha _ { 0 }$ have a certain impact on performance. We find $\alpha _ { 0 } = 2 0 \%$ achieves the best performance. Small $\alpha _ { 0 }$ will introduce incorrect pseudo labels for supervision, and large $\alpha _ { 0 }$ will make the information of some high-confidence samples underutilized. Other hyper-parameters are studied in Appendix D.1.
+
+# 4.4. Qualitative Results
+
+Fig. 4 shows the results of different methods on the PASCAL VOC 2012 val set. Benefiting from using unreliable pseudo-labels, $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ outperforms other methods. Note that using contrastive learning without filtering those unreliable pixels, sometimes does harm to the model (see row 2 and row 4 in Fig. 4), leading to worse results than those when the model is trained only by labeled data.
+
+Furthermore, through visualizing the segmentation results, we find that our method achieves much better performance on those ambiguous regions (e.g., the border between different objects). Such visual difference proves that our method finally makes the reliability of unreliable prediction labels stronger.
+
+# 5. Conclusion
+
+We propose a semi-supervised semantic segmentation framework $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ by including unreliable pseudo-labels into training, which outperforms many existing state-ofthe-art methods, suggesting our framework provide a new promising paradigm in semi-supervised learning research. Our ablation experiments proves the insight of this work is quite solid. Qualitative result gives a visual proof for its effectiveness, especially the better performance on borders between semantic objects or other ambiguous regions.
+
+The training of our method is time-consuming compared with fully-supervised methods [5, 6, 29, 35, 46], which is a common disadvantage for semi-supervised learning tasks [9, 20, 21, 33, 43, 48]. Due to the extreme lack of labels, the semi-supervised learning frameworks commonly need to pay a price in time for higher accuracy. More in-depth exploration could be conducted on their training optimization in the future.
+
+# References
+
+[1] Inigo Alonso, Alberto Sabater, David Ferstl, Luis Montesano, and Ana C Murillo. Semi-supervised semantic segmentation with pixel-level contrastive learning from a class-wise memory bank. In Int. Conf. Comput. Vis., 2021. 1, 2   
+[2] Eric Arazo, Diego Ortego, Paul Albert, Noel E O’Connor, and Kevin McGuinness. Pseudo-labeling and confirmation bias in deep semi-supervised learning. In IJCNN, 2020. 1, 2   
+[3] Philip Bachman, Ouais Alsharif, and Doina Precup. Learning with pseudo-ensembles. In Adv. Neural Inform. Process. Syst., 2014. 2   
+[4] Huaian Chen, Yi Jin, Guoqiang Jin, Changan Zhu, and Enhong Chen. Semi-supervised semantic segmentation by improving prediction confidence. IEEE Transactions on Neural Networks and Learning Systems, 13(1), 2021. 1, 2   
+[5] Liang-Chieh Chen, George Papandreou, Iasonas Kokkinos, Kevin Murphy, and Alan L Yuille. Deeplab: Semantic image segmentation with deep convolutional nets, atrous convolution, and fully connected crfs. IEEE Trans. Pattern Anal. Mach. Intell., 40(4):834–848, 2017. 1, 8   
+[6] Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian Schroff, and Hartwig Adam. Encoder-decoder with atrous separable convolution for semantic image segmentation. In Eur. Conf. Comput. Vis., 2018. 5, 8   
+[7] Ting Chen, Simon Kornblith, Kevin Swersky, Mohammad Norouzi, and Geoffrey Hinton. Big self-supervised models are strong semi-supervised learners. In Adv. Neural Inform. Process. Syst., 2020. 2   
+[8] Xinlei Chen, Saining Xie, and Kaiming He. An empirical study of training self-supervised vision transformers. In Int. Conf. Comput. Vis., 2021. 2   
+[9] Xiaokang Chen, Yuhui Yuan, Gang Zeng, and Jingdong Wang. Semi-supervised semantic segmentation with cross pseudo supervision. In IEEE Conf. Comput. Vis. Pattern Recog., 2021. 1, 5, 6, 8, 10   
+[10] Marius Cordts, Mohamed Omran, Sebastian Ramos, Timo Rehfeld, Markus Enzweiler, Rodrigo Benenson, Uwe Franke, Stefan Roth, and Bernt Schiele. The cityscapes dataset for semantic urban scene understanding. In IEEE Conf. Comput. Vis. Pattern Recog., 2016. 2, 5, 6, 10, 12   
+[11] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In IEEE Conf. Comput. Vis. Pattern Recog., 2009. 5   
+[12] Armen Der Kiureghian and Ove Ditlevsen. Aleatory or epistemic? does it matter? Structural Safety, 31(2):105–112, 2009. 2   
+[13] Terrance DeVries and Graham W Taylor. Improved regularization of convolutional neural networks with cutout. arXiv preprint arXiv:1708.04552, 2017. 2   
+[14] Mark Everingham, Luc Van Gool, Christopher KI Williams, John Winn, and Andrew Zisserman. The pascal visual object classes (voc) challenge. International Journal of Computer Vision, 88(2):303–338, 2010. 1, 2, 5, 6, 10, 12   
+[15] Geoff French, Samuli Laine, Timo Aila, Michal Mackiewicz, and Graham Finlayson. Semi-supervised semantic segmen-
+
+tation needs strong, varied perturbations. In Brit. Mach. Vis. Conf., 2020. 1, 2, 6   
+[16] Yves Grandvalet, Yoshua Bengio, et al. Semi-supervised learning by entropy minimization. CAP, 367:281–296, 2005. 2   
+[17] Jean-Bastien Grill, Florian Strub, Florent Altche, Corentin ´ Tallec, Pierre H Richemond, Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, et al. Bootstrap your own latent: A new approach to self-supervised learning. arXiv preprint arXiv:2006.07733, 2020. 2   
+[18] Bharath Hariharan, Pablo Arbelaez, Lubomir Bourdev, ´ Subhransu Maji, and Jitendra Malik. Semantic contours from inverse detectors. In Int. Conf. Comput. Vis., 2011. 5, 6   
+[19] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In IEEE Conf. Comput. Vis. Pattern Recog., 2016. 5   
+[20] Ruifei He, Jihan Yang, and Xiaojuan Qi. Re-distributing biased pseudo labels for semi-supervised semantic segmentation: A baseline investigation. In Int. Conf. Comput. Vis., 2021. 8   
+[21] Hanzhe Hu, Fangyun Wei, Han Hu, Qiwei Ye, Jinshi Cui, and Liwei Wang. Semi-supervised semantic segmentation via adaptive equalization learning. In Adv. Neural Inform. Process. Syst., 2021. 1, 5, 6, 8, 10   
+[22] Zhanghan Ke, Di Qiu, Kaican Li, Qiong Yan, and Rynson WH Lau. Guided collaborative training for pixel-wise semi-supervised learning. In Eur. Conf. Comput. Vis., 2020. 6   
+[23] Alex Kendall and Yarin Gal. What uncertainties do we need in bayesian deep learning for computer vision? In Adv. Neural Inform. Process. Syst., 2017. 2   
+[24] Youngdong Kim, Junho Yim, Juseung Yun, and Junmo Kim. Nlnl: Negative learning for noisy labels. In IEEE Conf. Comput. Vis. Pattern Recog., 2019. 3   
+[25] Youngdong Kim, Juseung Yun, Hyounguk Shon, and Junmo Kim. Joint negative and positive learning for noisy labels. In IEEE Conf. Comput. Vis. Pattern Recog., 2021. 3   
+[26] Geoffrey Hinton Laurens Van der Maaten. Visualizing data using t-sne. In JMLR, 2008. 12, 13   
+[27] Dong-Hyun Lee et al. Pseudo-label: The simple and efficient semi-supervised learning method for deep neural networks. In Int. Conf. Mach. Learn., volume 3, page 896, 2013. 1, 2   
+[28] Shikun Liu, Shuaifeng Zhi, Edward Johns, and Andrew J Davison. Bootstrapping semantic segmentation with regional contrast. arXiv preprint arXiv:2104.04465, 2021. 2, 3, 5, 11   
+[29] Jonathan Long, Evan Shelhamer, and Trevor Darrell. Fully convolutional networks for semantic segmentation. In IEEE Conf. Comput. Vis. Pattern Recog., 2015. 1, 8   
+[30] Jishnu Mukhoti and Yarin Gal. Evaluating bayesian deep learning methods for semantic segmentation. arXiv preprint arXiv:1811.12709, 2018. 2   
+[31] Viktor Olsson, Wilhelm Tranheden, Juliano Pinto, and Lennart Svensson. Classmix: Segmentation-based data augmentation for semi-supervised learning. In IEEE Conf. Comput. Vis. Pattern Recog., 2021. 2
+
+[32] Aaron van den Oord, Yazhe Li, and Oriol Vinyals. Representation learning with contrastive predictive coding. arXiv preprint arXiv:1807.03748, 2018. 3   
+[33] Yassine Ouali, Celine Hudelot, and Myriam Tami. Semi- ´ supervised semantic segmentation with cross-consistency training. In IEEE Conf. Comput. Vis. Pattern Recog., 2020. 1, 2, 6, 8   
+[34] Mamshad Nayeem Rizve, Kevin Duarte, Yogesh S Rawat, and Mubarak Shah. In defense of pseudo-labeling: An uncertainty-aware pseudo-label selection framework for semi-supervised learning. In Int. Conf. Learn. Represent., 2020. 2, 3   
+[35] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. Unet: Convolutional networks for biomedical image segmentation. In International Conference on Medical Image Computing and Computer Assisted Intervention, pages 234– 241. Springer, 2015. 1, 8   
+[36] Mehdi Sajjadi, Mehran Javanmardi, and Tolga Tasdizen. Regularization with stochastic transformations and perturbations for deep semi-supervised learning. In Adv. Neural Inform. Process. Syst., 2016. 2   
+[37] Kihyuk Sohn, David Berthelot, Nicholas Carlini, Zizhao Zhang, Han Zhang, Colin A Raffel, Ekin Dogus Cubuk, Alexey Kurakin, and Chun-Liang Li. Fixmatch: Simplifying semi-supervised learning with consistency and confidence. In Adv. Neural Inform. Process. Syst., 2020. 2, 4   
+[38] Antti Tarvainen and Harri Valpola. Mean teachers are better role models: Weight-averaged consistency targets improve semi-supervised deep learning results. In Adv. Neural Inform. Process. Syst., 2017. 6, 12   
+[39] Hiroki Tokunaga, Brian Kenji Iwana, Yuki Teramoto, Akihiko Yoshizawa, and Ryoma Bise. Negative pseudo labeling using class proportion for semantic segmentation in pathology. In Eur. Conf. Comput. Vis., 2020. 3   
+[40] Wenguan Wang, Tianfei Zhou, Fisher Yu, Jifeng Dai, Ender Konukoglu, and Luc Van Gool. Exploring cross-image pixel contrast for semantic segmentation. In Int. Conf. Comput. Vis., 2021. 2   
+[41] Qizhe Xie, Minh-Thang Luong, Eduard Hovy, and Quoc V Le. Self-training with noisy student improves imagenet classification. In IEEE Conf. Comput. Vis. Pattern Recog., 2020. 1, 4   
+[42] Yi Xu, Lei Shang, Jinxing Ye, Qi Qian, Yu-Feng Li, Baigui Sun, Hao Li, and Rong Jin. Dash: Semi-supervised learning with dynamic thresholding. In Int. Conf. Mach. Learn., 2021. 1, 2   
+[43] Lihe Yang, Wei Zhuo, Lei Qi, Yinghuan Shi, and Yang Gao. ${ \mathrm { S t } } { + + }$ : Make self-training work better for semi-supervised semantic segmentation. arXiv preprint arXiv:2106.05095, 2021. 1, 2, 4, 5, 8   
+[44] Jianlong Yuan, Yifan Liu, Chunhua Shen, Zhibin Wang, and Hao Li. A simple baseline for semi-supervised semantic segmentation with strong data augmentation. In Int. Conf. Comput. Vis., 2021. 2   
+[45] Sangdoo Yun, Dongyoon Han, Seong Joon Oh, Sanghyuk Chun, Junsuk Choe, and Youngjoon Yoo. Cutmix: Regularization strategy to train strong classifiers with localizable features. In Int. Conf. Comput. Vis., 2019. 2, 6, 11
+
+[46] Hengshuang Zhao, Jianping Shi, Xiaojuan Qi, Xiaogang Wang, and Jiaya Jia. Pyramid scene parsing network. In IEEE Conf. Comput. Vis. Pattern Recog., 2017. 1, 8   
+[47] Xiangyun Zhao, Raviteja Vemulapalli, Philip Andrew Mansfield, Boqing Gong, Bradley Green, Lior Shapira, and Ying Wu. Contrastive learning for label efficient semantic segmentation. In Int. Conf. Comput. Vis., 2021. 2   
+[48] Yuanyi Zhong, Bodi Yuan, Hong Wu, Zhiqiang Yuan, Jian Peng, and Yu-Xiong Wang. Pixel contrastive-consistent semi-supervised semantic segmentation. In Int. Conf. Comput. Vis., 2021. 1, 6, 8, 10   
+[49] Yanning Zhou, Hang Xu, Wei Zhang, Bin Gao, and Pheng-Ann Heng. C3-semiseg: Contrastive semi-supervised segmentation via cross-set learning and dynamic classbalancing. In Int. Conf. Comput. Vis., 2021. 2   
+[50] Yuliang Zou, Zizhao Zhang, Han Zhang, Chun-Liang Li, Xiao Bian, Jia-Bin Huang, and Tomas Pfister. Pseudoseg: Designing pseudo labels for semantic segmentation. In Int. Conf. Learn. Represent., 2020. 1, 4, 5, 6, 10   
+[51] Simiao Zuo, Yue Yu, Chen Liang, Haoming Jiang, Siawpeng Er, Chao Zhang, Tuo Zhao, and Hongyuan Zha. Self-training with differentiable teacher. arXiv preprint arXiv:2109.07049, 2021. 1
+
+# Appendix
+
+We organize the Appendix as follows. Above all, more details for reproducing the results will be given in Appendix A. Then we will give more results on Cityscapes from two perspectives in Appendix B. We also provide an alternative of contrastive learning to prove our main insight does not only rely on contrastive learning in Appendix C. Besides, ablation studies on both PASCAL VOC 2012 and Cityscapes for more hyper-parameters are given in Appendix D. Finally, visualization on feature space gives a visual proof for the effectiveness of $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ in Appendix E.
+
+# A. More Details for Reproducibility
+
+For Cityscapes [10], we utilize OHEM which is the same as previous methods [9, 21]. The temperature $\tau$ is set to 0.5 for both PASCAL VOC 2012 [14] and Cityscapes [10]. We use SGD optimizer for all experiments. For experiments in PASCAL VOC 2012 [14], the initial base learning rate is 0.001 and the weight decay is 0.0001. For experiments in Cityscapes [10], the initial base learning rate is 0.01 and the weight decay is 0.0005. In our experiments, we find if we train the model only with supervised loss for the initial a few epochs then apply $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ , it can achieve better performance. We define such epoch as the warm start epoch, and the corresponding warm start epochs for PASCAL VOC 2012 and Cityscapes are 1 and 20 respectively.
+
+To prevent overfitting, we apply random cropping, random horizontal flipping, and random scaling with the range of [0.5, 2.0] for both PASCAL VOC 2012 [14] and Cityscapes [10] following previous methods [9, 21, 48,
+
+![](images/32a41623f296d2e0f34a3e1de68af92c1396f25ef5f4365806178cf9b87250cc.jpg)
+
+![](images/22a14e6d7ece62b08b4744d84d53886b55c7f458c63af616b52c9f11797f1409.jpg)  
+(b) Ground-Truth
+
+![](images/e9ac1062cadd76926e62fee07f92eb2568d33ef1f9b0f38fb72b0c08b7dd7dd8.jpg)  
+(c) Supervised Only
+
+![](images/da14d36ab73a74a5f51e334940e943634985d0dc9ccc0a59223959641912328d.jpg)  
+(d) Plain $\mathcal { L } _ { c }$
+
+![](images/ee5fa09f4e2efafc237ecac7bd259d80db43540ce778b0a477558b11fc9b6bff.jpg)  
+(e) U2PL   
+Figure A1. Qualitative results on Cityscapes val set. All models are trained under the $1 / 2$ partition protocol, which contains 1, 488 labeled images and 1, 487 unlabeled images. (a) Input images. (b) Hand-annotated labels for the corresponding image. (c) Only labeled images are used for training. (d) The vanilla contrastive learning framework, where all pixels are used as negative samples without entropy filtering. (e) Predictions from our $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ . Yellow rectangles highlight the promotion by adequately using unreliable pseudo-labels.
+
+50]. Our memory queue is category-specific. For the background category, the length of the queue is set to be 50, 000. For foreground categories, the length of the queue is all 30, 000. All baselines i.e., “SupOnly”, “MT”, and “CutMix” are re-implemented by ourselves, where the only difference between “MT” and “CutMix” is that the latter applies CutMix [45] augmentation for unlabeled images.
+
+The hyper-parameters used in this work are listed in Tab. A1. Among them, $M , N , \delta _ { p }$ are used for contrastive learning, for which we simply follow [28]. $\lambda _ { c } , \eta , \tau$ are training-related, while $\alpha _ { 0 } , r _ { l } , r _ { h }$ are additionally introduced by our $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ .
+
+Table A1. Summary of hyper-parameters used in $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$   
+
+<table><tr><td>Symbol</td><td>Description</td><td>Default Value</td></tr><tr><td>(M, N)</td><td>contrastive learning settings</td><td>(50, 256)</td></tr><tr><td>δp</td><td>confidence threshold of positive samples</td><td>0.3</td></tr><tr><td>(λc, η)</td><td>loss weights</td><td>(0.1, 1)</td></tr><tr><td>τ</td><td>loss temperature</td><td>0.5</td></tr><tr><td>α0</td><td>initial proportion of unreliable pixels</td><td>20%</td></tr><tr><td>(rl, rh)</td><td>probability rank thresholds</td><td>(3, 20)</td></tr></table>
+
+# B. More Results on Cityscapes
+
+Quantitative Results. Tab. A2 demonstrates the mIoU results on Cityscapes val set. “Unreliable” outperforms other options, proving using unreliable pseudo-labels does help. $\mathrm { U } ^ { \mathrm { 2 } } \mathrm { P } \mathrm { L }$ fully mines the information of all pixels.
+
+Qualitative Results. Fig. A1 shows the results of different methods on the Cityscapes val set. Benefiting by using unreliable pseudo-labels, $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ outperforms other methods. Note that using contrastive learning without filtering those
+
+Table A2. Ablation study on using pseudo pixels with different reliability, which is measured by the entropy of pixel-wise prediction. “Unreliable” denotes selecting negative candidates from pixels with top $20 \%$ highest entropy scores. “Reliable” denotes the bottom $20 \%$ counterpart. “All” denotes sampling regardless of entropy. We prove this effectiveness under $1 / 2$ and $1 / 4$ partition protocol on Cityscapes val set.   
+
+<table><tr><td></td><td>Unreliable</td><td>Reliable</td><td>All</td></tr><tr><td>1/2 (1488)</td><td>79.05</td><td>77.19</td><td>76.96</td></tr><tr><td>1/4 (744)</td><td>76.47</td><td>75.16</td><td>74.51</td></tr></table>
+
+unreliable pixels, sometimes does harm to the model (see the 1-st row and the 4-th row in Fig. A1), leading to worse results than those when the model is trained only by labeled data. Such visual difference proves that our method finally makes the reliability of unreliable prediction labels stronger.
+
+# C. Alternative of Contrastive Learning
+
+Our proposed $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ is not limited by contrastive learning. Binary classification is also a sufficient way to use unreliable pseudo-labels, i.e., using binary cross-entropy loss (BCE) $\mathcal { L } _ { b }$ other than contrastive loss. For $i$ -th anchor $\mathbf { z } _ { c i }$ belongs to class $c$ , we simply use its negative samples
+
+![](images/b35fa4304e43765e3a9f6eb19e03410215e07d4e847de4ed657882aaef561cfe.jpg)  
+(a) Supervised Only
+
+![](images/98e5e0ffeea94b15c6d026cfdb4c057ead449c35bcd38be9b3e4a76796a91442.jpg)  
+(b) U2PL   
+Figure A2. Visualization of the feature spaces learned by our $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ and its supervised counterpart, using t-SNE [26]. The training set is the 1/4 partition protocol (2646) in blender VOC PASCAL 2012 Dataset.
+
+$\{ \mathbf { z } _ { c i j } ^ { - } \} _ { j = 1 } ^ { N }$ and positive sample ${ \bf z } _ { c } ^ { + }$ to compute the BCE loss:
+
+$$
+\begin{array}{l} \mathcal {L} _ {b} = - \frac {1}{C \times M \times N} \sum_ {c = 0} ^ {C - 1} \sum_ {i = 1} ^ {M} \sum_ {j = 1} ^ {N} \tag {A1} \\ \log \left[ \frac {e ^ {\langle \mathbf {z} _ {c i} , \mathbf {z} _ {c} ^ {+} \rangle / \tau}}{e ^ {\langle \mathbf {z} _ {c i} , \mathbf {z} _ {c} ^ {+} \rangle / \tau} + e ^ {\langle \mathbf {z} _ {c i} , \mathbf {z} _ {c i j} ^ {-} \rangle / \tau}} \right], \\ \end{array}
+$$
+
+where $C$ , M, and $N$ are the total number of classes, anchor pixels, and negative samples, respectively. $\langle \cdot , \cdot \rangle$ is the cosine similarity of two features, and $\tau$ represents the temperature.
+
+Tab. A3 and Tab. A4 are results of using unreliable pseudo-labels based on binary classification on Cityscapes [10] and PASCAL VOC 2012 [14] val set respectively. From Tab. A3 and Tab. A4, we can tell that our $\mathrm { U ^ { 2 } P L }$ is not restricted by contrastive learning, a basic binary classification also does help. On Cityscapes val set, $\mathrm { U ^ { 2 } P L }$ with $\mathcal { L } _ { b }$ can outperforms supervised only baseline by $+ 3 . 7 7 \%$ , $+ 0 . 4 0 \%$ , $+ 1 . 4 8 \%$ , and $+ 0 . 5 3 \%$ under 1/16, $1 / 8 , 1 / 4$ , and $1 / 2$ partial protocols. $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ with $\mathcal { L } _ { b }$ can outperforms supervised only baseline by $+ 7 . 4 9 \%$ , $+ 5 . 0 7 \%$ , $+ 3 . 8 4 \%$ , and $+ 2 . 6 7 \%$ under 1/16, 1/8, 1/4, and $1 / 2$ partial protocols on PASCAL VOC 2012 val set. Note that under the $1 / 4$ partition protocol of blender PASCAL VOC 2012, the bianry classification based $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ (w/ $\mathcal { L } _ { b }$ ) outperforms the contrastive learning based $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ (w/ $\mathcal { L } _ { c , }$ ) by $+ 0 . 3 4 \%$ , which proves that contrastive learning is not the only efficient way of using unreliable pseudo-labels.
+
+# D. More Ablation Studies
+
+# D.1. More Hyper-parameters on VOC
+
+Base Learning Rate. The impact of the base learning rate is shown in Tab. A5. Results are based on $\mathrm { U ^ { 2 } P L }$ on
+
+Table A3. Using unreliable pseudo-labels based on binary classification on Cityscapes val set under different partition protocols.   
+
+<table><tr><td>Method</td><td>1/16 (186)</td><td>1/8 (372)</td><td>1/4 (744)</td><td>1/2 (1488)</td></tr><tr><td>SupOnly</td><td>65.74</td><td>72.53</td><td>74.43</td><td>77.83</td></tr><tr><td>MT [38]</td><td>69.03</td><td>72.06</td><td>74.20</td><td>78.15</td></tr><tr><td>U²PL (w/ Lc)</td><td>70.30</td><td>74.37</td><td>76.47</td><td>79.05</td></tr><tr><td>U²PL (w/ Lb)</td><td>69.87</td><td>72.93</td><td>75.91</td><td>78.36</td></tr></table>
+
+Table A4. Using unreliable pseudo-labels based on binary classification on PASCAL VOC 2012 val set under different splits.   
+
+<table><tr><td>Method</td><td>1/16 (662)</td><td>1/8 (1323)</td><td>1/4 (2646)</td><td>1/2 (5291)</td></tr><tr><td>SupOnly</td><td>67.87</td><td>71.55</td><td>75.80</td><td>77.13</td></tr><tr><td>MT [38]</td><td>70.51</td><td>71.53</td><td>73.02</td><td>76.58</td></tr><tr><td>U²PL (w/ Lc)</td><td>77.21</td><td>79.01</td><td>79.30</td><td>80.50</td></tr><tr><td>U²PL (w/ Lb)</td><td>75.36</td><td>76.62</td><td>79.64</td><td>79.80</td></tr></table>
+
+blender VOC PASCAL 2012 Dataset. We find that 0.001 outperforms other alternatives.
+
+Temperature. Tab. A6 gives a study on the effect of temperature $\tau$ . Temperature $\tau$ plays an important role to adjust the importance to hard samples When $\tau = 0 . 5$ , our $\mathrm { U ^ { 2 } P L }$ achieves best results. Too large or too small of $\tau$ will have an adverse effect on overall performance.
+
+# D.2. Ablation Studies on Cityscapes
+
+Probability Rank Threshold. Tab. A7 provides a verification that such balance promotes the performance. $r _ { l } = 3$ and $r _ { h } = 2 0$ outperform other options by a large margin.
+
+Initial Reliable-Unreliable Partition. Tab. A8 studies the impact of different $\alpha _ { 0 }$ . When $\alpha _ { 0 } ~ = ~ 2 0 \%$ , the model achieves the best performance.
+
+Table A5. Ablation study on base learning rate under 1/4 partition protocol (2646) in blender VOC PASCAL 2012 Dataset.   
+
+<table><tr><td>lrbase</td><td>10-1</td><td>10-2</td><td>10-3</td><td>10-4</td><td>10-5</td></tr><tr><td>mIoU</td><td>3.49</td><td>77.82</td><td>79.30</td><td>74.58</td><td>65.69</td></tr></table>
+
+Table A6. Ablation study on temperature under 1/4 partition protocol (2646) in blender VOC PASCAL 2012 Dataset.   
+
+<table><tr><td>τ</td><td>10</td><td>1</td><td>0.5</td><td>0.1</td><td>0.01</td></tr><tr><td>mIoU</td><td>78.88</td><td>78.91</td><td>79.30</td><td>79.22</td><td>78.78</td></tr></table>
+
+Table A7. Ablation study on PRT on Cityscapes val set.   
+
+<table><tr><td>rl</td><td>1</td><td>1</td><td>3</td><td>3</td><td>10</td></tr><tr><td>rh</td><td>3</td><td>20</td><td>10</td><td>20</td><td>20</td></tr><tr><td>1/8 (372)</td><td>71.41</td><td>72.08</td><td>72.60</td><td>74.37</td><td>72.24</td></tr><tr><td>1/4 (744)</td><td>76.27</td><td>76.04</td><td>76.01</td><td>76.47</td><td>76.18</td></tr></table>
+
+Table A8. Ablation study on $\alpha _ { 0 }$ on Cityscapes val set.   
+
+<table><tr><td>α0</td><td>40%</td><td>30%</td><td>20%</td><td>10%</td></tr><tr><td>1/8 (372)</td><td>72.07</td><td>72.93</td><td>74.37</td><td>71.63</td></tr><tr><td>1/4 (744)</td><td>75.20</td><td>76.08</td><td>76.47</td><td>76.40</td></tr></table>
+
+# E. Visualization on Feature Space
+
+To have a better understanding of $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ , we give an illustration on visualization of feature space. Two t-SNE [26] plots are given respectively on the supervised only method and $\mathrm { U } ^ { 2 } \mathrm { P } \mathrm { L }$ .
+
+We can observe from Fig. A2 that decision boundaries of features generated by the supervised only method are quite confusing, while $\mathrm { U ^ { 2 } P L }$ has much more clear ones. This explains why $\mathrm { U } ^ { \mathrm { 2 } } \mathrm { P } \mathrm { L }$ works from a feature point of view.

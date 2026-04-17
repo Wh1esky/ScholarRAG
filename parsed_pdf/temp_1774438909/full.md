@@ -1,0 +1,684 @@
+# Discriminative Region-based Multi-Label Zero-Shot Learning
+
+Sanath Narayan* 1 Akshita Gupta* 1 Salman Khan2 Fahad Shahbaz Khan2,3 Ling Shao1 Mubarak Shah4
+
+1Inception Institute of Artificial Intelligence, UAE 2Mohamed Bin Zayed University of AI, UAE 3Linkoping University, Sweden ¨ 4University of Central Florida, USA
+
+# Abstract
+
+Multi-label zero-shot learning (ZSL) is a more realistic counter-part of standard single-label ZSL since several objects can co-exist in a natural image. However, the occurrence of multiple objects complicates the reasoning and requires region-specific processing of visual features to preserve their contextual cues. We note that the best existing multi-label ZSL method takes a shared approach towards attending to region features with a common set of attention maps for all the classes. Such shared maps lead to diffused attention, which does not discriminatively focus on relevant locations when the number of classes are large. Moreover, mapping spatially-pooled visual features to the class semantics leads to inter-class feature entanglement, thus hampering the classification. Here, we propose an alternate approach towards region-based discriminabilitypreserving multi-label zero-shot classification. Our approach maintains the spatial resolution to preserve regionlevel characteristics and utilizes a bi-level attention module (BiAM) to enrich the features by incorporating both region and scene context information. The enriched region-level features are then mapped to the class semantics and only their class predictions are spatially pooled to obtain imagelevel predictions, thereby keeping the multi-class features disentangled. Our approach sets a new state of the art on two large-scale multi-label zero-shot benchmarks: NUS-WIDE and Open Images. On NUS-WIDE, our approach achieves an absolute gain of $6 . 9 \%$ mAP for ZSL, compared to the best published results. Source code is available at https://github.com/akshitac8/BiAM.
+
+# 1. Introduction
+
+Multi-label classification strives to recognize all the categories (labels) present in an image. In the standard multilabel classification [33, 40, 16, 5, 22, 41, 42] setting, the category labels in both the train and test sets are identical.
+
+In contrast, the task of multi-label zero-shot learning (ZSL) is to recognize multiple new unseen categories in images at test time, without having seen the corresponding visual examples during training. In the generalized ZSL (GZSL) setting, test images can simultaneously contain multiple seen and unseen classes. GZSL is particularly challenging in the large-scale multi-label setting, where several diverse categories occur in an image (e.g., maximum of 117 labels per image in NUS-WIDE [6]) along with a large number of unseen categories at test time (e.g., 400 unseen classes in Open Images [17]). Here, we investigate this challenging problem of multi-label (generalized) zero-shot classification.
+
+Existing multi-label (G)ZSL methods tackle the problem by using global image features [21, 47], structured knowledge graph [18] and attention schemes [14]. Among these, the recently introduced LESA [14] proposes a shared attention scheme based on region-based feature representations and achieves state-of-the-art results. LESA learns multiple attention maps that are shared across all categories. The region-based image features are weighted by these shared attentions and then spatially aggregated. Subsequently, the aggregated features are projected to the label space via a joint visual-semantic embedding space.
+
+While achieving promising results, LESA suffers from two key limitations. Firstly, classification is performed on features obtained using a set of attention maps that are shared across all the classes. In such a shared attention framework, many categories are observed to be inferred from only a few dominant attention maps, which tend to be diffused across an image rather than discriminatively focusing on regions likely belonging to a specific class (see Fig. 1). This is problematic for large-scale benchmarks comprising several hundred categories, e.g., more than $7 k$ seen classes in Open Images [17] with significant inter and intra-class variations. Secondly, attended features are spatially pooled before projection to the label space, thus entangling the multi-label information in the collapsed imagelevel feature vectors. Since multiple diverse labels can appear in an image, the class-specific discriminability within such a collapsed representation is severely hampered.
+
+![](images/a44f2c01ec5f643634a28d90a727911ea5b1ccfdbb090beba822b4381430f8b0.jpg)
+
+![](images/afccc53e890784065d8457327d513f6ae95f1e5ebc483d10a131e8e9bc7ccb58.jpg)  
+Figure 1. Comparison, in terms of attention visualization, between shared attention-based LESA [14] and our approach on example NUS-WIDE test images. For each image, the visualization of attentions of positive labels within that image are shown for LESA (top row) and our approach (bottom row). In the case of LESA, all classes in these examples are inferred from the eighth shared attention module except for dog class in (b), which is inferred from the ninth module. As seen in these examples, these dominant attention maps struggle to discriminatively focus on relevant (class-specific) regions. In contrast, our proposed approach based on a bi-level attention module (BiAM) produces attention maps by preserving class-specific discriminability, leading to an enriched feature representation. Our BiAM effectively captures region-level semantics as well as global scene-level context, thereby enabling it to accurately attend to object class (e.g., window class in (a)) and abstract concepts (e.g., reflection class in (a)). Best viewed zoomed in.
+
+# 1.1. Contributions
+
+To address the aforementioned problems, we pose largescale multi-label ZSL as a region-level classification problem. We introduce a simple yet effective region-level classification framework that maintains the spatial resolution of features to keep the multi-class information disentangled for dealing with large number of co-existing classes in an image. Our framework comprises a bi-level attention module (BiAM) to contextualize and obtain highly discriminative region-level feature representations. Our BiAM contains region and global (scene) contextualized blocks and enables reasoning about all the regions together using pair-wise relations between them, in addition to utilizing the holistic scene context. The region contextualized block enriches each region feature by attending to all regions within the image whereas the scene contextualized block enhances the region features based on their congruence to the scene feature representation. The resulting discriminative features, obtained through our BiAM, are then utilized to perform region-based classification through a compatibility function. Afterwards, a spatial top- $k$ pooling is performed over each class to obtain the final predictions. Experiments are performed on two challenging large-scale multi-label zeroshot benchmarks: NUS-WIDE [6] and Open Images [17]. Our approach performs favorably against existing methods, setting a new state of the art on both benchmarks. Particularly, on NUS-WIDE, our approach achieves an absolute gain of $6 . 9 \%$ in terms of mAP for the ZSL task, over the best published results [14].
+
+# 2. Proposed Method
+
+Here, we introduce a region-based discriminabilitypreserving multi-label zero-shot classification framework aided by learning rich features that explicitly encodes both region as well as global scene contexts in an image.
+
+Problem Formulation: Let $\mathbf { x } \in \mathcal { X }$ denote the feature instances of a multi-label image $i \in \mathcal { Z }$ and $\mathbf { y } \in \{ 0 , 1 \} ^ { S }$ the corresponding multi-hot labels from the set of $S$ seen class labels $\mathcal { C } ^ { s }$ . Further, let $\mathbf { A } _ { S } { \in } \mathbb { R } ^ { S \times d _ { a } }$ denote the $d _ { a }$ -dimensional attribute embeddings, which encode the semantic relationships between $S$ seen classes. With $n _ { p }$ as the number of positive labels in an image, we denote the set of attribute embeddings for the image as $a _ { \mathbf { y } } = \{ \mathbf { A } _ { j } , \forall j : \mathbf { y } [ j ] = 1 \}$ , where $| a _ { \mathbf { y } } | { = } n _ { p }$ . The goal in (generalized) zero-shot learning is to learn a mapping $f ( \mathbf { x } ) : \mathcal { X } \mathrm {  } \{ 0 , 1 \} ^ { S }$ aided by the attribute embeddings $a _ { \mathbf { y } }$ , such that the mapping can be adapted to include the $U$ unseen classes (with embeddings $\mathbf { A } _ { U } \mathbf { \bar { \in } } \mathbb { R } ^ { U \times d _ { a } } )$ at test time, i.e., $f ( \mathbf { x } ) : \mathcal { X } \overset { } {  } \{ 0 , 1 \} ^ { U }$ for ZSL and $f ( \mathbf { x } )$ : $\mathcal { X } \mathrm {  } \{ 0 , 1 \} ^ { C }$ for the GZSL setting. Here, $C { = } S + U$ represents the total number of seen and unseen classes.
+
+# 2.1. Region-level Multi-label ZSL
+
+As discussed earlier, recognizing diverse and wide range of category labels in images under the (generalized) zeroshot setting is challenging. The problem arises, primarily, due to the entanglement of features of the various different classes present in an image. Fig. 2(a) illustrates this feature entanglement in the shared attention-based classification pipeline [14] that integrates multi-label features by
+
+![](images/d36bf088bf7ea16bb6caa7c7f3f863bdfdb65f900bde0467e6f741310a454378.jpg)  
+(a) Shared attention-based classification pipeline
+
+![](images/f0f98503f48702cdf1da4c64436929bbed5717747775d762d2d8481771981222.jpg)  
+(b) Proposed region-based classification framework   
+Figure 2. Comparison of our region-level classification framework (b) with the shared attention-based classification pipeline (a) in [14]. The shared attention-based pipeline performs an attention-weighted spatial averaging of the region-based features to generate a feature vector per shared attention. These (spatially pooled) features are then classified to obtain $S$ class scores per shared attention, which are max-pooled to obtain image-level class predictions. In contrast, our framework minimizes inter-class feature entanglement by enhancing the region-based features through a feature enrichment mechanism, which preserves the spatial resolution of the features. Each region-based enriched feature representation is then classified to $S$ seen classes. Afterwards, per class top- $k$ activations are aggregated to obtain image-level predictions.
+
+performing a weighted spatial averaging of the region-based features based on the shared-attention maps. In this work, we argue that entangled feature representations are suboptimal for multi-label classification and instead propose to alleviate this issue by posing large-scale multi-label ZSL as a region-level classification problem. To this end, we introduce a simple but effective region-level classification framework that first enriches the region-based features by the proposed feature enrichment mechanism. It then classifies the enriched region-based features followed by spatially pooling the per-class region-based scores to obtain the final image-level class predictions (see Fig. 2(b)). Consequently, our framework minimizes inter-class feature entanglement and enhances the classification performance. Fig. 3 shows our overall proposed framework. Let $\mathbf { e } _ { f } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ be the output region-based features, which are to be classified, from our proposed enrichment mechanism (i.e., BiAM). Here, $h , w$ denote the spatial extent of the region-based features with $\textit { h } \cdot \textit { w }$ regions. These features $\mathbf { e } _ { f }$ are first aligned with the class-specific attribute embeddings of the seen classes. This alignment is performed, i.e., a joint visual-semantic space is learned, so that the classifier can be adapted to the unseen classes at test time. The aligned region-based features are classified to obtain class-specific response maps $\mathbf { m } \in \mathbb { R } ^ { h \times w \times S }$ given by,
+
+$$
+\mathbf {m} = \mathbf {e} _ {f} \mathbf {W} _ {a} \mathbf {A} _ {S} ^ {\top}, \quad \text {s . t . ,} \mathbf {A} _ {S} \in \mathbb {R} ^ {S \times d _ {a}}, \tag {1}
+$$
+
+where $\mathbf { W } _ { a } \in \mathbb { R } ^ { d _ { r } \times d _ { a } }$ is a learnable weight matrix that is used to reshape the visual features to attribute embeddings
+
+of seen classes $( \mathbf { A } _ { S } )$ . The response maps are then top- $k$ pooled along the spatial dimensions to obtain image-level per-class scores $\mathbf { s } \in \mathbb { R } ^ { S }$ , which are then utilized for training the network (in Sec. 2.3). Such a region-level classification, followed by a score-level pooling, helps to preserve the discriminability of the features in each of the $h \cdot w$ regions by minimizing the feature entanglement of different positive classes occurring in the image.
+
+The aforementioned region-level multi-label ZSL framework relies on discriminative region-based features. Standard region-based features $\mathbf { x }$ only encode local regionspecific information and do not explicitly reason about all the regions together. Moreover, region-based features do not possess image-level holistic scene information. Next, we introduce a bi-level attention module (BiAM) to enhance feature discriminability and generate enriched features $\mathbf { e } _ { f }$ .
+
+# 2.2. Bi-level Attention Module
+
+Here, we present a bi-level attention module (BiAM) that enhances region-based features by incorporating both region and scene context information, without sacrificing the spatial resolution. Our BiAM comprises region and scene contextualized blocks, which are described next.
+
+# 2.2.1 Region Contextualized Block
+
+The region-contextualized block (RCB) enriches the regionbased latent features $\mathbf { h } _ { r }$ by capturing the contexts from different regions in the image. We observe encoding the individual contexts of different regions in an image to improve the discriminability of standard region-based features, e.g., the context of a region with window can aid in identifying other possibly texture-less regions in the image as house or building. Thus, inspired by the multi-headed self-attention [31], our RCB allows the features in different regions to interact with each other and identify the regions to be paid more attention to for enriching themselves (see Fig. 3(b)). To this end, the input features $\mathbf { x } _ { r } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ are first processed by a $3 { \times } 3$ convolution layer to obtain latent features $\mathbf { h } _ { r } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ . These latent features are then projected to a low-dimensional space $( d _ { r } ^ { \prime } =  \begin{array} { r l } \end{array} | _ { \cal F } )$ to create query-keyvalue triplets using a total of $H$ projection heads,
+
+$$
+\mathbf {q} _ {h} ^ {r} = \mathbf {h} _ {r} \mathbf {W} _ {h} ^ {Q}, \quad \mathbf {k} _ {h} ^ {r} = \mathbf {h} _ {r} \mathbf {W} _ {h} ^ {K}, \quad \mathbf {v} _ {h} ^ {r} = \mathbf {h} _ {r} \mathbf {W} _ {h} ^ {V}, \tag {2}
+$$
+
+where $h { \in } \{ 1 , 2 , . . , H \}$ and $\mathbf { W } _ { h } ^ { Q } , \mathbf { W } _ { h } ^ { K } , \mathbf { W } _ { h } ^ { V }$ are learnable weights of $1 \times 1$ convolution layers with input and output channels as $d _ { r }$ and $d _ { r } ^ { \prime }$ , respectively. The query vector (of length $d _ { r } ^ { \prime }$ ) derived from each region feature1 is used to find its correlation with the keys obtained from all the region features, while the value embedding holds the status of the current form of each region feature.
+
+![](images/70eb1f2c3c311016195aac8677b33086a454c9af008117a6a3c9d18852983d1f.jpg)  
+(a) Overall Proposed Framework
+
+![](images/03a55d3e8dbeb6544f161788c04fed32ae5411f379d8b48131826504a427d435.jpg)  
+(b) Region Contextualized Block (RCB)
+
+![](images/86fd9dcca08b3d19055651ea055940f56961667129b7a290b8b3fead04f6bba4.jpg)  
+(c) Scene Contextualized Block (SCB)
+
+![](images/c302fbe5addbc3f3a6f9973c3b95292736eac167a74810e301a6fdf80e3e68a6.jpg)  
+Figure 3. Our region-level multi-label (G)ZSL framework: The top row shows an overview of our network architecture. Given an image, the region-level features ${ \bf x } _ { r }$ are first obtained using a backbone. The region features are enriched using a Bi-level Attention Module (BiAM). This module incorporates region (b) and scene (c) contextualized blocks which learn to aggregate region-level and scene-specific context, respectively, which is in turn used to enhance the region features. The enriched features $\mathbf { e } _ { f }$ are mapped to the joint visual-semantic space to relate them with class semantics, obtaining m. Per-class region-based prediction scores are then spatially pooled to generate final image-level predictions. Notably, our design ensures region-level feature enrichment while preserving the spatial resolution uptil class predictions are made, which minimizes inter-class feature entanglement, a key requisite for large-scale multi-label (G)ZSL.
+
+Given these triplets for each head, first, an intra-head processing is performed by relating each query vector with ‘keys’ derived from the $h \cdot w$ region features. The resulting normalized relation scores $( \mathbf { r } _ { h } \in \mathbb { R } ^ { h w \times h w } )$ from the softmax function $( \sigma )$ are used to reweight the corresponding ‘value’ vectors. Without loss of generality1, the attended features $\pmb { \alpha } _ { h } \in \mathbb { R } ^ { h \times w \times d _ { r } ^ { \prime } }$ are given by,
+
+$$
+\boldsymbol {\alpha} _ {h} = \mathbf {r} _ {h} \mathbf {v} _ {h} ^ {r}, \quad \text {w h e r e} \mathbf {r} _ {h} = \sigma \left(\frac {\mathbf {q} _ {h} ^ {r} \mathbf {k} _ {h} ^ {r \top}}{\sqrt {d _ {r} ^ {l}}}\right). \tag {3}
+$$
+
+Next, these low-dimensional self-attended features from each head are channel-wise concatenated and processed by a convolution layer $\mathbf { W } _ { o }$ to generate output $\mathbf { o } _ { r } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ ,
+
+$$
+\mathbf {o} _ {r} = \left[ \alpha_ {1}; \alpha_ {2}; \dots \alpha_ {H} \right] \mathbf {W} _ {o}. \tag {4}
+$$
+
+To encourage the network to selectively focus on adding complimentary information to the ‘source’ latent feature $\mathbf { h } _ { r }$ , a residual branch is added to the attended features $\mathbf { o } _ { r }$ and further processed with a small residual sub-network $c ^ { r } ( \cdot )$ , comprising two $1 \times 1$ convolution layers, to help the network first focus on the local neighbourhood and then progressively pay attention to the other-level features. The enriched region-based features $\mathbf { e } _ { r } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ from the RCB are given by,
+
+$$
+\mathbf {e} _ {r} = c ^ {r} \left(\mathbf {h} _ {r} + \mathbf {o} _ {r}\right) + \left(\mathbf {h} _ {r} + \mathbf {o} _ {r}\right). \tag {5}
+$$
+
+Consequently, the discriminability of the latent features $\mathbf { h } _ { r }$ is enhanced by self-attending to the context of different regions in the image, resulting in enriched features $\mathbf { e } _ { r }$ .
+
+# 2.2.2 Scene Contextualized Block
+
+As discussed earlier, the RCB captures the regional context in the image, enabling reasoning about all regions together using pair-wise relations between them. In this way, RCB enriches the latent feature inputs $\mathbf { h } _ { r }$ . However, such a region-based contextual attention does not effectively encode the global scene-level context of the image, which is necessary for understanding abstract scene concepts like night-time, protest, clouds, etc. Understanding such labels from local regional contexts is challenging due to their abstract nature. Thus, in order to better capture the holistic scene-level context, we introduce a scene contextualized block (SCB) within our BiAM. Our SCB attends to the region-based latent features $\mathbf { h } _ { r }$ , based on their congruence with the global image feature $\mathbf { x } _ { g }$ (see Fig. 3(c)). To this end, the learnable weights $\mathbf { W } ^ { g }$ project the features $\mathbf { x } _ { g }$ to a $d _ { r }$ -dimensional space to obtain the global ‘key’ vectors $\mathbf { k } ^ { g } \in \mathbb { R } ^ { d _ { r } }$ , while the latent features $\mathbf { h } _ { r }$ are spatially average pooled to create the ‘query’ vectors $\mathbf { q } ^ { g } \in \mathbb { R } ^ { d _ { r } }$ ,
+
+$$
+\mathbf {q} ^ {g} = \operatorname {G A P} \left(\mathbf {h} _ {r}\right), \quad \mathbf {k} ^ {g} = \mathbf {x} _ {g} \mathbf {W} ^ {g}, \quad \mathbf {v} ^ {g} = \mathbf {h} _ {r}. \tag {6}
+$$
+
+The region-based latent features ${ \bf h } _ { r }$ are retained as ‘value’ features $\mathbf { v } ^ { g }$ . Given these query-key-value triplets, first, the query ${ \bf q } ^ { g }$ is used to find its correlation with the key ${ \bf k } ^ { g }$ . The resulting relation score vectors $\mathbf { r } ^ { g } \in \mathbb { R } ^ { d _ { r } }$ are then used to reweight the corresponding channels in value features to obtain the attended features $\pmb { \alpha } ^ { g } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ , given by,
+
+$$
+\boldsymbol {\alpha} ^ {g} = \mathbf {v} ^ {g} \otimes \mathbf {r} ^ {g}, \quad \text {w h e r e} \mathbf {r} ^ {g} = \operatorname {s i g m o i d} \left(\mathbf {q} ^ {g} * \mathbf {k} ^ {g}\right), \tag {7}
+$$
+
+![](images/17f332c191cf97722c921d4e30dbafb47f6ed4c84731d981d0542e7035a088c2.jpg)  
+RCB alone
+
+![](images/1376b559336283ee2ea4a5d2bcac4bc313bdd346e1d055420d60b809ae2396c1.jpg)
+
+![](images/00f6aa948dc6d484774f7be8aa77f83dc74eaed4881e529b55e2e19fd45917f7.jpg)
+
+![](images/a41566f4a3db59d696efcdfeb0466fbfe9ea14d45201a0a018606a492d150b0c.jpg)  
+BiAM
+
+![](images/997ce1143bb40c084459bec2bc62a58efce4efde06721d205524e5f10fda1b87.jpg)
+
+![](images/e188d9e128aae1bba77b5cb2aa57c20579a6bde29432fd70fffbba719f06f02e.jpg)
+
+![](images/ec42e3639ef9d88d86ecd54bf324eadf3cbd3fd3352df9b84fe2b09faf825687.jpg)
+
+![](images/91c278c3c13a703e7d35f9a995b5741ca27663c4a54effc86c69e3f36a2f6418.jpg)
+
+![](images/f1832f9bb1baf7968312c176bc95fc578e4c41610bb9c9c50033129a0ff9004a.jpg)
+
+![](images/967e62bc6d6b36c9cd2e27457bd2f5eb411a413ac81c1d6388deef29054ea189.jpg)  
+  
+Figure 4. Effect of enhancing the region-based features through our feature enrichment mechanism: BiAM. The two complementary RCB and SCB blocks in BiAM integrate region-level semantics and global scene-level context, leading to a more discriminative feature representation. While RCB alone (on the left) is able to capture the region-level semantics of person class, it confuses those related to protest label. However, encoding the global scene-level context from the SCB in BiAM (on the right) improves the semantic recognition of scene-level concepts like protest.
+
+where $\otimes$ and $^ *$ denote channel-wise and element-wise multiplications. The channel-wise operation is chosen here since we want to use the global contextualized features to dictate kernel-wise importance of the feature channels for aggregating relevant contextual cues without disrupting the local filter signature. Similar to RCB, to encourage the network to selectively focus on adding complimentary information to the ‘source’ $\mathbf { h } _ { r }$ , a residual branch is added after processing the attended features through a $3 { \times } 3$ convolution layer $c ^ { g } ( \cdot )$ . The scene-context enriched features $\mathbf { e } _ { g } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ from the SCB are given by,
+
+$$
+\mathbf {e} _ {g} = c ^ {g} \left(\boldsymbol {\alpha} ^ {g}\right) + \mathbf {h} _ {r}. \tag {8}
+$$
+
+In order to ensure the enrichment due to both region and global contexts are well captured, the enriched features $( \mathbf { e } _ { r }$ and $\mathbf { e } _ { g }$ ) from both region and scene contextualized blocks are channel-wise concatenated and processed through a $1 \times 1$ channel-reducing convolution layer $c ^ { f } ( \cdot )$ to obtain the final enriched features $\mathbf { e } _ { f } \in \mathbb { R } ^ { h \times w \times d _ { r } }$ , given by,
+
+$$
+\mathbf {e} _ {f} = c ^ {f} \left(\left[ \mathbf {e} _ {r}; \mathbf {e} _ {g} \right]\right). \tag {9}
+$$
+
+Fig. 4 shows that encoding scene context into the regionbased features improves the attention maps of scene level labels (e.g., protest), which were hard to attend to using only the region context. Consequently, our bi-level attention module effectively reasons about all the image regions together using pair-wise relations between them, while being able to utilize the whole image (holistic) scene as context.
+
+# 2.3. Training and Inference
+
+As discussed earlier, discriminative region-based features $\mathbf { e } _ { f }$ are learned and region-wise classified to obtain class-specific response maps $\mathbf { m } \in \mathbb { R } ^ { h \times w \times S }$ (using Eq. 1). The response maps m are further top- $k$ pooled spatially to
+
+compute the image-level per-class scores $\mathbf { s } \in \mathbb { R } ^ { S }$ . The network is trained using a simple, yet effective ranking loss $\mathcal { L } _ { r a n k }$ on the predicted scores s, given by,
+
+$$
+\mathcal {L} _ {\text {r a n k}} = \sum_ {i} \sum_ {p \in \mathbf {y} _ {p}, n \notin \mathbf {y} _ {p}} \max  (\mathbf {s} _ {i} [ n ] - \mathbf {s} _ {i} [ p ] + 1, 0). \tag {10}
+$$
+
+Here, $\mathbf { y } _ { p } = \{ j : \mathbf { y } [ j ] = 1 \}$ denotes the positive labels in image i. The ranking loss ensures that the predicted scores of the positive labels present in the image rank ahead, by a margin of at least 1, of the negative label scores.
+
+At test time, for the multi-label ZSL task, the unseen class attribute embeddings $\mathbf { A } _ { U } \in \mathbb { R } ^ { U \times d _ { a } }$ of the respective unseen classes are used (in place of $\mathbf { A } _ { S }$ ) for computing the class-specific response maps $\mathbf { m } \in \mathbb { R } ^ { h \times w \times U }$ in Eq. 1. As in training, these response maps are then top- $k$ pooled spatially to compute the image-level per-class scores $\mathbf { s } \in \mathbb { R } ^ { U }$ . Similarly, for the multi-label GZSL task, the concatenated embeddings $( \mathbf { A } _ { C } \in \mathbb { R } ^ { C \times d _ { a } } )$ of all the classes $C = S + U$ are used to classify the multi-label images.
+
+# 3. Experiments
+
+Datasets: We evaluate our approach on two benchmarks: NUS-WIDE [6] and Open Images [17]. The NUS-WIDE dataset comprises nearly 270K images with 81 humanannotated categories, in addition to the 925 labels obtained from Flickr user tags. As in [14, 47], the 925 and 81 labels are used as seen and unseen classes, respectively. The Open Images (v4) is a large-scale dataset comprising nearly 9 million training images along with 41,620 and 125,456 images in validation and test sets. It has annotations with human and machine-generated labels. Here, 7,186 labels, with at least 100 training images, are selected as seen classes. The most frequent 400 test labels that are absent in the training data are selected as unseen classes, as in [14].
+
+Evaluation Metrics: We use F1 score at top- $K$ predictions and mean Average Precision (mAP) as evaluation metrics, as in [32, 14]. The model’s ability to correctly rank labels in each image is measured by the F1, while the its image ranking accuracy for each label is captured by the mAP.
+
+Implementation Details: Pretrained VGG-19 [29] is used to extract features from multi-label images, as in [47, 14]. The region-based features (of size $h , w { = } 1 4$ and $d _ { r } { = } 5 1 2$ ) from $C o n \nu _ { 5 }$ are extracted along with the global features of size $d _ { g } { = } 4 { , } 0 9 6$ from FC7. As in [14], $\ell _ { 2 }$ -normalized 300- dimensional GloVe [26] vectors of the class names are used as the attribute embeddings $\mathbf { A } _ { C }$ . The two $3 { \times } 3$ convolutions (input and output channels are set to 512) are followed by ReLU and batch normalization layers. The $k$ for top- $k$ pooling is set to 10, while the heads $H { = } 8$ . For training, we use the ADAM optimizer with $( \beta _ { 1 } , \beta _ { 2 } )$ as (0.5, 0.999) and a gradual warm-up learning rate scheduler with an initial $l r$ of $1 e ^ { - 3 }$ . Our model is trained with a mini-batch size of 32 for 40 epochs on NUS-WIDE and 2 epochs on Open Images.
+
+Table 1. State-of-the-art comparison for multi-label ZSL and GZSL tasks on NUS-WIDE. We report the results in terms of mAP and F1 score at $K \in \{ 3 , 5 \}$ . Our approach outperforms the state-of-the-art for both ZSL and GZSL tasks, in terms of mAP and F1 score. Best results are in bold.   
+
+<table><tr><td>Method</td><td>Task</td><td>mAP</td><td>F1 (K = 3)</td><td>F1 (K = 5)</td></tr><tr><td rowspan="2">CONSE [24]</td><td>ZSL</td><td>9.4</td><td>21.6</td><td>20.2</td></tr><tr><td>GZSL</td><td>2.1</td><td>7.0</td><td>8.1</td></tr><tr><td rowspan="2">LabelEM [1]</td><td>ZSL</td><td>7.1</td><td>19.2</td><td>19.5</td></tr><tr><td>GZSL</td><td>2.2</td><td>9.5</td><td>11.3</td></tr><tr><td rowspan="2">Fast0Tag [47]</td><td>ZSL</td><td>15.1</td><td>27.8</td><td>26.4</td></tr><tr><td>GZSL</td><td>3.7</td><td>11.5</td><td>13.5</td></tr><tr><td rowspan="2">Attention per Label [15]</td><td>ZSL</td><td>10.4</td><td>25.8</td><td>23.6</td></tr><tr><td>GZSL</td><td>3.7</td><td>10.9</td><td>13.2</td></tr><tr><td rowspan="2">Attention per Cluster [14]</td><td>ZSL</td><td>12.9</td><td>24.6</td><td>22.9</td></tr><tr><td>GZSL</td><td>2.6</td><td>6.4</td><td>7.7</td></tr><tr><td rowspan="2">LESA [14]</td><td>ZSL</td><td>19.4</td><td>31.6</td><td>28.7</td></tr><tr><td>GZSL</td><td>5.6</td><td>14.4</td><td>16.8</td></tr><tr><td rowspan="2">Our Approach</td><td>ZSL</td><td>26.3</td><td>33.1</td><td>30.7</td></tr><tr><td>GZSL</td><td>9.3</td><td>16.1</td><td>19.0</td></tr></table>
+
+# 3.1. State-of-the-art Comparison
+
+NUS-WIDE: The state-of-the-art comparison for zero-shot (ZSL) and generalized zero-shot (GZSL) classification is presented in Tab. 1. The results are reported in terms of mAP and F1 score at top- $K$ predictions $( K \in \{ 3 , 5 \} )$ ). The approach of Fast0Tag [47], which finds principal directions in the attribute embedding space for ranking the positive tags ahead of negative tags, achieves 15.1 mAP on the ZSL task. The recently introduced LESA [14], which employs a shared multi-attention mechanism to recognize labels in an image, improves the performance over Fast0Tag, achieving $1 9 . 4 \ \mathrm { m A P } .$ Our approach outperforms LESA with an absolute gain of $6 . 9 \%$ mAP. Furthermore, our approach achieves consistent improvement over the state-of-the-art in terms of F1 $( K \in \{ 3 , 5 \} )$ ), achieving gains as high as $2 . 0 \%$ at $K { = } 5$ .
+
+Similarly, on the GZSL task, our approach achieves an mAP score of 9.3, outperforming LESA with an absolute gain of $3 . 7 \%$ . Moreover, consistent performance improvement in terms of F1 is achieved over LESA by our approach, with absolute gains of $1 . 5 \%$ and $2 . 2 \%$ at $K { = } 3$ and $K { = } 5$ .
+
+Open Images: Tab. 2 shows the state-of-the-art comparison for multi-label ZSL and GZSL tasks. The results are reported in terms of mAP and F1 score at top- $K$ predictions $( K \in \{ 1 0 , 2 0 \} )$ ). We follow the same evaluation protocol as in the concurrent work of SDL [2]. Since Open Images has significantly larger number of labels, in comparison to NUS-WIDE, ranking them within an image is more challenging. This is reflected by the lower F1 scores in the table. Among existing methods, LESA obtains an mAP of $4 1 . 7 \%$ for the ZSL task. In comparison, our approach outperforms LESA by achieving $7 3 . 6 \%$ mAP with an absolute gain of $3 1 . 9 \%$ . Furthermore, our approach performs favorably against the best existing approach with F1 scores of 8.3
+
+Table 2. State-of-the-art comparison for multi-label ZSL and GZSL tasks on Open Images. Results are reported in terms of mAP and F1 score at $K { \in } \{ 1 0 , 2 0 \}$ . Our approach sets a new state of the art for both tasks, in terms of mAP and F1 score. Best results are in bold.   
+
+<table><tr><td>Method</td><td>Task</td><td>mAP</td><td>F1 (K = 10)</td><td>F1 (K = 20)</td></tr><tr><td rowspan="2">CONSE [24]</td><td>ZSL</td><td>40.4</td><td>0.4</td><td>0.3</td></tr><tr><td>GZSL</td><td>43.5</td><td>2.6</td><td>2.4</td></tr><tr><td rowspan="2">LabelEM [1]</td><td>ZSL</td><td>40.5</td><td>0.5</td><td>0.4</td></tr><tr><td>GZSL</td><td>45.2</td><td>5.2</td><td>5.1</td></tr><tr><td rowspan="2">Fast0Tag [47]</td><td>ZSL</td><td>41.2</td><td>0.7</td><td>0.6</td></tr><tr><td>GZSL</td><td>45.2</td><td>16.0</td><td>12.9</td></tr><tr><td rowspan="2">Attention per Cluster [14]</td><td>ZSL</td><td>40.7</td><td>1.2</td><td>0.9</td></tr><tr><td>GZSL</td><td>44.9</td><td>16.9</td><td>13.5</td></tr><tr><td rowspan="2">LESA [14]</td><td>ZSL</td><td>41.7</td><td>1.4</td><td>1.0</td></tr><tr><td>GZSL</td><td>45.4</td><td>17.4</td><td>14.3</td></tr><tr><td rowspan="2">Our Approach</td><td>ZSL</td><td>73.6</td><td>8.3</td><td>5.5</td></tr><tr><td>GZSL</td><td>84.5</td><td>19.1</td><td>15.9</td></tr></table>
+
+![](images/de6bbfacf0efd9ff7b308cf5efd4370b52f6c6661d76f8263afbea22e0000292.jpg)  
+Figure 5. Impact of region-based classification for the ZSL task on NUS-WIDE, in terms of mAP and F1 at $K \in \{ 3 , 5 \}$ . Classifying spatially pooled features (blue bars) entangles the features of the different classes resulting in sub-optimal performance. In contrast, our proposed approach, which classifies each region individually and then spatially pools the per region class scores (red bars), minimizes the inter-class feature entanglement and achieves superior classification performance.
+
+and 5.5 at $K { = } 1 0$ and $K { = } 2 0$ . It is worth noting that the ZSL task is challenging due to the high number of unseen labels (400). As in ZSL, our approach obtains a significant gain of $3 9 . 1 \%$ mAP over the best published results for GZSL and also achieves favorable performance in F1. Additional details and results are presented in Appendix A.
+
+# 3.2. Ablation Study
+
+Impact of region-based classification: To analyse this impact, we train our proposed framework without regionbased classification, where the enriched features $\mathbf { e } _ { f }$ are spatially average-pooled to a single feature representation (of size $d _ { r }$ ) per image and then classified. Fig. 5 shows the performance comparison between our frameworks trained with and without region-based classification in terms of mAP and F1. Since images have large and diverse set of positive labels, spatially aggregating features without the regionbased classification (blue bars), leads to inter-class feature entanglement, as discussed in Sec. 2.1. Instead, preserving the spatial dimension by classifying the region-based features, as in the proposed framework (red bars), mitigates the
+
+Table 3. Impact of the proposed BiAM comprising RCB and SCB blocks. Note that all results here are reported with the same region-level classification framework and only the features utilized within the classification framework differs. Both RCB alone and SCB alone achieve consistently improved performance over standard region features. For both ZSL and GZSL tasks, the best performance is obtained when utilizing the discriminative features obtained from the proposed BiAM. Best results are in bold.   
+
+<table><tr><td>Method</td><td>Task</td><td>mAP</td><td>F1 (K = 3)</td><td>F1 (K = 5)</td></tr><tr><td>Standard</td><td>ZSL</td><td>21.1</td><td>28.0</td><td>26.9</td></tr><tr><td>region features</td><td>GZSL</td><td>6.8</td><td>12.0</td><td>14.5</td></tr><tr><td rowspan="2">RCB alone</td><td>ZSL</td><td>23.7</td><td>31.9</td><td>29.0</td></tr><tr><td>GZSL</td><td>7.6</td><td>14.7</td><td>17.6</td></tr><tr><td rowspan="2">SCB alone</td><td>ZSL</td><td>23.2</td><td>29.4</td><td>27.8</td></tr><tr><td>GZSL</td><td>8.6</td><td>14.0</td><td>16.7</td></tr><tr><td rowspan="2">BiAM (RCB + SCB)</td><td>ZSL</td><td>26.3</td><td>33.1</td><td>30.7</td></tr><tr><td>GZSL</td><td>9.3</td><td>16.1</td><td>19.0</td></tr></table>
+
+Table 4. ZSL comparison on NUS-WIDE with attention variants: our attention (left) and other attentions [34, 13] (right).   
+
+<table><tr><td>Method</td><td>mAP</td><td>Method</td><td>mAP</td></tr><tr><td>BiAM: RCB w/ LayerNorm</td><td>25.0</td><td>Non-Local [34]</td><td>23.1</td></tr><tr><td>BiAM: RCB w/ sigmoid</td><td>24.6</td><td>Criss-Cross Atn [13]</td><td>23.9</td></tr><tr><td>BiAM: SCB w/ softmax</td><td>24.3</td><td>BiAM (Ours)</td><td>26.3</td></tr><tr><td>BiAM: Final</td><td>26.3</td><td></td><td></td></tr></table>
+
+inter-class feature entanglement to a large extent. This leads to a superior performance for the region-based classification on both multi-label ZSL and GZSL tasks. These results suggest the importance of region-based classification for learning discriminative features in large-scale multi-label (G)ZSL tasks. Furthermore, Fig. 6 presents a t-SNE visualization showing the impact of our region-level classification framework on 10 unseen classes from NUS-WIDE. Impact of the proposed BiAM: Here, we analyse the impact of our feature enrichment mechanism (BiAM) to obtain discriminative feature representations. Tab. 3 presents the comparison between region-based classification pipelines based on standard features $\mathbf { h } _ { r }$ and discriminative features $\mathbf { e } _ { f }$ obtained from our BiAM on NUS-WIDE. We also present results of our RCB and SCB blocks alone. Both RCB alone and SCB alone consistently improve the (G)ZSL performance over the standard region-based features. This shows that our region-based classification pipeline benefits from the discriminative features obtained through the two complementary attention blocks. Furthermore, best results are obtained with our BiAM that comprises both RCB and SCB blocks, demonstrating the importance of encoding both region and scene context information. Fig. 8 shows a comparison between the standard features-based classification and the proposed classification framework utilizing BiAM on example unseen class images.
+
+Varying the attention modules: Tab. 4 (left) shows the comparison on NUS-WIDE when ablating RCB and SCB modules in our BiAM. Including LayerNorm in RCB or re-
+
+![](images/b84c971e13ea98be56014b956cae185ec93b66f6481361355fbb1be3d97110da.jpg)
+
+![](images/78335a7648c777a93df6e9fa165b5c5baadd9dd310a4413bab244ac492168ed0.jpg)  
+Figure 6. t-SNE visualization showing the impact of the proposed region-level classification framework on the inter-class feature entanglement. We present the comparison on 10 unseen classes of NUS-WIDE. On left: the single feature representationbased classification pipeline, where the enriched features are spatially aggregated to obtain a feature vector (of length $d _ { r }$ ) and then classified. On right: the proposed region-level classification framework, which classifies the region-level features first and then spatially pools the class scores to obtain image-level predictions. Our classification framework maintains the spatial resolution to preserve the region-level characteristics, thereby effectively minimizing the inter-class feature entanglement.
+
+![](images/c727111b3068b1b779f74e0621e9567cd72d308c0f8461dc7bf0652564ba7d05.jpg)
+
+![](images/c6c68ef5d6e66c4d679d8b08e17d4c15f5303d73971507b5e97dca6754c61459.jpg)
+
+![](images/72f65a667cc9197393257f4533f7a79029af0ba4d33e76a5a629ed6696664dd2.jpg)  
+Figure 7. ZSL comparison on NUS-WIDE when varying $H$ top- $k$ and $h { \cdot } w$ regions. Results improve slightly as heads $H$ increases till 8 and drops beyond 8, likely due to overfitting to seen classes. A similar trend is observed when top- $k$ increases. Decreasing h·w regions from 14x14 to 9x9 does not affect much.
+
+placing its softmax with sigmoid or replacing sigmoid with softmax in SCB result in sub-optimal performance compared to our final BiAM. Similarly, replacing our BiAM with existing Non-Local [34] and Criss-cross [13] attention blocks also results in reduced performance (see Tab. 4 (right)). This shows the efficacy of BiAM, which integrates both region and holistic scene context.
+
+Varying the hyperparameters: Fig. 7 shows the ZSL performance of our framework when varying heads $H$ , $k$ in top- $k$ and number of regions $( h \cdot w )$ . Performance improves as $H$ is increased till 8 and drops beyond 8, likely due to overfitting to seen classes. Similarly, as top- $k$ increases beyond 10, features of spatially-small classes entangle and reduce the discriminability. Furthermore, decreasing the regions leads to multiple classes overlapping in the same regions causing feature entanglement and performance drop. Compute and run-time complexity: Tab. 5 shows that our approach achieves significant performance gains of $6 . 7 \%$ and $3 1 . 3 \%$ over LESA with comparable FLOPs, memory cost, training and inference run-times, on NUS-WIDE and Open Images, respectively. For a fair comparison, both methods are run on the same Tesla V100.
+
+Additional examples w.r.t. failure cases of our model such as confusing abstract classes (e.g., sunset vs. sunrise) and fine-grained classes are provided in Appendix B.
+
+Table 5. Comparison of our BiAM with LESA in terms of ZSL performance (mAP), train and inference time, FLOPs and memory cost on NUS-WIDE (NUS) and Open Images (OI). Our BiAM achieves significant gain in performance with comparable compute and run-time complexity, over LESA.   
+Figure 8. Qualitative comparison on four test examples from NUS-WIDE, between the standard region features and our discriminative features. Top-3 predictions per image for both approaches are shown with true positives and false positives. Compared to the standard region-based features, our approach learns discriminative region-based features and performs favorably.   
+
+<table><tr><td>Method</td><td>mAP (NUS / OI)</td><td>Train (NUS / OI)</td><td>Inference</td><td>FLOPs</td><td>Memory</td></tr><tr><td>LESAL [10]</td><td>19.4 / 41.7</td><td>9.1 hrs / 35 hrs</td><td>1.4 ms</td><td>0.46 G</td><td>2.6 GB</td></tr><tr><td>BiAM (Ours)</td><td>26.1 / 73.0</td><td>7.5 hrs / 26 hrs</td><td>2.3 ms</td><td>0.59 G</td><td>2.8 GB</td></tr><tr><td></td><td>Standard features</td><td>Our Approach</td><td></td><td>Standard features</td><td>Our Approach</td></tr><tr><td></td><td>birds</td><td>birds</td><td></td><td>sky</td><td>ocean</td></tr><tr><td></td><td>snow</td><td>animal</td><td></td><td>beach</td><td>sky</td></tr><tr><td></td><td>whales</td><td>grass</td><td></td><td>buildings</td><td>sunset</td></tr><tr><td></td><td>Standard features</td><td>Our Approach</td><td></td><td>Standard features</td><td>Our Approach</td></tr><tr><td></td><td>person</td><td>person</td><td></td><td>sky</td><td>clouds</td></tr><tr><td></td><td>Mountain</td><td>sky</td><td></td><td>sunset</td><td>sky</td></tr><tr><td></td><td>Wedding</td><td>Wedding</td><td></td><td>nighttime</td><td>sunset</td></tr></table>
+
+# 3.3. Standard Multi-label Classification
+
+In addition to multi-label (generalized) zero-shot classification, we evaluate our proposed region-based classification framework on the standard multi-label classification task. Here, image instances for all the labels are present in training. The state-of-the-art comparison for the standard multi-label classification on NUS-WIDE with 81 human annotated labels is shown in Tab. 6. Among existing methods, the work of [15] and LESA [14] achieve mAP scores of 32.6 and 31.5, respectively. Our approach outperforms all published methods and achieves a significant gain of $1 5 . 2 \%$ mAP over the state of the art. Furthermore, our approach performs favorably against existing methods in terms of F1.
+
+# 4. Related Work
+
+Several works [39, 28, 19, 20, 43, 23, 45] have researched the conventional single-label ZSL problem. In contrast, a few works [21, 47, 18, 14, 12] have investigated the more challenging problem of multi-label ZSL. Mensink et al. [21] propose an approach based on using co-occurrence statistics for multi-label ZSL. Zhang et al. [47] introduce a method that utilizes linear mappings and non-linear deep networks to approximate principal direction from an input image. The work of [18] investigates incorporating knowledge graphs to reason about relationships between multiple labels. Recently, Huynh and Elhamifar [14] introduce a shared attention-based multi-label ZSL approach, where the shared attentions are label-agnostic and are trained to focus on relevant foreground regions by utilizing a formulation based on multiple loss terms.
+
+Context is known to play a crucial role in several vision
+
+Table 6. State-of-the-art performance comparison for the standard multi-label classification on NUS-WIDE. The results are reported in terms of mAP and F1 score at $K \in \{ 3 , 5 \}$ . Our proposed approach achieves superior performance compared to existing methods, with gains as high as $1 5 . 2 \%$ in terms of mAP. Best results are in bold.   
+
+<table><tr><td>Method</td><td>mAP</td><td>F1 (K = 3)</td><td>F1 (K = 5)</td></tr><tr><td>WARP [11]</td><td>3.1</td><td>54.4</td><td>49.4</td></tr><tr><td>WSABIE [36]</td><td>3.1</td><td>53.8</td><td>49.2</td></tr><tr><td>Logistic [30]</td><td>21.6</td><td>51.1</td><td>46.1</td></tr><tr><td>Fast0Tag [47]</td><td>22.4</td><td>53.8</td><td>48.6</td></tr><tr><td>CNN-RNN [33]</td><td>28.3</td><td>55.2</td><td>50.8</td></tr><tr><td>LESA [14]</td><td>31.5</td><td>58.0</td><td>52.0</td></tr><tr><td>Attention per Cluster [14]</td><td>31.7</td><td>56.6</td><td>50.7</td></tr><tr><td>Attention per Label [15]</td><td>32.6</td><td>56.8</td><td>51.3</td></tr><tr><td>Our Approach</td><td>47.8</td><td>59.6</td><td>53.4</td></tr></table>
+
+problems, such as object recognition [25, 9, 37, 46]. Studies [10, 3] have shown that deep convolutional networksbased visual recognition models implicitly rely on contextual information. Recently, self-attention models have achieved promising performance for machine translation and natural language processing [31, 38, 7, 8]. This has inspired studies to investigate self-attention and related ideas for vision tasks, such as object recognition [27], image synthesis [44] and video prediction [35]. Self-attention strives to learn the relationships between elements of a sequence by estimating the relevance of one item to other items. Motivated by its success in several vision tasks, we introduce a multi-label zero-shot region-based classification approach that utilizes self-attention in the proposed bi-level attention module to reason about all regions together using pair-wise relations between these regions. To complement the selfattentive region features with the holistic scene context information, we integrate a global scene prior which enables us to enrich the region-level features with both region and scene context information.
+
+# 5. Conclusion
+
+We proposed a region-based classification framework comprising a bi-level attention module for large-scale multilabel zero-shot learning. The proposed classification framework design preserves the spatial resolution of features to retain the multi-class information disentangled. This enables to effectively deal with large number of co-existing categories in an image. To contextualize and enrich the region features in our classification framework, we introduced a bi-level attention module that incorporates both region and scene context information, generating discriminative feature representations. Our simple but effective approach sets a new state of the art on two large-scale benchmarks and obtains absolute gains as high as $3 1 . 9 \%$ ZSL mAP, compared to the best published results.
+
+# References
+
+[1] Zeynep Akata, Florent Perronnin, Zaid Harchaoui, and Cordelia Schmid. Label-embedding for image classification. TPAMI, 2015. 6   
+[2] Avi Ben-Cohen, Nadav Zamir, Emanuel Ben Baruch, Itamar Friedman, and Lihi Zelnik-Manor. Semantic diversity learning for zero-shot multi-label classification. arXiv preprint arXiv:2105.05926, 2021. 6   
+[3] Wieland Brendel and Matthias Bethge. Approximating cnns with bag-of-local-features models works surprisingly well on imagenet. In ICLR, 2019. 8   
+[4] Mathilde Caron, Hugo Touvron, Ishan Misra, Herve J ´ egou, ´ Julien Mairal, Piotr Bojanowski, and Armand Joulin. Emerging properties in self-supervised vision transformers. arXiv preprint arXiv:2104.14294, 2021. 11   
+[5] Zhao-Min Chen, Xiu-Shen Wei, Peng Wang, and Yanwen Guo. Multi-label image recognition with graph convolutional networks. In CVPR, 2019. 1   
+[6] Tat-Seng Chua, Jinhui Tang, Richang Hong, Haojie Li, Zhiping Luo, and Yantao Zheng. Nus-wide: a real-world web image database from national university of singapore. In CIVR, 2009. 1, 2, 5, 11, 13   
+[7] Zihang Dai, Zhilin Yang, Yiming Yang, Jaime Carbonell, Quoc Le, and Ruslan Salakhutdinov. Transformer-xl: Attentive language models beyond a fixed-length context. In ACL, 2019. 8   
+[8] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. Bert: Pre-training of deep bidirectional transformers for language understanding. In NAACL-HLT, 2019. 8   
+[9] Carolina Galleguillos and Serge Belongie. Context based object categorization: A critical survey. CVIU, 2010. 8   
+[10] Robert Geirhos, Patricia Rubisch, Claudio Michaelis, Matthias Bethge, Felix Wichmann, and Wieland Brendel. Imagenet-trained cnns are biased towards texture; increasing shape bias improves accuracy and robustness. In ICLR, 2019. 8   
+[11] Yunchao Gong, Yangqing Jia, Thomas Leung, Alexander Toshev, and Sergey Ioffe. Deep convolutional ranking for multilabel image annotation. arXiv preprint arXiv:1312.4894, 2013. 8, 11   
+[12] Akshita Gupta, Sanath Narayan, Salman Khan, Fahad Shahbaz Khan, Ling Shao, and Joost van de Weijer. Generative multi-label zero-shot learning. arXiv preprint arXiv:2101.11606, 2021. 8   
+[13] Zilong Huang, Xinggang Wang, Lichao Huang, Chang Huang, Yunchao Wei, and Wenyu Liu. Ccnet: Criss-cross attention for semantic segmentation. In ICCV, 2019. 7   
+[14] Dat Huynh and Ehsan Elhamifar. A shared multi-attention framework for multi-label zero-shot learning. In CVPR, 2020. 1, 2, 3, 5, 6, 8, 11   
+[15] Jin-Hwa Kim, Jaehyun Jun, and Byoung-Tak Zhang. Bilinear attention networks. In NeurIPS, 2018. 6, 8   
+[16] Thomas N Kipf and Max Welling. Semi-supervised classification with graph convolutional networks. arXiv preprint arXiv:1609.02907, 2016. 1
+
+[17] Alina Kuznetsova, Hassan Rom, Neil Alldrin, Jasper Uijlings, Ivan Krasin, Jordi Pont-Tuset, Shahab Kamali, Stefan Popov, Matteo Malloci, Tom Duerig, et al. The open images dataset v4: Unified image classification, object detection, and visual relationship detection at scale. arXiv preprint arXiv:1811.00982, 2018. 1, 2, 5, 11, 14   
+[18] Chung-Wei Lee, Wei Fang, Chih-Kuan Yeh, and Yu-Chiang Frank Wang. Multi-label zero-shot learning with structured knowledge graphs. In CVPR, 2018. 1, 8   
+[19] Jingren Liu, Haoyue Bai, Haofeng Zhang, and Li Liu. Nearreal feature generative network for generalized zero-shot learning. In ICME), 2021. 8   
+[20] Devraj Mandal, Sanath Narayan, Sai Kumar Dwivedi, Vikram Gupta, Shuaib Ahmed, Fahad Shahbaz Khan, and Ling Shao. Out-of-distribution detection for generalized zero-shot action recognition. In CVPR, 2019. 8   
+[21] Thomas Mensink, Efstratios Gavves, and Cees GM Snoek. Costa: Co-occurrence statistics for zero-shot classification. In CVPR, 2014. 1, 8   
+[22] Jinseok Nam, Eneldo Loza Menc´ıa, Hyunwoo J Kim, and Johannes Furnkranz. Maximizing subset accuracy with recur-¨ rent neural networks in multi-label classification. NeurIPS, 2017. 1   
+[23] Sanath Narayan, Akshita Gupta, Fahad Shahbaz Khan, Cees GM Snoek, and Ling Shao. Latent embedding feedback and discriminative features for zero-shot classification. In ECCV, 2020. 8   
+[24] Mohammad Norouzi, Tomas Mikolov, Samy Bengio, Yoram Singer, Jonathon Shlens, Andrea Frome, Greg S Corrado, and Jeffrey Dean. Zero-shot learning by convex combination of semantic embeddings. arXiv preprint arXiv:1312.5650, 2013. 6   
+[25] Aude Oliva and Antonio Torralba. The role of context in object recognition. Trends Cogn Sci, 7, 2007. 8   
+[26] Jeffrey Pennington, Richard Socher, and Christopher D Manning. Glove: Global vectors for word representation. In EMNLP, 2014. 5   
+[27] Prajit Ramachandran, Niki Parmar, Ashish Vaswani, Irwan Bello, Anselm Levskaya, and Jonathon Shlens. Stand-alone self-attention in vision models. In NeurIPS, 2019. 8   
+[28] Yuming Shen, Jie Qin, Lei Huang, Li Liu, Fan Zhu, and Ling Shao. Invertible zero-shot recognition flows. In ECCV, 2020. 8   
+[29] Karen Simonyan and Andrew Zisserman. Very deep convolutional networks for large-scale image recognition. arXiv preprint arXiv:1409.1556, 2014. 5, 11   
+[30] Grigorios Tsoumakas and Ioannis Katakis. Multi-label classification: An overview. IJDWM, 2007. 8, 11   
+[31] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. Attention is all you need. In NeurIPS, 2017. 3, 8   
+[32] Andreas Veit, Neil Alldrin, Gal Chechik, Ivan Krasin, Abhinav Gupta, and Serge Belongie. Learning from noisy largescale datasets with minimal supervision. In CVPR, 2017. 5   
+[33] Jiang Wang, Yi Yang, Junhua Mao, Zhiheng Huang, Chang Huang, and Wei Xu. Cnn-rnn: A unified framework for multi-label image classification. In CVPR, 2016. 1, 8, 11
+
+[34] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He. Non-local neural networks. In CVPR, 2018. 7   
+[35] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He. Non-local neural networks. In CVPR, 2018. 8   
+[36] Jason Weston, Samy Bengio, and Nicolas Usunier. Wsabie: Scaling up to large vocabulary image annotation. In IJCAI, 2011. 8, 11   
+[37] Sanghyun Woo, Jongchan Park, Joon-Young Lee, and In So Kweon. Cbam: Convolutional block attention module. In ECCV, 2018. 8   
+[38] Felix Wu, Angela Fan, Alexei Baevski, Yann Dauphin, and Michael Auli. Pay less attention with lightweight and dynamic convolutions. In ICLR, 2019. 8   
+[39] Yongqin Xian, Tobias Lorenz, Bernt Schiele, and Zeynep Akata. Feature generating networks for zero-shot learning. In CVPR, 2018. 8   
+[40] Vacit Oguz Yazici, Abel Gonzalez-Garcia, Arnau Ramisa, Bartlomiej Twardowski, and Joost van de Weijer. Orderless recurrent models for multi-label classification. In CVPR, 2020. 1   
+[41] Jin Ye, Junjun He, Xiaojiang Peng, Wenhao Wu, and Yu Qiao. Attention-driven dynamic graph convolutional network for multi-label image recognition. In ECCV, 2020. 1   
+[42] Renchun You, Zhiyao Guo, Lei Cui, Xiang Long, Yingze Bao, and Shilei Wen. Cross-modality attention with semantic graph embedding for multi-label classification. In AAAI, 2020. 1   
+[43] Haofeng Zhang, Haoyue Bai, Yang Long, Li Liu, and Ling Shao. A plug-in attribute correction module for generalized zero-shot learning. PR, 2021. 8   
+[44] Han Zhang, Ian Goodfellow, Dimitris Metaxas, and Augustus Odena. Self-attention generative adversarial networks. In ICML, 2019. 8   
+[45] Haofeng Zhang, Li Liu, Yang Long, Zheng Zhang, and Ling Shao. Deep transductive network for generalized zero shot learning. PR, 2020. 8   
+[46] Mengmi Zhang, Claire Tseng, and Gabriel Kreiman. Putting visual object recognition in context. In CVPR, 2020. 8   
+[47] Yang Zhang, Boqing Gong, and Mubarak Shah. Fast zeroshot image tagging. In CVPR, 2016. 1, 5, 6, 8, 11
+
+# A. Additional Quantitative Results
+
+# A.1. Standard Multi-Label Learning
+
+Similar to Sec. 3.3, where we evaluate our approach for the standard multi-label classification on the NUS-WIDE dataset [6], here, we also evaluate on the large-scale Open Images dataset [17]. Tab. 7 shows the state-of-the-art comparison for the standard multi-label classification on Open Images. Here, 7, 186 classes are used for both training and evaluation. Test samples with missing labels for these 7, 186 classes are removed during evaluation, as in [14]. Due to significantly larger number of labels in Open Images, ranking the labels within an image is more challenging. This is reflected by the lower F1 scores in the table. Among existing methods, Fast0Tag [47] and LESA [14] achieve an F1 score of 13.1 and 14.5 at $K { = } 2 0$ . Our approach achieves favorable performance against the existing approaches, achieving an F1 score of 17.3 at $K { = } 2 0$ . The proposed approach also achieves superior performance in terms of mAP score, compared to existing methods and obtains an absolute gain of $3 5 . 6 \%$ mAP over the best existing method.
+
+# A.2. Robustness to Backbone Variation
+
+In Sec. 3, for a fair comparison with existing works such as Fast0Tag [47] and LESA [14], we employed a pretrained VGG-19 [29] as the backbone for extracting region-level and global-level features of images. However, such supervisedly pretrained backbone will not strictly conform with the zero-shot paradigm if there is any overlap between the unseen classes and the classes used for pretraining. To avoid using a supervisedly pre-trained network, we conduct an experiment by using the recent self-supervised DINO [4] ResNet-50 backbone trained on ImageNet without any labels. Tab. 8 shows that our approach (BiAM) significantly outperforms LESA [14] even with a self-supervised pretrained backbone on both benchmarks: NUS-WIDE [6] and Open Images [17]. Absolute gains as high as $6 . 9 \%$ mAP are obtained for NUS-WIDE on the ZSL task. Similar favorable gains are also obtained for the GZSL task on both datasets. These results show that irrespective of the backbone used for extracting the image features, our BiAM approach performs favorably against existing methods, achieving significant gains across different datasets on both ZSL and GZSL tasks.
+
+# B. Additional Qualitative Results
+
+Multi-label zero-shot classification: Fig. 9 shows the qualitative results for multi-label (generalized) zero-shot learning. Nine example images from the test set of the NUS-WIDE dataset [6] are presented in each figure. The comparison is shown between the standard regionbased features and our discriminative region-based fea-
+
+Table 7. State-of-the-art performance comparison for the standard multi-label classification on Open Images. The results are reported in terms of mAP and F1 score at $K { \in } \{ 1 0 , 2 0 \}$ . In comparison to existing approaches, our approach achieves favorable performance in terms of both mAP and F1. Best results are in bold.   
+
+<table><tr><td>Method</td><td>mAP</td><td>F1 (K = 10)</td><td>F1 (K = 20)</td></tr><tr><td>WARP [11]</td><td>46.0</td><td>7.7</td><td>7.4</td></tr><tr><td>WSABIE [36]</td><td>47.2</td><td>2.2</td><td>2.2</td></tr><tr><td>CNN-RNN [33]</td><td>41.0</td><td>9.6</td><td>10.5</td></tr><tr><td>Logistic [30]</td><td>49.4</td><td>13.3</td><td>11.8</td></tr><tr><td>Fast0Tag [47]</td><td>45.4</td><td>16.2</td><td>13.1</td></tr><tr><td>One Attention per Cluster [14]</td><td>45.1</td><td>16.3</td><td>13.0</td></tr><tr><td>LESA [14]</td><td>45.6</td><td>17.8</td><td>14.5</td></tr><tr><td>Our Approach</td><td>85.0</td><td>20.4</td><td>17.3</td></tr></table>
+
+Table 8. ZSL/GZSL performance comparison with LESA on NUS-WIDE and Open Images, when using the recent DINO ResNet-50 backbone pretrained on ImageNet without any labels. Our BiAM outperforms LESA [14] with a large margin on both datasets.   
+
+<table><tr><td rowspan="2">Backbone</td><td rowspan="2">Task</td><td colspan="2">NUS-WIDE (mAP)</td><td colspan="2">Open Images (mAP)</td></tr><tr><td>LESALeSA</td><td>BiAM (Ours)</td><td>LESALeSA</td><td>BiAM (Ours)</td></tr><tr><td rowspan="2">DINO ResNet-50 [4]</td><td>ZSL</td><td>20.5</td><td>27.4</td><td>41.9</td><td>74.0</td></tr><tr><td>GZSL</td><td>6.4</td><td>10.2</td><td>45.5</td><td>84.8</td></tr></table>
+
+tures. Alongside each image, top-5 predictions for both approaches are shown with true positives and false positives. In general, our approach learns discriminative regionbased features and achieves increased true positive predictions along with reduced false positives, compared to the standard region-based features. E.g., categories such as reflection and water in Fig. 9(b), ocean and sky in Fig. 9(g), boat and sky in Fig. 9(j) along with graveyard and england in Fig. 9(k) are correctly predicted. Both approaches predict a few confusing classes such as beach and surf in Fig. 9(d) in addition to sunrise and sunset that are hard to differentiate using visual cues alone in Fig. 9(l). Moreover, false positives that are predicted by the standard region-based features, are reduced by our discriminative region-based features, e.g., vehicle in Fig. 9(g), soccer in Fig. 9(h), balloons in Fig. 9(j), and ocean in Fig. 9(k). These results suggest that our approach based on discriminative region features achieves promising performance against the standard features, for multi-label (generalized) zero-shot classification.
+
+Visualization of attention maps: Fig. 10 and 11 show the visualizations of attention maps for the ground truth classes in example test images from NUS-WIDE and Open Images, respectively. Alongside each example, class-specific maps for the unseen classes are shown with the corresponding labels on top. In general, we observe that these maps focus reasonably well on the desired classes. E.g., promising class-specific attention is captured for zebra in Fig. 10(a), vehicle in Fig. 10(b), buildings in Fig. 10(d), Keelboat in Fig. 11(c), Boeing 717 in Fig. 11(e) and $E x .$ - ercise in Fig. 11(i). Although we observe that the atten-
+
+![](images/de1b79d7fdd9cb900ca2f92e32c4518e8267f6dd1d9946c8c6c620ad5e720784.jpg)
+
+Standard Our eaturesApproach
+
+person person
+
+lake lake
+
+sky water
+
+sunset sky
+
+nighttime sunset
+
+![](images/b9b5f5c0c94a02c3e118b7c97e3c296369961e7a157ac69c76e90cdfa93f7e2e.jpg)
+
+Standard Our features Approach
+
+birds birds
+
+lake lake
+
+fish reflection
+
+plane water
+
+whales fish
+
+![](images/5751d92991703564196ee7c5dcdf02164a59cf9c7ecb82853248f87bcf422a64.jpg)
+
+Standard Our features Approach
+
+buildings buildings
+
+lake castle
+
+reflection lake
+
+water reflection
+
+bridge water
+
+![](images/a552eb9c3917d61234e093d9526ceee1b84284e783bfe5f5280ad1412b7d10a5.jpg)
+
+Standard Our eatures Approach
+
+′boats boats
+
+ocean ocean
+
+beach sky
+
+sunset beach
+
+surf surf
+
+![](images/72a96fc8b0747af205c23471c0817618fb3f4427089c111bdc50701b1766307a.jpg)
+
+Standard Our features Approach
+
+valley sky
+
+beach beach
+
+ocean person
+
+rocks mountain
+
+surf rocks
+
+![](images/a7825627d2703059c981be9dafeb754a1e06dc1bb35bb9b414c7d59cd4762b62.jpg)  
+(f)
+
+Standard Our features Approach
+
+sky sky
+
+mountainmountain
+
+buildingsbuildings
+
+sunset snow
+
+tower sunset
+
+![](images/99a765590d1c6497ccb9a3f939338598979561d63cd3f1e686740d81a4a29dcd.jpg)
+
+Standard Our features Approach
+
+sky beach
+
+beach boats
+
+plane ocean
+
+cars sky
+
+vehicle water
+
+![](images/1f80d8ba703ed589976017d8f8b276df151f4ac5fe8ff1cfef6f2ffdbd2e8a8f.jpg)
+
+Standard Our eatures Approach
+
+flowers flowers
+
+garden garden
+
+′tree tree
+
+leaf grass
+
+soccer lake
+
+![](images/2cfad415a030ed176b36e981877bff1e90a7a24bc25c9c4775d87401a7877ecf.jpg)  
+(i)
+
+Standard Our Our features Approach proach
+
+beach beach beach
+
+sunset
+
+sky ocean ocean
+
+nighttime
+
+surf sky sky
+
+person
+
+sunset
+
+![](images/809bc4c7ac30a0774ecde938702f29325c48f8436199e88f41194a876aadfd33.jpg)  
+(j)
+
+Standard Our eaturesApproach
+
+blue blue
+
+red sea
+
+sea boat
+
+orange sky
+
+balloons sunset
+
+![](images/f492d89b8a67d76e67c72ce830be44197900fc82845a07e4deb3511fd87b1640.jpg)
+
+Standard Our feprach
+
+trees trees
+
+′river england
+
+florida cemetery
+
+fence graveyard
+
+ocean stone
+
+![](images/edcf0bddc8f0535443b19936c517364a808951067160c77769348f7a609810df.jpg)  
+Figure 9. Qualitative comparison for multi-label zero-shot classification on nine example images from the NUS-WIDE test set, between the standard region-based features and our discriminative features. Top-5 predictions per image for both approaches are shown with true positives and false positives. Generally, in comparison to the standard region-based features, our approach learns discriminative region-based features and results in increased true positive predictions along with reduced false positives. E.g., reflection and water in (b), ocean and sky in (g), boat and sky in (j) along with graveyard and england in (k) are correctly predicted. Though a few confusing classes are predicted (e.g., beach and surf in (d)), the obvious false positives such as vehicle in (g), soccer in (h), balloons in (j) and ocean in (k) which are predicted by the standard region-based features, are reduced by our discriminative region-based features. These qualitative results suggest that our approach based on discriminative region features achieves promising performance in comparison to the standard features, for the task of multi-label (generalized) zero-shot classification.
+
+(1)
+
+Standard Our Our features Approach oroach
+
+sunset bravo bravo
+
+iceland
+
+seascape
+
+sunrise
+
+australia
+
+sunset
+
+sunrise
+
+silhouette
+
+tion maps of visually similar classes overlap for sky and clouds in Fig. 10(d), these abstract categories, including reflection in Fig. 10(a) and nighttime in Fig. 10(c) are well captured. These qualitative results show that our proposed approach (BiAM) generates promising class-specific attention maps, leading to improved multi-label (generalized) zero-shot classification.
+
+![](images/38f6d9fcb8f83a433935cd7e102d890a677fc3d21bbec64e39f80c00eee4a2ce.jpg)  
+(a)
+
+![](images/ba889ce3c8f0fc744e199e503c5de297daf8550d409a8d8b11c88f01a3c09516.jpg)
+
+![](images/2c331de53a638cc58ca673e22471c42015cc071d94536bfdadd8552d690464b2.jpg)
+
+![](images/e8ab8e96e90b13791f20c8436aca6063ae458b52732d2da1a47c3afd4f3a9b1d.jpg)
+
+![](images/b3836cbf18a845acacc158fdc795e88a74e9e4e5994a92bf5b2de928a140d9df.jpg)
+
+![](images/6ebe68b35b6d13ccb909fd69e1e44e9d4e0714d9488cf48e23dd5b4e2a0fe1d6.jpg)  
+(b)
+
+![](images/df63425c29b36ac2b7bdfd720de06b1f9e27f1d006e2182d5bdae365e9b9542a.jpg)
+
+![](images/8b7a8ef3e0b3fb92b1f356e2b29eeb8536eb24cf34e7c1758bf70a9e31f97ff0.jpg)
+
+![](images/51d50dd0db97465b5f5834c7846d0dcc6baed65b6dbb6ce4b8b1620e3d2b1b8f.jpg)
+
+![](images/2268459c5f73d7613262a18fa5abf98a19d8d8813ee4ed5c9dafece19e7ab1c0.jpg)  
+(c)
+
+![](images/1b8e458086ef193839906be860709d77bca97744c979105abe590dc0bb526ee4.jpg)
+
+![](images/5c85c35236893b704bc939e7a2d16d777caff332b7d04092f86f91fff4f503c0.jpg)
+
+![](images/9a1f11557d60af0d3abf30225b11723dd1a59ac155824596ec1c426243f8e97a.jpg)
+
+![](images/86563ebacb300495617b80a9baafa57a6e360917e3759f98e1c4b0ff18498a45.jpg)  
+(d)
+
+![](images/d356049ecb403eb24c2f57ba26e807dec720fb3c939573716a8fa920ffb4f6db.jpg)
+
+![](images/289596042ebc33c6ccd0aa52be36f9d67d591f5e13583913b8eb18f8e2d2b3da.jpg)
+
+![](images/9d3e5854a4f922580d1ab0f90df83cad7510728558cc5ed610accc026b72084f.jpg)
+
+![](images/bbae0e703a7a75f8e1632237a47adcc2fda1f9e1eb00cbb5595feed464b20c80.jpg)
+
+![](images/9ee995173de96f18e52cb70a72ffa1e4c0769f77e461978a80effa030c3072ee.jpg)
+
+![](images/a6987da4c2c17e3f4261a9a1f54573776bd530ba75bfcab433a30c14989693cd.jpg)  
+(e)
+
+![](images/43289e4fc07bfa96405c2d3752e57c2486eccb158b9c470bd727065cabd10332.jpg)
+
+![](images/c0511052d7950acf15748f170b40ecd5a19e16326f174f41f42a145c9f898462.jpg)
+
+![](images/f46440efe3c4c18feea9c761096035a927ead624bbc7f53db40191c0c016a551.jpg)  
+(f)
+
+![](images/3c2a3d98777cc14fe815ac9bd9431f3ecbb58dff4e3ef42eee639d628ca231f1.jpg)
+
+![](images/da924d7a85d331dc06d63464ef0fec60c77027842f8af530392f1809bf8ad1fe.jpg)
+
+![](images/025c0b7b41b6e4ba4a6fd331e4ef32b5f74ced453971ca8304a41bab62414af3.jpg)
+
+![](images/7a30a9b2949fef2366dba9cfafe38f075e3e98675a737d29856529af8192c5c4.jpg)  
+Figure 10. Qualitative results with attention maps generated by our proposed approach, on example test images from the NUS-WIDE [6] dataset. For each image, class-specific maps for the ground truth unseen classes are shown with the corresponding labels on top. Generally, we observe that these maps focus reasonably well on the desired classes. E.g., promising attention/focus is observed on classes such as zebra in (a), vehicle in (b), buildings in (d) and statue in (f). Although we observe that the attention maps of visually similar classes such as sky and clouds overlap, as in (d), these abstract classes, including reflection in (a), (d) and nighttime in (c) are well captured. These qualitative results show that our proposed approach generates promising class-specific attention maps, leading to improved multi-label (generalized) zero-shot classification.
+
+![](images/4a9cd692d4ad5d3520bc813350bc358d84244264840692b0d4c38fc1258150ff.jpg)  
+(a)
+
+![](images/ddf58736f8bde227af11f8050c3c69c6eaa9977eda99f6d6c97383b585a5fb20.jpg)
+
+![](images/c57a0da6086163807233fbf8e2c5b23ed23d051cf5552e32cc4da11cbf9e223d.jpg)
+
+![](images/fb41bb5d704e80bdd79943a13229ab43f34907b9753345f0624a2ed1484d40d4.jpg)
+
+![](images/28db778e1f525b78f678baa17e9688719b8a5a3a73511f27203571ae1a728b00.jpg)
+
+![](images/1cb5b8edefa9a3a429666193afab441f8617a87920cc9c9e0944a10c13a25d33.jpg)
+
+![](images/6da38d807d8057c259b7c94bdf43beeb3318602e6c3005777f38e7933d461637.jpg)  
+(b)
+
+![](images/1e286052736fc88cfd2e10e7e6bf7391f9d6ae4e9ecb19a4d7b1311b49e68bfc.jpg)
+
+![](images/09ab71cc6ddde3055ad032953c7147af170b16ed27bbd7ec77cd73851bdfe73d.jpg)
+
+![](images/f46ede0d0d7143e4f515a46455ad38cd6dc535cf4719243af5908e119cdf5afa.jpg)  
+(c)
+
+![](images/81f79d5fa847d7a45d3739255d0e98d07ee7ad2829edf90190f7d020cdd3d47c.jpg)
+
+![](images/6c8daa88342ed7a7fc5b82d02bd6b2eae9a3991a97d4b6b8c1d0f02bbc193c1e.jpg)
+
+![](images/4cfcbf10098919bc362d163629cc11734cc97043d226e35f1c70e809e4225e37.jpg)  
+(d)
+
+![](images/924234afc864e6f5ead695c57f5d52ce81229f2a0237c9d85fbb3d295015ce80.jpg)
+
+![](images/69c78c985f57f0aaeb4b8b237f949f912d03c4aad245388ceda9521c01a4688a.jpg)
+
+![](images/9ea3c06bc1998a2eb1393cb2e03985452becd86d0db83a4dad4fd0e4d345a3d5.jpg)  
+(e)
+
+![](images/58559a3a790ec54c1ba16e162623dab25a441bbc7f1936eb970d6548366bfda3.jpg)
+
+![](images/1857485bf379ea172e6eaaeb19d5c77f486f5061fba1010d5bfbf2fe503cd6d7.jpg)
+
+![](images/9815e0d8fe32ab6655042b945a71df793bc11a16d9d4e187582e12900a1be9c3.jpg)  
+(f)
+
+![](images/6babf230aad4dae58e41b4d784f9d758e4b67e1448dfb7924f171d61b845f3b8.jpg)
+
+![](images/590934d5d77a2c5b7c8343a3e999ffd83b41c68cc7084dd7c2ca9ab89d955f5e.jpg)
+
+![](images/5c321973728c0f04341d0423d93c4eab969badeea7439f88df830a0fa77a336d.jpg)  
+(g)
+
+![](images/85d009b12da1d417fffa2978814deb57cb7f61e3adbe7158c93ecc99631d5f37.jpg)
+
+![](images/deb7b4e925901e6e4674fd91e5fb26f84095bf6eda33dbf7522b2386205a73d0.jpg)  
+Floating production storage and offloading
+
+![](images/6c2ec851f7508e07aec3eb4ebf36c75bf2f6cf55590f91906e54182b03f30e4b.jpg)
+
+![](images/eaecc27dd612d9b16125ebc90cf6ae406422e6b79801dbc8035696da259acfb0.jpg)
+
+![](images/e1a4f4888cd91e5ae4f07464c63c1ed959621d7d2a28ee63ffe6574bca92efa3.jpg)
+
+![](images/4d9758f869bde9e371f0d185454b95dbcd664db48f651e8e5e5df5622cef9f16.jpg)
+
+![](images/360fc090fe8d3667ac3f013c6cdc6884c24a658d72c9d2b002ece01c5dc93290.jpg)  
+(i)
+
+![](images/ec537c0681fa87a33da4f35ca0822d0e65e1aefea24f1b26da079c5a732f8be2.jpg)
+
+![](images/9d5dffb0afb23336d70c516e809669306e557dfd7516f03e7450b6af3600711b.jpg)  
+(j)
+
+![](images/70911ea591b14b46889ef553ac2c16107a54b89e9e1cf3c20eb1e7a8511cce17.jpg)
+
+![](images/4d6eeeb6c9d8fdde131336b0f3e352e804f1506c785ab87ed24d65d5670763fd.jpg)
+
+![](images/ad10c7ce40389f5caa221f41aa6b62e6d8d8ef42ff9d4e40345ecb959899e237.jpg)
+
+![](images/255ccc566b7d4b94b12421f54e96ad1fafa359956dba4da7efaa33aa4dfec022.jpg)
+
+![](images/9edf914e2c90636723957103b9132113f349c07f4ba9201286363aa93d5197b1.jpg)  
+(k)
+
+![](images/6b5e7b20bbbf436d5cfb86552d76c6f76d9f890c84d08d2e06654e6fdb3fa785.jpg)
+
+![](images/5ad0ba6f1de0fe68764176142adffe85257f63ccb50f623533ac2afc7f9e2382.jpg)  
+(1)
+
+![](images/b7bfa1002569eedf52fa614e332eaa7b679edb5e426beb858ba9720ee7a50195.jpg)
+
+![](images/291ed39ea4e5d6a21b6be5b63d5bdc7d388563a292fa5c8f0be1b156c05959fd.jpg)
+
+![](images/ef3931c6bb906114a313449597741000f40925eee462b803d6010af432128ad1.jpg)
+
+![](images/ed79ab86158d27e418a1f2d4291c471f98acef275eca2c7980e767364c500af2.jpg)
+
+![](images/a260cb2dcf46c8b44d4e77e547db4195cb4c9e8b6490d17487259be95edd8278.jpg)
+
+![](images/3331175e6cdb6b8893b40554e3607dd385dd532cb72ecfd95ca3a83aa513fb13.jpg)  
+Freestyle swimming   
+Figure 11. Qualitative results with attention maps generated by our proposed approach, on example test images from the Open Images [17] dataset. For each image, class-specific maps for the ground truth unseen classes are shown with the corresponding labels on top. Although there are overlapping attention regions for visually similar and fine-grained classes (e.g., Caridean shrimp and Fried prawn in (f), Canaan dog and Akita inu in (j)), generally, these maps focus reasonably well on the desired classes. E.g., promising class-specific attention is captured for Keelboat in (c), Boeing 717 in (e) and Exercise in (i). These qualitative results show that our proposed approach generates promising class-specific attention maps, resulting in improved multi-label (generalized) zero-shot classification.

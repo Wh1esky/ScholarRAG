@@ -1,0 +1,3303 @@
+[
+    {
+        "type": "text",
+        "text": "VaiPhy: a Variational Inference Based Algorithm for Phylogeny ",
+        "text_level": 1,
+        "bbox": [
+            179,
+            122,
+            816,
+            172
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Hazal Koptagel12∗ Oskar Kviman12∗ Harald Melin12 ",
+        "bbox": [
+            295,
+            224,
+            699,
+            238
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Negar Safinianaini12 Jens Lagergren12 ",
+        "bbox": [
+            354,
+            239,
+            640,
+            255
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1School of EECS, KTH Royal Institute of Technology, Stockholm, Sweden ",
+        "bbox": [
+            253,
+            255,
+            745,
+            268
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "2Science for Life Laboratory, Solna, Sweden ",
+        "bbox": [
+            351,
+            268,
+            645,
+            282
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "∗Equal contribution ",
+        "bbox": [
+            434,
+            284,
+            563,
+            297
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "{koptagel,okviman,haraldme,negars,jensl}@kth.se ",
+        "bbox": [
+            297,
+            297,
+            699,
+            311
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            459,
+            347,
+            537,
+            363
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Phylogenetics is a classical methodology in computational biology that today has become highly relevant for medical investigation of single-cell data, e.g., in the context of cancer development. The exponential size of the tree space is, unfortunately, a substantial obstacle for Bayesian phylogenetic inference using Markov chain Monte Carlo based methods since these rely on local operations. And although more recent variational inference (VI) based methods offer speed improvements, they rely on expensive auto-differentiation operations for learning the variational parameters. We propose VaiPhy, a remarkably fast VI based algorithm for approximate posterior inference in an augmented tree space. VaiPhy produces marginal log-likelihood estimates on par with the state-of-the-art methods on real data and is considerably faster since it does not require auto-differentiation. Instead, VaiPhy combines coordinate ascent update equations with two novel sampling schemes: (i) SLANTIS, a proposal distribution for tree topologies in the augmented tree space, and (ii) the JC sampler, to the best of our knowledge, the first-ever scheme for sampling branch lengths directly from the popular Jukes-Cantor model. We compare VaiPhy in terms of density estimation and runtime. Additionally, we evaluate the reproducibility of the baselines. We provide our code on GitHub: https://github.com/Lagergren-Lab/VaiPhy. ",
+        "bbox": [
+            228,
+            377,
+            766,
+            627
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 Introduction ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            650,
+            310,
+            666
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Phylogenetic software has for a long time been applied in biological research, and biological findings relying on phylogenetic trees are frequent. Moreover, due to the emergence of single-cell sequencing, phylogenetic inference for bifurcating and multifurcating trees can now be utilized in medical studies of how cells differentiate during development and how tumor cells progress in cancer. ",
+        "bbox": [
+            169,
+            681,
+            823,
+            737
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "When attempting to infer the posterior distribution over phylogenetic trees for $| X |$ taxa, represented as sequences, the main obstacle is the exponential size of the tree space, i.e., the set of candidate trees having those taxa as leaves. In Markov chain Monte Carlo (MCMC) based Bayesian phylogenetic inference, e.g., MrBayes [28] and RevBayes [20], this tree space is explored by performing local operations on the trees. In order to avoid local operations, Bouchard-Côté et al. [3] launched Sequential Monte Carlo (SMC) as an alternative methodology for Bayesian phylogenetic inference. ",
+        "bbox": [
+            169,
+            743,
+            823,
+            827
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Probabilistic phylogenetic inference is a machine learning problem, and the key to unlocking this crucial application can be expected to be found in the machine learning methodology; in particular, considering the capacity of the VI methodology, [32, 1], to deliver impressive performance gains for Bayesian inference, e.g., compared to MCMC. Expectedly, such gains have recently been made within the realm of phylogenetic analysis. ",
+        "bbox": [
+            169,
+            832,
+            823,
+            902
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2203.01121v3 [q-bio.PE] 24 Jan 2023 ",
+        "bbox": [
+            22,
+            260,
+            60,
+            724
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "footer",
+        "text": "36th Conference on Neural Information Processing Systems (NeurIPS 2022). ",
+        "bbox": [
+            171,
+            922,
+            629,
+            936
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/bbe585624efa10c2616a816235c19aa33bad097197a84d066301976c1d5aef72.jpg",
+        "image_caption": [
+            "Figure 1: Visualization of branch lengths, $b$ , sampled directly from the Jukes-Cantor model. The figure shows samples for different numbers of estimated mutations along an edge, $\\phi _ { i , j }$ , when the total number of sites are $M = 2 0 0 0$ . "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            220,
+            88,
+            777,
+            203
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "For instance, inference based on the computationally costly CAT model, which allows different equilibrium frequencies across sequence sites, has been made substantially more efficient by the application of VI, [5]. Also, [11] applied VI to render the analysis of a sequence evolution model more efficient. They consider the efficiency improvements obtained by VI, in particular using the generic STAN software [11], when analyzing a single fixed tree topology. Interestingly, the VI approach can also be used to analyze a large number of candidate phylogenetic trees. In [38], so-called subsplit Bayesian networks (SBNs) were introduced in order to represent the posterior over a given set of candidate trees. This approach has subsequently been developed further by introducing an edge (a.k.a. branch) length distribution [39] and making the edge length distribution more expressive by taking advantage of normalizing flows [37]. In particular, [39] obtains posterior distributions that improve on the marginal likelihood obtained by using MrBayes, [21], in combination with the improved Stepping Stone (SS) method, [8]. ",
+        "bbox": [
+            169,
+            279,
+            826,
+            445
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "The SBN approach evades the exponentially sized tree space by considering a given set of candidate trees and the partitions of the given taxa defined by those candidate trees. It is noteworthy that the VI methodology earlier has been successfully applied to bipartite matching and a few other combinatorial problems [2]; the phylogeny problem, however, involves both combinatorial and continuous parameters. ",
+        "bbox": [
+            169,
+            450,
+            823,
+            521
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Multifurcating trees are common in biology, and biologists are well familiar with them. For instance, in a clone tree that represents the evolutionary relationships between the subclones of a tumor, nodes may have more than two children. Even in cases with no biological support for multifurcating trees, biologists are used to working with multifurcating trees. E.g., the consensus method used to analyze the posterior of a MrBayes run may produce a multifurcating tree. ",
+        "bbox": [
+            169,
+            526,
+            826,
+            597
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Contributions: We present a novel framework for phylogenetic inference that produces marginal likelihood estimates on par with the state-of-the-art VI methods while being up to 25 times faster than VBPI-NF on real datasets. The framework is on the top level a mean-field VI algorithm and is comprised of the following three novel methods: ",
+        "bbox": [
+            169,
+            602,
+            823,
+            659
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "• SLANTIS is a proposal distribution that proposes multifurcating spanning trees. Sampling from SLANTIS is performed following an approach suggested by [6] for sampling a perfect matching in bipartite graphs: it is fast, and the sampled tree’s compensation weight is easily computed without additional cost of time. ",
+            "• The JC sampler is a novel scheme for sampling branch lengths directly from the Jukes-Cantor (JC69) model [22]. This is a significant contribution, as no previous sampling scheme is known for this task and the JC model arguably is a commonly used substitution model in phylogenetics. ",
+            "• VaiPhy is a VI algorithm for obtaining posterior approximations over the set of branch lengths, the ancestral sequences, and tree topologies, given the leaf set observations. VaiPhy utilizes SLANTIS and the JC sampler in order to compute the importance weighted evidence lower bound (IWELBO; [4]) and its update equations. Compared to existing VI methods in phylogenetics, VaiPhy extends the target distribution by considering an auxiliary variable, the ancestral sequences, and it does not require any input consisting of precomputed trees. "
+        ],
+        "bbox": [
+            215,
+            667,
+            826,
+            873
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We demonstrate the flexibility of our framework by using its learned parameters to parameterize two new proposal distributions for the Combinatorial SMC (CSMC) algorithm. We compare our CSMC ",
+        "bbox": [
+            169,
+            883,
+            823,
+            912
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "method, $\\phi$ -CSMC, with the other two main SMC based methods, outperforming them in terms of marginal likelihood estimation on real data. ",
+        "bbox": [
+            169,
+            90,
+            823,
+            119
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Finally, we contribute to the field of Bayesian phylogenetic inference by benchmarking the most prominent methods in the field on seven popular real datasets. ",
+        "bbox": [
+            169,
+            126,
+            823,
+            156
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "2 Background ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            174,
+            308,
+            191
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In the Bayesian phylogenetic setting, we are interested in the posterior distribution over phylogenies – pairs of tree topologies and sets of branch lengths – given observations on the leaves, ",
+        "bbox": [
+            169,
+            205,
+            828,
+            233
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\np _ {\\theta} (\\tau , \\mathcal {B} | X) = \\frac {p _ {\\theta} (\\tau , \\mathcal {B} , X)}{p _ {\\theta} (X)}, \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            243,
+            825,
+            273
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $\\tau , B$ , and $X$ denote the tree topology, the set of branch lengths and the observations, respectively. More specifically, $\\boldsymbol { B }$ contains a single branch length per edge, e, in the set of edges in $\\tau$ , i.e., $B = \\{ b ( e ) : e \\in E ( \\tau ) \\}$ . Unfortunately, $p _ { \\theta } ( \\tau , B | X )$ is intractable, so we need to approximate it using Bayesian inference. Before going into how to approximate this quantity, we first provide some crucial notation. ",
+        "bbox": [
+            169,
+            282,
+            825,
+            349
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In phylogenetics, one is often concerned with bifurcating $X$ -trees. These trees have labeled leaf nodes, and their internal vertices have either two (root in a rooted tree) or three degrees. Meanwhile, multifurcating trees’ internal vertices can have higher degrees. We use M, Σ, and $N$ to denote the sequence length, the set of nucleotides, and the number of vertices, respectively. Further, we let $| X |$ be the number of given taxa, $V$ and $E$ be the set of vertices and edges, while $( V , E )$ is an acyclic graph. ",
+        "bbox": [
+            169,
+            358,
+            823,
+            441
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Let $Z _ { i } ^ { m }$ be the probabilistic ancestral sequence of node $i$ at position $m$ , and $\\theta$ denote the model parameters, such as the branch length prior parameters or the parameter choices in the substitution model. Then, the evolutionary model along an edge, $e \\ = \\ ( i , j )$ , is $p _ { \\theta } ( Z _ { i } ^ { m } = \\alpha | Z _ { j } ^ { m } = \\beta ) =$ $e x p ( b ( e ) ~ Q _ { \\alpha \\beta } )$ , where $Q$ is the rate matrix, parameterized according to the JC69 model, and $\\alpha , \\beta \\in \\Sigma$ are nucleotides. The likelihood is defined as ",
+        "bbox": [
+            169,
+            446,
+            825,
+            518
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\np _ {\\theta} (X | \\tau , \\mathcal {B}) = \\sum_ {Z \\in \\Sigma^ {M}} p _ {\\theta} (X, Z | \\tau , \\mathcal {B}),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            375,
+            537,
+            617,
+            570
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "and can be computed effectively using Felsenstein’s pruning algorithm [9]. ",
+        "bbox": [
+            169,
+            573,
+            663,
+            589
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3 Proposed Framework ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            609,
+            387,
+            626
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Existing Bayesian phylogenetic approaches often perform inference in a sample space over bifurcating $X$ -trees and branch length sets, $\\Omega$ . In contrast, we propose to work in an augmented sample space, A. Firstly, we work in a tree topology space for multifurcating trees with labeled internal vertices. Secondly, we extend the target distribution in Eq. (1) by considering ancestral sequences on the internal vertices as an auxiliary variable, $Z$ . ",
+        "bbox": [
+            169,
+            640,
+            826,
+            710
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Apart from that, our augmented space offers higher modeling flexibility (clearly, since $\\Omega \\subset \\mathrm { A }$ ); it enables posterior estimation over $Z$ , which further lets us estimate the number of mutations between all vertices in the sample space. This is a key insight that ultimately allows us to devise VaiPhy, a mean-field coordinate ascent VI [19] algorithm. ",
+        "bbox": [
+            169,
+            715,
+            823,
+            772
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.1 VaiPhy ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            787,
+            264,
+            804
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In the augmented space, A, we wish to approximate the posterior distribution ",
+        "bbox": [
+            169,
+            814,
+            679,
+            829
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\np _ {\\theta} (\\tau , \\mathcal {B}, Z | X) \\propto p _ {\\theta} (X, Z | \\mathcal {B}, \\tau) p _ {\\theta} (\\mathcal {B} | \\tau) p _ {\\theta} (\\tau), \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            346,
+            838,
+            823,
+            853
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "using a factorized variational distribution ",
+        "bbox": [
+            171,
+            862,
+            444,
+            876
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\nq (\\tau , \\mathcal {B}, Z | X) = q (\\mathcal {B} | X) q (\\tau | X) q (Z | X), \\tag {3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            366,
+            897,
+            823,
+            912
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $\\begin{array} { r } { q ( Z | X ) = \\prod _ { i \\in I ( \\mathrm { A } ) } q ( Z _ { i } | X ) } \\end{array}$ . Here, $I ( \\mathrm { A } )$ denotes the set of internal vertices in the augmented space. We will use $q ( Z | X )$ to compute $\\phi _ { i j } \\in [ 0 , M ]$ , the expected number of mutations over the edge $( i , j )$ , for all possible edges. Notice that the maximum number of observed mutations between two vertices is the number of sites, $M$ . ",
+        "bbox": [
+            169,
+            90,
+            823,
+            148
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "As is standard in classical VI, we alternatively update the distributions in Eq. (3) in order to maximize the evidence lower bound (ELBO), ",
+        "bbox": [
+            169,
+            155,
+            823,
+            186
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} = \\mathbb {E} _ {q (\\tau , \\mathcal {B}, Z | X)} \\left[ \\log \\frac {p _ {\\theta} (X , Z | \\mathcal {B} , \\tau) p _ {\\theta} (\\mathcal {B} | \\tau) p _ {\\theta} (\\tau)}{q (\\mathcal {B} | X) q (\\tau | X) q (Z | X)} \\right], \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            320,
+            196,
+            825,
+            231
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "over iterations. Each iteration, we also update $\\phi$ , following [12] ",
+        "bbox": [
+            171,
+            242,
+            591,
+            258
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\phi_ {i j} = \\sum_ {\\alpha \\neq \\beta} F _ {i j} ^ {\\alpha , \\beta}, \\tag {5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            439,
+            270,
+            825,
+            303
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $F _ { i j } ^ { \\alpha , \\beta }$ is the estimated number of times a nucleotide mutates from $\\alpha$ to $\\beta$ , defined as $F _ { i j } ^ { \\alpha , \\beta } =$ PM $\\begin{array} { r } { \\sum _ { m = 1 } ^ { M } q ( Z _ { i } ^ { m } = \\alpha | X ^ { m } ) q ( Z _ { j } ^ { m } = \\beta | X ^ { m } ) . } \\end{array}$ . ",
+        "bbox": [
+            169,
+            316,
+            823,
+            356
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The update equations for the variational distributions are derived in a mean-field fashion. Starting with $q ( Z _ { i } | X )$ , we find that ",
+        "bbox": [
+            169,
+            359,
+            823,
+            388
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\log q ^ {*} (Z _ {i} | X) \\stackrel {\\pm} {=} \\mathbb {E} _ {q (\\tau , \\mathcal {B}, Z _ {\\neg i} | X)} [ \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) ] \\\\ \\pm \\mathbb {E} _ {q (\\tau , \\mathcal {B} | X)} \\left[ \\sum_ {Y _ {j} \\in Y _ {N _ {\\tau} (i)}} q \\left(Y _ {j} | X\\right) \\log p _ {\\theta} \\left(Y _ {j} \\mid Z _ {i}, b (i, j)\\right) \\right], \\tag {6} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            263,
+            402,
+            825,
+            473
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $\\pm$ denotes equal up to an additive constant, $Y _ { N _ { \\tau } ( i ) }$ is the set of sequences of node $i$ ’s neighbors in $\\tau$ , and $\\neg i$ is the set of latent nodes except node $i$ . Continuing with the two other approximations, we have ",
+        "bbox": [
+            169,
+            494,
+            826,
+            537
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\log q ^ {*} (\\tau | X) \\stackrel {\\pm} {=} \\mathbb {E} _ {q (\\mathcal {B}, Z | X)} [ \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) ] \\\\ \\stackrel { \\pm } { = } \\mathbb { E } _ { q ( \\mathcal { B } | X ) } \\left[ \\sum _ { \\substack { ( i , j ) \\in E ( \\tau ) \\\\ Z _ { i } , Z _ { j } } } q ( Z _ { i } , Z _ { j } | X ) \\log p _ { \\theta } ( Z _ { i } | Z _ { j } , b ( i , j ) ) \\right] \\tag{7} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            263,
+            545,
+            825,
+            625
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "and ",
+        "bbox": [
+            171,
+            643,
+            200,
+            656
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\log q ^ {*} (b (i, j) | X) \\stackrel {\\pm} {=} \\mathbb {E} _ {q (\\tau , \\mathcal {B} _ {\\neg b (i, j)}, Z | X)} [ \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) ] \\\\ \\stackrel {\\pm} {=} \\mathbb {E} _ {q (\\tau | X)} \\left[ \\sum_ {Z _ {i}, Z _ {j}} q \\left(Z _ {i}, Z _ {j} \\mid X\\right) \\log p _ {\\theta} \\left(Z _ {i} \\mid Z _ {j}, b (i, j), \\tau\\right) \\right] + \\log p _ {\\theta} (b (i, j)). \\tag {8} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            184,
+            689,
+            823,
+            762
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The exact computation of the expectations in Eq. (6) and (8) involves summing over all possible trees, which is computationally intractable. Luckily, we can easily approximate the expectation using importance sampling, and our new proposal distribution, $s _ { \\phi } ( \\tau )$ , is outlined in the subsequent Sec. 3.2. We direct the reader to Appendix A for the derivations of the above variational distributions and the details of the algorithm. ",
+        "bbox": [
+            169,
+            779,
+            826,
+            851
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "To obtain good starting points for the variational distributions, we initialize $\\phi$ with trees obtained using the Neighbor-Joining algorithm [14]. The details of the initialization are provided in Appendix A.2. Alg. 1 is a high-level algorithmic description of VaiPhy. The proof regarding the natural gradient is presented in Appendix I. ",
+        "bbox": [
+            169,
+            854,
+            826,
+            912
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "code",
+        "sub_type": "algorithm",
+        "code_caption": [
+            "Algorithm 1 VaiPhy in pseudocode – ι is the total number of iterations and $\\eta$ is the natural gradient step size "
+        ],
+        "code_body": "1: Input: $X, \\phi, \\eta, \\iota$ 2: for iter = 1, ..., i do  \n3: Approximate log $q^{*}(Z|X)$ using $s_{\\phi}(\\tau)$ {Eq. (6)}  \n4: $q(Z_i) \\gets (1 - \\eta) q(Z_i) + \\eta q^{*}(Z_i)$ 5: $\\phi_{ij} \\gets \\sum_{\\alpha \\neq \\beta} F_{ij}^{\\alpha, \\beta}$ {Eq. (5)}  \n6: $q(\\tau|X) \\gets q^{*}(\\tau|X)$ {Eq. (7)}  \n7: $q(\\mathcal{B}|X) \\gets q^{*}(\\mathcal{B}|X)$ using $s_{\\phi}(\\tau)$ {Eq. (8)}  \n8: end for  \n9: return $q(\\tau, \\mathcal{B}, Z|X), \\phi$ ",
+        "bbox": [
+            173,
+            121,
+            823,
+            258
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "3.2 SLANTIS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            287,
+            282,
+            301
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "We propose the method Sequential Look-Ahead Non-local Tree Importance Sampling (SLANTIS), which enables sampling of a tree, $\\tau$ , from a distribution, $s _ { \\phi } ( \\tau )$ . SLANTIS has support over multifurcating trees with labeled internal vertices and is parameterized by $\\phi$ . To describe the algorithm, we next introduce some notation. ",
+        "bbox": [
+            169,
+            316,
+            826,
+            372
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Using $\\phi$ , SLANTIS immediately constructs $W$ , an $N \\times N$ matrix describing all pairwise edge weights based on the substitution model, ",
+        "bbox": [
+            169,
+            378,
+            823,
+            406
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\nW _ {i j} = \\sum_ {\\alpha , \\beta : \\alpha \\neq \\beta} \\phi_ {i j} (b (i, j) Q _ {\\alpha \\beta}) + \\sum_ {\\alpha , \\beta : \\alpha = \\beta} (M - \\phi_ {i j}) (b (i, j) Q _ {\\alpha \\beta}), \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            267,
+            420,
+            825,
+            454
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where $Q$ is the rate matrix of the JC69 model and $\\alpha$ and $\\beta$ are nucleotides. Moreover, let $\\mathcal { G }$ be a graph with vertex set $\\{ N \\}$ with edge weights specified by $W$ . Let $\\mathcal { G } _ { \\mathbb { Z } } = \\mathcal { G } \\backslash \\Lambda$ , where $\\Lambda$ is the $( V , E )$ of the leaves, i.e., the graph induced by the internal vertices of our trees. The pseudocode of the algorithm is presented in Appendix B. The main idea, which is borrowed from [6], is to order the edges of the graph and for each edge in the order, make a choice whether to include it in the sampled tree or not. The choice is made based on a Bernoulli trial, where the two probabilities are proportional to the weight of the maximum spanning tree (MST) containing the already selected edges and the currently considered edge and that of the MST containing the already selected edges but not the currently considered edge.1 The action associated with the former outcome is to include the edge in the sampled tree, and the other outcome is not to include it. ",
+        "bbox": [
+            169,
+            467,
+            823,
+            606
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "To facilitate fast computation of the required MSTs, we first consider the edges of an MST $T _ { 1 }$ of $\\mathcal { G }$ . After the edges of $T _ { 1 }$ , the edges of an MST $T _ { 2 }$ of $\\mathcal { G } \\setminus T _ { 1 }$ can be found. In general, $T _ { s }$ is an MST of $\\mathcal { G } \\backslash \\cup _ { r = 1 } ^ { s - 1 } T _ { r }$ , and after the edges of $\\cup _ { r = 1 } ^ { s - 1 } T _ { r }$ , the edges of $T _ { s }$ can be found. In the algorithm, we repeatedly take advantage of the property that for any tree $T$ and edge $e$ not in $T$ , $T \\cup e$ contains a unique cycle, and the removal of its heaviest edge different from $e$ produces the minimum weight subtree of $T \\cup e$ containing $e$ . If the considered edge is in $T$ and we choose to include it in the sampled tree, $\\tau$ , we recursively update $\\log { s _ { \\phi } ( \\tau ) }$ by adding the Bernoulli log probability corresponding to the edge. See Fig. 2 for an illustration. ",
+        "bbox": [
+            169,
+            612,
+            826,
+            726
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "3.3 The JC Sampler ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            750,
+            328,
+            763
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The JC69 model is arguably one of the most frequently used substitution models in Bayesian phylogenetics. However, as far as we are aware, the model has only been used for obtaining maximum likelihood estimates of branch lengths. Here, we observe that the JC69 model can be seen as an i.i.d. Bernoulli likelihood over sites and leverage the Beta-Bernoulli conjugacy for obtaining a normalized distribution over branch lengths in variational inference. Below we show how to sample from this distribution and evaluate its likelihood using the change-of-variables formula. ",
+        "bbox": [
+            169,
+            777,
+            823,
+            861
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_footnote",
+        "text": "1In [6], the candidate edges are selected from those that will make a perfect matching, and the probability of each edge is uniform. ",
+        "bbox": [
+            169,
+            883,
+            826,
+            912
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Given a branch length $b ( e ) = b$ , the probability of the $m$ ’th nucleotide not mutating along edge $e = ( i , j )$ is, according to the JC69 model, ",
+        "bbox": [
+            169,
+            90,
+            823,
+            122
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\np = \\left(\\frac {1}{4} + \\frac {3}{4} e ^ {- \\frac {4}{3} b}\\right) ^ {\\mathbb {1} \\left\\{Z _ {i} ^ {m} = Z _ {j} ^ {m} \\right\\}}. \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            387,
+            127,
+            825,
+            167
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "As all mutations are equiprobable for this model, the probability of the nucleotide mutating is thus $1 - p$ , giving rise to the following distribution when all $M$ estimated mutations and non-mutations are observed and assuming mutations occur independently across sites ",
+        "bbox": [
+            169,
+            172,
+            823,
+            215
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {B e r n} \\left(\\phi_ {i j} | p\\right) = \\prod_ {m = 1} ^ {M} \\operatorname {B e r n} \\left(\\phi_ {i j} ^ {m} | p\\right) = \\prod_ {m = 1} ^ {M} p ^ {1 - \\phi_ {i j} ^ {m}} (1 - p) ^ {\\phi_ {i j} ^ {m}} = p ^ {M - \\phi_ {i j}} (1 - p) ^ {\\phi_ {i j}}, \\tag {11}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            207,
+            223,
+            825,
+            263
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\phi _ { i j } ^ { m }$ is the expected number of mutations over the edge $( i , j )$ at site $m$ . Assuming an uninformative Beta prior on the Bernoulli parameter, $p$ , and recalling that Beta is a conjugate prior for the Bernoulli distribution, we get a posterior distribution over $p$ , $\\mathrm { B e t a } ( p | M - \\phi _ { i j } + 1 , \\phi _ { i j } + 1 )$ . Since we are ultimately interested in sampling $b$ , not $p$ , we find a transform, $f ( \\cdot )$ , mapping $p$ to $b$ , using Eq. (10); ",
+        "bbox": [
+            169,
+            272,
+            826,
+            344
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf ^ {- 1} (b) = \\frac {1}{4} + \\frac {3}{4} e ^ {- \\frac {4}{3} b} = p \\tag {12}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            405,
+            359,
+            825,
+            390
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf (p) = - \\frac {3}{4} \\log \\left(\\frac {4}{3} \\left(p - \\frac {1}{4}\\right)\\right) = b. \\tag {13}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            375,
+            398,
+            823,
+            433
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "In all, sampling branch lengths from the JC model include two straightforward steps, (i) draw $p$ from the Beta posterior distribution, and (ii) pass it through the transform, $b = f ( p )$ . ",
+        "bbox": [
+            169,
+            436,
+            823,
+            467
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Of course, we are also interested in evaluating the likelihood of the sampled branch length. To do so, we use the change-of-variables formula; we let ",
+        "bbox": [
+            169,
+            470,
+            826,
+            501
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} s _ {\\phi} (b) = \\operatorname {B e t a} \\left(p \\mid M - \\phi_ {i j} + 1, \\phi_ {i j} + 1\\right) \\left| \\frac {d f ^ {- 1} (b)}{d b} \\right| (14) \\\\ = \\frac {p ^ {M - \\phi_ {i j}} (1 - p) ^ {\\phi_ {i j}} e ^ {- \\frac {4}{3} b}}{\\mathrm {B} (M - \\phi_ {i j} + 1 , \\phi_ {i j} + 1)}, (15) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            330,
+            507,
+            825,
+            580
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { B } ( \\cdot )$ is the Beta function. This provides an efficient way of evaluating the likelihood of a branch length. In Alg. 2, we summarize the JC sampler with an algorithmic description. ",
+        "bbox": [
+            169,
+            587,
+            823,
+            617
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Algorithm 2 The JC Sampler ",
+        "text_level": 1,
+        "bbox": [
+            173,
+            633,
+            370,
+            648
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1: Input: φ, i, j ",
+            "2: Sample $p \\sim \\mathrm { B e t a } ( p | M - \\phi _ { i j } + 1 , \\phi _ { i j } + 1 )$ ",
+            "3: Transform $b = f ( p )$ {Eq. (13)} ",
+            "4: Evaluate sφ(b) {Eq. (14)} ",
+            "5: return b, sφ(b) "
+        ],
+        "bbox": [
+            181,
+            651,
+            483,
+            720
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/36b98ddd10c4317823f2c9d1db776034285d85059dcd6bc5f1fc1115a824d6a5.jpg",
+        "image_caption": [
+            "Figure 2: Propagation step of SLANTIS. The solid line is $\\tau$ so far, and bold green lines are accepted edges. Dashed and dotted lines are the edges not in $\\tau$ . The blue color indicates the edge we consider (e), and the orange color indicates the alternative edge, either $c$ or $e ^ { * }$ . $r _ { e } = W ( e ) / ( W ( e ) + W ( c ) )$ or $r _ { e } = W ( e ) / ( W ( e ) + W ( e ^ { * } ) )$ . At the end of SLANTIS, the spanning tree with bold green lines is reported. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            171,
+            747,
+            825,
+            829
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            936,
+            504,
+            946
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "3.4 Assessing the Framework ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            90,
+            392,
+            104
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "The framework learns its parameters and distributions by maximizing the ELBO in Eq. (4). However, the IWELBO offers a tighter lower bound on the marginal log-likelihood. Using SLANTIS and the JC sampler, we can easily evaluate our framework using the IWELBO: ",
+        "bbox": [
+            169,
+            116,
+            823,
+            159
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {L} = \\mathbb {E} _ {\\mathcal {B} _ {\\ell}, \\tau_ {\\ell} \\sim s _ {\\phi} (\\mathcal {B}, \\tau)} \\left[ \\log \\frac {1}{L} \\sum_ {\\ell = 1} ^ {L} \\frac {p _ {\\theta} (X , \\mathcal {B} _ {\\ell} , \\tau_ {\\ell})}{s _ {\\phi} (\\mathcal {B} _ {\\ell} , \\tau_ {\\ell})} \\right], \\tag {16}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            330,
+            165,
+            823,
+            208
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "where we may factorize the denominator as $s _ { \\phi } ( B , \\tau ) ~ = ~ s _ { \\phi } ( B | \\tau ) s _ { \\phi } ( \\tau )$ , and $\\begin{array} { r l } { s _ { \\phi } ( B | \\tau ) } & { { } = } \\end{array}$ $\\begin{array} { r } { \\prod _ { e \\in E { ( \\tau ) } } s _ { \\phi } ( b ( \\mathbf { \\bar { e } } ) ) } \\end{array}$ . Note that we have marginalized out the auxiliary variable, $Z$ , in the target in Eq. (16), as we do not wish to compute $\\mathcal { L } _ { L }$ using our variational distributions. ",
+        "bbox": [
+            169,
+            215,
+            823,
+            260
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "4 Using VaiPhy to Parameterize the CSMC ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            279,
+            550,
+            296
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "As the tree topology space in A is considerably larger than the bifurcating $X$ -tree space, obtaining competitive log-likelihood (LL) estimates is not straightforward. Namely, the uniform prior over the tree space in A, $p _ { \\theta } ( \\tau ) = 1 / ( N - | \\boldsymbol { X } | ) ^ { N - 2 }$ , turns into a heavily penalizing term. When compared to baselines in smaller sample spaces, this will become a considerable negative factor for VaiPhy. Compare this to the prior when considering unrooted, bifurcating $X$ -trees (which is the case for VBPI-NF): $p _ { \\theta } ^ { \\prime } ( \\tau ) = \\bar { 1 } / ( 2 | X | - 5 ) ! !$ , where $| X |$ is the number of taxa. As an example, for $| X | = 1 0$ and $N = 1 8$ , $p _ { \\theta } ( \\tau )$ distributes mass uniformly over 281 trillion trees, while the latter one merely considers 2 million trees. ",
+        "bbox": [
+            169,
+            310,
+            823,
+            420
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Inspired by [26], we instead seek to use VaiPhy to parameterize a CSMC algorithm, thereby obtaining a procedure for projecting our trees to the lower-dimensional leaf-labeled tree space. Here, the prior is instead $p _ { \\theta } ^ { \\prime \\prime } ( \\tau ) \\bar { = } 1 / ( 2 | \\bar { X } | - 3 ) ! !$ . ",
+        "bbox": [
+            169,
+            426,
+            823,
+            470
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Since $\\phi$ is not constrained to multifurcating trees, we can utilize the estimated number of mutations between vertices learned in A, also in the bifurcating $X$ -tree space, $\\Omega$ . Here arises an interesting obstacle. In the CSMC algorithm, the internal vertices are unlabeled. Hence we are effectively blindfolded and need to estimate which entry in $\\phi$ to use for a given edge. We achieve this by scoring edges based on how frequently the corresponding split of the leaf-set $X$ occurs in trees sampled from $s _ { \\phi } \\bar { ( \\tau ) }$ . See Appendix D.2 for more information. ",
+        "bbox": [
+            169,
+            474,
+            823,
+            559
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "At each rank $\\rho \\in [ 1 , R ]$ , the CSMC proposes (i) a forest, $\\tau _ { \\rho }$ , by merging the roots of two subtrees in $\\mathcal { T } _ { \\rho - 1 }$ , and (ii) a corresponding set of branch lengths, $B _ { \\rho }$ . This is done in parallel for $K$ particles, resampling particles with probability proportional to their importance weights, $\\it { w _ { \\rho } ^ { k } }$ , at every rank.2 However, the reason to take advantage of a CSMC is that it allows us to estimate the marginal log-likelihood in the bifurcating $X$ -tree space using the well-known formula, ",
+        "bbox": [
+            169,
+            565,
+            823,
+            637
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\log p _ {\\theta} (X) \\approx \\log \\prod_ {\\rho = 1} ^ {R} \\frac {1}{K} \\sum_ {k = 1} ^ {K} w _ {\\rho} ^ {k}. \\tag {17}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            387,
+            643,
+            823,
+            686
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We let $\\phi$ parameterize our two novel CSMC proposal distributions, $r _ { \\phi } ( \\boldsymbol { B } _ { \\rho } | \\boldsymbol { B } _ { \\rho - 1 } , \\mathcal { T } _ { \\rho } )$ and $r _ { \\phi } ( \\mathcal { T } _ { \\rho } | \\mathcal { T } _ { \\rho - 1 } )$ The former constructs a mixture of JC samplers and evaluates the proposal’s likelihood in a multiple importance sampling fashion [7], while the latter forms a categorical distribution over the roots in $\\mathcal { T } _ { \\rho - 1 }$ , parameterized by a function of the likelihoods of trees sampled by SLANTIS. The in-detail descriptions can be found in Appendix D. ",
+        "bbox": [
+            169,
+            700,
+            823,
+            772
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5 Experiments ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            790,
+            313,
+            806
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5.1 Visualizing the JC Sampler ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            821,
+            403,
+            835
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We conduct a toy experiment, investigating how the estimated number of mutations along an edge affects the behavior of the JC sampler. We would expect that a greater number of mutations should ",
+        "bbox": [
+            169,
+            845,
+            823,
+            875
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_footnote",
+        "text": "2For more details and background of the CSMC algorithm, we point the reader to [26] and [33] for excellent descriptions. ",
+        "bbox": [
+            169,
+            883,
+            823,
+            912
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "generate a larger branch length. This is the case since the involved vertices are supposedly farther apart in terms of an evolutionary distance. ",
+        "bbox": [
+            169,
+            90,
+            823,
+            119
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "As demonstrated in Fig. 1, this advantageous behavior is indeed displayed. As $\\phi _ { i j }$ grows, the corresponding JC sampling distribution is shifted towards larger branch lengths. Interestingly, the JC sampler distributes its mass more symmetrically than the Log-Normal or Exponential distributions, which are typically used for modeling branch length distributions [33, 39, 37, 26]. ",
+        "bbox": [
+            169,
+            126,
+            823,
+            181
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "It follows from Eq. (13) that branch lengths grow infinitely large as $p$ goes to 0.25. This phenomenon in phylogenetics is referred to as saturation. Saturation occurs for distantly related lineages and implies that the states of the nucleotides in these ancestral sequences are mutually independent. This is not an interesting case, hence the non-exhaustive parameter search of $\\phi _ { i j }$ in Fig. 1. ",
+        "bbox": [
+            169,
+            186,
+            823,
+            244
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5.2 Density Estimation ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            263,
+            346,
+            277
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Here we benchmark our methods, VaiPhy, and $\\phi$ -CSMC, in terms of LL estimates on seven real-world datasets, which we refer to as DS1-DS7 ([16, 13, 35, 17, 25, 40, 29]; in Appendix E, we provide additional information about the datasets). Additionally, to the extent possible, we have used the open-source code of our baselines to survey the benchmarks on these popular datasets. We only considered baselines that employ the JC69 model. Moreover, we assumed an Exp(10) prior over branch lengths and a uniform prior over tree topologies. This was aligned with the generative models used in all the original works of the baselines. ",
+        "bbox": [
+            169,
+            291,
+            823,
+            388
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "For all methods, we use the exact parameter configurations reported in the corresponding papers or specified in their available code. We let VBPI-NF [37] and VCSMC [26] train for the number of iterations as specified in their works. For MrBayes [28] with the SS method, we follow the protocol used in [39]. ",
+        "bbox": [
+            169,
+            393,
+            823,
+            450
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "As we are benchmarking sophisticated versions of the phylogenetic inference CSMC [33], it seems relevant to include a vanilla CSMC. We define the vanilla CSMC as one that proposes branch lengths using the model prior and merges subtrees uniformly. There are no learnable parameters in the vanilla CSMC. ",
+        "bbox": [
+            169,
+            455,
+            823,
+            511
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Indeed, there exist particle MCMC based approaches for parameterizing the CSMC, e.g., [33] or [34]; however, these have not previously been benchmarked on the datasets used here, and the latter uses the K2P substitution model. As such, we leave these comparisons for future work and constrain ourselves to VI based CSMCs. ",
+        "bbox": [
+            169,
+            518,
+            823,
+            573
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Following [26], we give all CSMC methods $K = 2 0 4 8$ particles. The parameters of VCSMC, VaiPhy, and $\\phi$ -CSMC are selected based on their best iteration, measured in LL. Using these parameters, we compute the LL estimates averaged over ten random seeds. We run VaiPhy and $\\phi$ -CSMC for 200 iterations and evaluate them on Eq. (16) and Eq. (17), respectively. Vanilla CSMC is also evaluated using Eq. (17). ",
+        "bbox": [
+            169,
+            580,
+            823,
+            650
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "In Table 1, we provide the mean LL scores and standard deviations. On all datasets except DS2, our $\\phi$ -CSMC is the superior CSMC method (highlighted in red). It also produces significantly smaller variations in its LL estimates compared to VCSMC and the Vanilla CSMC. On DS2, the Vanilla CSMC is surprisingly the winning CSMC. ",
+        "bbox": [
+            169,
+            656,
+            823,
+            712
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Overall, MrBayes SS is the superior method on these datasets, followed by VBPI-NF. VaiPhy, despite its heavily penalizing prior distribution over tree topologies (see Sec. 4), still outperforms VCSMC and Vanilla CSMC on all datasets but DS2, with extremely low-variance estimates of the LL. ",
+        "bbox": [
+            169,
+            718,
+            823,
+            760
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5.3 Wall-Clock Time and Memory Comparisons ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            780,
+            522,
+            795
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Being a mean-field VI algorithm, VaiPhy truly enjoys the related benefits in terms of speed, which we demonstrate in this section. The experiments are performed on a high-performance computing cluster node with two Intel Xeon Gold 6130 CPUs with 16 CPU cores each. Each node in the cluster has 96 GiB RAM. ",
+        "bbox": [
+            169,
+            806,
+            823,
+            862
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We run VaiPhy for 200 iterations, and 128 trees are sampled using SLANTIS to compute the expectations in Eq. (6) and (8). To compute $\\mathcal { L } _ { L }$ , 3000 trees are sampled from SLANTIS after 200 iterations. The $\\phi$ -CSMC results include the aforementioned VaiPhy runs and 10 additional ",
+        "bbox": [
+            169,
+            869,
+            823,
+            911
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "table",
+        "img_path": "images/81d929a4f8e51e4d0edb5eb2e2a3ff31cf24b3d02aae872069ffa36ae9d57a16.jpg",
+        "table_caption": [
+            "Table 1: Real dataset LL estimates for the different methods. Our $\\phi$ -CSMC is, on average, the best-performing CSMC method (red). Overall, MrBayes SS achieves the highest LL estimates (bold). *Not available due to unresolved memory issues. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>DATA SET</td><td>(#TAXA, #SITES)</td><td>MRBAYES SS</td><td>VBPI-NF</td><td>VCSMC (JC)</td><td>VANILLA CSMC</td><td>VAI PHY</td><td>φ-CSMC</td></tr><tr><td>DS1</td><td>(27, 1949)</td><td>-7032.45 ± 0.15</td><td>-7108.40 ± 0.11</td><td>-9180.34 ± 170.27</td><td>-8306.76 ± 166.27</td><td>-7490.54 ± 0</td><td>-7290.36 ± 7.23</td></tr><tr><td>DS2</td><td>(29, 2520)</td><td>-26363.85 ± 0.33</td><td>-26367.70 ± 0.03</td><td>-28700.7 ± 4892.67</td><td>-27884.37 ± 226.60</td><td>-31203.44 ± 3E-12</td><td>-30568.49 ± 31.34</td></tr><tr><td>DS3</td><td>(36, 1812)</td><td>-33729.60 ± 0.74</td><td>-33735.09 ± 0.05</td><td>-37211.20 ± 397.97</td><td>-35381.01 ± 218.18</td><td>-33911.13 ± 7E-12</td><td>-33798.06 ± 6.62</td></tr><tr><td>DS4</td><td>(41, 1137)</td><td>-13292.37 ± 1.42</td><td>-13329.93 ± 0.11</td><td>-17106.10 ± 362.74</td><td>-15019.21 ± 100.61</td><td>-13700.86 ± 0</td><td>-13582.24 ± 35.08</td></tr><tr><td>DS5</td><td>(50, 378)</td><td>-8192.96 ± 0.71</td><td>-8214.61 ± 0.40</td><td>-9449.65 ± 2578.58</td><td>-8940.62 ± 46.44</td><td>-8464.77 ± 0</td><td>-8367.51 ± 8.87</td></tr><tr><td>DS6</td><td>(50, 1133)</td><td>-6571.02 ± 0.81</td><td>-6724.36 ± 0.37</td><td>-9296.66 ± 2046.70</td><td>-8029.51 ± 83.67</td><td>-7157.84 ± 0</td><td>-7013.83 ± 16.99</td></tr><tr><td>DS7</td><td>(64, 1008)</td><td>-8438.78 ± 73.66</td><td>-8650.49 ± 0.53</td><td>N/A*</td><td>-11013.57 ± 113.49</td><td>-9462.21 ± 1E-12</td><td>-9209.18 ± 18.03</td></tr></table>",
+        "bbox": [
+            179,
+            161,
+            823,
+            237
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "independent CSMC runs with 2048 particles. VBPI-NF runs for 400,000 iterations and uses 100,000 trees to estimate the lower bound after training. Each experiment is repeated 10 times. The wall-clock time comparison of the methods on DS1 is presented in Fig. 3. ",
+        "bbox": [
+            169,
+            261,
+            823,
+            305
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/cbcbdb41022b1cba636a80d43b881c7d566aa607d757f7dc6b61538fc965f0ca.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            181,
+            324,
+            485,
+            460
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/ff16e7f17c13d516d178bc69b3180e199647d4904684e51779312f20822ebb78.jpg",
+        "image_caption": [
+            "Figure 3: Wall-clock runtime results on DS1 data set with $\\{ 2 , 4 , 8 , 1 6 \\}$ cores. Left) Runtime results for VaiPhy, $\\phi$ -CSMC, and VBPI-NF. Right) A zoomed-in version of the top figure showing runtime results for VaiPhy and $\\phi$ -CSMC. Clearly, VaiPhy is consistently faster than its benchmarks. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            509,
+            321,
+            810,
+            460
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "We were not able to run VCSMC on less than 16 cores due to the method producing memory issues on DS1. However, for 16 cores, their runtime was around 6840 seconds, with too small variations to show in a boxplot. VCSMC is thus faster than $\\phi$ -CSMC on 16 cores but still slower than VaiPhy. ",
+        "bbox": [
+            169,
+            521,
+            823,
+            565
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "VaiPhy is remarkably faster than other variational methods for each number of cores investigated. Although VBPI-NF produces impressive LL estimates, it is considerably slower than VaiPhy and the CSMC methods (all CSMCs are not shown in the figure). Additionally, using two cores, the wall-clock time required by VBPI-NF to arrive at VaiPhy’s approximation accuracy was close to 11x that of VaiPhy on DS1. For completeness, we compared wall-clock times with MrBayes, although this is not appropriate given that the software has been highly optimized over decades and is written in C. And, indeed, MrBayes is the fastest algorithm when allowed multiple cores. However, for a single core on DS1, MrBayes ran for approximately 100 minutes while VaiPhy only needed an impressive 83 minutes on average for the same setup. ",
+        "bbox": [
+            169,
+            569,
+            825,
+            695
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Finally, we discuss memory requirements. Our main variational baseline, VBPI-NF, used 8.4 million neural network weights and biases on DS1, while the number of learnable parameters (i.e., the dimensions of $\\phi$ and $q ( Z | X ) )$ in VaiPhy was 0.8 million; less than $10 \\%$ of the former. ",
+        "bbox": [
+            169,
+            700,
+            823,
+            743
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "6 Conclusion ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            766,
+            302,
+            782
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "We have presented a modular framework for Bayesian phylogenetic inference, building on three novel methods: VaiPhy, SLANTIS, and the $J C$ sampler. At the heart of our framework lies $\\phi$ , the estimated number of mutations matrix. Although $\\phi$ was learned in a multifurcating tree space with labeled internal vertices, we showed that the evolutionary distances also served useful in the bifurcating $X$ -tree space. We demonstrated this by using $\\phi$ to parameterize two new proposal distributions for the CSMC, also introduced by us in this work; we referred to this new algorithm as $\\phi$ -CSMC. Our $\\phi$ -CSMC proved to be the best-performing CSMC in terms of marginal log-likelihood estimation on real datasets. Additionally, VaiPhy was up to 25 times faster than its baselines on real data. ",
+        "bbox": [
+            169,
+            800,
+            823,
+            912
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Speed is essential for making Bayesian phylogenetics a reality for future large data sets, in particular, single-cell data sets in medical investigations. Moreover, speed and the opportunity to leverage the VI methodology for phylogeny, as provided by our framework, i.e., our graph-based representation of the VI distribution over trees, $\\phi$ , opens up novel research opportunities. For instance, recently, ensemble and mixture models in VI have received a lot of attention [23, 27]. VaiPhy could obtain many ensemble components in parallel with low computational cost and thus has great potential to benefit from these findings. Moreover, more mixture components appear to imply significant improvements in terms of negative log-likelihood scores when learned by maximizing a multiple importance sampling-based objective, MISELBO [24]. This motivates researching how VaiPhy could be fitted using a MISELBO objective. ",
+        "bbox": [
+            169,
+            90,
+            826,
+            231
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "For many potential applications, models other than the JC69 model will be more suitable for the evolution that takes place over the edges of the phylogenetic tree. However, our JC sampler provides a great starting point. Reasonably, the JC sampler should serve as a better base distribution for normalizing flows than those currently employed [37]. Furthermore, in this work, the JC sampler samples the branch lengths independent of the tree topology. We expect that tree topology dependent branch sampling will enhance VaiPhy’s performance. This will be investigated in our future work. ",
+        "bbox": [
+            169,
+            234,
+            826,
+            321
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "VI can facilitate Bayesian analysis of models that integrate phylogeny with other tasks that usually are performed as pre-processing or post-processing steps. The most important such example may very well be sequence alignment. Although Bayesian phylogenetic inference is currently considered state-of-the-art, this inference does not take the observed sequences associated with the taxa as input but a so-called multiple sequence alignment (MSA) of these, which is obtained by applying a heuristic to the sequences. This implies that the entire uncertainty related to the multitude of possible MSAs remains uncharacterized after a standard Bayesian phylogenetic inference, i.e., it does not affect the obtained posterior at all. For single-cell phylogenetic analysis of cancer cells, pre-processing may be even more involved. For instance, the so-called direct library preparation single-cell DNA data [36] for tumors require a pre-processing step in which the cells are clustered into cancer clones. For these clones, it is then desirable to perform a phylogenetic inference. Interestingly, the VI has already been launched for Bayesian clustering for this pre-processing step [30]. ",
+        "bbox": [
+            169,
+            325,
+            826,
+            494
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "In conclusion, we have presented a VI algorithm for Bayesian phylogeny that, together with its building blocks, unlocks the potential of VI for fast Bayesian analysis in phylogeny and integrated phylogenetic analysis. The by now 25 year old methodology of MCMC based Bayesian phylogenetic analysis is certainly a mature and optimized methodology with great accuracy. However, VaiPhy is faster than MrBayes on a single core, and the underlying methodology is bound to lead to a sequence of increasingly faster and more accurate VI based phylogenetic software. Moreover, it paves the way for integrated VI based phylogenetic inference. ",
+        "bbox": [
+            169,
+            497,
+            826,
+            598
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgments and Disclosure of Funding ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            618,
+            555,
+            638
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "First, we acknowledge the insightful comments provided by the reviewers, which have helped improve our work. This project was made possible through funding from the Swedish Foundation for Strategic Research grant BD15-0043, and from the Swedish Research Council grant 2018-05417_VR. The computations and data handling were enabled by resources provided by the Swedish National Infrastructure for Computing (SNIC), partially funded by the Swedish Research Council through grant agreement no. 2018-05973. ",
+        "bbox": [
+            169,
+            651,
+            826,
+            737
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "The authors declare no competing interests. ",
+        "bbox": [
+            171,
+            741,
+            460,
+            757
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            779,
+            269,
+            795
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] D. M. Blei, A. Kucukelbir, and J. D. McAuliffe. Variational inference: A review for statisticians. Journal of the American statistical Association, 112(518):859–877, 2017. ",
+            "[2] A. Bouchard-Côté and M. Jordan. Variational inference over combinatorial spaces. In Advances in Neural Information Processing Systems, volume 23, 2010. ",
+            "[3] A. Bouchard-Côté, S. Sankararaman, and M. I. Jordan. Phylogenetic inference via sequential Monte Carlo. Systematic Biology, 61(4):579–593, July 2012. "
+        ],
+        "bbox": [
+            179,
+            809,
+            825,
+            910
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            490,
+            935,
+            509,
+            946
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[4] Y. Burda, R. B. Grosse, and R. Salakhutdinov. Importance Weighted Autoencoders. In The International Conference on Learning Representations, 2016. ",
+            "[5] T. Dang and H. Kishino. Stochastic Variational Inference for Bayesian Phylogenetics: A Case of CAT Model. Molecular Biology and Evolution, 36(4):msz020, 2019. ",
+            "[6] P. Diaconis. Sequential importance sampling for estimating the number of perfect matchings in bipartite graphs: An ongoing conversation with laci. In Building Bridges II, pages 223–233. Springer, 2019. ",
+            "[7] V. Elvira, L. Martino, D. Luengo, and M. F. Bugallo. Generalized multiple importance sampling. Statistical Science, 34(1):129–155, 2019. ",
+            "[8] Y. Fan, R. Wu, M.-H. Chen, L. Kuo, and P. O. Lewis. Choosing among Partition Models in Bayesian Phylogenetics. Molecular Biology and Evolution, 28(1):523–532, 2011. ",
+            "[9] J. Felsenstein. Evolutionary trees from dna sequences: a maximum likelihood approach. Journal of molecular evolution, 17(6):368–376, 1981. ",
+            "[10] R. W. Floyd. Algorithm 97: Shortest path. Commun. ACM, 5(6):345, jun 1962. ",
+            "[11] M. Fourment and A. E. Darling. Evaluating probabilistic programming and fast variational Bayesian inference in phylogenetics. PeerJ, 7(1):e8272, 2019. ",
+            "[12] N. Friedman, M. Ninio, I. Pe’er, and T. Pupko. A structural EM algorithm for phylogenetic inference. Journal of computational biology : a journal of computational molecular cell biology, 9(2):331–353, 2002. ",
+            "[13] J. R. Garey, T. J. Near, M. R. Nonnemacher, and S. A. Nadler. Molecular evidence for acanthocephala as a subtaxon of rotifera. Journal of Molecular Evolution, 43(3):287–292, 1996. ",
+            "[14] O. Gascuel. BIONJ: an improved version of the NJ algorithm based on a simple model of sequence data. Molecular Biology and Evolution, 14(7):685–695, 07 1997. ",
+            "[15] S. Guindon, J.-F. Dufayard, V. Lefort, M. Anisimova, W. Hordijk, and O. Gascuel. New Algorithms and Methods to Estimate Maximum-Likelihood Phylogenies: Assessing the Performance of PhyML 3.0. Systematic Biology, 59(3):307–321, 05 2010. ",
+            "[16] S. B. Hedges, K. D. Moberg, and L. R. Maxson. Tetrapod phylogeny inferred from 18s and 28s ribosomal rna sequences and a review of the evidence for amniote relationships. Molecular Biology and Evolution, 7(6):607–633, 1990. ",
+            "[17] D. A. Henk, A. Weir, and M. Blackwell. Laboulbeniopsis termitarius, an ectoparasite of termites newly recognized as a member of the laboulbeniomycetes. Mycologia, 95(4):561–564, 2003. ",
+            "[18] D. T. Hoang, O. Chernomor, A. von Haeseler, B. Q. Minh, and L. S. Vinh. UFBoot2: Improving the Ultrafast Bootstrap Approximation. Molecular Biology and Evolution, 35(2):518–522, 10 2017. ",
+            "[19] M. D. Hoffman, D. M. Blei, C. Wang, and J. Paisley. Stochastic variational inference. Journal of Machine Learning Research, 2013. ",
+            "[20] S. Höhna, M. J. Landis, T. A. Heath, B. Boussau, N. Lartillot, B. R. Moore, J. P. Huelsenbeck, and F. Ronquist. Revbayes: Bayesian phylogenetic inference using graphical models and an interactive model-specification language. Systematic biology, 65(4):726–736, 2016. ",
+            "[21] J. P. Huelsenbeck and F. Ronquist. Mrbayes: Bayesian inference of phylogenetic trees. Bioinformatics, 17(8):754–755, 2001. ",
+            "[22] T. Jukes and C. Cantor. Evolution of protein molecules, pp. 21–132 in mammalian protein metabolism, vol. iii munro hn, 1969. ",
+            "[23] O. Kviman, H. Melin, H. Koptagel, V. Elvira, and J. Lagergren. Multiple importance sampling elbo and deep ensembles of variational approximations. In International Conference on Artificial Intelligence and Statistics, pages 10687–10702. PMLR, 2022. ",
+            "[24] O. Kviman, R. Molén, A. Hotti, S. Kurt, V. Elvira, and J. Lagergren. Learning with miselbo: The mixture cookbook. arXiv, 2022. ",
+            "[25] C. Lakner, P. Van Der Mark, J. P. Huelsenbeck, B. Larget, and F. Ronquist. Efficiency of markov chain monte carlo tree proposals in bayesian phylogenetics. Systematic biology, 57(1):86–103, 2008. "
+        ],
+        "bbox": [
+            173,
+            90,
+            826,
+            910
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[26] A. K. Moretti, L. Zhang, C. A. Naesseth, H. Venner, D. Blei, and I. Pe’er. Variational combinatorial sequential monte carlo methods for bayesian phylogenetic inference. In Uncertainty in Artificial Intelligence, pages 971–981. PMLR, 2021. ",
+            "[27] W. Morningstar, S. Vikram, C. Ham, A. Gallagher, and J. Dillon. Automatic differentiation variational inference with mixtures. In International Conference on Artificial Intelligence and Statistics, pages 3250–3258. PMLR, 2021. ",
+            "[28] F. Ronquist, M. Teslenko, P. Van Der Mark, D. L. Ayres, A. Darling, S. Höhna, B. Larget, L. Liu, M. A. Suchard, and J. P. Huelsenbeck. Mrbayes 3.2: efficient bayesian phylogenetic inference and model choice across a large model space. Systematic biology, 61(3):539–542, 2012. ",
+            "[29] A. Y. Rossman, J. M. McKemy, R. A. Pardo-Schultheiss, and H.-J. Schroers. Molecular studies of the bionectriaceae using large subunit rdna sequences. Mycologia, 93(1):100–110, 2001. ",
+            "[30] N. Safinianaini, C. P. de Souza, and J. Lagergren. CopyMix: mixture model based single-cell clustering and copy number profiling using variational inference. bioRxiv, 2020. ",
+            "[31] R. A. Vos, H. Lapp, W. H. Piel, and V. Tannen. Treebase2: rise of the machines. Nature Precedings, 2010. ",
+            "[32] M. J. Wainwright and M. I. Jordan. Graphical Models, Exponential Families, and Variational Inference. Foundations and Trends® in Machine Learning, 1(1–2):1–305, 2007. ",
+            "[33] L. Wang, A. Bouchard-Côté, and A. Doucet. Bayesian phylogenetic inference using a combinatorial sequential monte carlo method. Journal of the American Statistical Association, 110(512):1362–1374, 2015. ",
+            "[34] S. Wang and L. Wang. Particle gibbs sampling for bayesian phylogenetic inference. Bioinformatics, 37(5):642–649, 2021. ",
+            "[35] Z. Yang and A. D. Yoder. Comparison of likelihood and bayesian methods for estimating divergence times using multiple gene loci and calibration points, with application to a radiation of cute-looking mouse lemur species. Systematic biology, 52(5):705–716, 2003. ",
+            "[36] H. Zahn, A. Steif, E. Laks, P. Eirew, M. VanInsberghe, S. P. Shah, S. Aparicio, and C. L. Hansen. Scalable whole-genome single-cell library preparation without preamplification. Nature methods, 14(2):167–173, Feb. 2017. ",
+            "[37] C. Zhang. Improved variational bayesian phylogenetic inference with normalizing flows. Advances in Neural Information Processing Systems, 33:18760–18771, 2020. ",
+            "[38] C. Zhang and F. A. Matsen IV. Generalizing tree probability estimation via bayesian networks. Advances in Neural Information Processing Systems, 31, 2018. ",
+            "[39] C. Zhang and F. A. Matsen IV. Variational bayesian phylogenetic inference. In International Conference on Learning Representations, 2018. ",
+            "[40] N. Zhang and M. Blackwell. Molecular phylogeny of dogwood anthracnose fungus ( discula destructiva ) and the diaporthales. Mycologia, 93:355–365, 03 2001. "
+        ],
+        "bbox": [
+            173,
+            90,
+            826,
+            659
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Checklist ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            256,
+            104
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "1. For all authors... ",
+        "bbox": [
+            210,
+            116,
+            341,
+            128
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) Do the main claims made in the abstract and introduction accurately reflect the paper’s contributions and scope? [Yes] ",
+            "(b) Did you describe the limitations of your work? [Yes] We discuss the extension to labelled multifurcating tree space and the requirement of the post-processing step that is required to make fair comparisons in bifurcating space. ",
+            "(c) Did you discuss any potential negative societal impacts of your work? [N/A] ",
+            "(d) Have you read the ethics review guidelines and ensured that your paper conforms to them? [Yes] "
+        ],
+        "bbox": [
+            235,
+            133,
+            823,
+            253
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "2. If you are including theoretical results... ",
+        "bbox": [
+            209,
+            258,
+            496,
+            272
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) Did you state the full set of assumptions of all theoretical results? [Yes] ",
+            "(b) Did you include complete proofs of all theoretical results? [Yes] We show the conjugacy of JC sampler and we provide proof of natural gradient in the Appendix. "
+        ],
+        "bbox": [
+            235,
+            276,
+            823,
+            321
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "3. If you ran experiments... ",
+        "bbox": [
+            209,
+            325,
+            395,
+            339
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)? [Yes] We will provide the codes in the supplementary materials. ",
+            "(b) Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)? [Yes] In the Experiments section we mention the choice of parameters. In Appendix, we provide code segments to show how we ran the benchmark methods. ",
+            "(c) Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)? [Yes] In Table 1 we include the standard deviations and in Figure 3 we include the error bars. ",
+            "(d) Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)? [Yes] We wrote the hardware specifications in the runtime experiments; however, we didn’t include the total amount of time required for all datasets. "
+        ],
+        "bbox": [
+            235,
+            344,
+            826,
+            531
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "4. If you are using existing assets (e.g., code, data, models) or curating/releasing new assets... ",
+        "bbox": [
+            209,
+            536,
+            825,
+            550
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) If your work uses existing assets, did you cite the creators? [Yes] We cited all software and also provided GitHub links to the repositories in the Appendix. ",
+            "(b) Did you mention the license of the assets? [N/A] ",
+            "(c) Did you include any new assets either in the supplemental material or as a URL? [Yes] The code is available in the supplementary material. ",
+            "(d) Did you discuss whether and how consent was obtained from people whose data you’re using/curating? [N/A] ",
+            "(e) Did you discuss whether the data you are using/curating contains personally identifiable information or offensive content? [N/A] "
+        ],
+        "bbox": [
+            235,
+            554,
+            823,
+            689
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "5. If you used crowdsourcing or conducted research with human subjects... ",
+        "bbox": [
+            209,
+            693,
+            705,
+            708
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) Did you include the full text of instructions given to participants and screenshots, if applicable? [N/A] ",
+            "(b) Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable? [N/A] ",
+            "(c) Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation? [N/A] "
+        ],
+        "bbox": [
+            235,
+            712,
+            826,
+            801
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "VaiPhy: a Variational Inference Based Algorithm for Phylogeny Appendix ",
+        "text_level": 1,
+        "bbox": [
+            186,
+            122,
+            816,
+            188
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "A The VaiPhy Algorithm ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            268,
+            401,
+            287
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "A.1 Update Equation Details ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            318,
+            388,
+            333
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "The update equations of VaiPhy follow the standard mean-field VI updates. The variational distribution factorizes over the tree topology, ancestral sequences of each latent vertex, and the branch lengths of all edges in the graph (Eq. (18)); ",
+        "bbox": [
+            169,
+            354,
+            826,
+            398
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} q (\\tau , \\mathcal {B}, Z | X) = q (\\mathcal {B} | X) q (\\tau | X) q (Z | X) (18) \\\\ = \\prod_ {e \\in \\mathcal {G}} q (b (e) | X) q (\\tau | X) \\prod_ {i \\in I (\\mathrm {A})} q \\left(Z _ {i} | X\\right). (19) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            316,
+            450,
+            825,
+            523
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "For brevity, we denote the set of neighbors of node $i$ with $N _ { \\tau } ( i )$ and their sequences with $Y _ { N _ { \\tau } ( i ) }$ in this section. Furthermore, $\\neg i$ is the set of nodes except node $i$ , and $C$ is a constant. ",
+        "bbox": [
+            169,
+            563,
+            823,
+            593
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Ancestral sequence update equation ",
+        "bbox": [
+            171,
+            598,
+            426,
+            613
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\log q ^ {*} \\left(Z _ {i} | X\\right) \\propto \\mathbb {E} _ {q (\\tau , \\mathcal {B}, Z _ {- i} | X)} \\left[ \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) \\right] (21) \\\\ = \\sum_ {\\tau} \\int_ {\\mathcal {B}} \\sum_ {Z _ {\\neg i}} q (\\tau | X) q (\\mathcal {B} | X) q (Z _ {\\neg i} | X) \\left[ \\log p _ {\\theta} \\left(X, Z _ {i}, Z _ {\\neg i}, \\mathcal {B}, \\tau\\right) \\right] d \\mathcal {B} (22) \\\\ = \\sum_ {\\tau} \\int_ {\\mathcal {B}} q (\\tau | X) q (\\mathcal {B} | X) \\left[ \\sum_ {Y _ {j} \\in Y _ {N _ {\\tau} (i)}} q \\left(Y _ {j} | X\\right) \\log p _ {\\theta} \\left(Y _ {j} \\mid Z _ {i}, b (i, j), \\tau\\right) \\right] d \\mathcal {B} + C (23) \\\\ \\pm \\mathbb {E} _ {q (\\tau , \\mathcal {B} | X)} \\left[ \\sum_ {Y _ {j} \\in Y _ {N _ {\\tau} (i)}} q \\left(Y _ {j} | X\\right) \\log p _ {\\theta} \\left(Y _ {j} \\mid Z _ {i}, b (i, j), \\tau\\right) \\right] (24) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            189,
+            665,
+            825,
+            857
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "If $j$ is an observed node, $q ( Y _ { j } | X ) = \\mathbb { 1 } \\{ Y _ { j } = X _ { j } \\}$ . ",
+        "bbox": [
+            169,
+            896,
+            506,
+            912
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "1 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Tree topology update equation ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            90,
+            387,
+            106
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\log q ^ {*} (\\tau | X) \\propto \\mathbb {E} _ {q (\\mathcal {B}, Z | X)} [ \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) ] (26) \\\\ = \\sum_ {Z} \\int_ {\\mathcal {B}} q (\\mathcal {B} | X) q (Z | X) \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) d \\mathcal {B} (27) \\\\ = \\sum_ {Z} \\int_ {\\mathcal {B}} q (\\mathcal {B} | X) q (Z | X) \\log p _ {\\theta} (X, Z | \\mathcal {B}, \\tau) d \\mathcal {B} + \\log p _ {\\theta} (\\tau) + C (28) \\\\ = \\sum_ {(i, j) \\in E (\\tau)} \\sum_ {Z _ {i}, Z _ {j}} \\int_ {b (i, j)} q (b (i, j) | X) q \\left(Z _ {i}, Z _ {j} \\mid X\\right) \\log p _ {\\theta} \\left(Z _ {i} \\mid Z _ {j}, b (i, j), \\tau\\right) d b (i, j) (29) \\\\ + \\log p _ {\\theta} (\\tau) + C (30) \\\\ \\pm \\mathbb {E} _ {q (\\mathcal {B} | X)} \\left[ \\sum_ {(i, j) \\in E (\\tau)} \\sum_ {Z _ {i}, Z _ {j}} q \\left(Z _ {i}, Z _ {j} | X\\right) \\log p _ {\\theta} \\left(Z _ {i} \\mid Z _ {j}, b (i, j), \\tau\\right) \\right] (31) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            192,
+            121,
+            823,
+            357
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Branch length update equation ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            380,
+            392,
+            395
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\log q ^ {*} (b (i, j) | X) (33) \\\\ \\propto \\mathbb {E} _ {q (\\tau , \\mathcal {B} _ {\\neg e (i, j)}, Z | X)} [ \\log p _ {\\theta} (X, Z, \\mathcal {B}, \\tau) ] (34) \\\\ = \\sum_ {\\tau} \\sum_ {Z} \\int_ {\\mathcal {B} _ {- e (i, j)}} q (\\tau | X) q (Z | X) q \\left(\\mathcal {B} _ {- e (i, j)} | X\\right) \\left[ \\log p _ {\\theta} (X, Z, b (i, j), \\mathcal {B} _ {- e (i, j)}, \\tau) \\right] d \\mathcal {B} _ {- e} (35) \\\\ = \\sum_ {\\tau} q (\\tau | X) \\sum_ {Z _ {i}, Z _ {j}} q \\left(Z _ {i}, Z _ {j} \\mid X\\right) \\left[ \\log p _ {\\theta} \\left(Z _ {i} \\mid Z _ {j}, b (i, j), \\tau\\right) \\right] + \\log p _ {\\theta} (b (i, j)) + C (36) \\\\ \\pm \\mathbb {E} _ {q (\\tau | X)} \\left[ \\sum_ {Z _ {i}, Z _ {j}} q \\left(Z _ {i}, Z _ {j} \\mid X\\right) \\log p _ {\\theta} \\left(Z _ {i} \\mid Z _ {j}, b (i, j), \\tau\\right) \\right] + \\log p _ {\\theta} (b (i, j)) (37) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            192,
+            410,
+            823,
+            603
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "In the experiments, we observed that using the branch length that maximizes the tree likelihood during optimization provided better results. Hence, during the training of VaiPhy, we used a maximum likelihood heuristic to update the branch lengths given a tree topology. After the training, we used the tree topologies sampled from SLANTIS and corresponding branch lengths sampled from the JC sampler to compute IWELBO. ",
+        "bbox": [
+            169,
+            626,
+            823,
+            696
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "A.2 Neighbor-Joining Initialization ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            719,
+            431,
+            734
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "We utilize the NJ algorithm to initialize VaiPhy with a reasonable state. The sequence data is fed into BIONJ, an NJ algorithm, to create an initial reference phylogenetic tree using the PhyML software, version 3.3.20200621 [14, 15]. The branch lengths of the NJ tree are optimized with the same software. An example script to run PhyML is shown below. ",
+        "bbox": [
+            169,
+            748,
+            825,
+            805
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "phyml -i DS1.phylip -m JC69 --r_seed vbpi_seed -o l -c 1 ",
+        "bbox": [
+            171,
+            823,
+            653,
+            838
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "The marginal likelihoods of internal vertices, $p _ { \\theta } ( Z _ { i } | X , B , \\tau ) \\ \\forall i \\in I ( A )$ , are used to initialize the latent ancestral sequences, $q ( Z _ { i } | X )$ . The optimized branch lengths are used as the initial set of lengths for $e \\in E ( \\tau )$ . The lengths of the edges that are not present in the NJ tree are initialized by computing the shortest path between the vertices using the Floyd-Warshall algorithm [10]. ",
+        "bbox": [
+            169,
+            854,
+            823,
+            912
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "2 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "A.3 Graphical Model ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            90,
+            336,
+            104
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "When training VaiPhy, we used the following branch length prior ",
+        "bbox": [
+            171,
+            116,
+            602,
+            132
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\np _ {\\theta} (\\mathcal {B} | \\tau) = \\prod_ {e \\in E (\\tau)} p _ {\\theta} (b (e)), \\tag {39}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            140,
+            823,
+            172
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "where $p _ { \\theta } ( b ( e ) ) = \\mathrm { E x p } ( 1 0 )$ , and a uniform prior over tree topologies (in A): ",
+        "bbox": [
+            169,
+            180,
+            669,
+            196
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\np _ {\\theta} (\\tau) = \\frac {1}{N ^ {N - 2}}. \\tag {40}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            441,
+            204,
+            823,
+            232
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "The prior when considering unrooted, bifurcating $X$ -trees (which is the case for VBPI-NF): ",
+        "bbox": [
+            169,
+            238,
+            772,
+            253
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\np ^ {\\prime} (\\tau) = \\frac {1}{(2 | X | - 3) ! !}, \\tag {41}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            423,
+            261,
+            823,
+            291
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "and for rooted, bifurcating $X$ -trees ",
+        "bbox": [
+            169,
+            297,
+            403,
+            313
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\np ^ {\\prime \\prime} (\\tau) = \\frac {1}{(2 | X | - 5) ! !}. \\tag {42}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            421,
+            321,
+            823,
+            351
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "B SLANTIS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            294,
+            104
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Here we provide two algorithmic descriptions of SLANTIS. Note that in Eq. (9), the weight matrix $W$ is in logarithmic scale. However, in Alg. 3 and 4, W is in normal scale. ",
+        "bbox": [
+            171,
+            119,
+            826,
+            150
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "code",
+        "sub_type": "algorithm",
+        "code_caption": [
+            "Algorithm 3 SLANTIS in pseudocode "
+        ],
+        "code_body": "1: Input: $\\phi, W$ 2: $\\mathcal{G} \\gets$ graph spanned by $W$ 3: $\\mathcal{G}_{\\mathcal{I}} \\gets \\mathcal{G} \\setminus \\Lambda$ 4: Initialize $T_{1}$ , e.g. by MST( $W(\\mathcal{G}_{\\mathcal{I}})$ )  \n5: Initialize $\\tau \\gets T_{1}$ , $s(\\tau) \\gets 1$ , $\\mathcal{M} \\gets \\{\\}$ and $s \\gets 1$ 6: while $|\\mathcal{M}| < |V(\\mathcal{G}_{\\mathcal{I}})| - 1$ do  \n7: $\\mathcal{R} \\gets \\mathcal{G}_{\\mathcal{I}} \\setminus T_{s}$ 8: $W_{1} \\gets W(\\mathcal{R})$ 9: $T_{s+1} \\gets \\mathrm{MST}(W_{1})$ 10: pass $T_{s}, T_{s+1}, \\tau, W, \\mathcal{M}$ to Algorithm 4  \n11: $\\tau, \\mathcal{M}$ updated in Alg. 4  \n12: $s(\\tau) \\gets s(\\tau) \\times r$ , from return value $r$ of Alg. 4  \n13: $T_{s} \\gets T_{s+1}$ , $s \\gets s + 1$ 14: end while  \n15: Sample leaf connections  \n16: for $u \\in V(\\Lambda)$ do  \n17: $i \\gets$ indexes of internal vertices in $\\mathcal{G}$ 18: $p_{1}, \\ldots, p_{n} \\gets \\frac{W(u,i_{1})}{\\Sigma W(u,i)}, \\ldots, \\frac{W(u,i_{n})}{\\Sigma W(u,i)}$ 19: $v \\gets \\text{Categorical}(p_{1}, \\ldots, p_{n})$ 20: add $(u,v)$ to $\\tau$ 21: $s(\\tau) \\gets s(\\tau) \\times p_{v}$ 22: end for  \n23: return $\\tau, s(\\tau)$ ",
+        "bbox": [
+            173,
+            181,
+            531,
+            506
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "code",
+        "sub_type": "algorithm",
+        "code_caption": [
+            "Algorithm 4 SLANTIS - propagation "
+        ],
+        "code_body": "1: Input: $t_0, t_1, \\tau, W, \\mathcal{M}$ 2: Initialize $r \\gets 1$ 3: $I_1 \\gets \\text{sort}(t_1)$ , e.g. by sorting $W(t_1)$ in descending order and selecting the indices.  \n4: for $e \\in t_0$ do  \n5: if $e \\in \\tau$ then  \n6: Set $\\tau_0, \\tau_1$ such that $e = \\text{cut}(\\tau_0, \\tau_1)$ 7: for $e_1 \\in I_1$ do  \n8: if $e_1$ connects $\\tau_0, \\tau_1$ then  \n9: $e^* \\gets e_1$ 10: break inner for loop  \n11: end if  \n12: end for  \n13: $r_e = \\frac{W(e)}{W(e) + W(e^*)}$ 14: else if $e \\notin \\tau$ then  \n15: add $e$ to $\\tau$ creating new graph $\\tau^*$ with cycle $\\mathcal{C}$ 16: $c \\gets \\arg \\min(W(\\mathcal{C} \\setminus \\{\\mathcal{M} \\cup e^*\\}))$ 17: if $c = \\{\\}$ then  \n18: continue  \n19: end if  \n20: remove $c$ from $\\tau^*$ 21: $r_e = \\frac{W(e)}{W(e) + W(c)}$ 22: end if  \n23: $u \\gets \\text{Uniform}(0, 1)$ 24: if $e \\in \\tau$ and $r_e < u$ then  \n25: $\\tau \\gets \\tau_0 \\cup e^* \\cup \\tau_1$ 26: else if $e \\in \\tau$ and $r_e \\geq u$ then  \n27: $M \\gets M \\cup e$ 28: $r \\gets r \\times r_e$ 29: else if $e \\notin \\tau$ and $r_e < u$ then  \n30: continue  \n31: else if $e \\notin \\tau$ and $r_e \\geq u$ then  \n32: $\\tau \\gets \\tau^*$ 33: $M \\gets M \\cup e$ 34: $r \\gets r \\times r_e$ 35: end if  \n36: if $|\\mathcal{M}| = |V(\\mathcal{G}_I)| - 1$ then  \n37: break for loop  \n38: end if  \n39: end for  \n40: return $\\tau, \\mathcal{M}, r$ ",
+        "bbox": [
+            173,
+            107,
+            823,
+            672
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Fig. 4-7 show four different cases in SLANTIS propagation. In all of the figures, the left column is the current state of $\\tau$ , the middle column is two trees that are compared, and the right column is the selected tree. Solid lines indicate the edges in $\\tau$ , and bold green lines are accepted edges (edges in $M$ ). The blue color indicates the edge we consider $( e )$ and orange color indicates the alternative edge; either $c$ or $e ^ { * }$ . Depending on the configuration, the Bernoulli random variable is either $r _ { e } = \\bar { W ( e ) } / ( W ( e ) + W ( c ) )$ or $r _ { e } \\doteq W ( e ) / ( W ( \\bar { e } ) + W ( e ^ { * } ) )$ . In order to add an edge to $M$ , the edge must have blue color ( $( e \\in \\tau )$ ) and must get accepted. At the end of the SLANTIS algorithm, the spanning tree with bold green edges, along with its sampled leaf connections, is returned. ",
+        "bbox": [
+            169,
+            694,
+            826,
+            808
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "image",
+        "img_path": "images/11fb1f0d99b5b3a9f4e024f72ff08743063aab37ed53efb90c302f5569a7988c.jpg",
+        "image_caption": [
+            "Figure 4: Propagation step of SLANTIS, a case where $e \\not \\in \\tau$ and $c \\in \\tau$ . The Bernoulli r.v. is $r _ { e } = W ( e ) / ( \\bar { W ( e ) } + W ( \\bar { c } ) )$ . e is rejected, therefore $\\tau$ , $s ( \\tau )$ and $M$ remain unchanged. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            186,
+            104,
+            810,
+            300
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "image",
+        "img_path": "images/6155ff2cb93d9a0196bdcabc6ce720aeff1a819550500146e9f2ef5394b832ed.jpg",
+        "image_caption": [
+            "Figure 5: Propagation step of SLANTIS, a case where $e \\in \\tau$ and $e ^ { \\ast } \\notin \\tau$ . The Bernoulli r.v. is $\\bar { r _ { e } } = W ( e ) / ( \\bar { W ( e ) } + W ( \\bar { e } ^ { * } ) )$ . e is accepted, therefore $\\tau$ , $s ( \\tau )$ and $M$ are updated. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            184,
+            378,
+            810,
+            578
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "image",
+        "img_path": "images/2d1729aef436e91eb4f8b3883bd410e449aab15bc318593ce02519a27acd5aac.jpg",
+        "image_caption": [
+            "Figure 6: Propagation step of SLANTIS, a case where $e \\not \\in \\tau$ and $c \\in \\tau$ . The Bernoulli r.v. is $r _ { e } = W ( e ) / ( \\bar { W ( e ) } + W ( \\bar { c } ) )$ . e is accepted, therefore $\\tau$ , $s ( \\tau )$ and $M$ are updated. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            184,
+            656,
+            810,
+            852
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "image",
+        "img_path": "images/bbd28663834480f0c7e1ce6616befd3002282a8b65cd8b23ce6306fcc73045f5.jpg",
+        "image_caption": [
+            "Figure 7: Propagation step of SLANTIS, a case where $e \\in \\tau$ and $e ^ { \\ast } \\notin \\tau$ . The Bernoulli r.v. is $\\bar { r _ { e } } = W ( e ) / ( \\bar { W ( e ) } + W ( \\bar { e } ^ { * } ) )$ . e is rejected, therefore $\\tau$ , $s ( \\tau )$ and $M$ remain unchanged. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            186,
+            90,
+            816,
+            289
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "C The JC Sampler ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            353,
+            346,
+            371
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "In the JC Sampler, the probability of no substitutions is sampled from the Beta posterior distribution as follows; ",
+        "bbox": [
+            169,
+            383,
+            823,
+            410
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\np \\sim \\operatorname {B e t a} (p | M - \\phi_ {i j} + 1, \\phi_ {i j} + 1).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            377,
+            411,
+            616,
+            426
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "The Beta posterior distribution is parameterized by the Beta prior $( B e t a ( p | 1 , 1 )$ in this case), the sequence length $( M )$ , and the expected number of substitutions between two nodes $( \\phi _ { i j } )$ . ",
+        "bbox": [
+            169,
+            434,
+            823,
+            464
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Since the support of the Beta distribution is in [0, 1], it is possible to sample $p < 0 . 2 5$ . However, according to the JC69 model, such a case corresponds to saturation, and the logarithm in Eq. (13) becomes negative. ",
+        "bbox": [
+            169,
+            469,
+            825,
+            512
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "In practice, on the rare occasions where we encounter $p < 0 . 2 5$ , we discard that sample and draw another $p$ from the Beta posterior distribution. Yet, the user can adjust the prior distribution parameters to change the behavior of the posterior distribution (e.g., skew the distribution away from $p < 0 . 2 5 )$ . ",
+        "bbox": [
+            169,
+            517,
+            826,
+            561
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "D CMSC Proposal Distributions ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            578,
+            460,
+            595
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Here we go into detail about our novel CSMC proposals. ",
+        "bbox": [
+            171,
+            608,
+            545,
+            625
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "D.1 The Branch Length Proposal ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            638,
+            419,
+            654
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Here we outline our new proposal distribution for sampling sets of branch lengths in the CSMC, $r _ { \\phi } ( \\boldsymbol { B } _ { \\rho } | \\boldsymbol { B } _ { \\rho - 1 } , \\mathcal { T } _ { \\rho } )$ . In practice, sampling the $B _ { \\rho }$ means that, given the two edges most recently added to $\\tau _ { \\rho }$ (e and $e ^ { \\prime }$ ), we sample branch lengths using the JC sampler, $s _ { \\phi } ( b ( e ) )$ , and concatenate $\\{ b ( e ) , b ( e ^ { \\prime } ) \\}$ to the previous set, $B _ { \\rho } = \\{ b ( e ) , b ( e ^ { \\prime } ) \\} \\cup B _ { \\rho - 1 }$ . The complicated part is identifying which entries in $\\phi$ the edges correspond to. ",
+        "bbox": [
+            169,
+            664,
+            823,
+            734
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "We let the proposal distribution of branch lengths be a mixture of JC samplers while additionally allowing edge indices to be random variables: ",
+        "bbox": [
+            169,
+            739,
+            823,
+            768
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\nr _ {\\phi} \\left(b, b ^ {\\prime}, e, e ^ {\\prime}\\right) = s _ {\\phi} (b | e) r \\left(e | e ^ {\\prime}\\right) s _ {\\phi} \\left(b ^ {\\prime} \\mid e ^ {\\prime}\\right) r \\left(e ^ {\\prime}\\right). \\tag {43}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            336,
+            772,
+            823,
+            789
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Branch length $b$ given $e$ is sampled independently of $e ^ { \\prime }$ , and vice versa; however, we assume that the edge indices are not mutually independent. If $e ^ { \\prime }$ is sampled first from the mixture, then $e$ is constrained to sharing the same parent node as $e$ . We get the following priors ",
+        "bbox": [
+            169,
+            792,
+            823,
+            835
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\nr \\left(e ^ {\\prime}\\right) = \\sum_ {i, j \\in \\mathcal {C} ^ {\\prime} \\left(e ^ {\\prime}\\right)} \\frac {c (i , j)}{C} \\delta_ {i, j} (u, v), \\tag {44}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            382,
+            839,
+            823,
+            878
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "where $c ( i , j )$ is the number of occurrences of the edge in the pre-sampled SLANTIS trees, $C ^ { \\prime }$ is a normalizing constant, and $\\delta _ { i , j } ( \\cdot )$ is the Dirac delta with the mass on $i , \\bar { j } . { \\mathcal { C } } ( e ^ { \\prime } )$ is the set of possible ",
+        "bbox": [
+            169,
+            883,
+            825,
+            912
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "labeled edge indices for $e ^ { \\prime }$ . E.g., if the root in $e ^ { \\prime }$ is a leaf node, then we only need to consider edges involving that labeled leaf. To estimate the index of the unlabeled edge $e ^ { \\prime }$ , we thus sample from $r ( \\bar { e } ^ { \\prime } )$ . Similarly, for $r ( e | e ^ { \\prime } )$ , the set $\\mathcal { C } ( e | e ^ { \\prime } )$ is even smaller, as we have estimated the label of the parent. ",
+        "bbox": [
+            169,
+            90,
+            826,
+            133
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "The above results in the following likelihood function for the set of branch lengths: ",
+        "bbox": [
+            169,
+            138,
+            718,
+            154
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\nr _ {\\phi} \\left(\\mathcal {B} _ {\\rho} \\mid \\mathcal {B} _ {\\rho - 1}, \\mathcal {T} _ {\\rho}\\right) = \\prod_ {\\bar {e} \\in E \\left(\\mathcal {T} _ {\\rho}\\right)} \\sum_ {i, j} ^ {N} s _ {\\phi} (b (\\bar {e})) r _ {\\phi} (i, j | \\bar {e}), \\tag {45}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            326,
+            161,
+            823,
+            205
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "where $\\bar { e }$ is the estimated edge index. ",
+        "bbox": [
+            169,
+            213,
+            413,
+            227
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "D.2 The Merger Proposal ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            243,
+            366,
+            258
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "At each rank $\\rho \\in [ 1 , R ]$ , the CSMC proposes a forest, $\\tau _ { \\rho }$ , by merging the roots of two subtrees in $\\mathcal { T } _ { \\rho - 1 }$ . ",
+        "bbox": [
+            169,
+            268,
+            823,
+            299
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "Let $r _ { 1 } , \\ldots , r _ { R }$ be the roots of a forest $\\mathcal { T } _ { \\rho - 1 }$ .3 There are $\\binom { R } { 2 }$ way to merge the roots. In the case of vanilla CSMC, the probability of merging roots $r _ { i }$ and $r _ { j }$ is uniform, $\\begin{array} { r } { p ( r _ { i } , r _ { j } ) = 1 / \\binom { R } { 2 } } \\end{array}$ . ",
+        "bbox": [
+            169,
+            305,
+            825,
+            340
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "For $\\phi$ -CSMC, we sample $S$ trees from SLANTIS and corresponding branch lengths from JC sampler as a preprocessing step.4 Let $X ( r _ { i } )$ and $X ( r _ { j } )$ be the set of observations in the subtrees with roots $r _ { i }$ and $r _ { j }$ respectively. We define a function $\\mathsf { \\tilde { O } } ( X ( r _ { i } ) , X ( r _ { j } ) , \\tau )$ , that checks each edge in $\\tau$ and returns 0 if there is an edge that separates the observations into two disjoint sets such that one set of observations is $X ( r _ { i } ) \\cup { \\bar { X } } ( r _ { j } )$ . The probability of merging subtrees with roots $r _ { i }$ and $r _ { j }$ is: ",
+        "bbox": [
+            169,
+            344,
+            825,
+            415
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\np \\left(r _ {i}, r _ {j}\\right) \\propto \\sum_ {s = 1} ^ {S} p _ {\\theta} \\left(X \\mid \\tau^ {s}, \\mathcal {B} ^ {s}\\right) \\mathbb {1} \\left\\{O \\left(X \\left(r _ {i}\\right), X \\left(r _ {j}\\right), \\tau^ {s}\\right) = 0 \\right\\} \\tag {46}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            300,
+            440,
+            825,
+            479
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "E Biological Data Sets ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            497,
+            375,
+            513
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "The details of the biological data sets are presented in Table 2. The former and up-to-date TreeBASE Matrix IDs are displayed [31]. ",
+        "bbox": [
+            169,
+            527,
+            823,
+            556
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "table",
+        "img_path": "images/92e69f0d1afd32691cb78ad3c768f957cd6208bfd5754d8362e51be9c3b4c5a4.jpg",
+        "table_caption": [
+            "Table 2: Biological data set details "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td colspan=\"6\">TreeBASE Matrix ID</td></tr><tr><td>Name</td><td>Legacy</td><td>Up-to-date Legacy</td><td>Taxa</td><td>Sites</td><td>Reference</td></tr><tr><td>DS1</td><td>M336</td><td>M2017</td><td>27</td><td>1949</td><td>[16]</td></tr><tr><td>DS2</td><td>M501</td><td>M2131</td><td>29</td><td>2520</td><td>[13]</td></tr><tr><td>DS3</td><td>M1510</td><td>M127</td><td>36</td><td>1812</td><td>[35]</td></tr><tr><td>DS4</td><td>M1366</td><td>M487</td><td>41</td><td>1137</td><td>[17]</td></tr><tr><td>DS5</td><td>M3475</td><td>M2907</td><td>50</td><td>378</td><td>[25]</td></tr><tr><td>DS6</td><td>M1044</td><td>M220</td><td>50</td><td>1133</td><td>[40]</td></tr><tr><td>DS7</td><td>M755</td><td>M2261</td><td>64</td><td>1008</td><td>[29]</td></tr></table>",
+        "bbox": [
+            269,
+            589,
+            728,
+            739
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "page_footnote",
+        "text": "3For brevity, we focus on a single particle. ",
+        "bbox": [
+            189,
+            882,
+            444,
+            897
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "page_footnote",
+        "text": "4For the experiments, we set $\\mathrm { S } { = } 3 { , } 0 0 0$ . ",
+        "bbox": [
+            192,
+            896,
+            421,
+            911
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "F MrBayes Experiment ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            388,
+            107
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Following the experimental setup in [37], we ran MrBayes version 3.2.7 [28] (written in C) with the stepping-stone algorithm and summarized the results of 10 independent runs. We set the number of generations to 10,000,000 and the number of chains per run to 4. The mean and the standard deviation of the marginal log-likelihood estimates are calculated by using the results reported in MrBayes output file. An example script to run MrBayes is shown below. ",
+        "bbox": [
+            169,
+            119,
+            823,
+            191
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "code",
+        "sub_type": "code",
+        "code_caption": [],
+        "code_body": "BEGIN MRBAYES;  \nset autoclose=yes nowarn=yes Seed=123 Swapseed=123;  \nlset rst=1;  \nprset statefreqpr=fixed(equal);  \nssngen = 10000000 nruns=10 nchains=4 printfreq=1000\\  \nsamplefreq=100 savebrrels=yes filename=mrbayes_ss_out.txt;  \nEND; ",
+        "guess_lang": "txt",
+        "bbox": [
+            171,
+            200,
+            671,
+            297
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "G VBPI-NF Experiment ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            316,
+            395,
+            333
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "We used the codes in the author’s GitHub repository, which is based on PyTorch, to reproduce their results on the biological data sets. VBPI-NF requires precomputed bootstrap trees to gather the support of conditional probability tables. For DS[1-4], we used the bootstrap trees provided by the authors in their code repository. For DS[5-7], following the guidelines in [37], UFBoot is used to create 10 replicates of 10,000 bootstrap trees [18]. An example script is shown below. ",
+        "bbox": [
+            169,
+            347,
+            823,
+            417
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "code",
+        "sub_type": "code",
+        "code_caption": [],
+        "code_body": "iqtree -s DS5 -bb 10000 -wbt -m JC69 -redo ",
+        "guess_lang": "batch",
+        "bbox": [
+            171,
+            429,
+            534,
+            443
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "We chose RealNVP(10) variant for comparison. To reproduce the results on biological datasets, we used RealNVP flow type with 10 layers. The step size for branch length parameters is set to 0.0001.5 We introduced a seed parameter in their code to be able to reproduce the runs. We used default settings for the rest of the parameters. An example script is shown below. ",
+        "bbox": [
+            169,
+            454,
+            823,
+            510
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "code",
+        "sub_type": "code",
+        "code_caption": [],
+        "code_body": "python main.py --dataset DS5 --flow_type realnvp --Lnf 10 \\\n--stepszBranch 0.0001 --vbpi_seed 1",
+        "guess_lang": "batch",
+        "bbox": [
+            168,
+            521,
+            679,
+            550
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "H VCSMC Experiment ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            568,
+            385,
+            585
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "We attempted to reproduce the JC model results of VCSMC [26] using the authors’ GitHub repository (based on TensorFlow 1) and default hyperparameters: 100 epochs, batch size 256, learning rate 0.001, branch length initialization ln(10). Similar to the VBPI-NF experiments, we added a seed argument for reproducibility. ",
+        "bbox": [
+            169,
+            599,
+            823,
+            656
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "code",
+        "sub_type": "code",
+        "code_caption": [],
+        "code_body": "python runner.py --dataset hohna_data_1 --jcmodel True --num_epoch 100 \\\n--n PARTICLES 2048 --batch_size 256 --learning_rate 0.001 --nested False --seed 1 ",
+        "guess_lang": "shell",
+        "bbox": [
+            168,
+            666,
+            862,
+            696
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "After running 100 epochs, the parameters $\\lambda _ { m a x }$ and $Q _ { m a x }$ (although $Q _ { m a x }$ is fixed for the JC model) of the epoch with maximum $\\log \\hat { p } ( X )$ were selected. Then CSMC was run ten times using $\\lambda _ { m a x }$ and $Q _ { m a x }$ . The results in Table 1 correspond to the means and standard deviations for $\\log \\hat { p } ( X )$ and $p ( { \\cal { X } } | \\tau , B )$ of these ten evaluation runs. In the VCSMC paper, the results are obtained by alternating optimization (updating $\\lambda$ and $Q$ ) and inference (estimating $p ( X )$ via the approximated ELBO, $\\hat { \\mathcal { L } } _ { i }$ ) in 100 iterations, ultimately reporting $\\hat { \\mathcal { L } } ^ { \\star } = \\operatorname* { m a x } _ { i } \\{ \\hat { \\mathcal { L } } _ { i } \\} _ { i = 1 } ^ { 1 0 0 }$ . Unfortunately, $\\hat { \\mathcal { L } } ^ { \\star }$ will have a bias proportional to the variance of the selected $\\hat { \\mathcal { L } } _ { i }$ . Hence, $\\mathbb { E } [ \\hat { \\mathcal { L } } ^ { \\star } ]$ is not necessarily an ELBO. In practice, VCSMC produced $\\hat { \\mathcal { L } } _ { i }$ with high variance (see Table 1), making it unclear if $\\hat { \\mathcal { L } } ^ { \\star }$ results from a $\\hat { \\mathcal { L } } _ { i }$ with a high mean or the variance. Instead, finding $\\hat { \\mathcal { L } } ^ { \\star }$ and then rerunning the inference with the corresponding parameters for different seeds produces a fair benchmark; this is what we report. ",
+        "bbox": [
+            169,
+            705,
+            826,
+            858
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "The VNCSMC code in the authors’ GitHub repository gave rise to non-trivial memory issues that we couldn’t resolve; hence, the VNCSMC method is excluded from this paper. ",
+        "bbox": [
+            169,
+            862,
+            823,
+            892
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "page_footnote",
+        "text": "5We consulted the authors. ",
+        "bbox": [
+            191,
+            897,
+            352,
+            910
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "I Proof of Convex Combination for Natural Gradient for Exponential Families ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            772,
+            125
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "The proof is two-folded: Part 1, where we prove that the Natural Gradient based VI update equation for Exponential Families (EF) is computed as a convex combination of old and new VI update equations; Part 2, where we prove that the VaiPhy distributions that should belong to EF, belong to EF. ",
+        "bbox": [
+            169,
+            138,
+            826,
+            194
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "Part 1: We basically prove what was stated in stochastic variational inference (SVI) [19] using SVI notation. Let $\\mathcal { L } ( q ( \\beta ) )$ denote the ELBO as a function of the variational distribution of the interest, as the goal is to maximize ELBO w.r.t. $q ( \\beta )$ . We know that ",
+        "bbox": [
+            169,
+            199,
+            826,
+            244
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathcal {L} (q (\\beta)) = \\mathbb {E} _ {q} [ \\log p (\\beta , x, Z, \\alpha) ] - \\mathbb {E} _ {q (\\beta)} [ \\log q (\\beta) ] (47) \\\\ = \\mathbb {E} _ {q} [ \\log p (\\beta | x, Z, \\alpha) + \\log p (x, Z, \\alpha) ] - \\mathbb {E} _ {q (\\beta)} [ \\log q (\\beta) ] (48) \\\\ \\stackrel {\\pm} {=} \\mathbb {E} _ {q} [ \\log p (\\beta | x, Z, \\alpha) ] - \\mathbb {E} _ {q (\\beta)} [ \\log q (\\beta) ]. (49) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            276,
+            268,
+            823,
+            330
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "Note that for readability, [19] uses $q ( \\beta )$ instead of $q ( \\beta | \\lambda )$ , where $\\lambda$ is the natural parameter. They assume that $q ( \\beta )$ and $p ( \\beta | x , Z , \\alpha )$ belong to the same exponential family. However, we prove that they can merely belong to EF. Therefore, we have the following: ",
+        "bbox": [
+            169,
+            343,
+            826,
+            388
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\nq (\\beta) = H (\\beta) e ^ {\\lambda^ {T} T (\\beta) - A _ {g} (\\lambda)}, \\tag {50}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            398,
+            401,
+            823,
+            422
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\np (\\beta | x, Z, \\alpha) = H (\\beta) e ^ {\\eta_ {g} (x, Z, \\alpha) ^ {T} T (\\beta) - A _ {g} \\left(\\eta_ {g} (x, Z, \\alpha)\\right)}, \\tag {51}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            323,
+            441,
+            825,
+            462
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathcal {L} (q (\\beta)) = \\mathbb {E} _ {- q (\\beta)} \\left[ \\mathbb {E} _ {q (\\beta)} [ \\log H (\\beta) + \\eta_ {g} (x, Z, \\alpha) ^ {T} T (\\beta) - A _ {g} (\\eta_ {g} (x, Z, \\alpha)) ] \\right] \\\\ - \\mathbb {E} _ {q (\\beta)} [ \\log H (\\beta) + \\lambda^ {T} T (\\beta) - A _ {g} (\\lambda) ] \\\\ \\stackrel {\\pm} {=} \\mathbb {E} _ {- q (\\beta)} \\big [ \\mathbb {E} _ {q (\\beta)} [ \\eta_ {g} (x, Z, \\alpha) ^ {T} T (\\beta) - A _ {g} (\\eta_ {g} (x, Z, \\alpha)) ] \\big ] - \\mathbb {E} _ {q (\\beta)} [ \\lambda^ {T} T (\\beta) - A _ {g} (\\lambda) ] \\\\ \\stackrel {\\pm} {=} \\mathbb {E} _ {- q (\\beta)} \\big [ \\mathbb {E} _ {q (\\beta)} [ \\eta_ {g} (x, Z, \\alpha) ^ {T} T (\\beta) ] \\big ] - \\mathbb {E} _ {q (\\beta)} [ \\lambda^ {T} T (\\beta) - A _ {g} (\\lambda) ] \\\\ = \\mathbb {E} _ {- q (\\beta)} \\left[ \\eta_ {g} (x, Z, \\alpha) ^ {T} \\mathbb {E} _ {q (\\beta)} [ T (\\beta) ] \\right] - \\lambda^ {T} \\mathbb {E} _ {q (\\beta)} [ T (\\beta) ] + A _ {g} (\\lambda). \\tag {52} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            191,
+            489,
+            823,
+            609
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "The final line above corresponds to Eq. 13 in [19], except that they changed the measure so that they got $\\mathbb { E } _ { \\lambda } [ T ( \\beta ) ]$ instead of $\\mathbb { E } _ { q ( \\beta ) } ^ { - } [ T ( \\beta ) ]$ ; see the proof below. ",
+        "bbox": [
+            169,
+            616,
+            823,
+            646
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "Lemma I.1 It holds that $\\nabla _ { \\lambda } A _ { g } ( \\lambda ) = \\mathbb { E } _ { q ( \\beta ) } [ T ( \\beta ) ]$ . ",
+        "bbox": [
+            169,
+            657,
+            513,
+            674
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "Proof. ",
+        "bbox": [
+            171,
+            685,
+            217,
+            699
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "Since the derivative of the logarithm is the inverse of the variable, we have ",
+        "bbox": [
+            169,
+            705,
+            661,
+            720
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\nabla_ {\\lambda} A _ {g} (\\lambda) = \\nabla_ {\\lambda} \\left\\{\\log \\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta \\right\\} = \\frac {\\nabla_ {\\lambda} \\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta}{\\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta}. \\tag {53}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            204,
+            744,
+            825,
+            781
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "Taking the derivative of the numerator in the above, we get ",
+        "bbox": [
+            169,
+            794,
+            560,
+            809
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {\\int H (\\beta) T (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta}{\\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta}. \\tag {54}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            390,
+            834,
+            825,
+            869
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "text",
+        "text": "We now rewrite the above and then multiply and divide the expression by $\\exp \\{ A _ { g } ( \\lambda ) \\}$ , which results in ",
+        "bbox": [
+            169,
+            882,
+            823,
+            910
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            490,
+            935,
+            509,
+            946
+        ],
+        "page_idx": 22
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\frac {\\int H (\\beta) T (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta}{\\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta} = \\int T (\\beta) \\frac {H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta}{\\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta} (55) \\\\ = \\int T (\\beta) \\frac {H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\}}{\\exp \\left\\{A _ {g} (\\lambda) \\right\\}} \\frac {\\exp \\left\\{A _ {g} (\\lambda) \\right\\}}{\\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta} d \\beta . (56) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            192,
+            104,
+            823,
+            189
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "We know that exponentiation of the log-normalizer gives us exp{Ag(λ)} = $\\begin{array} { r } { \\int \\exp \\{ \\lambda ^ { T } T ( \\beta ) \\} H ( \\beta ) d \\beta } \\end{array}$ . Therefore, we have ",
+        "bbox": [
+            169,
+            199,
+            823,
+            231
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int T (\\beta) \\frac {H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\}}{\\int \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} H (\\beta) d \\beta} \\frac {\\int \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} H (\\beta) d \\beta}{\\int H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} d \\beta} d \\beta = \\tag {57}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            264,
+            250,
+            823,
+            284
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int T (\\beta) \\frac {H (\\beta) \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\}}{\\int \\exp \\left\\{\\lambda^ {T} T (\\beta) \\right\\} H (\\beta) d \\beta} d \\beta = \\int T (\\beta) q (\\beta) d \\beta = \\mathbb {E} _ {q (\\beta)} [ T (\\beta) ]. \\tag {58}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            264,
+            287,
+            823,
+            320
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "Now that we have proved Lemma H.1, we know that $\\mathbb { E } _ { q ( \\beta ) } [ T ( \\beta ) ] = \\nabla _ { \\lambda } A _ { g } ( \\lambda )$ ; thus, we can write the ELBO as ",
+        "bbox": [
+            169,
+            328,
+            823,
+            356
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathcal {L} (\\lambda) = \\mathbb {E} _ {- q (\\beta)} \\left[ \\eta_ {g} (x, Z, \\alpha) ^ {T} \\mathbb {E} _ {q (\\beta)} [ T (\\beta) ] \\right] - \\lambda^ {T} \\mathbb {E} _ {q (\\beta)} [ T (\\beta) ] - A _ {g} (\\lambda) \\\\ = \\nabla_ {\\lambda} A _ {g} (\\lambda) \\left(\\mathbb {E} _ {- q (\\beta)} [ \\eta_ {g} (x, Z, \\alpha) ] - \\lambda\\right) - A _ {g} (\\lambda). \\tag {59} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            267,
+            378,
+            823,
+            430
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "Taking the derivative of the ELBO w.r.t. $\\lambda$ , we get the ",
+        "bbox": [
+            169,
+            438,
+            527,
+            454
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\nabla_ {\\lambda} \\mathcal {L} (\\lambda) = \\nabla_ {\\lambda} ^ {2} A _ {g} (\\lambda) \\left(\\mathbb {E} _ {- q (\\beta)} [ \\eta_ {g} (x, Z, \\alpha) ] - \\lambda\\right) + \\nabla_ {\\lambda} A _ {g} (\\lambda) \\left(- 1\\right) + \\nabla_ {\\lambda} A _ {g} (\\lambda) \\\\ = \\nabla_ {\\lambda} ^ {2} A _ {g} (\\lambda) \\left(\\mathbb {E} _ {- q (\\beta)} [ \\eta_ {g} (x, Z, \\alpha) ] - \\lambda\\right). \\tag {60} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            212,
+            474,
+            821,
+            541
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "Knowing that $\\nabla _ { \\lambda } ^ { 2 } A _ { g } ( \\lambda ) = F I M ( \\lambda ) ,$ 6 if we put the above gradient into the formula of the natural gradient, we get ",
+        "bbox": [
+            169,
+            549,
+            823,
+            579
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\lambda^ {t + 1} = \\lambda^ {t} + \\gamma \\left(F I M ^ {- 1} (\\lambda) \\nabla_ {\\lambda} \\mathcal {L} (\\lambda)\\right) \\\\ = \\lambda^ {t} + \\gamma \\left(\\mathbb {E} _ {- q (\\beta)} \\left[ \\eta_ {g} (x, Z, \\alpha) \\right] - \\lambda^ {t}\\right) \\tag {61} \\\\ = (1 - \\gamma) \\lambda^ {t} + \\gamma \\mathbb {E} _ {- q (\\beta)} [ \\eta_ {g} (x, Z, \\alpha) ]. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            354,
+            597,
+            823,
+            683
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "Part 2: We prove that Part 1 holds for VaiPhy, i.e., we prove the two corresponding distributions in VaiPhy’s ELBO follow EF. That is $q ( Z | X )$ and $p ( Z , X | B , \\tau )$ . Note that if the latter probability belongs to EF, it implies that $p ( Z | X , B , \\tau )$ and $p ( X | B , \\tau )$ belong to EF since we know that the likelihood $p ( X | B , \\tau )$ is a JC model and itself follows EF; more details of JC being formulated as EF will be provided in the rest of this section. ",
+        "bbox": [
+            169,
+            689,
+            823,
+            758
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "In the normal scale, the update equation for latent nodes in the tree is ",
+        "bbox": [
+            169,
+            766,
+            627,
+            780
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} q ^ {*} (Z _ {u} | X) \\propto \\prod_ {\\tau , \\mathcal {B}} \\left[ p _ {\\theta} (Z _ {r} | \\tau) ^ {I (Z _ {u} = Z _ {r})} \\times p _ {\\theta} (Z _ {u} | Y _ {p a (u)}, \\mathcal {B}, \\tau) ^ {q (Y _ {p a (u)} | X)} \\right. \\\\ \\left. \\times \\prod_ {Y _ {w} \\in Y _ {C _ {\\tau} (u)}} p _ {\\theta} \\left(Y _ {w} \\mid Z _ {u}, \\mathcal {B}, \\tau\\right) ^ {q \\left(Y _ {w} \\mid X\\right)} \\right] ^ {q (\\tau , \\mathcal {B} \\mid X)}. \\tag {62} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            267,
+            797,
+            821,
+            888
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "page_footnote",
+        "text": "6Fisher Information Matrix. ",
+        "bbox": [
+            191,
+            896,
+            359,
+            910
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 23
+    },
+    {
+        "type": "text",
+        "text": "We now prove that $q ( Z | X )$ follows EF. In Eq. 62, each term involves $p$ with some exponent value calculated by either the previous iteration or the current one—we refer to the exponent as $\\alpha$ . Each term can be written as a canonical form of EF: $1 \\times \\exp \\{ \\alpha \\log p - 0 \\}$ . Now, $q ( Z _ { u } \\vert X )$ is the product over EF distributions; hence $q ( Z _ { u } | X )$ also belongs to EF, i.e., the canonical product of two EF is ",
+        "bbox": [
+            169,
+            90,
+            823,
+            148
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "equation",
+        "text": "$$\nh (x) e ^ {\\theta_ {1} T (x) - A \\left(\\theta_ {1}\\right)} \\times h (x) e ^ {\\theta_ {2} T (x) - A \\left(\\theta_ {2}\\right)} = h (\\hat {x}) e ^ {\\left(\\theta_ {1} + \\theta_ {2}\\right) T (x) - \\hat {A} \\left(\\theta_ {1}, \\theta_ {2}\\right)}, \\tag {63}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            263,
+            155,
+            823,
+            174
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "text",
+        "text": "where $\\theta$ ’s are the natural parameters. ",
+        "bbox": [
+            169,
+            181,
+            415,
+            196
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "text",
+        "text": "Moreover, in Eq. 62, each $p$ , except the probability of the root which is constant, i.e., $0 . 2 5 ^ { M }$ , follows the JC model’s distribution, which is defined by the following, in which up to a constant, belongs to EF. ",
+        "bbox": [
+            169,
+            202,
+            823,
+            244
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "equation",
+        "text": "$$\np \\left(Z _ {u} = i \\mid Z _ {w} = j, \\tau , \\mathcal {B}\\right) = \\frac {1}{4} + \\frac {3}{4} e ^ {- \\frac {4}{3} \\mathcal {B} _ {u w}} \\quad \\text {i f} \\quad i = j\n$$",
+        "text_format": "latex",
+        "bbox": [
+            316,
+            268,
+            676,
+            299
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "equation",
+        "text": "$$\np \\left(Z _ {u} = i \\mid Z _ {w} = j, \\tau , \\mathcal {B}\\right) = \\frac {1}{4} - \\frac {1}{4} e ^ {- \\frac {4}{3} \\mathcal {B} _ {u w}} \\quad \\text {i f} \\quad i \\neq j\n$$",
+        "text_format": "latex",
+        "bbox": [
+            316,
+            300,
+            676,
+            329
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "text",
+        "text": "To prove that the above belongs to EF, one can rewrite $p ( Z _ { u } = i | Z _ { w } = j , \\tau , \\mathcal { B } ) \\stackrel { + } { = } \\frac { 3 } { 4 } e ^ { - \\frac { 4 } { 3 } \\mathcal { B } _ { u w } }$ , where $\\begin{array} { r } { h ( . ) = \\frac { 3 } { 4 } , T ( . ) = - \\frac { 4 } { 3 } } \\end{array}$ , and $A ( . ) = 0$ in the EF’s canonical form. ",
+        "bbox": [
+            169,
+            345,
+            823,
+            380
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "text",
+        "text": "Next, we prove that $p ( Z , X | B , \\tau )$ follows EF. We can refer to all vertices as $Y$ , and we again assume the root vertex has a fixed probability that is $0 . 2 5 ^ { M }$ ; therefore, we can write: $p ( Y | B , \\tau ) =$ $\\begin{array} { r } { \\prod _ { i \\in V ( \\tau ) , i - 1 = P a ( i ) } p ( Y _ { i } | Y _ { i - 1 } ) p ( \\dot { Y } _ { r } | \\tau ) \\propto \\prod _ { i \\in V ( \\tau ) , i - 1 = P a ( i ) } p ( Y _ { i } | Y _ { i - 1 } ) . } \\end{array}$ . Now each $p ( Y _ { i } | Y _ { i - 1 } )$ follows a JC model, and in the previous proof, we showed that JC follows EF. Thus, the product of JC distributions also follows EF, again proven in the previous proof. ",
+        "bbox": [
+            169,
+            397,
+            826,
+            470
+        ],
+        "page_idx": 24
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 24
+    }
+]

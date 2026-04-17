@@ -1,0 +1,5540 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Implicit Feature Decoupling with Depthwise Quantization "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        192,
+        130,
+        774,
+        151
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Iordanis Fostiropoulos University of Southern California Los Angeles, CA "
+          }
+        ]
+      },
+      "bbox": [
+        192,
+        181,
+        457,
+        232
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "fostirop@usc.edu "
+          }
+        ]
+      },
+      "bbox": [
+        254,
+        237,
+        395,
+        250
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Barry Boehm University of Southern California Los Angeles, CA "
+          }
+        ]
+      },
+      "bbox": [
+        511,
+        181,
+        776,
+        233
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "boehm@usc.edu "
+          }
+        ]
+      },
+      "bbox": [
+        581,
+        237,
+        699,
+        250
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        233,
+        286,
+        310,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quantization has been applied to multiple domains in Deep Neural Networks (DNNs). We propose Depthwise Quantization (DQ) where quantization is applied to a decomposed sub-tensor along the feature axis of weak statistical dependence. The feature decomposition leads to an exponential increase in representation capacity with a linear increase in memory and parameter cost. In addition, DQ can be directly applied to existing encoder-decoder frameworks without modification of the DNN architecture. We use DQ in the context of Hierarchical Auto-Encoders and train end-to-end on an image feature representation. We provide an analysis of the cross-correlation between spatial and channel features and propose a decomposition of the image feature representation along the channel axis. The improved performance of the depthwise operator is due to the increased representation capacity from implicit feature decoupling. We evaluate DQ on the likelihood estimation task, where it outperforms the previous state-of-the-art on CIFAR-10, ImageNet-32 and ImageNet-64. We progressively train with increasing image size a single hierarchical model that uses "
+          },
+          {
+            "type": "equation_inline",
+            "content": "69 \\%"
+          },
+          {
+            "type": "text",
+            "content": "fewer parameters and has faster convergence than the previous work. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        318,
+        472,
+        650
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        679,
+        207,
+        694
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quantization is an effective lossy compression process that maps a continuous signal to a set of discrete values, also called codes. Quantization is extended to vector feature spaces with learning paradigms such as Vector Quantization (VQ) and with a training objective identical to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { k }"
+          },
+          {
+            "type": "text",
+            "content": "-means. Product Quantization (PQ) decomposes the feature vector and assumes a weak statistical dependence between feature sub-vectors. Additive Quantization (AQ) decomposes the feature vector into a sum of quantized vectors as opposed to the concatenated output in PQ. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        704,
+        468,
+        854
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quantization is used in conjunction with Deep Neural Networks (DNNs) for tasks such as classification [49], incremental learning [49], zero-shot learning [28], generation [34], "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        854,
+        470,
+        901
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6e652a92853196629a8d0995735d4ee505a691409e7fc57299306d91cd3985c6.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        522,
+        287,
+        867,
+        377
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/abc51d522ebadcf52a8dc4c1722fbbf45e1372d933ed1910f5eb49c36ba4a4cf.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        522,
+        380,
+        867,
+        470
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c22c46971753e6e37c010486eef8453f19ac46fb8302273a3250625d1b20bc83.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        522,
+        473,
+        867,
+        563
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3d43145f31a20e400d8e641179b94ff6d1f916dcc8b6a10dc281df4002b865a0.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1. The original images (left) are reconstructed by DQ (middle) and VQ (right) with identical models and training setup. The perceptual quality of DQ outperform VQ. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        522,
+        566,
+        867,
+        655
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "compression [30] and data retrieval [4]. The discrete quantized feature representations can be used post-hoc [11,34,39] or as a learning objective (i.e. classification) [28, 49]. Our work is motivated by the increasing number of quantization applications to high dimensional feature tensors. We view the quantizer as a density estimator and evaluate it on the task of likelihood estimation for the visual domain. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        744,
+        893,
+        851
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Likelihood estimation models seek to minimize the divergence between the data distribution and the model prior. Explicit likelihood estimation models, including Vector Quanti-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        854,
+        893,
+        901
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2203.08080v2 [cs.CV] 29 Mar 2022 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        258,
+        57,
+        705
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        480,
+        924,
+        488,
+        935
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3af4e802a9fb4248c4fe3c7b2cb5f50684e553c1e4e92b04d07e0702ea230722.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2. DQ (left) apply "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "on the first slice of the sub-tensor and for all sub-vectors and concatenate the quantized vectors. VQ [34] (middle) and PQ (right) quantize the same vector with different codebook and combine the two sub-vectors by addition or concatenation. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        98,
+        89,
+        872,
+        460
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "zation (VQ), Variational Auto-encoders (VAEs), and Auto-Regressive (AR) models directly minimize a divergence. In this work, we focus on explicit likelihood estimation. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        523,
+        470,
+        570
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "AR models do well in likelihood estimation and are applied in multiple domains such as language, vision, and audio. AR models have a recursive dependency on the input during training and inference. Therefore, AR models are computationally inefficient for domains with long sequences, such as pixels of an image. Even with caching [35] during sampling, AR models are still less efficient than VAEs. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        573,
+        470,
+        679
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The priors of VAEs provide a compressed feature representation that can be used as a surrogate training objective for the downstream task. In contrast to the discrete prior, a continuous prior can lead to posterior collapse. The representation is ignored by the downstream task model because it is either too noisy or uninformative. This effect is amplified when the data is discrete, as in the language domain [14]. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        684,
+        470,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To that end, we propose the Depthwise Quantization (DQ) method that quantizes each decomposed feature sub-tensor with a different quantizer. We use rate-distortion theory to interpret a quantizer as an encoding function with limited capacity. We provide a theoretical upper bound on the capacity in relation to the quantization cost when DQ is applied on a decoupled feature tensor, as opposed to a coupled feature ten-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        795,
+        470,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sor. We evaluate the performance of DQ on the feature space of ImageNet for an image classification backbone. Lastly, we apply DQ to a hierarchical Auto-Encoder with DQ as a bottleneck for different hierarchies and train it end-to-end. DQ outperforms explicit models in likelihood estimation. In detail: "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        523,
+        893,
+        616
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We propose Depthwise Quantization (DQ) and decompose a feature tensor along the axis of weak statistical dependence. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We provide a theoretical analysis on the improved quantization performance and experimentally corroborate our theoretical results. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We introduce an improved hierarchical AutoEncoder model Depth-Quantized Auto-Encoder where DQ is applied to the feature representation at different hierarchies. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We extend the parametric Mutual Information (MI) quantization estimators for DNNs when the prior is learned. We experimentally verify that the learned prior is implicitly decoupled. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        517,
+        623,
+        893,
+        861
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our approach can be applied to previous works that use quantization. We demonstrate with our experiments that DQ "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        869,
+        893,
+        902
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        491,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "performs significantly better when the assumption on crosscorrelation is strong in both post-hoc analysis and end-toend training settings. When trained end-to-end, DQ reduces the cross-correlation among the decomposed feature tensors (“implicitly decouple”) and improves reconstruction loss and likelihood estimation. Our code is publicly available1. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        470,
+        181
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        196,
+        218,
+        213
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our work is closely related to previous studies on feature decomposition and quantization optimization in visual tasks using DNNs. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        224,
+        468,
+        268
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Feature decomposition approaches include Separable Convolutions (SP) [32], which factorizes a convolutional kernel to the spatial dimensions. SP reduces the number of computations required to calculate the filter output. Inception [45], another approach to feature decomposition, factorizes a feature representation implicitly with a “Networkin-Network” (NiN) [27] branch of convolutions. Thus, Inception learns spatial cross-correlations and feature crosscorrelations independently. Depthwise Separable Convolution (DSC) [9, 45] is a method of feature decomposition that uses a single “spatial” convolution followed by multiple vanilla convolutions on a decomposed “segment”. Xception [9] is based on the “Inception Hypothesis” for a decoupled space where DSC is applied to an eXtreme. Our work is based on a hypothesis similar to that of DSC and considers modeling cross-channel correlations and spatial correlations independently. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        270,
+        473,
+        526
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "There are analyses on the decoupling of the feature space implicitly in the context of DSC as well as on NiN architectures. Blueprint Separable Convolutions (BSConv) [16] have been proposed as an alternative to DSC based on the observation of intra-kernel correlations. They propose a pointwise (1x1) convolution followed by a depthwise convolution. In contrast, DSC enforces cross-kernel correlations implicitly. Analysis on the variance of a convolution kernel shows that a DNN can perform better when cross-kernel redundancies decrease. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        527,
+        470,
+        678
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Other works explicitly factorize a convolutional filter. There are methods that use a low-rank approximation [20] or closed-form decomposition [15] on pre-trained networks to speed up the computation process. Previous works on speeding up networks [44] have used product quantization to quantize convolutional filters and take advantage of the redundancies. Previous analysis of the redundancy and crosscorrelation of the feature space in DNNs is complementary to our work. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        680,
+        470,
+        815
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Improvements in quantization learning approaches include Optimized Product Quantization [13] that decomposes the feature vector in a parametric manner. In addition, Ad-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        816,
+        472,
+        863
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ditive Quantization [2] improves on the computational efficiency of PQ for high dimensional vector search by decomposing the vectors into a sum instead of a concatenation of their sub-vectors. In contrast, our work can be applied to feature tensors and the quantizer is trained end-to-end with a DNN. "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        90,
+        893,
+        180
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Kobayashi et al. [25] train a quantizer end-to-end with a DNN. They use multiple codebooks and train each codebook independently for a different supervised task. However, as opposed to our method, the codebooks are decoupled in a supervised manner. Moreover, the quantized representations are used by different networks for different downstream tasks as opposed to interacting for a single downstream task. Lastly, vector decomposition is applied to feature vectors as opposed to feature sub-tensors as in our work. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        181,
+        893,
+        316
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "PQ-VAE [48] also decomposes the latent representations to sub-vectors and uses different quantizers for each subvector. Kaiser et al. [21] introduces “sliced quantization” that is identical to PQ-VAE but uses the discrete representation post-hoc with a latent variable model. By contrast, DQ decomposes the feature space to sub-tensors as opposed to sub-vectors and thus improves the reconstruction loss by implicitly increasing the statistical dependence within the sub-tensor. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        316,
+        893,
+        452
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The works most similar to ours are those of Razavi et al. [39] and Dhariwal et al. [11]. VQ-VAE-2 [39] applies quantization to the feature representation of multiple hierarchies on a VAE. Similar to our method, they train VQ end-to-end with a VAE. However, we apply DQ as opposed to VQ for the quantization method. VQ-VAE-2 can suffer from an uninformative top prior. Subsequent models such as “Jukebox” [11] mitigate the issue by modeling each hierarchy with an independent encoder-decoder architecture. We also avoid the issue of an uninformative top prior but do not model each hierarchy with a different model. Instead, we introduce a model architecture DQ-AE. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        454,
+        893,
+        633
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Background "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        648,
+        629,
+        666
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Auto-Encoder (AE) is an unsupervised class of DNN architectures that learns compressed feature representations from high dimensional data. Work by Kingma et al. [22] extends AE to Deep Latent Variable Models with variants such as Variational Auto-Encoder (VAE). For some input "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": "and a latent space "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z"
+          },
+          {
+            "type": "text",
+            "content": ", VAE is composed of a decoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( x | z )"
+          },
+          {
+            "type": "text",
+            "content": ", a prior "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( z )"
+          },
+          {
+            "type": "text",
+            "content": ", and an encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q ( z | x )"
+          },
+          {
+            "type": "text",
+            "content": ". VAE is a probabilistic model that implicitly learns underlying variables used to generate the data and their latent factors by minimizing the divergence between the encoded representation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q ( z | x )"
+          },
+          {
+            "type": "text",
+            "content": "and the true data manifold "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( z )"
+          },
+          {
+            "type": "text",
+            "content": ". To evaluate AE, we can use Mutual Information (MI) which is a statistical dependence metric between two variables s.t. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I ( X ; Y ) = H ( X ) -"
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( X | Y )"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( X )"
+          },
+          {
+            "type": "text",
+            "content": "is the information entropy of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": ". The optimization objective of a VAE [3, 18] is an upper "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        672,
+        893,
+        902
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1https : / / github . com / fostiropoulos / Depthwise - Quantization "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        875,
+        472,
+        900
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        491,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/21071a421b068b58ba1e89972fae630a88e9e583c04c7b50e59c3455ef6e48dd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        109,
+        89,
+        486,
+        238
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/feacb062b440848038be4b6c299e758450ed54dac84cd597b6748a50be44b860.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        493,
+        93,
+        653,
+        229
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/748f15ea601b0346f1e65c5edc896da5fbc1aad1a93591d0e5ef2e6e2ce4f506.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3. Effects of implicit marginalization on the learned quantized features. The mean entropy (“informativeness”) of the quantization vectors for each pixel for DQ (first) is higher when compared to VQ (second); higher is better. The mean MI (“redundancy”) scores between each quantization codebook for DQ (third) is lower when compared to VQ(fourth); lower is better. The diagonal represent the entropy for each quantization vector, lower half of the diagonal is empty. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        658,
+        94,
+        859,
+        234
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "bound to "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        349,
+        142,
+        363
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\max  \\left[ I (z; p (x | z)) - \\beta I (x; z) \\right] \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/89de943b79993cb6049405e72968b2915edb6c4301c868dbb30b0de88b852e69.jpg"
+        }
+      },
+      "bbox": [
+        171,
+        378,
+        468,
+        396
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "that maximizes the mutual information between latent representation and decoded data, and discards information from x that is not informative to decoding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( x | z )"
+          },
+          {
+            "type": "text",
+            "content": ". As such, maximizing Eq. (1) also maximizes the entropy of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z"
+          },
+          {
+            "type": "text",
+            "content": "or “informativeness” [19]. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        398,
+        472,
+        474
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our view on quantization is based on the interpretation by Richardson et al. [40] and MacKay et al. [31]. For the sake of brevity, we refer the reader to their work for a detailed analysis and attach our own analysis and proofs in the supplementary material. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        474,
+        472,
+        549
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Scalar Quantizer (SQ) with a vocabulary of size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "is an encoding function for an element "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "from a sequence "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X ~ \\in ~ R ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": "of length "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "such that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f ( X ) \\ = \\ \\{ 1 \\ldots K \\} ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": ". SQ quantizes every element of the sequence in a memoryless fashion with the same encoding function. SQ cannot place assumptions on cross-correlation between different sequence elements. SQ performs optimally when the probability density function (pdf) of all data is known in advance. An encoding function that follows a uniform distribution (i.e. floor function) will perform optimally when all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { U _ { i } } \\in X _ { U }"
+          },
+          {
+            "type": "text",
+            "content": "are also uniformly distributed and bounded such that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { U _ { i } } \\in [ a , b ]"
+          },
+          {
+            "type": "text",
+            "content": ". When "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { U { i } }"
+          },
+          {
+            "type": "text",
+            "content": "has an unknown pdf, SQ will assign probability mass on unlikely regions in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ a , b ]"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        549,
+        472,
+        747
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Vector Quantization (VQ) “learns” a mapping between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X \\in R ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "quantization vectors, or codes. A Codebook is the set of codes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c \\in \\ R ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": "such that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C \\ = \\ \\{ c _ { i } :"
+          },
+          {
+            "type": "equation_inline",
+            "content": "i \\in { 1 , \\dots , K } \\}"
+          },
+          {
+            "type": "text",
+            "content": ". The VQ decoding function returns the code "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "with the lowest decoding error "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "and the vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "such that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { X } \\ = \\ \\bar { \\mathrm { \\bf ~ V } } \\mathrm { \\bf Q } ( X ) \\ = \\ c _ { j _ { m i n } }"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "j _ { m i n } = a r g m i n \\{ d ( X , c ) : c \\in C \\}"
+          },
+          {
+            "type": "text",
+            "content": ". The objective function is to minimize the error of the closest codebook vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "to the feature vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "and can be summarized as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { V Q } = \\mathop { m i n } _ { c \\in C } d ( X , { \\hat { X } } )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        746,
+        473,
+        904
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Product Quantization (PQ) decomposes a one dimensional vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X \\in R ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": "to sub-vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ X _ { j } : j = 1 , \\ldots , M \\}"
+          },
+          {
+            "type": "text",
+            "content": "and optimizes for a unique pair of a VQ and the sub-vector space. For "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "different Codebooks "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { j } : j \\in { 1 , \\dots , M }"
+          },
+          {
+            "type": "text",
+            "content": "there is a one-to-one mapping with each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { j }"
+          },
+          {
+            "type": "text",
+            "content": ". The PQ decoding function is the concatenation or addition of all VQ decoding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathsf { V } \\mathsf { Q } _ { j } = \\hat { X } _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "for codebook "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "such that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { P Q } ( X ) ="
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\| _ { \\forall j \\in M } V Q _ { j } ( X _ { j } )"
+          },
+          {
+            "type": "text",
+            "content": ". We adopt the feature decomposition from PQ and extend it to high dimensional feature vectors to reduce the statistical independence among latent features. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        349,
+        893,
+        500
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cost of a quantizer is the number of Codebook vectors s.t. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\mathrm { c o s t } } = K \\times M"
+          },
+          {
+            "type": "text",
+            "content": ", for PQ. Representation Capacity "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( C _ { R } )"
+          },
+          {
+            "type": "text",
+            "content": "defines an upper bound on the sample space from the number of discrete latent factors that can be represented by the quantizer for independent random variables "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { j }"
+          },
+          {
+            "type": "text",
+            "content": ", such that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S = K ^ { M }"
+          },
+          {
+            "type": "text",
+            "content": "for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "codes and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "decomposed sub-vectors. For redundant "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { j }"
+          },
+          {
+            "type": "text",
+            "content": ", the sample space is reduced to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S ^ { \\mathrm { n e w } } = ( K - 1 ) ^ { M }"
+          },
+          {
+            "type": "text",
+            "content": "and thus the capacity is bounded by the sample space s.t. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        501,
+        893,
+        623
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "C _ {R} = - H (\\mathbf {X}) \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7c0ac9e618790ac89e379464e5e18af2e1de191069eee834b5918b1bed6c8233.jpg"
+        }
+      },
+      "bbox": [
+        643,
+        637,
+        890,
+        655
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Note that for PQ, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\mathrm { c o s t } }"
+          },
+          {
+            "type": "text",
+            "content": "grows linearly while "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": "grows exponentially, in contrast to a VQ which has linear growth for both, and thus has an exponential cost with an identical capacity to PQ. More detailed analysis and proofs can be found in the Appendix. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        670,
+        890,
+        746
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Distribution of Prior can have an effect on the decoding performance of the quantizer. For example, VQ with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { U }"
+          },
+          {
+            "type": "text",
+            "content": "from before can achieve identical decoding error as SQ but at a significant cost of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": "as compared to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "for a memoryless SQ. The assumption on the distribution of the prior can determine the cost and the representation capacity of a quantizer. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        748,
+        893,
+        853
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The difference between PQ and VQ is the assumption of co-variance among features. Contrary to VQ, PQ takes advantage of the low co-variance among feature sub-vectors. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        854,
+        893,
+        901
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        491,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/baabc7067e25fe66bee0230d3122b4d20613d1a5f61c324d4f68075fde5f8cb9.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        124,
+        90,
+        364,
+        280
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b6c1389d27d859e8fd2ef7e4676a122a2505bf6fbd3110cb2b7a5e05be3dff87.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        366,
+        90,
+        604,
+        280
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/37c3a39e2c7c3b0a77d3a42800cd902182abbf10a6b69991e8447c5173a4f19f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4. Original image (left) is reconstructed using only top level codes (middle) and only bottom level codes (right). Top level hierarchy contains structural information, while bottom level hierarchy contains details. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        604,
+        90,
+        846,
+        280
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Depthwise Quantization "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        348,
+        305,
+        366
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given an output feature tensor from encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { X } \\in R"
+          },
+          {
+            "type": "text",
+            "content": "with rank "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": ", Depthwise Quantization (DQ) applies "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "quantizers "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V Q _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "pair-wise on decomposed tensor slices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { X } _ { i } = \\mathbf { X } _ { i } ^ { \\alpha }"
+          },
+          {
+            "type": "text",
+            "content": "along an axis "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "with quantization dimension "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D = | \\mathbf { X } _ { i } ^ { \\alpha } |"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        373,
+        470,
+        436
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathrm {D Q} (\\mathbf {X}) = \\left\\{V Q _ {i} (\\mathbf {X} _ {i}): i = 1, \\dots , M \\right\\} \\qquad (3)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/da9dd270e6d9d73a3c877609fa8b252eb32cbd24c30f7d098a70b026128987bb.jpg"
+        }
+      },
+      "bbox": [
+        143,
+        445,
+        468,
+        464
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V Q _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "optimizes Codebook "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and uses "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { V Q }"
+          },
+          {
+            "type": "text",
+            "content": "to define the error between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { X } _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and closest quantization vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\hat { \\mathbf { X } } } _ { i } ="
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q _ { i } ( \\mathbf { X } _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": ". The optimization objective is the joint optimization over each codebook such that "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        472,
+        468,
+        534
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\min  _ {C ^ {1}, \\dots , C ^ {M}} \\left[ L _ {D Q} = \\sum_ {\\forall \\hat {\\mathbf {X}} _ {i}, \\mathbf {X} _ {i}} l _ {V Q} \\left(\\mathbf {X} _ {i}, \\hat {\\mathbf {X}} _ {i}\\right) \\right] \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/443bf4145d162d26a6a9d58c770cca5e58d4a93eb2dbcc75549dc3ede35c573c.jpg"
+        }
+      },
+      "bbox": [
+        147,
+        542,
+        468,
+        578
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "norm as a similarity metric for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { V Q }"
+          },
+          {
+            "type": "text",
+            "content": "between each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { X } _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and the local quantization vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { \\mathbf { X } _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": ". The DQ loss is then added to the reconstruction loss of the DNN and the gradients are copied from the quantized vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { \\mathbf { X } } _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "using auto-grad [38]. The loss function of DQ becomes "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        588,
+        468,
+        666
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "L = L _ {D N N} + L _ {D Q} \\left(s g (\\mathbf {X}), \\hat {\\mathbf {X}}\\right) + \\beta L _ {D Q} (\\mathbf {X}, s g (\\hat {\\mathbf {X}})) \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d22eb9d17128b733de9ebc08886741829b8428c8f41f29c06da4fd808ecfc6dd.jpg"
+        }
+      },
+      "bbox": [
+        89,
+        676,
+        468,
+        694
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where sg stands for stop-gradient operator that stops the operand from updating during the training phase. Similar to the setting in VQ-VAE, the first loss term is used to lower the reconstruction error, the second term adjusts the codebook corresponding to the encoder output, and the third term is used to prevent the output of the encoder from growing arbitrarily. Note that the KL divergence is a constant equal to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M l o g ( K )"
+          },
+          {
+            "type": "text",
+            "content": "as DQ assumes a uniform prior distribution of latent embeddings. Therefore, the KL divergence term is dropped from the optimization objective of our framework. A detailed explanation is provided in Sec. 4.1 "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        704,
+        470,
+        869
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Note that for a feature tensor of rank one, DQ is identical to SQ when a single codebook of dimensionality one is used. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        869,
+        472,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When more than one codebook is used, DQ is identical to PQ and Additive Quantization with addition as the decoding function. The advantage of DQ over other quantization methods comes from the decomposition of a tensor to subtensors along the axis of weak statistical dependence. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        349,
+        893,
+        425
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For 2-D Convolutional Neural Networks (CNN), X is a feature tensor of rank 3. Fig. 2 provides an illustration of the DQ process for a 3-rank tensor. Different quantizers are applied for each slice of the channel axis, but the same quantizer is applied on the sub-vectors of a feature sub-tensor, such as decomposing along the spatial dimension. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        425,
+        893,
+        516
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1. Decoupled Feature Space "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        498,
+        523,
+        732,
+        540
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Decoupled refers to the statistical independence between features and Coupled refers to the statistical dependence between features. We use Information Theory to analyze quantization as an encoding function with an information bottleneck on a signal. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        547,
+        893,
+        623
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Eq. (1) provides the basis of the VAE optimization objective that can be formulated as a lower bound to the channel capacity as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbb { L } \\geq \\mathbb { E } _ { q ( z | x ) } \\log p ( x | z ) - \\beta D _ { K L } \\big ( q ( z | x ) | | p ( z ) \\big )"
+          },
+          {
+            "type": "text",
+            "content": "[3, 18] where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "is the Lagrange multiplier. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "-VAE assumes a Gaussian prior "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( z ) \\sim \\mathcal { N } ( 0 , I )"
+          },
+          {
+            "type": "text",
+            "content": ", and DQ assumes a uniform prior. Thus the KL-Divergence of the uniform distribution and decoder is the capacity of the quantizer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D _ { K L } ( q ( \\mathbf { z } | \\mathbf { x } ) | | p ( \\mathbf { z } ) ) = C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": ". The detailed proof can be found in Appendix 1. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        623,
+        893,
+        758
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\max  \\left[ \\mathbb {E} _ {q (z | x)} \\log p (x | z) - C _ {R} \\right] \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/2cc820d590c2125d5cdbce9377a22cb09d2e5084f2fc8d41781bae73290f919c.jpg"
+        }
+      },
+      "bbox": [
+        591,
+        768,
+        890,
+        787
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Reducing the capacity of the information bottleneck in VAE encourages disentangled representations in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "-VAE. In a similar fashion, reducing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": "encourages disentangled representations for each codebook, with the upper bound controlled by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": ". By doing so, significantly compressed representations can be learned for an improved downstream training objective. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        795,
+        893,
+        901
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        490,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": "and by extension "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( z )"
+          },
+          {
+            "type": "text",
+            "content": "in the discrete case are not differentiable with respect to the DNN parameters and can not be explicitly minimized. We observe index collapse and performance degradation on hierarchical deep quantization variants. Index collapse causes the quantizer to utilize only limited number of codes. We enforce a uniform prior through an approximate solution and discuss the implications in Sec. 4.2 and Sec. 6. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        90,
+        472,
+        210
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2. Implicit Decoupling "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        224,
+        266,
+        242
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Implicit decoupling of the feature space is the surrogate optimization objective derived by the explicit minimization of the decoding error. There is a joint optimization objective when DQ is applied to the intermediate feature representations in the context of DNN and trained end-to-end. DQ minimizes the decoding error along the DNN objective function. DQ works as a bottleneck on intermediate feature representations between subsequent layers of the network. We use the result from work by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "-VAE on the interpretation of AE as the information bottleneck. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        248,
+        472,
+        398
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "-VAE uses "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q ( z | x )"
+          },
+          {
+            "type": "text",
+            "content": "to learn a set of additive channels "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "where their capacity is maximized when all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "are independent. This provides an implicit optimization objective by optimizing Eq. (1), which is the equivalent in the quantized case as optimizing Eq. (6). There is an equivalence between each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and the codebook as they both perform as additive information channels that, when combined, reconstruct an original signal. Lastly, both "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and the quantizer are parametric density estimators or smaller networks that can be considered as part of a generic Network-in-Network (NiN) family of models. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        400,
+        472,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Feature independence improves downstream task performance when learned implicitly in NiN models. Xception uses Depthwise Seperable Convolution (DSC) to outperform coupled variants on ablation studies on Mobile-Net [17]. Additional previous analysis on the intra-kernel correlations [16] has demonstrated the benefits of a decoupled feature space along the channels of an image feature tensor. We corroborate the analysis with MI estimation on a static prior to determine the axis of weak statistical dependence and apply DQ along the channel dimension (“depth-wise”) and spatial dimension (“pixel-wise”) in the context of DNN. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        566,
+        472,
+        733
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Uniform Prior In contrast to the traditional Variational Auto-Encoder, DQ relies on the assumption of uniform distribution of quantized vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( z )"
+          },
+          {
+            "type": "text",
+            "content": ". However, the assumption of a uniform prior is not strong, which can potentially lead to degrading performance and be sensitive to the random initialization. A non-uniform prior will cause codebook collapse where only few codes are utilized in a codebook. To mitigate this issue, we follow previous work, and use Exponential Moving Average (EMA) and random reinitialization of codes. We re-initialize codes with low usage frequency counts that are below a threshold.Although pre-"
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        734,
+        472,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "vious works [5, 21] discuss the equivalence of quantization with EMA and the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "-VAE objective, there is no exact relationship between the two. VQ-VAE is an approximation to the Varitional Information Bottleneck (VIB) when trained with soft Expectation Maximization (EM). The E-step on the update rule of DQ is approximated with EMA over minibatches of data [5, 6]. This is in contrast to hard - EM where quantization is deterministic [41]. Soft - EM provides a probabilistic discrete information bottleneck as discussed in work by Roy et al. [42] and Wu et al. [47]. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        893,
+        243
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use entropy of the quantization vectors to measure their information density. A successful decoupling method should generate feature vectors with high entropy. Entropy Estimation on continuous distributions is intractable, but a signal can be discretized by quantization with both parametric and non-parametric optimization on the quantization interval. The entropy is then computed on the quantized discrete distribution. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        248,
+        893,
+        368
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "I (X; Y) = \\sum_ {y \\in \\mathcal {Y}} \\sum_ {x \\in \\mathcal {X}} p _ {(X, Y)} (x, y) \\log \\left(\\frac {p _ {(X , Y)} (x , y)}{p _ {X} (x) p _ {Y} (y)}\\right) \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/e21fc34ecd5d1d52e0625cc31fc9464866d8ee9eae72d69ba571c996cdb19371.jpg"
+        }
+      },
+      "bbox": [
+        513,
+        409,
+        890,
+        462
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use the quantization regions of VQ as a density estimator for entropy, and thus mutual information on a continuous prior. When DQ is learned end-to-end, entropy can be calculated directly by the frequency count of each code vector over a sample set. Our approach in approximating MI is similar to previous work that uses Kernel Density Estimators [33] and is performed post-hoc on a trained network or by training a different DQ. Quantization post-hoc is sensitive to sample size but performs at par with other state-of-the-art approaches [12, 23, 24, 36]. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        467,
+        893,
+        619
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3. Depth-Quantized AutoEncoder "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        645,
+        774,
+        662
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Depthwise Quantized Auto-Encoder (DQ-AE) uses DQ at different hierarchical feature representations. The full algorithm that defines the training process is found in the supplementary material. In summary, we decode each quantized representation conditioned only on the quantized representation of the previous level. We perform this operation top-bottom and use Eq. (6) as the optimization objective of each DQ. Through experiments, we find that lower capacity bottom-level hierarchy enforces the utilization of top-level hierarchies and that the problem of under-utilization of top or bottom level hierarchies can also be a consequence of over-fitting. During the early stages of training, both hierarchies are used equivalently, but at later stages, top-level prior collapse. Our architecture leads to informative top and bottom level hierarchies as can be seen in Fig. 4. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        674,
+        893,
+        901
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        491,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6d38e62cf16b602e079fb3b21cca978021ba2a8410733a3743ad544f455dcecd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        94,
+        90,
+        478,
+        268
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f5af11958a451fca51714c48c1de0a893fc8839b98ce79f6a2071d8b99618638.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5. Ablation study model comparison. For "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { M } { = } 1"
+          },
+          {
+            "type": "text",
+            "content": ", DQ is identical to VQ. We train models under the following settings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K ="
+          },
+          {
+            "type": "text",
+            "content": "{32, 128, 512}, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M = \\{ 1 , 3 , 5 , 1 0 \\}"
+          },
+          {
+            "type": "text",
+            "content": "and optimize for different reconstruction losses NLL (left) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "(right). We report the average of the final convergence loss from multiple runs (10). The top bold line for each polygon corresponds to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K = 3 2"
+          },
+          {
+            "type": "text",
+            "content": ", the bottom line to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K = 5 1 2"
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        483,
+        89,
+        875,
+        270
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/c8ef8904cc84a5274b4d6780b746b5e03810af6690c72c74fd6e2283610a3010.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1. Baselines: 1Sparse Transformer [8] 2Image Transformer [37] 3VD-VAE [7]. “Ours” is a 2 hierarchical DQ-AE with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "set to 256 and 128 for top and bottom codebooks respectively. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td colspan=\"2\">CIFAR-10</td><td colspan=\"2\">ImageNet-32</td><td>ImageNet-64</td></tr><tr><td>Model (Param.)</td><td>bits/dim</td><td>Param.</td><td>bits/dim</td><td>Param.</td><td>bits/dim</td></tr><tr><td>S-Tr.1 (59M)</td><td>2.80</td><td>Img-Tr.2 (-)</td><td>3.77</td><td>S-Tr.1 (152M)</td><td>3.44</td></tr><tr><td>VDVAE3 (39M)</td><td>2.80</td><td>119M</td><td>3.80</td><td>125M</td><td>3.52</td></tr><tr><td>(Ours) (22M)</td><td>2.52</td><td>22M</td><td>3.12</td><td>22M</td><td>2.89</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        158,
+        340,
+        810,
+        422
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5. Experiment "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        486,
+        202,
+        503
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In our experiment, we evaluate DQ in two settings: on a static prior, and when trained end-to-end with a DNN, on a learned prior. We first evaluate our theoretical claim on a static prior and perform an ablation study on DQ and DQ-AE. We report the details of the training and network hyper-parameters in the supplementary material. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        511,
+        470,
+        602
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1. Density Estimation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        612,
+        261,
+        628
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We experimentally verify our claims on the decoupled feature space from Sec. 4.1. The penultimate feature representation from pre-trained VGG-16 model2 is used on ImageNet [10]. DQ decomposes the feature representation “channel-wise” "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( D Q _ { C } )"
+          },
+          {
+            "type": "text",
+            "content": "and “pixel-wise” "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( D Q _ { S } )"
+          },
+          {
+            "type": "text",
+            "content": ". The penultimate feature tensor with shape "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ 5 1 2 \\times 7 \\times 7 ]"
+          },
+          {
+            "type": "text",
+            "content": "is sliced along the channel axis into 7 segments and zero padded with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D = 7 4"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M = 7"
+          },
+          {
+            "type": "text",
+            "content": ". The quantizers for both networks independently quantize each row for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D Q _ { S }"
+          },
+          {
+            "type": "text",
+            "content": "in contrast to each slice for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { D Q } _ { C }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        636,
+        468,
+        787
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We train DQ as a quantizer for multiple random runs (10) and we report the mean "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "norm between X and the reconstruction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { \\bar { \\mathbf { X } } }"
+          },
+          {
+            "type": "text",
+            "content": ". For each quantization method, we approximate the entropy of the codes to determine their respective information density using Eq. (7). The results of our experiments can be found in Tab. 2. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        787,
+        470,
+        878
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/f573ca549d1b46f8408f1b99b0e0c1df8373482cf6c061442cf4439604d7a27e.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2. Density estimation on ImageNet feature space extracted from VGG-16. Results are from 10 train runs with random code initialization. DQ applied along the channels (Channel Quantization) as opposed to the spatial dimension (Pixel Quantization). "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": "is the size of the feature vector, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "the discrete codes used, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "the reconstruction error, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( \\mathbf { X } )"
+          },
+          {
+            "type": "text",
+            "content": "is the mean entropy of the feature tensor. Channel Quantization surpasses Pixel Quantization in all respects. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Quant.</td><td>K</td><td>D</td><td>LDQ↓</td><td>~H(X)↑</td></tr><tr><td>Pixel</td><td>32</td><td>74</td><td>0.192±0.002</td><td>1.98±0.01</td></tr><tr><td>Channel</td><td>32</td><td>74</td><td>0.184±0.001</td><td>2.53±0.01</td></tr><tr><td>Pixel</td><td>1024</td><td>74</td><td>0.523±0.003</td><td>3.64±0.01</td></tr><tr><td>Channel</td><td>1024</td><td>74</td><td>0.480±0.001</td><td>3.99±0.01</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        516,
+        484,
+        877,
+        563
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We find that DQ can achieve better density estimation along the channel dimension as opposed to the spatial dimension. The lower entropy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( \\mathbf { X } )"
+          },
+          {
+            "type": "text",
+            "content": "of the feature tensor is due to a higher redundancy among feature sub-tensor and corresponds to a higher reconstruction error. DQ can perform better when decomposing on the channel axis and our results agree with previous analyses on intra-kernel correlations [16]. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        779,
+        893,
+        902
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "2https://pytorch.org/vision/stable/models.html "
+          }
+        ]
+      },
+      "bbox": [
+        93,
+        886,
+        457,
+        901
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        491,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2. Implicit Decoupling "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        90,
+        266,
+        107
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We train a DQ-AE and a VQ-VAE [34] for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M = 1 0"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K = 5 1 2"
+          },
+          {
+            "type": "text",
+            "content": "with an identical network configuration, methodology and hyper-parameters. The difference between architectures is highlighted in Fig. 2. We measure the likelihood estimation of the two approaches on CIFAR-10 [26] and quantize each image to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 \\times 8 \\times 1 0"
+          },
+          {
+            "type": "text",
+            "content": "codes. VQ-VAE NLL is 4.36 bits/dim as compared to 3.14 bits/dim for single hierarchy DQ-AE, a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "28 \\%"
+          },
+          {
+            "type": "text",
+            "content": "decrease. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        112,
+        468,
+        233
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "High Entropy We show that the learned features of DQ have high entropy which indicates low statistical dependence among them. In contrast, VQ appears to have few very informative features and many uninformative ones. The mean entropy of the prior is "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( z ) = 6 . 0 3"
+          },
+          {
+            "type": "text",
+            "content": "nats/pixel for DQ as compared to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( z ) = 5 . 8 6"
+          },
+          {
+            "type": "text",
+            "content": "nats/pixel for VQ. The entropy distribution among spatial features of the prior can be found in the left two sub-figures in Fig. 3. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        234,
+        468,
+        354
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Low MI We estimate the pairwise MI of the quantization vectors along the depth of the feature tensor with mean score of 1.93 and 2.36 nats/vector respectively. A comparison matrix can be found in the right two sub-figures in Fig. 3. For DQ the MI between quantization vectors is significantly lower as visualized by the mostly empty upper triangular matrix. In contrast, for VQ there seems to be higher redundancy among quantization vectors. The diagonal of the matrix represents the entropy of each quantization vector. The MI estimate on the quantization vector shows that the redundancies are significantly higher in the learned representation for VQ. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        354,
+        468,
+        535
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.3. Ablation study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        544,
+        225,
+        559
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We study the effect of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": "on the model performance. The model is more sensitive to the dimensionality "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": "of the sub-vector and less sensitive to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": ". DQ outperforms coupled variants on likelihood estimation and reconstruction loss in all settings. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": "grows exponentially with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "as opposed to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": ". Fewer code vectors can be used to quantize without performance degradation. For example, when "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M = 3"
+          },
+          {
+            "type": "text",
+            "content": ", DQ outperforms a VQ variant by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and uses "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "fewer code vectors. Fig. 5 shows a summary of the loss for different "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "values. A detailed table of the results can be found in the Appendix. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        566,
+        468,
+        733
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.4. Likelihood Estimation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        741,
+        284,
+        756
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For likelihood estimation, we compare DQ-AE with other likelihood estimator models and report the numbers from their work. We use Very Deep VAE (“VD-VAE”) [7] as a continuous AutoEncoder baseline and Sparse Transformer (“S-Tr”) [8] as an Auto-Regressive baseline. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        763,
+        468,
+        839
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For experiments on ImageNet, we add a number on the image resolution at which we train the model at the end of the dataset name. For our model, we use an identical architecture and number of hierarchies for all resolution of "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        839,
+        468,
+        898
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the dataset. The detailed results are in Tab. 1. We outperform all previous state-of-the-art models when measuring the loss in bits/dim, we also report "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": "separately. The estimate for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R } \\sim 0 . 2"
+          },
+          {
+            "type": "text",
+            "content": "nats. Visual inspection of both top and bottom hierarchies confirm that they encode different granularity of features and are utilized (Fig. 4), and perceptual quality is improved (Fig. 1). Additional high resolution images are attached in the supplementary materials. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        90,
+        890,
+        210
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When compared to the hierarchical model by Razavi et al. [39], DQ-AE also outperforms in reconstruction error for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "on ImageNet-256. On CIFAR-10, the DQ-AE loss is 0.019 compared to 0.044 for VQ-VAE. For ImageNet-256, DQ-AE loss is 0.0032 compared to 0.005 for VQ-VAE-2. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        212,
+        890,
+        287
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6. Discussion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        301,
+        612,
+        316
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We thoroughly evaluate the theoretical claims of our work and empirically verify our method in likelihood estimation. Evaluation of the discrete representation on a downstream task such as latent interpolations is domain specific. Sampling from the multi-resolution and high dimensional discrete codebooks requires training additional models post-hoc. As such, there are multiple open problems in how to design such a model. We leave this for future work. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        325,
+        890,
+        445
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The direct evaluation and comparison on NLL between explicit likelihood models can be non-equivalent. Our model makes different assumptions on the prior distribution and as such the direct comparison can be flawed. Previous work [1] has suggested that the ELBO might be a poor metric to evaluate deep latent variable models. We mitigated the issue and followed the theoretical result and experimental methodology to previous work [7]. We consider the proper evaluation of the discrete prior with other model variants as an open problem. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        446,
+        890,
+        598
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "7. Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        611,
+        617,
+        626
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We analyze the effects of decomposing an image feature tensor along an axis of statistical independence. Decomposition and quantization among independent features outperforms coupled feature variants. Our theoretical insights focus on feature decoupling for decomposed image feature tensors along the channel axis. Our results corroborate previous analyses and explain the advantage of NiN applications which can be interpreted as an information bottleneck. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        637,
+        890,
+        756
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Based on our theoretical insight, we propose Depthwise Quantization (DQ) that provides significantly more efficient bottleneck capacity by eliminating redundancies implicitly in the feature axis. DQ is trained end-to-end with a Hierarchical Auto-Encoder (DQ-AE) and learns improved hierarchical discrete representations. Our method is domain agnostic, and we consider the evaluation on a specific task for future work. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        757,
+        890,
+        876
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        480,
+        924,
+        488,
+        935
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        78,
+        89,
+        173,
+        104
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[1] Alexander Alemi, Ben Poole, Ian Fischer, Joshua Dillon, Rif A Saurous, and Kevin Murphy. Fixing a broken elbo. In International Conference on Machine Learning, pages 159–168. PMLR, 2018. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[2] Artem Babenko and Victor Lempitsky. Additive quantization for extreme vector compression. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 931–938, 2014. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[3] Christopher P Burgess, Irina Higgins, Arka Pal, Loic Matthey, Nick Watters, Guillaume Desjardins, and Alexander Lerchner. Understanding disentangling in "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\beta"
+              },
+              {
+                "type": "text",
+                "content": "-vae. arXiv preprint arXiv:1804.03599, 2018. 3, 5, 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[4] Yue Cao, Mingsheng Long, Jianmin Wang, and Shichen Liu. Deep visual-semantic quantization for efficient image retrieval. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 1328–1337, 2017. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[5] Olivier Cappe and Eric Moulines. On-line expectation- ´ maximization algorithm for latent data models. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 71(3):593–613, Jun 2009. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[6] Jianfei Chen, Jun Zhu, Yee Whye Teh, and Tong Zhang. Stochastic expectation maximization with variance reduction. In NeurIPS, pages 7978–7988, 2018. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[7] Rewon Child. Very deep {vae}s generalize autoregressive models and can outperform them on images. In International Conference on Learning Representations, 2021. 7, 8, 14 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[8] Rewon Child, Scott Gray, Alec Radford, and Ilya Sutskever. Generating long sequences with sparse transformers. arXiv preprint arXiv:1904.10509, 2019. 7, 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[9] Franc¸ois Chollet. Xception: Deep learning with depthwise separable convolutions. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 1251–1258, 2017. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[10] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition, pages 248–255. Ieee, 2009. 7 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[11] Prafulla Dhariwal, Heewoo Jun, Christine Payne, Jong Wook Kim, Alec Radford, and Ilya Sutskever. Jukebox: A generative model for music. arXiv preprint arXiv:2005.00341, 2020. 1, 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[12] Weihao Gao, Sreeram Kannan, Sewoong Oh, and Pramod Viswanath. Estimating mutual information for discretecontinuous mixtures. arXiv preprint arXiv:1709.06212, 2017. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[13] Tiezheng Ge, Kaiming He, Qifa Ke, and Jian Sun. Optimized product quantization. IEEE transactions on pattern analysis and machine intelligence, 36(4):744–755, 2013. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[14] Anirudh Goyal, Alessandro Sordoni, Marc-Alexandre Cotˆ e,´ Nan Rosemary Ke, and Yoshua Bengio. Z-forcing: Training stochastic recurrent networks. arXiv preprint arXiv:1711.05411, 2017. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[15] Jianbo Guo, Yuxi Li, Weiyao Lin, Yurong Chen, and Jianguo Li. Network decoupling: From regular to depthwise separable convolutions. arXiv preprint arXiv:1808.05517, 2018. 3 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        114,
+        470,
+        900
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[16] Daniel Haase and Manuel Amthor. Rethinking depthwise separable convolutions: How intra-kernel correlations lead to improved mobilenets. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 14600–14609, 2020. 3, 6, 7 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[17] Daniel Haase and Manuel Amthor. Rethinking depthwise separable convolutions: How intra-kernel correlations lead to improved mobilenets. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 14600–14609, 2020. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[18] Irina Higgins, Loic Matthey, Arka Pal, Christopher Burgess, Xavier Glorot, Matthew Botvinick, Shakir Mohamed, and Alexander Lerchner. beta-vae: Learning basic visual concepts with a constrained variational framework. 2016. 3, 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[19] Marcus Hutter. Distribution of mutual information. Advances in neural information processing systems, 1:399–406, 2002. 4 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[20] Max Jaderberg, Andrea Vedaldi, and Andrew Zisserman. Speeding up convolutional neural networks with low rank expansions. arXiv preprint arXiv:1405.3866, 2014. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[21] Lukasz Kaiser, Samy Bengio, Aurko Roy, Ashish Vaswani, Niki Parmar, Jakob Uszkoreit, and Noam Shazeer. Fast decoding in sequence models using discrete latent variables. In International Conference on Machine Learning, pages 2390– 2399. PMLR, 2018. 3, 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[22] Diederik P Kingma and Max Welling. An introduction to variational autoencoders. arXiv preprint arXiv:1906.02691, 2019. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[23] Zeger F Knops, JB Antoine Maintz, Max A Viergever, and Josien PW Pluim. Normalized mutual information-based registration using k-means clustering-based histogram binning. In Medical Imaging 2003: Image Processing, volume 5032, pages 1072–1080. International Society for Optics and Photonics, 2003. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[24] Zeger F Knops, JB Antoine Maintz, Max A Viergever, and Josien PW Pluim. Normalized mutual information based registration using k-means clustering and shading correction. Medical image analysis, 10(3):432–439, 2006. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[25] Kazuma Kobayashi, Ryuichiro Hataya, Yusuke Kurose, Mototaka Miyake, Masamichi Takahashi, Akiko Nakagawa, Tatsuya Harada, and Ryuji Hamamoto. Decomposing normal and abnormal features of medical images into discrete latent codes for content-based image retrieval. arXiv preprint arXiv:2103.12328, 2021. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[26] Alex Krizhevsky, Geoffrey Hinton, et al. Learning multiple layers of features from tiny images. 2009. 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[27] Min Lin, Qiang Chen, and Shuicheng Yan. Network in network. arXiv preprint arXiv:1312.4400, 2013. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[28] Zhizhe Liu, Xingxing Zhang, Zhenfeng Zhu, Shuai Zheng, Yao Zhao, and Jian Cheng. Convolutional prototype learning for zero-shot recognition. Image and Vision Computing, 98:103924, 2020. 1 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[29] Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. arXiv preprint arXiv:1711.05101, 2017. 13 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[30] Xiaotong Lu, Heng Wang, Weisheng Dong, Fangfang Wu, Zhonglong Zheng, and Guangming Shi. Learning a deep vector quantization network for image compression. IEEE Access, 7:118815–118825, 2019. 1 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        893,
+        898
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        478,
+        924,
+        491,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[31] David JC MacKay and David JC Mac Kay. Information theory, inference and learning algorithms. Cambridge university press, 2003. 4 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[32] Franck Mamalet and Christophe Garcia. Simplifying convnets for fast learning. In International Conference on Artificial Neural Networks, pages 58–65. Springer, 2012. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[33] Young-Il Moon, Balaji Rajagopalan, and Upmanu Lall. Estimation of mutual information using kernel density estimators. Physical Review E, 52(3):2318, 1995. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[34] Aaron van den Oord, Oriol Vinyals, and Koray Kavukcuoglu. Neural discrete representation learning. arXiv preprint arXiv:1711.00937, 2017. 1, 2, 8 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[35] Tom Le Paine, Pooya Khorrami, Shiyu Chang, Yang Zhang, Prajit Ramachandran, Mark A Hasegawa-Johnson, and Thomas S Huang. Fast wavenet generation algorithm. arXiv preprint arXiv:1611.09482, 2016. 2 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[36] Liam Paninski. Estimation of entropy and mutual information. Neural computation, 15(6):1191–1253, 2003. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[37] Niki Parmar, Ashish Vaswani, Jakob Uszkoreit, Lukasz Kaiser, Noam Shazeer, Alexander Ku, and Dustin Tran. Image transformer. In International Conference on Machine Learning, pages 4055–4064. PMLR, 2018. 7 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[38] Adam Paszke, Sam Gross, Soumith Chintala, Gregory Chanan, Edward Yang, Zachary DeVito, Zeming Lin, Alban Desmaison, Luca Antiga, and Adam Lerer. Automatic differentiation package - torch.autograd, 2017. 5 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[39] Ali Razavi, Aaron van den Oord, and Oriol Vinyals. Generating diverse high-fidelity images with vq-vae-2. arXiv preprint arXiv:1906.00446, 2019. 1, 3, 8, 12 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[40] Tom Richardson and Ruediger Urbanke. Modern coding theory. Cambridge university press, 2008. 4 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[41] Aurko Roy, Ashish Vaswani, Arvind Neelakantan, and Niki Parmar. Theory and experiments on vector quantized autoencoders. arXiv preprint arXiv:1805.11063, 2018. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[42] Aurko Roy, Ashish Vaswani, Niki Parmar, and Arvind Neelakantan. Towards a better understanding of vector quantized autoencoders. 2018. 6 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[43] Tim Salimans, Andrej Karpathy, Xi Chen, and Diederik P Kingma. Pixelcnn++: Improving the pixelcnn with discretized logistic mixture likelihood and other modifications. arXiv preprint arXiv:1701.05517, 2017. 13, 14, 16 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[44] Pierre Stock, Armand Joulin, Remi Gribonval, Benjamin ´ Graham, and Herve J ´ egou. And the bit goes down: Re- ´ visiting the quantization of neural networks. arXiv preprint arXiv:1907.05686, 2019. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[45] Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jon Shlens, and Zbigniew Wojna. Rethinking the inception architecture for computer vision. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 2818–2826, 2016. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[46] Naftali Tishby, Fernando C Pereira, and William Bialek. The information bottleneck method. arXiv preprint physics/0004057, 2000. 11 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[47] Hanwei Wu and Markus Flierl. Variational information bottleneck on vector quantized autoencoders. arXiv preprint arXiv:1808.01048, 2018. 6 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        78,
+        90,
+        470,
+        898
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[48] Hanwei Wu and Markus Flierl. Learning product codebooks using vector-quantized autoencoders for image retrieval. In 2019 IEEE Global Conference on Signal and Information Processing (GlobalSIP), pages 1–5. IEEE, 2019. 3 "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[49] Hong-Ming Yang, Xu-Yao Zhang, Fei Yin, and Cheng-Lin Liu. Robust classification with convolutional prototype learning. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 3474–3482, 2018. 1 "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        92,
+        893,
+        204
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        477,
+        924,
+        495,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A. Appendix "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        90,
+        189,
+        107
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1. Representation Capacity "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        114,
+        307,
+        131
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proofs in this section correspond to claims and results in the main text. Where applicable, a proposition will refer to the the equation in the main text for which the result is applied. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        137,
+        468,
+        199
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proposition 1 (Depthwise Quantization Channel Capacity - Result for Equation 2 in the main text). The capacity "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c"
+          },
+          {
+            "type": "text",
+            "content": "of Depthwise Quantization (DQ) channel for set of codebooks "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": "is the entropy of the codebooks s.t. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c = H ( C )"
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        207,
+        472,
+        268
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proof. Let the capacity of a channel "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c = I ( x ; z )"
+          },
+          {
+            "type": "text",
+            "content": "[46] , where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I ( : ; : )"
+          },
+          {
+            "type": "text",
+            "content": "is the mutual information. It is sufficient to show "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { \\mathcal { C } } = I ( \\boldsymbol { x } ; C ) = H ( C ) - H ( \\boldsymbol { x } | C )"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z = C ="
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ C _ { i } : i \\in N \\}"
+          },
+          {
+            "type": "text",
+            "content": "is the set of codebooks. Since the quantization channel is a noiseless discrete channel with deterministic quantization function, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P ( x | C ) = 1"
+          },
+          {
+            "type": "text",
+            "content": "and thus "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ( x | C ) ="
+          },
+          {
+            "type": "text",
+            "content": "0. − "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        277,
+        472,
+        383
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {\\mathcal {C}} = I (x; C) = H (C) \\tag {8}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/47d8250b43443ac122dc5e9625b9d2a824b15ef385002d00e6d7e3f2a46ce815.jpg"
+        }
+      },
+      "bbox": [
+        196,
+        407,
+        468,
+        425
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proposition 2 (Representation Capacity - Result for Equation 2 in the main text). The channel capacity is bounded by the number of discrete latent factors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "that can be represented by DQ. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "be the cardinality of the set of codebooks "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": "with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "codes. Representation Capacity is defined as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R } = - H ( C ) = \\log S"
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        433,
+        472,
+        525
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proof. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S \\ = \\ K ^ { N }"
+          },
+          {
+            "type": "text",
+            "content": "be the sample space for the set of codebooks "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C = C _ { i } : i \\in N"
+          },
+          {
+            "type": "text",
+            "content": "with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "codes. By definition "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        532,
+        472,
+        566
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "H (C) = - \\sum_ {C _ {i} \\in N} P \\left(C _ {1}, \\dots , C _ {n}\\right) \\log P \\left(C _ {1}, \\dots , C _ {n}\\right) \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/5ca243cfb3bcfafc174ffaae07473afa67a21d2d74202466f2710abcc317b849.jpg"
+        }
+      },
+      "bbox": [
+        96,
+        575,
+        468,
+        608
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P ( C _ { i } ) P ( C _ { j } ) > P ( C _ { i } ) P ( C _ { j } | C _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        618,
+        346,
+        633
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "H ( C )"
+          },
+          {
+            "type": "text",
+            "content": "is maximized when "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { i } , C _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "are independent variables and are uniformly distributed (uniform prior) s.t. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P ( C _ { i } ) ="
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle { \\frac { 1 } { K } }"
+          },
+          {
+            "type": "text",
+            "content": ". Thus: "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        633,
+        468,
+        681
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} H _ {\\max } (C) = - \\sum_ {i \\in K} [ P (C _ {1}) \\times \\dots \\times P (C _ {n}) \\\\ \\log \\left[ P \\left(C _ {1}\\right) \\times \\dots \\times P \\left(C _ {n}\\right) \\right] \\\\ = \\log K ^ {N} = \\log S \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/e4f68b4ac204b68abcba9b2267512e4a559c2cdcdeee32caad65b8e78e12b693.jpg"
+        }
+      },
+      "bbox": [
+        135,
+        691,
+        408,
+        763
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "C _ {R} = - H (C) = \\log S \\tag {10}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0cec20d73efbe7955cd53064c09764f1c500d2690831a0227c0d6edc56a8d66e.jpg"
+        }
+      },
+      "bbox": [
+        192,
+        790,
+        468,
+        806
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proposition 3 (ELBO for Depthwise AutoEncoder - Result for Equation 6). The variational lower bound of DQ-AE is "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        815,
+        468,
+        845
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {L} \\geq \\max  \\left[ \\mathbb {E} _ {q (z | x)} \\log p (x | z) - C _ {R} \\right] \\tag {11}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/41b3a0109c1f9dfe1813d2432c7d29ed90eb59923dc297cadcdccebf894e5cc8.jpg"
+        }
+      },
+      "bbox": [
+        155,
+        857,
+        468,
+        875
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proof. By definition [3] "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        90,
+        663,
+        106
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {L} \\geq \\mathbb {E} _ {q (z | x)} \\log p (x | z) - \\beta D _ {K L} (q (z | x) | | p (z)) \\tag {12}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/71e231815f31db0b57714c87e11323fcc334f7ad8800b30dabb3cac002dd192c.jpg"
+        }
+      },
+      "bbox": [
+        524,
+        118,
+        890,
+        136
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Thus, it is sufficient to show that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { R }"
+          },
+          {
+            "type": "text",
+            "content": "is the bound of the divergence of the uniform prior "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( z )"
+          },
+          {
+            "type": "text",
+            "content": "and inferred prior "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q ( z | x )"
+          },
+          {
+            "type": "text",
+            "content": "s.t. "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        146,
+        893,
+        190
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "D _ {K L} (q (z | x) \\mid \\mid p (z)) = C _ {R} - S \\tag {13}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a348335399c89874589d9fad921e138f6e419c7e21094be699688b009323054c.jpg"
+        }
+      },
+      "bbox": [
+        591,
+        205,
+        890,
+        223
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p ( z )"
+          },
+          {
+            "type": "text",
+            "content": "be the uniform distribution and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q ( z | x )"
+          },
+          {
+            "type": "text",
+            "content": "the inferred prior. Therefore, "
+          }
+        ]
+      },
+      "bbox": [
+        498,
+        229,
+        893,
+        258
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} D _ {K L} (q (z | x) | | p (z)) = \\sum_ {i \\in N} q (z _ {i} | x) \\log \\left(\\frac {q (z _ {i} | x)}{p (z _ {i})}\\right) \\\\ = \\sum_ {i \\in N} q (z | x) \\log \\left(q (z | x) K ^ {- 1}\\right) \\\\ = \\sum_ {i \\in N} q (z | x) \\log (q (z | x)) - N \\log (K) \\\\ <   - H (q (z | x)) \\quad \\square \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/1db16a30e958a82c14ea250f1e68b6e7f8b7c1de6be154f7674bc56fa99341a3.jpg"
+        }
+      },
+      "bbox": [
+        500,
+        270,
+        908,
+        398
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "is constant, it does not affect the optimization objective, the ELBO is "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        409,
+        890,
+        440
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {L} \\geq \\max  \\left[ \\mathbb {E} _ {q (z | x)} \\log p (x | z) - C _ {R} \\right] \\tag {14}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/805fb264fd3736c27233e4a9b5c1f12084d4b90d92fcd00760c4320258434ed8.jpg"
+        }
+      },
+      "bbox": [
+        578,
+        454,
+        890,
+        472
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "11 "
+          }
+        ]
+      },
+      "bbox": [
+        475,
+        924,
+        493,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2. Architecture "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        90,
+        217,
+        104
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section we provide details on the Hierarchical DQ-AE architecture. "
+          }
+        ]
+      },
+      "bbox": [
+        76,
+        113,
+        468,
+        143
+      ]
+    },
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 1 N-Hierarchical Depthwise Vector Quantizer "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "given encoder E, decoder  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal{D}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm{N}\\times \\{"
+          },
+          {
+            "type": "text",
+            "content": " quantizers Q, decoders D, up-samplers U} for each hierarchy, Reconstruction Loss function  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal{L}"
+          },
+          {
+            "type": "text",
+            "content": " and Optimizer  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal{O}"
+          },
+          {
+            "type": "text",
+            "content": " and training sample X "
+          }
+        ]
+      },
+      "bbox": [
+        91,
+        191,
+        472,
+        251
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": ". Stack of N encoded representations bottom to top "
+          }
+        ]
+      },
+      "bbox": [
+        91,
+        266,
+        434,
+        282
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbf {e} _ {\\text {a l l}} \\leftarrow \\mathrm {E} (\\mathbf {x}) \\\\ \\mathbf {e} _ {\\text {t o p}} \\leftarrow \\operatorname {p o p} (\\mathbf {e} _ {\\text {a l l}}) \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f7146a0450618a9916caac58890b0a342da785cdd2214dc77dbed71356e1c937.jpg"
+        }
+      },
+      "bbox": [
+        94,
+        282,
+        200,
+        313
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": ". Quantize using DVQ "
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        327,
+        246,
+        342
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathrm {q} \\leftarrow \\mathrm {Q} _ {\\text {t o p}} (\\mathrm {e} _ {\\text {t o p}}) \\\\ \\mathrm {d} \\leftarrow \\mathrm {D} _ {\\text {t o p}} (\\mathrm {q}) \\\\ u _ {\\text {a l l}} \\leftarrow \\text {l i s t} () \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/27b03f7140235d5a3e723b9c4ffb190ce6cb2ad9aa181ba17b57180912390c32.jpg"
+        }
+      },
+      "bbox": [
+        96,
+        343,
+        191,
+        387
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "for e in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { e } _ { \\mathrm { a l l } }"
+          },
+          {
+            "type": "text",
+            "content": "do "
+          }
+        ]
+      },
+      "bbox": [
+        96,
+        388,
+        191,
+        402
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathrm {q}, \\mathrm {d}, \\mathrm {u} \\leftarrow \\operatorname {D E C O D E} (\\mathrm {e}, \\mathrm {d}) \\\\ u _ {\\text {a l l}} \\leftarrow \\operatorname {a p p e n d} (u) \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/452501fa42f83cc82fdef4e7ed4b0d8d9566305c36c0786bed253285f7a6d013.jpg"
+        }
+      },
+      "bbox": [
+        119,
+        402,
+        272,
+        431
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\hat {x} \\leftarrow \\mathcal {D} (u _ {\\text {a l l}})",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/5bd8bf6850f965ad037a59549c01a2a2de120abc749b34d4121c40184d5c41e7.jpg"
+        }
+      },
+      "bbox": [
+        94,
+        435,
+        189,
+        450
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Update "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta _ { [ E , Q , D , U ] }"
+          },
+          {
+            "type": "text",
+            "content": "based on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L } ( x , \\hat { x } )"
+          },
+          {
+            "type": "text",
+            "content": ", using Optimizer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { O }"
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        450,
+        465,
+        467
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "procedure DECODE "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { \\ ' { e } _ { c u r } }"
+          },
+          {
+            "type": "text",
+            "content": ", dprev) "
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        481,
+        303,
+        496
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Input Current level encoding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { e } _ { \\mathrm { c u r } }"
+          },
+          {
+            "type": "text",
+            "content": "and previous decoding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { d } _ { \\mathrm { p r e v } }"
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        496,
+        470,
+        526
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Output Current Level quantization q, upsampling u and decoding d "
+          }
+        ]
+      },
+      "bbox": [
+        93,
+        526,
+        468,
+        556
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathrm {q} \\leftarrow \\mathrm {Q} _ {\\text {c u r}} \\left(\\mathrm {e} _ {\\text {c u r}}, \\mathrm {d} _ {\\text {p r e v}}\\right) \\\\ u \\leftarrow U _ {\\text {p r e v}} (q) \\\\ \\mathrm {d} \\leftarrow \\mathrm {D} _ {\\text {c u r}} (\\mathrm {q}) + \\mathrm {d} _ {\\text {p r e v}} \\\\ \\text {r e t u r n} q, d, u \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c4fbb3860c7d4369467c87371c17c936197ad587c0a6de1df41b54f15aa6a6cc.jpg"
+        }
+      },
+      "bbox": [
+        117,
+        571,
+        256,
+        632
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Algorithm 1. As opposed to VQ-VAE [39] we use skip connections on the decoded quantized representations from top hierarchies to bottom and thus increase interaction between hierarchies to avoid prior collapse of top-level hierarchies. The decoder accepts quantized upsampled representations as opposed to independently decoding each hierarchy. Fig. 1 shows an overview of the architecture. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        662,
+        472,
+        758
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/0e81d894d20998caf6755fd34a9f81d6ecd0ba1f21c2cb18f48be42be884b7b5.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1. Architecture of N-Hierarchical Depthwise AutoEncoder. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "is input to the model and is progressively encoded to finer grain representations. Each hidden representation in the decoder is decoded using previous hierarchy’s decoded quantized representation as well as the encoded representation. The quantized representations are up-sampled and decoded jointly. Quantization of top use no prior decoding. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        527,
+        112,
+        883,
+        386
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8c181d535de040f3121b94ad277a01f97551b218125797b8ca9b784229a46d3f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2. Each input latent representation is sent to the corresponding codebook. The closest code in the codebook latent space is the output of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D Q"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        516,
+        570,
+        880,
+        797
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        475,
+        924,
+        493,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3. Ablation Study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        90,
+        235,
+        107
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Results for the ablation study on the quantization process can be found in Tab. 3. Results for the ablation study on DQ-AE can be found in Tab. 4. We also perform additional experiments on MNIST where DQ (“Our”) outperforms VQ with 1.92e-04 in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "reconstruction loss as compared to 3.41e-04, and similarly for CelebA with 9.57e-03 compared to 3.70e-02. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        113,
+        470,
+        218
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4. Training Configuration "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        229,
+        297,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For all experiments and for the quantizer we use "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 2 5"
+          },
+          {
+            "type": "text",
+            "content": "and dimensionality of each code "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D \\ = \\ 6 4"
+          },
+          {
+            "type": "text",
+            "content": ", decay factor "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma = 0 . 9 9"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\epsilon = 1 . 0 0 e - 0 5"
+          },
+          {
+            "type": "text",
+            "content": "unless otherwise noted. We use a different random seed for all experiments and for every trial. For the discretized logistic mixture loss (“mix”) [43], we use 10 components and discretize on 8-bit (lossless). We use Adam with weight decay regularization [29] for optimization for all training settings. We use automatic mixed precision "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\left( a m p \\right)"
+          },
+          {
+            "type": "text",
+            "content": ".We use a batch size of 128, learning rate 2.00e-04 and train for 400 epochs. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        252,
+        470,
+        402
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Ablation Study For DQ-AE we use 2 Encoder Block composed of 4 Resnet Block with Conv2D layer of 256 channel and 256 hidden unit and stride 2. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        402,
+        470,
+        446
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Likelihood estimation DQ-AE for the likelihood estimation task uses 2 hierarchies with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K _ { \\mathrm { b o t } } = 1 2 8"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K _ { \\mathrm { t o p } } = 2 5 6"
+          },
+          {
+            "type": "text",
+            "content": ". For each hierarchical encoder, it uses 2 encoder block composed of 4 resnet block with Conv2D layer of 256 channel and 256 hidden unit. "
+          }
+        ]
+      },
+      "bbox": [
+        75,
+        448,
+        472,
+        523
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/df4301c7efac1977cedcbe39840d4ec30bd7647e6623c87ae806091d8d0ba94d.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3. NLL Loss in bits/dim over time. Comparison between VQ and DVQ with an equivalent training set up. DVQ matches the best NLL reported for VQ by step 50,000 in contrast to step 200,000. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        119,
+        536,
+        428,
+        686
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/d882100be791145e9d92f072ab8af2771615843c84275e129068f9cdf8290d40.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3. We vary the number of codebook vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "and codebooks "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": ", while we keep the same "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D = 6 4"
+          },
+          {
+            "type": "text",
+            "content": ". We evaluate our results on CIFAR10 using an identical training configuration between all models and multiple random initialization. Note that the DQ model do not fully converge, due to the limited number of computational resources. We train for 400 epochs and pick the best test loss for each architecture. The comparison between the models shows a statistical trend of improved likelihood estimation for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D Q -"
+          },
+          {
+            "type": "equation_inline",
+            "content": "A E"
+          },
+          {
+            "type": "text",
+            "content": ". Figure 5 in the main text, shows the aggregate results of the likelihood estimation. The top, middle, and bottom line correspond to K having values 32,128,and 512, respectively. The effect of K is not as significant as the effect of M. For "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { M } { = } 1"
+          },
+          {
+            "type": "text",
+            "content": "both VQ and DVQ are identical in terms of theoretical and experimental performance. As we increase M, we find that the loss significantly decreases. Moreover, K, is not the limiting factor to the channel capacity but M is. This can also be seen on the graph as the loss for all different K converges as we increase M. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>loss func.</td><td>M</td><td>K</td><td>DQ (nats/dim)</td><td>VQ (nats/dim)</td></tr><tr><td>ce</td><td>1</td><td>32</td><td>4.16e+00</td><td>4.16e+00</td></tr><tr><td>ce</td><td>1</td><td>128</td><td>4.01e+00</td><td>4.01e+00</td></tr><tr><td>ce</td><td>1</td><td>512</td><td>3.85e+00</td><td>3.85e+00</td></tr><tr><td>ce</td><td>3</td><td>32</td><td>3.55e+00</td><td>3.92e+00</td></tr><tr><td>ce</td><td>3</td><td>128</td><td>3.31e+00</td><td>3.80e+00</td></tr><tr><td>ce</td><td>3</td><td>512</td><td>3.13e+00</td><td>3.68e+00</td></tr><tr><td>ce</td><td>5</td><td>32</td><td>3.25e+00</td><td>3.84e+00</td></tr><tr><td>ce</td><td>5</td><td>128</td><td>2.96e+00</td><td>3.71e+00</td></tr><tr><td>ce</td><td>5</td><td>512</td><td>2.75e+00</td><td>3.59e+00</td></tr><tr><td>ce</td><td>10</td><td>32</td><td>2.71e+00</td><td>3.71e+00</td></tr><tr><td>ce</td><td>10</td><td>128</td><td>2.37e+00</td><td>3.51e+00</td></tr><tr><td>ce</td><td>10</td><td>512</td><td>2.13e+00</td><td>3.44e+00</td></tr><tr><td>loss func.</td><td>M</td><td>K</td><td>DQ (L2)</td><td>VQ (L2)</td></tr><tr><td>mse</td><td>1</td><td>32</td><td>1.22e-01</td><td>1.22e-01</td></tr><tr><td>mse</td><td>1</td><td>128</td><td>8.75e-02</td><td>8.75e-02</td></tr><tr><td>mse</td><td>1</td><td>512</td><td>6.78e-02</td><td>6.78e-02</td></tr><tr><td>mse</td><td>3</td><td>32</td><td>3.90e-02</td><td>7.70e-02</td></tr><tr><td>mse</td><td>3</td><td>128</td><td>2.49e-02</td><td>6.17e-02</td></tr><tr><td>mse</td><td>3</td><td>512</td><td>1.67e-02</td><td>4.78e-02</td></tr><tr><td>mse</td><td>5</td><td>32</td><td>2.08e-02</td><td>6.48e-02</td></tr><tr><td>mse</td><td>5</td><td>128</td><td>1.15e-02</td><td>5.52e-02</td></tr><tr><td>mse</td><td>5</td><td>512</td><td>7.33e-03</td><td>4.14e-02</td></tr><tr><td>mse</td><td>10</td><td>32</td><td>6.84e-03</td><td>5.54e-02</td></tr><tr><td>mse</td><td>10</td><td>128</td><td>3.08e-03</td><td>4.07e-02</td></tr><tr><td>mse</td><td>10</td><td>512</td><td>1.68e-03</td><td>3.25e-02</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        501,
+        170,
+        895,
+        568
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "3https://pytorch.org/docs/stable/amp.html "
+          }
+        ]
+      },
+      "bbox": [
+        94,
+        886,
+        418,
+        901
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        475,
+        924,
+        495,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/79e1348b9cedd631567c4dd4d5d4274d8a4f5dc049853bafe5a80b0b6cec62bd.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [
+          {
+            "type": "text",
+            "content": "Table 4. Hierarchical Depthwise Quantizers for 2 and 3 hierarchies. DQ outperforms equivalent VQ. The “mix” objective function refers to 8-bit mixture of logistics [43] following the methodology by Child et al. [7]. The hierarchy capacity "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "is reported from top to bottom, i.e. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ K _ { t o p } , K _ { m i d } , K _ { b o t } ]"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ],
+        "html": "<table><tr><td>loss func.</td><td>M</td><td>K</td><td>DQ (nats/dim)</td><td>VQ (nats/dim)</td></tr><tr><td>ce</td><td>5</td><td>[128,128,128]</td><td>2.96e+00</td><td>3.73e+00</td></tr><tr><td>ce</td><td>5</td><td>[128,128]</td><td>2.95e+00</td><td>3.60e+00</td></tr><tr><td>ce</td><td>5</td><td>[128,256]</td><td>2.96e+00</td><td>3.69e+00</td></tr><tr><td>ce</td><td>5</td><td>[128,32]</td><td>2.94e+00</td><td>3.70e+00</td></tr><tr><td>ce</td><td>5</td><td>[256,128]</td><td>2.84e+00</td><td>3.63e+00</td></tr><tr><td>ce</td><td>5</td><td>[256,256]</td><td>2.85e+00</td><td>3.63e+00</td></tr><tr><td>ce</td><td>5</td><td>[32,128]</td><td>3.21e+00</td><td>3.72e+00</td></tr><tr><td>ce</td><td>5</td><td>[32,32,32]</td><td>3.24e+00</td><td>3.69e+00</td></tr><tr><td>ce</td><td>5</td><td>[64,64,64]</td><td>3.08e+00</td><td>3.79e+00</td></tr><tr><td>loss func.</td><td>M</td><td>K</td><td>DQ (nats/dim)</td><td>VQ (nats/dim)</td></tr><tr><td>mix</td><td>5</td><td>[128,128,128]</td><td>2.55e+00</td><td>3.04e+00</td></tr><tr><td>mix</td><td>5</td><td>[128,128]</td><td>2.56e+00</td><td>3.12e+00</td></tr><tr><td>mix</td><td>5</td><td>[128,256]</td><td>2.52e+00</td><td>3.11e+00</td></tr><tr><td>mix</td><td>5</td><td>[128,32]</td><td>2.55e+00</td><td>3.18e+00</td></tr><tr><td>mix</td><td>5</td><td>[256,128]</td><td>2.49e+00</td><td>3.15e+00</td></tr><tr><td>mix</td><td>5</td><td>[256,256]</td><td>2.49e+00</td><td>3.11e+00</td></tr><tr><td>mix</td><td>5</td><td>[32,128]</td><td>2.79e+00</td><td>3.26e+00</td></tr><tr><td>mix</td><td>5</td><td>[32,32,32]</td><td>2.80e+00</td><td>3.26e+00</td></tr><tr><td>mix</td><td>5</td><td>[64,64,64]</td><td>2.65e+00</td><td>3.06e+00</td></tr><tr><td>loss func.</td><td>M</td><td>K</td><td>DQ (L2)</td><td>VQ (L2)</td></tr><tr><td>mse</td><td>5</td><td>[128,128,128]</td><td>1.15e-02</td><td>5.53e-02</td></tr><tr><td>mse</td><td>5</td><td>[128,128]</td><td>1.24e-02</td><td>5.05e-02</td></tr><tr><td>mse</td><td>5</td><td>[128,256]</td><td>1.02e-02</td><td>5.52e-02</td></tr><tr><td>mse</td><td>5</td><td>[128,32]</td><td>1.15e-02</td><td>5.07e-02</td></tr><tr><td>mse</td><td>5</td><td>[256,128]</td><td>9.31e-03</td><td>4.52e-02</td></tr><tr><td>mse</td><td>5</td><td>[256,256]</td><td>9.27e-03</td><td>5.13e-02</td></tr><tr><td>mse</td><td>5</td><td>[32,128]</td><td>1.94e-02</td><td>5.82e-02</td></tr><tr><td>mse</td><td>5</td><td>[32,32,32]</td><td>2.03e-02</td><td>6.29e-02</td></tr><tr><td>mse</td><td>5</td><td>[64,64,64]</td><td>1.50e-02</td><td>5.81e-02</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        254,
+        234,
+        715,
+        694
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        475,
+        924,
+        493,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.5. Hierarchical Reconstruction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        76,
+        181,
+        334,
+        196
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bb7fee18b5be2ffaf22593970c8307278744b70067f8b0ec77dde3718bc78ece.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4. Image reconstructions from a model trained with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "for the reconstruction loss. Original image (left) is reconstructed using only top level codes (middle) and only bottom level codes (right). Top level hierarchy contains structural information, while bottom level hierarchy contains details. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        232,
+        204,
+        738,
+        746
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        477,
+        924,
+        493,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d541630feac6d39f4c8df516018585beacb3609cc958f016c736c047750b43de.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        163,
+        122,
+        805,
+        289
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6cc908007bf3dab8f40f171f16400df4d6777e4e66fafb189a5ace26f5046bc8.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        163,
+        295,
+        805,
+        463
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e79d28d61553c539ee0daf65814e2be5e8ad41792bef5447764ad153d58d1aba.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        163,
+        468,
+        805,
+        636
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2fa75c622bb793ee5902c8c5f4aa8b2726e21801b053051fa4a5701ce458e3a1.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5. Image reconstructions from a model trained with discretized mixture of logistic loss (dmol) [43] for the reconstruction loss. Original image (left) is reconstructed using only top level codes (middle) and only bottom level codes (right). Top level hierarchy contains structural information, while bottom level hierarchy contains details. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        163,
+        641,
+        805,
+        810
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        475,
+        924,
+        495,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.6. Perceptual Evaluation of Image Reconstructions "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        279,
+        150,
+        691,
+        166
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5894c8fdb9cf22b2d189fcc3d3e3e694b18b278ec06966af8e33e8a43fa30dbe.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        196,
+        175,
+        774,
+        327
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/94414ce4b2b0d6f734aab4fc096d0961b62ed654c72824e852aac6e86b8d9ae7.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        196,
+        330,
+        772,
+        481
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7dd75f3a2234757ffcad65b1a96e3839c4d93d9541aeb019eaf007f92543dfba.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        196,
+        484,
+        772,
+        635
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/56a656a3243ec6ea4b7fe071a78621ca6eecc69a9858bf7f44d2c0ede2b2f35f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6. The original image (left) is fed through and reconstructed by a model trained with DQ (middle) and VQ (right). The model is trained using identical settings. Perceptual quality of DQ outperforms VQ. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        196,
+        640,
+        772,
+        790
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        475,
+        924,
+        495,
+        936
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b82963d18f37006a2fa670e5751fe0c9368f278172775c8e61deadf17bacf0be.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        84,
+        93,
+        885,
+        300
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ef4896f19db631bda5baf43f01031ae27d9e00a43371a444a773884502590cd8.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        84,
+        306,
+        885,
+        515
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d066c149ac726a0ff7b5ff4555f75addf97872aedd5220cde72e87404628b333.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        84,
+        521,
+        885,
+        729
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/43382cb212277a7ae2f476a0124d6436baae3899126e080284fbf27e70fbe2fb.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7. The original image (left) is fed through and reconstructed by a model trained with DQ (middle) and VQ (right). The model is trained using identical settings. Perceptual quality of DQ outperforms VQ. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        84,
+        736,
+        885,
+        944
+      ]
+    }
+  ]
+]

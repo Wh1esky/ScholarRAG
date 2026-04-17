@@ -1,0 +1,6648 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "BATCH NORMALIZATION ORTHOGONALIZES REPRESENTATIONS IN DEEP RANDOM NETWORKS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        140,
+        128,
+        854,
+        162
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "HADI DANESHMAND, AMIR JOUDAKI, AND FRANCIS BACH "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        186,
+        723,
+        200
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Abstract. This paper underlines a subtle property of batch-normalization (BN): Successive batch normalizations with random linear transformations make hidden representations increasingly orthogonal across layers of a deep neural network. We establish a non-asymptotic characterization of the interplay between depth, width, and the orthogonality of deep representations. More precisely, under a mild assumption, we prove that the deviation of the representations from orthogonality rapidly decays with depth up to a term inversely proportional to the network width. This result has two main implications: 1) Theoretically, as the depth grows, the distribution of the representation –after the linear layers– contracts to a Wasserstein-2 ball around an isotropic Gaussian distribution. Furthermore, the radius of this Wasserstein ball shrinks with the width of the network. 2) In practice, the orthogonality of the representations directly influences the performance of stochastic gradient descent (SGD). When representations are initially aligned, we observe SGD wastes many iterations to orthogonalize representations before the classification. Nevertheless, we experimentally show that starting optimization from orthogonal representations is sufficient to accelerate SGD, with no need for BN. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        257,
+        826,
+        450
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        423,
+        496,
+        571,
+        511
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Batch Normalization (BN) (Ioffe and Szegedy, 2015) enhances training across a wide range of deep network architectures and experimental setups (He et al., 2016; Huang et al., 2017; Silver et al., 2017). The practical success of BN has inspired research into the underlying benefits of BN (Santurkar et al., 2018; Karakida et al., 2019; Arora et al., 2019b; Bjorck et al., 2018). In particular, it shown that BN influences first-order optimization methods by avoiding the rank collapse in deep representation (Daneshmand et al., 2020), direction-length decoupling of optimization (Kohler et al., 2018), influencing the learning rate of the steepest descent (Arora et al., 2019b; Bjorck et al., 2018), and smoothing the optimization objective function (Santurkar et al., 2018; Karakida et al., 2019). However, the benefits of BN go beyond its critical role in optimization. For example, Frankle et al. (2020) shows that BN networks with random weights also achieve surprisingly high performance after only minor adjustments of their weights. This striking result motivates us to study the representational power of random networks with BN. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        520,
+        883,
+        715
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We study hidden representations across layers of a laboratory random BN with linear activations. Consider a batch of samples passing through consecutive BN and linear layers with Gaussian weights. The representations of these samples are perturbed by each random linear transformation, followed by a non-linear BN. At first glance, the deep representations appear unpredictable after many stochastic and non-linear transformations. Yet, we show that these transformations orthogonalize the representations. To prove this statement, we introduce the notion of “orthogonality gap”, defined in Section 3, to quantify the deviation of representations from a perfectly orthogonal representation. Then, we prove that the orthogonality gap decays exponentially with the network "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        717,
+        880,
+        849
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2106.03970v1 [stat.ML] 7 Jun 2021 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        270,
+        57,
+        713
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "INRIA Paris, ETH Zurich, INRIA-ENS-PSL Paris. "
+          }
+        ]
+      },
+      "bbox": [
+        130,
+        882,
+        472,
+        896
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        898,
+        503,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "depth and stabilizes around a term inversely related to the network width. More precisely, we prove "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        90,
+        883,
+        107
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ \\mathrm {o r t h o g o n a l i t y g a p} \\right] = \\mathcal {O} \\left((1 - \\alpha) ^ {\\mathrm {d e p t h}} + \\frac {\\mathrm {b a t c h s i z e}}{\\alpha \\sqrt {\\mathrm {w i d t h}}}\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/e755fcf352e0d76e975a828a02b20889bc93a120fefbf7b2059f948b9f02a5cc.jpg"
+        }
+      },
+      "bbox": [
+        282,
+        111,
+        715,
+        156
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha > 0"
+          },
+          {
+            "type": "text",
+            "content": "that is an absolute constant under a mild assumption. In probability theoretic terms, we prove stochastic stability of the Markov chain of hidden representations (Kushner, 1967; Kushner and Yin, 2003; Khasminskii, 2011). The orthogonality of deep representations allows us to prove that the distribution of the representations after linear layers contracts to a Wasserstein-2 ball around isotropic Gaussian distribution as the network depth grows. Moreover, the radius of the ball is inversely proportional to the network width. Omitting details, we prove the following bound holds: "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        157,
+        883,
+        271
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathrm {W a s s e r s t e i n} _ {2} (\\mathrm {r e p r e s e n t a t i o n s , G a u s s i a n}) ^ {2} = \\mathcal {O} \\left((1 - \\alpha) ^ {\\mathrm {d e p t h}} (\\mathrm {b a t c h s i z e}) + \\frac {\\mathrm {b a t c h s i z e}}{\\alpha \\sqrt {\\mathrm {w i d t h}}}\\right).",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/134e58069321d3c26746d2debaf60651b008029db92dfdebdbc1de511e93e39b.jpg"
+        }
+      },
+      "bbox": [
+        153,
+        273,
+        841,
+        310
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The above equation shows how depth, width, and batch size, interact with the law of the representations. Since the established rate is exponential with depth, the distribution of the representations stays in a Wasserstein ball around isotropic Gaussian distribution after a few layers. Thus, BN not only stabilizes the distribution of the representations, which is its main promise (Ioffe and Szegedy, 2015), but also enforces Gaussian isotropic distribution in deep layers. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        311,
+        883,
+        393
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "There is growing interest in bridging the gap between neural networks, as the most successful parametric methods for learning, and Gaussian processes and kernel methods, as well-understood classical models for learning (Jacot et al., 2018; Matthews et al., 2018; Lee et al., 2019; Bietti and Mairal, 2019; Huang et al., 2014). This link is inspired by studying random neural networks in the asymptotic regime of infinite width. The seminal work by Neal (1996) sparks a singlelayer network resembles a Gaussian process as its width goes to infinity. However, increasing the depth may significantly shift the distribution of the representations away from Gaussian (Ioffe and Szegedy, 2015). This distributional shift breaks the link between Gaussian processes and deep neural networks. To ensure Gaussian representations, Matthews et al. (2018) suggests increasing the width of the network proportional to the network depth. Here, we show that BN ensures Gaussian representations even for deep networks with finite width. This result bridges the link between deep neural networks and Gaussian process in the regime of finite width. Many studies rely on deep Gaussian representations in an infinite width setting (Yang et al., 2019; Schoenholz et al., 2017; Pennington et al., 2018; Klambauer et al., 2017; De Palma et al., 2019). Our nonasymptotic Gaussian approximation can be incorporated into their analysis to extend these results to the regime of finite width. "
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        395,
+        883,
+        654
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Since training starts from random networks, representations in these networks directly influence training. Hence, recent theoretical studies has investigated the interplay between initial hidden representations and training (Daneshmand et al., 2020; Bjorck et al., 2018; Frankle et al., 2020; Schoenholz et al., 2017; Saxe et al., 2014; Bahri et al., 2020). In particular, it is shown that hidden representations in random networks without BN become correlated as the network grows in depth, thereby drastically slows training (Daneshmand et al., 2020; He et al., 2016; Bjorck et al., 2018; Saxe et al., 2014). On the contrary, we prove that deep representations in networks with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B N"
+          },
+          {
+            "type": "text",
+            "content": "are almost orthogonal. We experimentally validate that initial orthogonal representations can save training time that would otherwise be needed to orthogonalize them. By proposing a novel initialization scheme, we ensures the orthogonality of hidden representations; then, we show that such an initialization effectively avoids the training slowdown with depth for vanilla networks, with no need for BN. This observation further motivates studying the inner workings of BN to replace or improve it in deep neural networks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        656,
+        883,
+        869
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        898,
+        504,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Theoretically, we made the following contributions: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        90,
+        519,
+        106
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "(1) For MLPs with batch normalization, linear activation, and Gaussian i.i.d. weights, we prove that representations across layers become increasingly orthogonal up to a constant inversely proportional to the network width. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "(2) Leveraging the orthogonality, we prove that the distribution of the representations contracts to a Wasserstein ball around a Gaussian distribution as the depth grows. Up to the best of our knowledge, this is the first non-asymptotic Gaussian approximation for deep neural networks with finite width. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        140,
+        109,
+        885,
+        223
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Experimentally, we made the following contribution1: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        224,
+        534,
+        243
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(3) Inspired by our theoretical understanding, we propose a novel weight initialization for standard neural networks that ensure orthogonal representations without BN. Experimentally, we show that this initialization effectively avoids training slowdown with depth in the absence of BN. "
+          }
+        ]
+      },
+      "bbox": [
+        140,
+        244,
+        883,
+        310
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Preliminaries "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        421,
+        323,
+        575,
+        338
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "2.1. Notations. Akin to Daneshmand et al. (2020), we focus on a Multi-Layer Perceptron (MLP) with batch normalization and linear activation. Theoretical studies of linear networks is a growing research area (Saxe et al., 2014; Daneshmand et al., 2020; Bartlett et al., 2019; Arora et al., 2019a). When weights initialized randomly, linear and non-linear networks share similar properties (Daneshmand et al., 2020). For ease of analysis, we assume activations are linear. Yet, we will argue that our findings extend to non-linear in Appendix F. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        347,
+        883,
+        445
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "to denote batch size, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "to denote the width across all layers, which we further assume is larger than the batch size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d \\geq n"
+          },
+          {
+            "type": "text",
+            "content": ". Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "denote "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "sample representations in layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": ", with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { 0 } \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "corresponding to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "input samples in the batch with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "features. Successive representations are connected by Gaussian weight matrices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } \\sim { \\mathcal { N } } ( 0 , I _ { d } / d )"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        445,
+        883,
+        511
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "H _ {\\ell + 1} = \\frac {1}{\\sqrt {d}} B N \\left(W _ {\\ell} H _ {\\ell}\\right), \\quad B N (M) = \\operatorname {d i a g} \\left(M M ^ {\\top}\\right) ^ {- 1 / 2} M, \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ddad86b14067585f381e8534e7ecc694a6a566ef3f5d56230e496e6a9151c036.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        515,
+        723,
+        550
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { d i a g } ( M )"
+          },
+          {
+            "type": "text",
+            "content": "zeros out off-diagonal elements of its input matrix, and the scaling factor "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / \\sqrt { d }"
+          },
+          {
+            "type": "text",
+            "content": "ensures that all matrices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ H _ { k } \\} _ { k }"
+          },
+          {
+            "type": "text",
+            "content": "have unit Frobenius norm (see Appendix 2). The BN function in Eq. (1) differs slightly from the commonly used definition for BN as the mean correction is omitted. However, Daneshmand et al. (2020) showes this difference does not change the network properties qualitatively. Readers can find all the notations in Appendix Table 2. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        555,
+        888,
+        638
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "2.2. The linear independence of hidden representations. Daneshmand et al. (2020) observe that if inputs are linearly independent, then their hidden representations remain linearly independent in all layers as long as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d = \\Omega ( n ^ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": ". Under technical assumptions, Daneshmand et al. (2020) establishes a lower-bound on the average of the rank of hidden representations over infinite layers. Based on this study, we assume that the linear independence holds and build our analysis upon that. This avoids restating the technical assumptions of Daneshmand et al. (2020) and also further technical refinements of their theorems. The next assumption presents the formal statement of the linear independence property. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        646,
+        883,
+        777
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { 1 } ( \\alpha , \\ell )"
+          },
+          {
+            "type": "text",
+            "content": ". There exists an absolute positive constant "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "such that the minimum singular value of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { k }"
+          },
+          {
+            "type": "text",
+            "content": "is greater than (or equal to) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "for all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k = 1 , \\dots , \\ell"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        782,
+        883,
+        816
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The linear independence of the representations is a shared property across all layers. However, the representations constantly change when passing through random layers. In this paper, we mathematically characterize the dynamics of the representations across layers. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        821,
+        883,
+        871
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1The codes for the experiments are available at https://github.com/hadidaneshmand/batchnorm21.git "
+          }
+        ]
+      },
+      "bbox": [
+        130,
+        881,
+        815,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        900,
+        504,
+        910
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Orthogonality of deep representations "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        300,
+        90,
+        696,
+        104
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "3.1. A warm-up observation. To illustrate the difference between BN and vanilla networks, we compare hidden representations of two input samples across the layers of these networks. Figure 1 plots the absolute value of cosine similarity of these samples across layers. This plot shows a stark contrast between vanilla and BN networks: While representations become increasingly orthogonal across layers of a BN network, they become increasingly aligned in a vanilla network. We used highly correlated inputs for the BN network and perfectly orthogonal inputs for the Vanilla network to contrast their differences. While the hidden representation of vanilla networks has been theoretically studied (Daneshmand et al., 2020; Bjorck et al., 2018; Saxe et al., 2014), up to the best of our knowledge, there is no theoretical analysis of BN networks. In the following section, we formalize and prove this orthogonalizing property for BN networks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        114,
+        885,
+        279
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8dbad6d2e9c3b629d2c3fcade13e5f0ded5b8698d2c5b514e32512e7509f01e2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1. Orthogonality: BN vs. vanilla networks. The horizontal axis shows the number of layers, and the vertical axis shows the absolute value of cosine similarity between two samples across the layers ( "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d = 3 2"
+          },
+          {
+            "type": "text",
+            "content": "). Mean and 95% confidence intervals of 20 independent runs. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        348,
+        308,
+        625,
+        452
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "3.2. Theoretical analysis. The notion of orthogonality gap plays a central role in our analysis. Given the hidden representation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": ", matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ^ { \\mid } H"
+          },
+          {
+            "type": "text",
+            "content": "constitutes inner products between representations of different samples. Note that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ^ { \\mathrm { ~ l ~ } } H \\in \\mathbb { R } ^ { n \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "is different form the covariance matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H H ^ { \\top } / n \\in \\mathbb { R } ^ { d \\times d }"
+          },
+          {
+            "type": "text",
+            "content": ". The orthogonality gap of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": "is defined as the deviations of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H ^ { \\mid } H"
+          },
+          {
+            "type": "text",
+            "content": "from identity matrix, after proper scaling. More precisely, define "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V : \\mathbb { R } ^ { d \\times n } \\backslash \\mathbf { 0 }  \\mathbb { R } _ { + }"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        561,
+        883,
+        645
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "V (H) := \\left\\| \\left(\\frac {1}{\\| H \\| _ {F} ^ {2}}\\right) H ^ {\\top} H - \\left(\\frac {1}{\\| I _ {n} \\| _ {F} ^ {2}}\\right) I _ {n} \\right\\| _ {F}. \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/1ce40cfb6486ded27972bc4ba28e638d7e2afaf0f517f3ac43bc45a25f8e61f0.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        648,
+        676,
+        686
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The following theorem establishes a bound on the orthogonality of representation in layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        690,
+        836,
+        707
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Theorem 1. Under Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": " { \\mathcal { A } } _ { 1 } ( \\alpha , \\ell )"
+          },
+          {
+            "type": "text",
+            "content": ", the following holds: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        715,
+        607,
+        732
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ V \\left(H _ {\\ell + 1}\\right) \\right] \\leq 2 \\left(1 - \\frac {2}{3} \\alpha\\right) ^ {\\ell} + \\frac {3 n}{\\alpha \\sqrt {d}}. \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/fa556bfbe31825ca60fc75cb373649bab50faa3ec80024217e645bd08f21a267.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        737,
+        640,
+        777
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "is studied by Daneshmand et al. (2020) who note that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 } ( \\alpha , \\infty )"
+          },
+          {
+            "type": "text",
+            "content": "holds as long as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d = \\Omega ( n ^ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": ". If "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "does not hold, one can still prove that there is a function of representations that decays with depth up to a constant (see Appendix C). "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        782,
+        883,
+        830
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The above result implies that BN is an approximation algorithm for orthogonalizing the hidden representations. If we replace "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { d i a g } ( M ) ^ { - 1 }"
+          },
+          {
+            "type": "text",
+            "content": "by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( M ) ^ { - 1 }"
+          },
+          {
+            "type": "text",
+            "content": "in BN formula, in Eq. (1), then all the hidden representation will become exactly orthogonal. However, computing the inverse of a non-diagonal "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d \\times d"
+          },
+          {
+            "type": "text",
+            "content": "matrix is computationally expensive, which must repeat for all layers throughout training, "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        830,
+        885,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        900,
+        504,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "and differentiation must propagate back through this inversion. The diagonal approximation in BN significantly reduces the computational complexity of the matrix inversion. Since the orthogonality gap decays at an exponential rate with depth, the approximate orthogonality is met after only a few layers. Interestingly, this yields a desirable cost-accuracy trade-off: For a larger width,√ the orthogonality is more accurate, due to term "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / \\sqrt { d }"
+          },
+          {
+            "type": "text",
+            "content": "in the orthogonality gap, and also the computational gain is more significant. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        90,
+        883,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "From a different angle, Theorem 1 proves the stochastic stability of the Markov chain of hidden representations. In expectation, stochastic processes may obey an inherent Lyapunov-type of stability (Kushner, 1967; Kushner and Yin, 2003; Khasminskii, 2011). One can analyze the mixing and hitting times of Markov chains based on the stochastic stability of Markov chains,(Kemeny and Snell, 1976; Eberle, 2009). In our analysis, the orthogonality gap is a Lyapunov function characterizing the stability of the chain of hidden representations. This stability opens the door to more theoretical analysis of this chain, such as studying mixing and hitting times. Since these theoretical properties may not be of interest to the machine learning community, we focus on the implications of these results for understanding the underpinnings of neural networks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        188,
+        883,
+        335
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "It is helpful to compare the orthogonality gap in BN networks to studies on vanilla networks (Bjorck et al., 2018; Daneshmand et al., 2020; Saxe et al., 2014). The function implemented by a vanilla linear network is a linear transformation as the product of random weight matrices. The spectral properties of the product of i.i.d. random matrices are the subject of extensive studies in probability theory (Bougerol et al., 2012). Invoking these results, one can readily check that the orthogonality gap of the hidden representations in vanilla networks rapidly increases since the representations converge to a rank one matrix after a proper scaling (Daneshmand et al., 2020). "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        335,
+        883,
+        454
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "3.3. Experimental validations. Our experiments presented in Fig. 2a validate the exponential decay rate of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V"
+          },
+          {
+            "type": "text",
+            "content": "with depth. In this plot, we see that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\log ( V _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "linearly decreases for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell = 1 , \\ldots , 2 0"
+          },
+          {
+            "type": "text",
+            "content": ", then it wiggles around a small constant. Our experiments in Fig. 2b suggest that the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { O } ( 1 / \\sqrt { d } )"
+          },
+          {
+            "type": "text",
+            "content": "dependency on width is almost tight. Since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "rapidly converges to a ball, the average of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "over layers estimates the radius of this ball. This plot shows how the average of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": ", over 500 layers, changes with the network width. Since the scale is logarithmic in this plot, slope is close to√ "
+          },
+          {
+            "type": "equation_inline",
+            "content": "- 1 / 2"
+          },
+          {
+            "type": "text",
+            "content": "in logarithmic scale, validating the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { O } ( 1 / \\sqrt { d } )"
+          },
+          {
+            "type": "text",
+            "content": "dependency implied by Theorem 1. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        479,
+        883,
+        599
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f0237b5fde742b8a0b6737fd329fa67a7112a4923779ca4420aaeb34b330d298.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Orthogonality vs. depth "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        186,
+        636,
+        472,
+        782
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5c6d62debdc17cde759b2ee385f2ffd1aec76d54c06c8c8c1672df1cbeab1e20.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) Orthogonality vs. width "
+          },
+          {
+            "type": "text",
+            "content": "horizontally . Right: Figure 2. Orthogonality gap vs. depth and width. Left: "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\log ( \\frac { 1 } { 5 0 0 } \\sum _ { \\ell = 1 } ^ { 5 0 0 } V ( H _ { \\ell } ) ) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "vertically versus "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "horizontally. The slop of the right "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\log ( V ( H _ { \\ell } ) )"
+          },
+          {
+            "type": "text",
+            "content": "vertically versus "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": "plot is "
+          },
+          {
+            "type": "equation_inline",
+            "content": "- 0 . 4 6"
+          },
+          {
+            "type": "text",
+            "content": ". Mean and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "9 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "confidence interval of 20 independent runs. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        628,
+        807,
+        780
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        898,
+        503,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Gaussian approximation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        375,
+        90,
+        620,
+        104
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "4.1. Orthogonality yields Gaussian approximation. The established result on the orthogonality gap allows us to show that the representations after linear layers are approximately Gaussian. If "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "is orthogonal, the random matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "is equal in distribution to a standard Gaussian matrix due to the invariance of standard Gaussian distribution under linear orthogonal transformations. We can formalize this notion of Gaussianity by bounding the Wasserstein-2 distance, denoted by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { W } _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": ", between the distribution of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "and standard Gaussian distribution. The next lemma formally establishes the link between the orthogonality and the distribution of the representations. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        114,
+        883,
+        229
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 2. Given "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "with i.i.d. zero-mean "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / d"
+          },
+          {
+            "type": "text",
+            "content": "-variance Gaussian elements, the following Gaussian approximation holds: "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        237,
+        883,
+        270
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {W} _ {2} \\left(\\operatorname {l a w} \\left(W _ {\\ell} H _ {\\ell}\\right), \\operatorname {l a w} (G / \\sqrt {n})\\right) ^ {2} \\leq 2 n \\mathbb {E} \\left[ V \\left(H _ {\\ell}\\right) \\right]. \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/969d741673984935ca2bbdd7cc1e97d6fcdabe8bbcfbc51c05825a24bcb9b623.jpg"
+        }
+      },
+      "bbox": [
+        116,
+        275,
+        679,
+        297
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Combining the above result with Theorem 1 yields the result presented in the next corollary. "
+          }
+        ]
+      },
+      "bbox": [
+        129,
+        303,
+        861,
+        320
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Corollary 3. For "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "with i.i.d. zero-mean "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / d"
+          },
+          {
+            "type": "text",
+            "content": "-variance Gaussian elements, "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        327,
+        771,
+        344
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {W} _ {2} \\left(\\operatorname {l a w} \\left(W _ {\\ell} H _ {\\ell}\\right), \\operatorname {l a w} (G / \\sqrt {n})\\right) ^ {2} \\leq 4 n \\left(1 - \\frac {2}{3} \\alpha\\right) ^ {\\ell} + \\frac {6 n ^ {2}}{\\alpha \\sqrt {d}} \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/6c3613a68a41cd29654c86de189b6a0e5e721a611a30c36177104006d594d2d5.jpg"
+        }
+      },
+      "bbox": [
+        116,
+        349,
+        714,
+        388
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds under Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { 1 } ( \\alpha , \\ell )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        393,
+        380,
+        409
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In other words, the distribution of the representations contracts to a Wasserstein 2 ball around an isotropic Gaussian distribution as the depth grows. The radius of the Wasserstein 2 ball is at√ most "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { O } ( 1 / \\sqrt { \\mathrm { w i d t h } } )"
+          },
+          {
+            "type": "text",
+            "content": ". As noted in the last section, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "is extensively studied by Daneshmand et al. (2020) where it is shown that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 } ( \\alpha > 0 , \\infty )"
+          },
+          {
+            "type": "text",
+            "content": "holds as long as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d = \\Omega ( n ^ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        417,
+        883,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "4.2. Deep neural networks as Gaussian processes. Leveraging BN, Corollary 3 establishes the first non-asymptotic Gaussian approximation for deep random neural networks. For vanilla networks, the Gaussianity is guaranteed only in the asymptotic regime of infinite width (Garriga-Alonso et al., 2019; Neal, 1996; Lee et al., 2019; Neal, 1996; Hazan and Jaakkola, 2015). Particularly, Matthews et al. (2018) links vanilla networks to Gaussian processes when their width is infinite and grows in successive layers, while our Gaussian approximation holds for networks with finite width across layers. Table 1 briefly compares Gaussian approximation for vanilla and BN networks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        492,
+        883,
+        607
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/7fcc64e26bdd5bb1257f82d5fc471fdee742b20fd437c59502035043b5fef159.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1. Distribution of representations in random vanilla and BN networks. For the convolutional network, the width refers to the number of channels. Results for Vanilla MLPs and Vanilla convolution networks are establish by Matthews et al. (2018), and Garriga-Alonso et al. (2019), respectively. Remarkably, Corollary 3 holds for MLP with linear activations. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Network</td><td>Width</td><td>Depth</td><td>Distribution of Outputs</td></tr><tr><td>Vanilla MLP</td><td>infinite</td><td>finite</td><td>Converges to Gaussian as width → ∞</td></tr><tr><td>Vanilla Convnet</td><td>infinite</td><td>finite</td><td>Converges to Gaussian as width → ∞</td></tr><tr><td>BN MLP (Cor. 3)</td><td>(in)finite</td><td>(in)finite</td><td>In a O(width-1/4)-W2 ball around Gaussian</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        151,
+        619,
+        839,
+        693
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The link between Gaussian processes and infinite-width neural networks has inspired several studies to rely on Gaussian representations in deep random networks (Klambauer et al., 2017; De Palma et al., 2019; Pennington et al., 2018; Schoenholz et al., 2017; Yang et al., 2019). Assuming the representations are Gaussian, Klambauer et al. (2017) designed novel activation functions that improve the optimization performance, De Palma et al. (2019) studies the sensitivity of random networks, Pennington et al. (2018) highlights the spectral universality in random networks, Schoenholz et al. (2017) studies information propagating through the network layers, and Yang "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        782,
+        883,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        898,
+        503,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "et al. (2019) studies gradients propagation through the depth. Indeed, our analysis implies that including BN imposes the Gaussian representations required for these analyses. Although our result is established for linear activations, we conjecture a similar result holds for non-linear MLPs (see Appendix F). "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        90,
+        887,
+        157
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5. The orthogonality and optimization "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        315,
+        167,
+        679,
+        184
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the preceding sections, we elaborated on the theoretical properties of BN networks in controlled settings. In this section, we demonstrate the practical applications of our findings. In the first part, we focus on the relationship between depth and orthogonality. Increasing depth drastically slows the training of neural networks with BN. Furthermore, we observe that as depth grows, the training slowdown highly correlates with the orthogonality gap. This observation suggests that SGD needs to orthogonalize deep representations in order to start classification. This intuition leads us to the following question: If orthogonalization is a prerequisite for training, can we save optimization time by starting from orthogonal representations? To test this experimentally, we devised a weight initialization that guarantees orthogonality of representations. Surprisingly, even in a network without BN, our experiments showed that this initialization avoids the training slow down, affirmatively answering the question. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        191,
+        883,
+        372
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Throughout the experiments, we use vanilla MLP (without BN) with a width of 800 across all hidden layers, ReLU activation, and used Xavier’s method for weights intialization (Glorot and Bengio, 2010). We use SGD with stepsize 0.01 and batch size 500 and for training. The learning task is classification with cross entropy loss for CIFAR10 dataset (Krizhevsky et al., 2009, MIT license). We use PyTorch (Paszke et al., 2019, BSD license) and Google Colaboratory platform with a single Tesla-P100 GPU with 16GB memory in all the experiments. The reported orthogonality gap is the average of the orthogonality gap of representation in the last layer. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        372,
+        883,
+        488
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "5.1. Orthogonality correlates with optimization performance. In the first experiment, we show that the orthogonality of representations at the initialization correlates with optimization speed. For networks with 15, 30, 45, 60, and 75 widths, we register training loss after 30 epochs and compare it with the initial orthogonality gap. Figure 3a shows the training loss (blue) and the initial orthogonality gap (red) as a function of depth. We observe that representations are more entangled, i.e., orthogonal, when we increase depth, coinciding with the training slowdown. Intuitively, the slowdown is due to the additional time SGD must spend to orthogonalize the representations before classification. In the second experiment, we validate this intuitive argument by tracking the orthogonality gap during training. Figure 3b plots the orthogonality gap of output and training loss for a network with 20 layers. We observe that SGD updates are iteratively orthogonalizing representations, marked by the reduction in the orthogonality gap. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        496,
+        883,
+        678
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "5.2. Learning with initial orthogonal representations. We have seen that the slowdown in SGD for deeper networks correlates with the orthogonality gap before training. Here we show that by preemptively orthogonalizing representations, we avoid the slowdown with depth. While in MPL with linear activations, hidden representations remain orthogonal simply by taking orthogonal matrices as weights (Pennington et al., 2018; Saxe et al., 2014), the same does not hold for networks with non-linear activations, such as ReLU. To enforce the orthogonality in the absence of BN, we introduce a dependency between weights of successive layers that ensures deep representations remain orthogonal. More specifically, we incorporate the SVD decomposition of the hidden representation of each layer into the initialization of the subsequent layer. To emphasis this dependency between layers and to distinguish it from purely orthogonal weight initialization, we refer to this as iterative orthogonalization. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        684,
+        880,
+        864
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We take a large batch of samples "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n \\geq d"
+          },
+          {
+            "type": "text",
+            "content": ", as the input batch for initialization. Let us assume that weights are initialized up to layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell - 1 }"
+          },
+          {
+            "type": "text",
+            "content": ". To initialize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ", we compute SVD decomposition of the "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        864,
+        883,
+        898
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        898,
+        504,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6f223eda082cb83fbaea8a8966eb540ff4e5e6023d2a9a05eccb7e1ef8f9935b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) gap and loss vs. depth "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        194,
+        104,
+        493,
+        246
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/61a38b943081aa278ffd592ad915fae3e460b93369568b5744fd687341e1b9fd.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) gap and loss during training "
+          },
+          {
+            "type": "text",
+            "content": "Figure 3. Orthogonality and Optimization Left: the orthogonality gap at initialization (red, left axis) and the training loss after 30 epochs (blue, right axis) with depth. Right: the orthogonality gap (red, left axis) and the training loss in each epoch (blue, right axis). Mean and 95% confidence interval of 4 independent runs. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        506,
+        104,
+        805,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "representations "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } = U _ { \\ell } \\Sigma _ { \\ell } V _ { \\ell } ^ { \\top }"
+          },
+          {
+            "type": "text",
+            "content": "where matrices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "U _ { \\ell } \\in \\mathbb { R } ^ { d \\times d }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V _ { \\ell } \\in \\mathbb { R } ^ { n \\times d }"
+          },
+          {
+            "type": "text",
+            "content": "are orthogonal. Given this decomposition, we initialize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "by "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        362,
+        883,
+        396
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\ell} = \\frac {1}{\\left\\| \\Sigma_ {\\ell} ^ {1 / 2} \\right\\| _ {F}} V _ {\\ell} ^ {\\prime} \\Sigma_ {\\ell} ^ {- 1 / 2} U _ {\\ell} ^ {\\top}, \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/b048a16112b7a83186a75bd38369911b97c63ee3156aef9851b020de68425f1b.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        400,
+        602,
+        440
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V _ { \\ell } ^ { \\prime } \\in \\mathbb { R } ^ { d \\times d }"
+          },
+          {
+            "type": "text",
+            "content": "is an orthogonal matrix obtained by slicing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V _ { \\ell } \\in \\mathbb { R } ^ { n \\times d }"
+          },
+          {
+            "type": "text",
+            "content": ". Notably, the inverse in the above formula exists when "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "is sufficiently larger than d 2. It is easy to check that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( W _ { \\ell } H _ { \\ell } ) < V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "holds for the above initialization (see Appendix E), similar to BN. By enforcing the orthogonality, this initialization significantly alleviates the slow down of training with depth (see Fig. 4), with no need for BN. This initialization is not limited to MLPs. In Appendix G, we propose a similar SVD-based initialization for convolutional networks that effective accelerates training of deep convolutional networks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        446,
+        883,
+        561
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ba404d48d1d6e42ab609d4b46cf2dfab303a6f17a32227b9c77e7bb5ffa70a9b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4. Iterative orthogonalization. Horizontal axis: depth. Vertical axis: the training loss after 30 epochs for Xavier’s initialization (blue), our initialization (red). Mean and 95% confidence interval of 4 independent runs. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        295,
+        597,
+        674,
+        792
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "2We may inductively assume that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "is almost orthogonal by the choice of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { 1 } , \\dots , W _ { \\ell - 1 }"
+          },
+          {
+            "type": "text",
+            "content": ". Thus, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Sigma _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "is invertible. "
+          }
+        ]
+      },
+      "bbox": [
+        130,
+        880,
+        880,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        898,
+        503,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6. Discussion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        436,
+        90,
+        558,
+        104
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To recap, we proved the recurrence of random linear transformations and BN orthogonalizes samples. Our experiments underline practical applications of this theoretical finding: starting from orthogonal representations effectively avoids the training slowdown with depth for MLPs. Based on our experimental observations in Appendix G, we believe that this result extends to standard convolution networks used in practice. In other words, a proper initialization ensuring the orthogonality of hidden representations may replace BN in neural architectures. This future research direction has the potentials to boost the training of deep neural networks and change benchmarks in deep learning. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        114,
+        883,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Although our theoretical bounds hold for MLPs with linear activations, our experiments confirm similar orthogonal stability for various neural architectures. Appendix Figure 5 demonstrates this stability for MLPs with ReLU activations and a convolutional networks. This plot compares the evolution of the orthogonality gap, through layers, for BN networks with vanilla networks. For vanilla networks, we observe that the gap increases with depth. On the contrary, the gap decreases by adding BN layers and stabilizes at a term that is constant with regard to depth. Based on our observations, we conjecture that hidden representations of modern BN networks obey similar stability. A more formal statement of the conjecture is presented in Appendix F. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        244,
+        883,
+        377
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Acknowledgements "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        406,
+        398,
+        591,
+        415
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We thank Gideon Dresdner, Vincent Fortuin, and Ragnar Groot Koerkamp for their helpful comments and discussions. This work was funded in part by the French government under management of Agence Nationale de la Recherche as part of the “Investissements d’avenir” program, reference ANR-19-P3IA-0001(PRAIRIE 3IA Institute). We also acknowledge support from the European Research Council (grant SEQUOIA 724063). "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        422,
+        883,
+        506
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        444,
+        529,
+        553,
+        544
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arora, S., Cohen, N., Golowich, N., and Hu, W. (2019a). A convergence analysis of gradient descent for deep linear neural networks. International Conference on Learning Representations. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arora, S., Li, Z., and Lyu, K. (2019b). Theoretical analysis of auto rate-tuning by batch normalization. International Conference on Learning Representations. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bahri, Y., Kadmon, J., Pennington, J., Schoenholz, S. S., Sohl-Dickstein, J., and Ganguli, S. (2020). Statistical mechanics of deep learning. Annual Review of Condensed Matter Physics. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bartlett, P. L., Helmbold, D. P., and Long, P. M. (2019). Gradient descent with identity initialization efficiently learns positive-definite linear transformations by deep residual networks. Neural computation. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bietti, A. and Mairal, J. (2019). On the inductive bias of neural tangent kernels. Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bjorck, J., Gomes, C., Selman, B., and Weinberger, K. Q. (2018). Understanding batch normalization. Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bougerol, P. et al. (2012). Products of random matrices with applications to Schr¨odinger operators. Springer Science & Business Media. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Daneshmand, H., Kohler, J., Bach, F., Hofmann, T., and Lucchi, A. (2020). Batch normalization provably avoids rank collapse for randomly initialised deep networks. Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "De Palma, G., Kiani, B. T., and Lloyd, S. (2019). Random deep neural networks are biased towards simple functions. Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Eberle, A. (2009). Markov processes. Lecture Notes at University of Bonn. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        553,
+        883,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        900,
+        504,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Frankle, J., Schwab, D. J., and Morcos, A. S. (2020). Training batchnorm and only batchnorm: On the expressive power of random features in cnns. arXiv preprint arXiv:2003.00152. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Garriga-Alonso, A., Rasmussen, C. E., and Aitchison, L. (2019). Deep convolutional networks as shallow gaussian processes. International Conference on Learning Representations. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Glorot, X. and Bengio, Y. (2010). Understanding the difficulty of training deep feedforward neural networks. In International Conference on Artificial Intelligence and Statistics. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hazan, T. and Jaakkola, T. (2015). Steps toward deep kernel methods from infinite neural networks. arXiv preprint arXiv:1508.05133. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "He, K., Zhang, X., Ren, S., and Sun, J. (2016). Deep residual learning for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Huang, G., Liu, Z., Van Der Maaten, L., and Weinberger, K. Q. (2017). Densely connected convolutional networks. In Proceedings of the IEEE conference on computer vision and pattern recognition. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Huang, P.-S., Avron, H., Sainath, T. N., Sindhwani, V., and Ramabhadran, B. (2014). Kernel methods match deep neural networks on timit. In ICASSP. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ioffe, S. and Szegedy, C. (2015). Batch normalization: Accelerating deep network training by reducing internal covariate shift. In ICML. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jacot, A., Gabriel, F., and Hongler, C. (2018). Neural tangent kernel: Convergence and generalization in neural networks. Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Karakida, R., Akaho, S., and Amari, S.-i. (2019). The normalization method for alleviating pathological sharpness in wide neural networks. In Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kemeny, J. G. and Snell, J. L. (1976). Markov chains. Springer-Verlag, New York. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Khasminskii, R. (2011). Stochastic stability of differential equations, volume 66. Springer Science & Business Media. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Klambauer, G., Unterthiner, T., Mayr, A., and Hochreiter, S. (2017). Self-normalizing neural networks. Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kohler, J., Daneshmand, H., Lucchi, A., Zhou, M., Neymeyr, K., and Hofmann, T. (2018). Exponential convergence rates for batch normalization: The power of length-direction decoupling in non-convex optimization. arXiv preprint arXiv:1805.10694. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Krizhevsky, A., Hinton, G., et al. (2009). Learning multiple layers of features from tiny images. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kushner, H. and Yin, G. G. (2003). Stochastic approximation and recursive algorithms and applications. Springer Science & Business Media. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kushner, H. J. (1967). Stochastic stability and control. Technical report. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lee, J., Bahri, Y., Novak, R., Schoenholz, S. S., Pennington, J., and Sohl-Dickstein, J. (2019). Deep neural networks as gaussian processes. International Conference on Learning Representations. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Matthews, A. G. d. G., Rowland, M., Hron, J., Turner, R. E., and Ghahramani, Z. (2018). Gaussian process behaviour in wide deep neural networks. arXiv preprint arXiv:1804.11271. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Neal, R. M. (1996). Bayesian learning for neural networks. Springer Science & Business Media. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Kopf, A., Yang, E., DeVito, Z., Raison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L., Bai, J., and Chintala, S. (2019). Pytorch: An imperative style, high-performance deep learning library. In Advances in Neural Information Processing Systems. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pennington, J., Schoenholz, S., and Ganguli, S. (2018). The emergence of spectral universality in deep networks. In International Conference on Artificial Intelligence and Statistics. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Santurkar, S., Tsipras, D., Ilyas, A., and Madry, A. (2018). How does batch normalization help optimization?(no, it is not about internal covariate shift). Advances in Neural Information Processing Systems. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        89,
+        880,
+        875
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sawa, T. (1972). Finite-sample properties of the k-class estimators. Econometrica: Journal of the Econometric Society, pages 653–680. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Saxe, A. M., McClelland, J. L., and Ganguli, S. (2014). Exact solutions to the nonlinear dynamics of learning in deep linear neural networks. International Conference on Learning Representations. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Schoenholz, S. S., Gilmer, J., Ganguli, S., and Sohl-Dickstein, J. (2017). Deep information propagation. International Conference on Learning Representations. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Silver, D., Schrittwieser, J., Simonyan, K., Antonoglou, I., Huang, A., Guez, A., Hubert, T., Baker, L., Lai, M., Bolton, A., et al. (2017). Mastering the game of go without human knowledge. nature. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., and Salakhutdinov, R. (2014). Dropout: a simple way to prevent neural networks from overfitting. The Journal of Machine Learning Research. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yang, G., Pennington, J., Rao, V., Sohl-Dickstein, J., and Schoenholz, S. S. (2019). A mean field theory of batch normalization. International Conference on Learning Representations. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        89,
+        883,
+        301
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        491,
+        898,
+        504,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        429,
+        87,
+        568,
+        111
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix A. Preliminaries "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        375,
+        121,
+        620,
+        136
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A.1. Notations. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v , w \\in \\mathbb { R } ^ { k }"
+          },
+          {
+            "type": "text",
+            "content": "then "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v \\odot w \\in \\mathbb { R } ^ { n }"
+          },
+          {
+            "type": "text",
+            "content": "with coordinates "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        145,
+        633,
+        162
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(7) "
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        167,
+        140,
+        185
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "[ v \\odot w ] _ {i} = v _ {i} w _ {i}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/3a44b95898eceda1275279efc9bf2f71ddf801dd5d23e606b8253668fd5c60f2.jpg"
+        }
+      },
+      "bbox": [
+        437,
+        167,
+        558,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Furthermore "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\boldsymbol { v } ^ { \\otimes 2 } \\in \\mathbb { R } ^ { k \\times k }"
+          },
+          {
+            "type": "text",
+            "content": "with entities "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        191,
+        413,
+        209
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(8) "
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        215,
+        140,
+        233
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "[ v ^ {\\otimes 2} ] _ {i j} = v _ {i} v _ {j}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/393cba765593ebe1db7b6d870c9243f04554c3691de4015a8e32b8945b2eaf5b.jpg"
+        }
+      },
+      "bbox": [
+        442,
+        214,
+        553,
+        234
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Table 2, we summarize notations introduced previously. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        238,
+        573,
+        255
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/c51b246797fbddc1bc8a8e59967336d98156966ccec15fe4a8f76c47b0ee5723.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2. Notations "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Notation</td><td>Type</td><td>Definition</td></tr><tr><td>l</td><td>integer</td><td>number of layers</td></tr><tr><td>n</td><td>integer</td><td>batch size</td></tr><tr><td>d</td><td>integer</td><td>width of the network</td></tr><tr><td>k</td><td>integer</td><td>output dimension</td></tr><tr><td>X</td><td>Rd×n</td><td>input matrix</td></tr><tr><td>Hl</td><td>Rd×n</td><td>hidden representations at l (obeying Eq. (4))</td></tr><tr><td>BN</td><td>Rd×n → Rd×n</td><td>batch normalization layer (defined in Eq.(4))</td></tr><tr><td>Law(X)</td><td></td><td>the law of random matrix X</td></tr><tr><td>σi(M)</td><td>Rk1×k2 → R+</td><td>theith largest singular value of matrix M</td></tr><tr><td>Ik</td><td>Rk×k</td><td>Identity matrix of size k</td></tr><tr><td>1k</td><td>Rn</td><td>all-ones vector</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        205,
+        267,
+        787,
+        470
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A.2. The Markov chain of hidden representations. Recall the chain of the hidden representation, denoted by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ H _ { \\ell } \\in \\mathbb { R } ^ { d \\times n } \\}"
+          },
+          {
+            "type": "text",
+            "content": ", obeys the following recurrence: "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        530,
+        883,
+        565
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "H _ {\\ell + 1} = \\frac {1}{\\sqrt {d}} B N \\left(W _ {\\ell} H _ {\\ell}\\right), \\quad B N (M) = \\left(\\operatorname {d i a g} \\left(M M ^ {\\top}\\right)\\right) ^ {- 1 / 2} M, \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/90c0464b22f525f4b5aa2fc4e073f14d606b6168dd0e68da2e599153255cdc44.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        569,
+        733,
+        604
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "are random weight matrices with i.i.d. zero-mean Gaussian elements. It is easy to check that the Frobenius norm of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "is one due to the row-wise normalization: "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        608,
+        883,
+        642
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\operatorname {T r} \\left(B N (H) B N (H) ^ {\\top}\\right) = \\operatorname {T r} \\left(\\operatorname {d i a g} \\left(H H ^ {\\top}\\right) ^ {- 1 / 2} H H ^ {\\top} \\operatorname {d i a g} \\left(H H ^ {\\top}\\right) ^ {- 1 / 2}\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0e8db4363833a15cbcbe39a9ff93b355fdccbdf2cf985975816c4eccb91de9db.jpg"
+        }
+      },
+      "bbox": [
+        235,
+        646,
+        761,
+        674
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} = \\operatorname {T r} \\left(\\operatorname {d i a g} \\left(H H ^ {\\top}\\right) ^ {- 1} H H ^ {\\top}\\right) \\tag {10} \\\\ = d. \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/8824ee5c4f50f19408af61c36f8c73648d4e9327db4513aec7f5c7fc356e10a1.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        675,
+        630,
+        719
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A.3. A Lyapunov function for the orthogonal stability. We establish stochastic stability of the chain of the hidden representations. Our analysis is in terms of Lyapunov function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\widehat { V } : \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "defined as "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        724,
+        885,
+        773
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\widehat {V} (H) = \\frac {1}{n} - (\\sigma_ {n} (H)) ^ {2}, \\tag {11}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0390591ca5019f6a1ead3e36cd31e62431871703eb4644ca0e3b735858bb5536.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        777,
+        591,
+        809
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { n } ( H )"
+          },
+          {
+            "type": "text",
+            "content": "is the minimum singular value of matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": ". Next lemma proves "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\widehat { V } ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "bounds the orthogonality gap. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        814,
+        883,
+        849
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 4. For all hidden representations "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ", the following holds: "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        856,
+        638,
+        873
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "V (H _ {\\ell}) \\leq 2 n \\widehat {V} (H _ {\\ell}).",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/4ed14280bd9e936d7c079380b31edb7fbcc7d48ae188685548dadc17d5690844.jpg"
+        }
+      },
+      "bbox": [
+        421,
+        877,
+        573,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Proof. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { 1 } , \\ldots , \\sigma _ { n }"
+          },
+          {
+            "type": "text",
+            "content": "be the singular values of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ". Given these singular values, one can compute "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        90,
+        880,
+        125
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "(V (H _ {\\ell})) ^ {2} = \\sum_ {i = 1} ^ {n} \\left(\\sigma_ {i} ^ {2} - \\frac {1}{n}\\right) ^ {2}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c6ee28a3c180b35941ecee74e04a23e9715940c33e9afb5bb222c124b4e7161a.jpg"
+        }
+      },
+      "bbox": [
+        388,
+        130,
+        609,
+        172
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "According to Eq. (10), "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle \\sum _ { i = 1 } ^ { 2 } \\sigma _ { i } ^ { 2 } = 1"
+          },
+          {
+            "type": "text",
+            "content": "holds. The proof is an immediate consequence of this propery. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        181,
+        880,
+        200
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} V^{2}(H_{\\ell}) = \\sum_{i = 1}^{n}\\sigma_{i}^{4} - 2\\underbrace{\\left(\\sum_{i = 1}^{n}\\sigma_{i}^{2}\\right)}_{= 1}\\frac{1}{n} +\\frac{1}{n} \\\\ = \\sum_ {i = 1} ^ {n} \\sigma_ {i} ^ {4} - \\frac {1}{n}. \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/82c4008bed9b9cc6899a64a422dcf45b62eab4e988c375679baf694542b3957a.jpg"
+        }
+      },
+      "bbox": [
+        352,
+        210,
+        643,
+        316
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fixing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { n }"
+          },
+          {
+            "type": "text",
+            "content": ", the maximum of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle \\sum _ { i = 1 } ^ { n } \\sigma _ { i } ^ { 4 } - { \\frac { 1 } { n } }"
+          },
+          {
+            "type": "text",
+            "content": "subject to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle \\sum _ { i = 1 } ^ { n } \\sigma _ { i } ^ { 2 } = 1"
+          },
+          {
+            "type": "text",
+            "content": "is met when "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { 1 } ^ { 2 } = 1 - ( n - 1 ) \\sigma _ { n } ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { 2 } = \\cdots = \\sigma _ { n }"
+          },
+          {
+            "type": "text",
+            "content": ". Therefore, "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        325,
+        880,
+        359
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "V ^ {2} (H _ {\\ell}) \\leq 2 (n - 1) ^ {2} \\underbrace {\\left(\\frac {1}{n} - \\sigma_ {n} ^ {2}\\right) ^ {2}} _ {= \\widehat {V} ^ {2} (H _ {\\ell} (X))}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/3be392342fcde55aa80a065abfc6607beaa68b2c550c2725a0066ec2f8a1aa76.jpg"
+        }
+      },
+      "bbox": [
+        375,
+        367,
+        622,
+        429
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds true. Taking the square root of both sides concludes the proof. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        436,
+        653,
+        452
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7166aaff9295699ca76c8b10cf308358ee05d226fc129f1d762a149a47792441.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        864,
+        436,
+        880,
+        449
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix B. Proof of Theorem 1 "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        343,
+        472,
+        650,
+        487
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The proof of Theorem 1 relies on the following Theorem that characterizes the change of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\widehat { V }"
+          },
+          {
+            "type": "text",
+            "content": "in consecutive layers. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        494,
+        880,
+        529
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Theorem 5. Sequence "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ H _ { \\ell } \\}"
+          },
+          {
+            "type": "text",
+            "content": "obeys "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        539,
+        390,
+        556
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ \\widehat {V} (H _ {\\ell + 1}) | H _ {\\ell} \\right] \\leq \\left(1 - \\frac {2}{3} \\left(\\frac {1}{n} - \\widehat {V} (H _ {\\ell})\\right)\\right) \\widehat {V} (H _ {\\ell}) + \\frac {1}{\\sqrt {d}}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/330ce4d8a7e73202677442589451a980b1f4828251219ff855f42cb7bc26899f.jpg"
+        }
+      },
+      "bbox": [
+        277,
+        564,
+        718,
+        599
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Notably, the above result does not rely on Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": ". Assuming that Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "holds, we complete the proof of Theorem 1. Combining the last Theorem by this assumption, we get "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        607,
+        880,
+        640
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ \\widehat {V} (H _ {\\ell + 1}) \\right] \\leq \\left(1 - \\frac {2}{3} (\\alpha)\\right) \\mathbb {E} \\left[ \\widehat {V} (H _ {\\ell}) \\right] + \\frac {1}{\\sqrt {d}}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/8bab24aa01490891af75ec04cd90b0fe20920e5dabcd29417e656f7af2be5e8b.jpg"
+        }
+      },
+      "bbox": [
+        320,
+        647,
+        676,
+        683
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Induction over "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": "yields "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        689,
+        294,
+        704
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbb {E} \\left[ \\widehat {V} \\left(H _ {\\ell + 1} (X)\\right) \\right] \\leq \\left(1 - \\frac {2}{3} \\alpha\\right) ^ {\\ell} \\mathbb {E} \\left[ \\widehat {V} \\left(H _ {1}\\right) \\right] + \\left(\\sum_ {k = 1} ^ {\\ell} \\left(1 - \\frac {2}{3} \\alpha\\right) ^ {k}\\right) \\frac {1}{\\sqrt {d}} \\\\ \\leq \\left(1 - \\frac {2}{3} \\alpha\\right) ^ {\\ell} \\mathbb {E} \\left[ \\widehat {V} (H _ {1}) \\right] + \\frac {3}{2 \\alpha \\sqrt {d}} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/913dbc007dda831bae83004247a869caf56cb6e73af33e911bca291a9f84fcf4.jpg"
+        }
+      },
+      "bbox": [
+        245,
+        715,
+        751,
+        800
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "An application of Lemma 4 completes the proof: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        806,
+        495,
+        823
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbb {E} \\left[ V \\left(H _ {\\ell + 1}\\right) \\right] \\leq 2 n \\mathbb {E} \\left[ \\widehat {V} \\left(H _ {\\ell + 1}\\right) \\right] \\\\ \\leq 2 \\left(1 - \\frac {2}{3} \\alpha\\right) ^ {\\ell} + \\frac {3 n}{2 \\alpha \\sqrt {d}} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/69d61d8fee8a00263abaaac8c4721b6c9f3cb5d3e548e1210089262096c82ae2.jpg"
+        }
+      },
+      "bbox": [
+        356,
+        830,
+        640,
+        898
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "B.1. Stability analysis without "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": ". Using Theorem 5, we can prove stability of the chain "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ H _ { \\ell } \\}"
+          },
+          {
+            "type": "text",
+            "content": "without Assumption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": ". After rearrangement of terms in Theorem 5, we get "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        89,
+        880,
+        122
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ \\widehat {V} (H _ {\\ell + 1}) | H _ {\\ell} \\right] - \\widehat {V} (H _ {\\ell}) \\leq - \\frac {2}{3} \\widehat {V} (H _ {\\ell}) \\left(\\frac {1}{n} - \\widehat {V} (H _ {\\ell})\\right) + \\frac {2}{\\sqrt {d}}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f0c97d662caa7ee33217dfa3243b59ac95dae161f14af433137582ddbd52c87a.jpg"
+        }
+      },
+      "bbox": [
+        267,
+        132,
+        730,
+        167
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Taking the expectation over "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "and average over "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": "yields "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        174,
+        563,
+        191
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ \\frac {1}{\\ell} \\sum_ {k = 1} ^ {\\ell} \\widehat {V} (H _ {k}) \\left(\\frac {1}{n} - \\widehat {V} (H _ {k})\\right) \\right] \\leq \\left(\\frac {3 \\mathbb {E} \\left[ \\widehat {V} (H _ {0}) \\right]}{2 \\ell}\\right) + \\frac {3}{2 \\sqrt {d}}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/acccc94adb2f1ae1eed1c68ac4025c585a1d2566b0adf2c596aba856194f7506.jpg"
+        }
+      },
+      "bbox": [
+        269,
+        200,
+        728,
+        253
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix C. Proof of Theorem 5 "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        344,
+        275,
+        651,
+        289
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.1. Spectral decomposition. Consider the SVD decomposition of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } = U \\mathrm { d i a g } ( \\sigma ) V ^ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "U"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V"
+          },
+          {
+            "type": "text",
+            "content": "are orthogonal matrices. Given this decomposition, we get "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        297,
+        880,
+        333
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\ell} H _ {\\ell} = \\underbrace {W _ {\\ell} U} _ {W} \\operatorname {d i a g} (\\sigma) V ^ {\\top} \\tag {12}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/cca0d3c49cd314fbd54992991ced9312412a937919f6bd35517cacf0048fa44b.jpg"
+        }
+      },
+      "bbox": [
+        116,
+        340,
+        594,
+        376
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "is Gaussian and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "U"
+          },
+          {
+            "type": "text",
+            "content": "is orthogonal, entities of matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W"
+          },
+          {
+            "type": "text",
+            "content": "are also i.i.d. standard normal. This decomposition will be repeatedly used. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        385,
+        880,
+        417
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.2. Concentration. Consider matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\ell + 1 } : = H _ { \\ell + 1 } ^ { \\scriptscriptstyle | } H _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": "whose eigenvalues are "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { 1 } ^ { 2 } , \\ldots , \\sigma _ { n } ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": ". T he SVD decomposition of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "allows writing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": "as the average of vectors "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        434,
+        880,
+        468
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "C _ {\\ell + 1} = \\frac {1}{d} \\sum_ {i = 1} ^ {d} \\left(\\frac {w _ {i} \\odot \\sigma}{\\| w _ {i} \\odot \\sigma \\| _ {2}}\\right) ^ {\\otimes 2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c2e18b3b147f129e1d637ca7a74a32c1b851a7aa0cc3044ffb01aca235238586.jpg"
+        }
+      },
+      "bbox": [
+        380,
+        478,
+        614,
+        522
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w _ { i } \\in \\mathbb { R } ^ { n }"
+          },
+          {
+            "type": "text",
+            "content": "are rows of matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W"
+          },
+          {
+            "type": "text",
+            "content": "in Eq.(12) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma \\in \\mathbb { R } ^ { n }"
+          },
+          {
+            "type": "text",
+            "content": "is the vector of singular values of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "Thus, conditioned on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": "is an empirical average of i.i.d. random vectors. This allows us to prove that this empirical average is concentrated around its expectation. The next lemma states this concentration. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        532,
+        880,
+        595
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 6. The following concentration always holds "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        607,
+        532,
+        625
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} _ {W _ {\\ell}} \\left\\| C _ {\\ell + 1} - \\mathbb {E} _ {W _ {\\ell}} \\left[ C _ {\\ell + 1} \\right] \\right\\| ^ {2} \\leq 1 / d",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/600fef713cb251684086c8fc761f6a1912bb49c86721389c410908b9c837f135.jpg"
+        }
+      },
+      "bbox": [
+        374,
+        633,
+        625,
+        651
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        662,
+        161,
+        675
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} _ {W _ {\\ell}} \\left[ C _ {\\ell + 1} \\right] = \\operatorname {d i a g} \\left(p _ {1} (\\sigma), \\dots , p _ {n} (\\sigma)\\right), \\quad p _ {i} (\\sigma) := \\mathbb {E} \\left[ \\frac {\\sigma_ {n} ^ {2} w _ {n} ^ {2}}{\\sum_ {k = 1} ^ {n} \\sigma_ {k} ^ {2} w _ {k} ^ {2}} \\right], \\quad w _ {i} \\stackrel {{i. i. d.}} {{\\sim}} \\mathcal {N} (0, 1) \\tag {13}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a7fd7984c9472c3a796c21f87fbb0290fbd3c559e052a0c0795e30b7d53bffaa.jpg"
+        }
+      },
+      "bbox": [
+        117,
+        683,
+        815,
+        720
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The concentration of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": "allows us to prove that the Lyapunov function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\widehat V ( H _ { \\ell + 1 } )"
+          },
+          {
+            "type": "text",
+            "content": "is concentrated around "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / n - p _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        731,
+        880,
+        766
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 7. The following holds "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        776,
+        366,
+        792
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} _ {W _ {\\ell}} \\left[ \\left(\\widehat {V} (H _ {\\ell + 1}) - (1 / n - p _ {n} (\\sigma))\\right) ^ {2} \\right] \\leq \\frac {1}{d}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ce7bbae5d52d40cd60526caf62ecb32f5cf01a0a5302a5bd60c7d4beac5b0000.jpg"
+        }
+      },
+      "bbox": [
+        339,
+        801,
+        656,
+        837
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The last lemma allows us to predict the value of random variable "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\widehat V ( H _ { \\ell + 1 } )"
+          },
+          {
+            "type": "text",
+            "content": "by deterministic term "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / n - p _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        863,
+        880,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.3. Contraction. The decay in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\widehat V ( H _ { \\ell + 1 } )"
+          },
+          {
+            "type": "text",
+            "content": "with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": "is due to term "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 / n - p _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": "in the last lemma. This term is less than (or equal to) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        89,
+        880,
+        125
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 8. For "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": "defined in Eq. (13), the following holds: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        136,
+        604,
+        154
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\left(\\frac {1}{n} - p _ {n} (\\sigma)\\right) \\leq \\left(1 - \\frac {2}{3} \\left(\\frac {1}{n} - \\widehat {V} (H _ {\\ell})\\right)\\right) \\widehat {V} (H _ {\\ell}).",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/00cc3b7b6db68292fc6126de43fe436561649f229c67d0a9cb0e7e53badc94e1.jpg"
+        }
+      },
+      "bbox": [
+        310,
+        165,
+        684,
+        203
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Combining the last lemma by Lemma 7 concludes the proof of Theorem 5: "
+          }
+        ]
+      },
+      "bbox": [
+        130,
+        212,
+        718,
+        229
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} _ {W _ {\\ell}} \\left[ \\widehat {V} \\left(H _ {\\ell + 1}\\right) \\right] \\leq \\left(1 - \\frac {2}{3} \\left(\\frac {1}{n} - V \\left(H _ {\\ell}\\right)\\right)\\right) \\widehat {V} \\left(H _ {\\ell}\\right) + \\frac {1}{\\sqrt {d}}. \\tag {14}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/58067b1249bac9d2e9f643ec44d6f2caf95d3679698528b0a5b588618462cd7e.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        241,
+        715,
+        277
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To complete the proof, we prove Lemmas 6, 7, and 8. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        289,
+        534,
+        306
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.4. Proof of Lemma 6. Given the spectral decomposition of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "in Eq. (12), we compute element "
+          },
+          {
+            "type": "equation_inline",
+            "content": "_ { i j }"
+          },
+          {
+            "type": "text",
+            "content": "of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": ", which is denoted by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ C _ { \\ell + 1 } ] _ { i j }"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        330,
+        883,
+        366
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "[ C _ {\\ell + 1} ] _ {i j} = [ A ^ {\\top} A ] _ {i j} = \\frac {1}{d} \\sum_ {k = 1} ^ {d} A _ {k i} A _ {k j}, \\quad A _ {k i} = W _ {k i} \\sigma_ {i} / \\sqrt {v _ {k}}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/4998fbae7cc20d9930c4ac7e7e9bad3c2fca683c355b317787407a28d1095fb4.jpg"
+        }
+      },
+      "bbox": [
+        279,
+        378,
+        714,
+        424
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { v _ { k } = \\sum _ { m = 1 } ^ { n } W _ { k m } ^ { 2 } \\sigma _ { m } ^ { 2 } } \\end{array}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { k m }"
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        436,
+        728,
+        455
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ C _ {\\ell + 1} \\right] _ {i j} = 0",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/63e2e96f99767377fbaef649323a478ffc71ef735cd968b29f54dbcad09d001d.jpg"
+        }
+      },
+      "bbox": [
+        284,
+        468,
+        393,
+        486
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbb {E} [ C _ {\\ell + 1} ] _ {i j} ^ {2} = \\frac {1}{d ^ {2}} \\sum_ {k = 1} ^ {d} A _ {k i} ^ {2} A _ {k j} ^ {2} + \\frac {1}{d ^ {2}} \\sum_ {k, k ^ {\\prime}} ^ {d} \\underbrace {\\mathbb {E} \\left[ A _ {k i} ^ {2} A _ {k j} ^ {2} A _ {k ^ {\\prime} i} ^ {2} A _ {k ^ {\\prime} j} ^ {2} \\right]} _ {= 0} \\\\ = \\frac {1}{d ^ {2}} \\sum_ {k = 1} ^ {d} A _ {k i} ^ {2} A _ {k j} ^ {2} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f7a0b715f9d1daa72489e0289aaaf8fc51bace0f7e296808d6b56d16969d7a84.jpg"
+        }
+      },
+      "bbox": [
+        284,
+        491,
+        712,
+        590
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i \\neq j"
+          },
+          {
+            "type": "text",
+            "content": ". By summing up over "
+          },
+          {
+            "type": "equation_inline",
+            "content": "i \\neq j"
+          },
+          {
+            "type": "text",
+            "content": ", we get "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        604,
+        511,
+        621
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\sum_ {i \\neq j} \\mathbb {E} [ C _ {\\ell + 1} ] _ {i j} = \\frac {1}{d ^ {2}} \\left(\\sum_ {k} \\left(\\sum_ {i} A _ {k i} ^ {2}\\right) ^ {2} - \\sum_ {i k} A _ {k i} ^ {4}\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d2f42a7d82a69754e6cd40ff9735b992994a8d45bb4c116cc18275e7ab305c47.jpg"
+        }
+      },
+      "bbox": [
+        305,
+        633,
+        683,
+        686
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For the diagonal elements, we get "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        698,
+        379,
+        714
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbb {E} \\left[ C _ {\\ell + 1} \\right] _ {i i} = \\frac {1}{d} \\sum_ {k = 1} ^ {d} \\mathbb {E} A _ {k i} ^ {2} \\\\ = \\frac {1}{d} \\sum_ {k = 1} ^ {d} \\mathbb {E} A _ {k i} ^ {2} \\\\ = \\underbrace {\\frac {1}{d} \\sum_ {k = 1} ^ {d} \\mathbb {E} \\left[ \\frac {W _ {k i} ^ {2} \\sigma_ {i} ^ {2}}{\\sum_ {j = 1} ^ {n} W _ {k j} ^ {2} \\sigma_ {j} ^ {2}} \\right]} _ {p _ {i} (\\sigma)} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/eeddc650ce925bda37ce9c3070e8ada9069d26f8aff2b0d8438aeeae7a3e9d4b.jpg"
+        }
+      },
+      "bbox": [
+        359,
+        728,
+        637,
+        893
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The variance of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "[ C _ { \\ell + 1 } ] _ { i i }"
+          },
+          {
+            "type": "text",
+            "content": "is bounded as "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        89,
+        415,
+        107
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\operatorname {v a r} \\left([ C _ {\\ell + 1} ] _ {i i}\\right) = \\mathbb {E} \\left(\\frac {1}{d} \\sum_ {k = 1} ^ {d} \\left(A _ {k i} ^ {2} - p _ {i} (\\sigma)\\right)\\right) ^ {2} \\\\ = \\frac {1}{d ^ {2}} \\sum_ {k = 1} ^ {d} \\left(A _ {k i} ^ {2} - p _ {i} (\\sigma)\\right) ^ {2} \\\\ \\leq \\frac {1}{d ^ {2}} \\sum_ {k = 1} ^ {d} A _ {k i} ^ {4} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7ad66606d8867f983f4c80755edee0d40c2518214437a435477f84e285945311.jpg"
+        }
+      },
+      "bbox": [
+        341,
+        126,
+        655,
+        271
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Combining results for diagonal and off-diagonal elements yields "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        289,
+        612,
+        306
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbb {E} \\| C _ {\\ell + 1} - \\mathbb {E} _ {W _ {\\ell}} \\left[ C _ {\\ell + 1} \\right] \\| _ {F} ^ {2} = \\sum_ {i j} \\operatorname {v a r} \\left(\\left[ C _ {\\ell + 1} \\right] _ {i j}\\right) \\\\ \\leq \\frac {1}{d ^ {2}} \\left(\\sum_ {i} A _ {k i} ^ {2}\\right) ^ {2} = 1 / d \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/198796a5ba4f80c0920a5dc66974a24087aa8af66cba9b4cad2eeb26a1afc4e8.jpg"
+        }
+      },
+      "bbox": [
+        312,
+        325,
+        684,
+        410
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.5. Proof of Lemma 7. Notably, the eigenvalues of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": "are squared singular values of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell + 1 }"
+          },
+          {
+            "type": "text",
+            "content": "Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda _ { n } ( C )"
+          },
+          {
+            "type": "text",
+            "content": "denote the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "_ { n }"
+          },
+          {
+            "type": "text",
+            "content": "th largest eigenvalue of matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        444,
+        880,
+        477
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathbb {E} _ {W _ {\\ell}} \\left[ \\left(V (C _ {\\ell + 1}) - \\left(\\frac {1}{n} - p _ {n} (\\sigma)\\right)\\right) ^ {2} \\right] = \\mathbb {E} _ {W _ {\\ell}} \\left[ \\left(\\lambda_ {n} \\left(C _ {\\ell + 1}\\right) - \\lambda_ {n} \\left(\\mathbb {E} _ {W _ {\\ell}} [ C _ {\\ell + 1} ]\\right)\\right) ^ {2} \\right] \\\\ \\leq \\mathbb {E} _ {W _ {\\ell}} \\left[ \\| C _ {\\ell + 1} - \\mathbb {E} _ {W _ {\\ell}} \\left[ C _ {\\ell + 1} \\right] \\| _ {F} ^ {2} \\right] \\\\ \\leq \\frac {1}{d} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/149bc518d0c20e1000ee1e9af350e6261361415372312660249adce6276ad2b3.jpg"
+        }
+      },
+      "bbox": [
+        204,
+        496,
+        790,
+        595
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where the last inequality relies on Lemma 6. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        613,
+        462,
+        628
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.6. Proof of Lemma 8. The proof is based an application of moment generating function that allows us to compute expectations of ratios of random variables. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        665,
+        880,
+        698
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 9 (Lemma 1 in (Sawa, 1972)). Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "be a random variable that is positive with probability one and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "be an arbitrary random variable. Suppose that there exists a joint moment generating function of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        714,
+        883,
+        763
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\phi \\left(\\theta_ {1}, \\theta_ {2}\\right) = \\mathbb {E} \\left[ \\exp \\left(\\theta_ {1} X _ {1} + \\theta_ {2} X _ {2}\\right) \\right]",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/02bffef7ab8be4201e24b6ee9214be373792f4cebcd09d935f2e80bf142db86f.jpg"
+        }
+      },
+      "bbox": [
+        372,
+        782,
+        625,
+        800
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta _ { 1 } \\leq \\epsilon"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| \\theta _ { 2 } | < \\epsilon"
+          },
+          {
+            "type": "text",
+            "content": "where \u000f is some positive constant. Then "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        820,
+        611,
+        835
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ \\frac {X _ {2}}{X _ {1}} \\right] = \\int_ {- \\infty} ^ {0} \\left[ \\frac {\\partial \\phi (\\theta_ {1} , \\theta_ {2})}{\\partial \\theta_ {2}} \\right] _ {\\theta_ {2} = 0} d \\theta_ {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/fd42273e89b5ac654d1cc257ea204eb5b2074222cbe6db30b5919bd4689c1ddc.jpg"
+        }
+      },
+      "bbox": [
+        357,
+        854,
+        638,
+        893
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        491,
+        900,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To estimate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": ", we set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { 2 } : = \\sigma _ { i } ^ { 2 } w _ { i } ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { X _ { 1 } = \\sum _ { j } \\sigma _ { j } ^ { 2 } w _ { j } ^ { 2 } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ", which obtains "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        88,
+        689,
+        109
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\phi \\left(\\theta_ {1}, \\theta_ {2}\\right) = \\mathbb {E} \\left[ \\exp \\left(\\theta_ {1} X _ {1} + \\theta_ {2} X _ {2}\\right) \\right] \\\\ = (2 \\pi) ^ {- n / 2} \\int_ {- \\infty} ^ {\\infty} \\exp ((\\theta_ {1} + \\theta_ {2}) \\sigma_ {i} ^ {2} w _ {i} ^ {2} + \\sum_ {j \\neq i} \\theta_ {1} \\sigma_ {j} ^ {2} w _ {j} ^ {2}) \\exp (- \\sum_ {k} w _ {k} ^ {2} / 2) d w \\\\ = (2 \\pi) ^ {- n / 2} \\int_ {- \\infty} ^ {\\infty} \\exp \\left(\\left(- 0. 5 + \\left(\\theta_ {1} + \\theta_ {2}\\right) \\sigma_ {i} ^ {2}\\right) w _ {i} ^ {2}\\right) d w _ {i} \\left(\\prod_ {j \\neq i} \\int_ {- \\infty} ^ {\\infty} \\exp \\left(\\left(- 0. 5 + \\theta_ {1} \\sigma_ {j} ^ {2}\\right) w _ {j} ^ {2}\\right) d w _ {j}\\right) \\\\ = \\frac {1}{\\sqrt {1 - 2 \\left(\\theta_ {1} + \\theta_ {2}\\right) \\sigma_ {i} ^ {2}}} \\left(\\prod_ {j \\neq i} \\frac {1}{\\sqrt {1 - 2 \\theta_ {1} \\sigma_ {j} ^ {2}}}\\right). \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d489882086904472ace91c193d96ef34e6a6bedb5f3ef337c164745ea495e71f.jpg"
+        }
+      },
+      "bbox": [
+        122,
+        118,
+        870,
+        292
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Taking derivative with respect to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "yields "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        300,
+        450,
+        316
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\frac {\\partial \\phi}{\\theta_ {2}} (\\theta_ {1}, 0) = \\frac {\\sigma_ {i} ^ {2}}{(1 - 2 \\theta_ {1} \\sigma_ {i} ^ {2}) ^ {3 / 2}} \\left(\\prod_ {j \\neq i} \\frac {1}{\\sqrt {1 - 2 \\theta_ {1} \\sigma_ {j} ^ {2}}}\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/2006060b7d5d8dd3ce1d310c4667d3402324a9ecb924eff42f15a5a85dd29a7d.jpg"
+        }
+      },
+      "bbox": [
+        313,
+        324,
+        679,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Using the result of the last lemma, we get "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        386,
+        446,
+        402
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "p _ {i} (\\sigma) = \\int_ {- \\infty} ^ {0} \\frac {\\sigma_ {i} ^ {2}}{(1 - 2 \\theta \\sigma_ {i} ^ {2})} \\left(\\prod_ {j} \\frac {1}{\\sqrt {1 - 2 \\theta \\sigma_ {j} ^ {2}}}\\right) d \\theta",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/1a393a58e2e59a9c56c46f0418fc09d7fbc2ebd7526c909024bc2ec2bfbe72ca.jpg"
+        }
+      },
+      "bbox": [
+        315,
+        410,
+        679,
+        465
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Therefore, "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        472,
+        197,
+        488
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "p _ {n} (\\sigma) = \\sigma_ {n} ^ {2} f _ {n} (\\sigma), \\quad f _ {n} (\\sigma) := \\int_ {- \\infty} ^ {0} \\frac {1}{(1 - 2 \\theta \\sigma_ {n} ^ {2}) ^ {3 / 2}} \\prod_ {j \\neq n} (1 - 2 \\theta \\sigma_ {j} ^ {2}) ^ {1 / 2} \\tag {15}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0f9ff707908de9f4932f5091f13658431fbb5c69b2ba5ef9df339696743bac91.jpg"
+        }
+      },
+      "bbox": [
+        117,
+        497,
+        754,
+        537
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle \\sum _ { i = 1 } ^ { n } \\sigma _ { i } ^ { 2 } = 1"
+          },
+          {
+            "type": "text",
+            "content": "(see Eq. (10)), "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": "in the above formulation is minimized when the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { j } ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "s are all equal for all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "j \\neq n"
+          },
+          {
+            "type": "text",
+            "content": ". Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { n } ^ { 2 } : = 1 / n - \\delta"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma _ { j } ^ { 2 } : = 1 / n + \\delta / ( n - 1 )"
+          },
+          {
+            "type": "text",
+            "content": "for all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "j \\neq i"
+          },
+          {
+            "type": "text",
+            "content": ". This allows us to establish a lowerbound on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        544,
+        883,
+        598
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "f _ {n} (\\sigma) \\geq \\int_ {0} ^ {\\infty} \\underbrace {\\left(1 + 2 \\theta \\left(\\frac {1}{n} - \\delta\\right)\\right) ^ {- \\frac {3}{2}} \\left(1 + 2 \\theta \\left(\\frac {1}{n} + \\frac {\\delta}{n - 1}\\right)\\right) ^ {- \\frac {n - 1}{2}}} _ {g (\\delta) :=} \\tag {16}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7ea82f19750a784f341114f57ee50fa0c36f77d272f68a936a73f0d6b9f06985.jpg"
+        }
+      },
+      "bbox": [
+        117,
+        607,
+        733,
+        667
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next lemma proves that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g ( \\delta )"
+          },
+          {
+            "type": "text",
+            "content": "is a convex function for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\delta \\in [ 0 , 1 / n ]"
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        676,
+        627,
+        695
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lemma 10. The function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g ( \\delta )"
+          },
+          {
+            "type": "text",
+            "content": ", which is defined in Eq. (16), is a convex function on domain "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\delta \\in [ 0 , 1 / n ]"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        704,
+        883,
+        738
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The convexity of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g ( \\delta )"
+          },
+          {
+            "type": "text",
+            "content": "yields "
+          }
+        ]
+      },
+      "bbox": [
+        130,
+        747,
+        356,
+        763
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "g ^ {\\prime \\prime} (\\delta) \\geq 0 \\forall \\delta \\Rightarrow g (\\delta) \\geq g (0) + \\delta g ^ {\\prime} (0)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/df9ef821f4716a045f5301a30bb14af4eef0b0e3558714e21c3827fcd93bfc66.jpg"
+        }
+      },
+      "bbox": [
+        344,
+        772,
+        648,
+        791
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The above bound allow us to bound "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { n } ( \\sigma )"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        800,
+        472,
+        816
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} f _ {n} (\\sigma) \\geq \\int_ {0} ^ {\\infty} g (0) + \\delta \\int_ {0} ^ {\\infty} 2 \\theta \\left(1 + \\frac {2 \\theta}{n}\\right) ^ {- \\frac {n}{2} - 2} \\\\ = 1 + \\delta \\frac {2 n}{n + 2} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/6cddfe608c7fa8d435d1a7b13536520be5b18eb009189b86f8498d5240e18fab.jpg"
+        }
+      },
+      "bbox": [
+        334,
+        825,
+        661,
+        893
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recall "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\delta = \\frac { 1 } { n } - \\sigma _ { n } ^ { 2 } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ". Combining the above inequality by Eq. (15) concludes the proof of the Lemma 8: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        88,
+        880,
+        108
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\frac {1}{n} - p _ {n} (\\sigma) \\leq \\left(1 - \\frac {2 n}{(n + 2)} \\sigma_ {n} ^ {2}\\right) \\left(\\frac {1}{n} - \\sigma_ {n} ^ {2}\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/e23d36f7bd040276348ea7e159e74aafe925217e85e404a5571ddc39144a8c24.jpg"
+        }
+      },
+      "bbox": [
+        334,
+        119,
+        658,
+        157
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "C.7. Proof of Lemma 10. We can show convexity of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g ( \\delta )"
+          },
+          {
+            "type": "text",
+            "content": "by showing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g ^ { \\prime \\prime } ( \\delta ) \\geq 0"
+          },
+          {
+            "type": "text",
+            "content": "for all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\delta \\in ( 0 , 1 )"
+          },
+          {
+            "type": "text",
+            "content": "To this end, we define the helper function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 1 } ( \\delta )"
+          },
+          {
+            "type": "text",
+            "content": "(for the compactness of notations) as "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        181,
+        880,
+        214
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "h _ {1} (\\delta) := (1 + 2 \\theta (\\frac {1}{n} - \\delta)) ^ {- 5 / 2} (1 + 2 \\theta (\\frac {1}{n} + \\frac {\\delta}{n - 1})) ^ {- \\frac {n - 1}{2} - 1}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/633cc098c56a58e828e1d86608cacab765101108026609d22724945cd879854d.jpg"
+        }
+      },
+      "bbox": [
+        272,
+        227,
+        718,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": ", the derivative of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g"
+          },
+          {
+            "type": "text",
+            "content": "reads as "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        272,
+        408,
+        287
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} g ^ {\\prime} (\\delta) = h _ {1} (\\delta) \\left((- \\frac {3}{2}) (- 2 \\theta) \\left(1 + 2 \\theta \\left(\\frac {1}{n} + \\frac {\\delta}{n - 1}\\right)\\right) - \\frac {n - 1}{2} \\frac {2 \\theta}{n - 1} \\left(1 + 2 \\theta \\left(\\frac {1}{n} - \\delta\\right)\\right)\\right) \\\\ = \\theta h _ {1} (\\delta) \\left(3 + \\theta \\frac {6}{n} + \\theta \\delta \\frac {6}{n - 1} - 1 - \\theta \\frac {2}{n} + 2 \\theta \\delta\\right) \\\\ = \\theta h _ {1} (\\delta) \\underbrace {\\left(2 + \\theta \\frac {4}{n} + \\theta \\delta \\frac {2 n + 4}{n - 1}\\right)} _ {h _ {2} (\\delta) :=} \\\\ = \\theta h _ {1} (\\delta) h _ {2} (\\delta). \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/231b75ef0934949433db28d52a995814a306eeadf0aeb448dda1eeaaf64bb5c4.jpg"
+        }
+      },
+      "bbox": [
+        179,
+        301,
+        813,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "One can readily check that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 2 } ^ { \\prime } ( \\delta ) \\geq 0"
+          },
+          {
+            "type": "text",
+            "content": ". Hence, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 1 } ^ { \\prime } ( \\delta ) \\geq 0"
+          },
+          {
+            "type": "text",
+            "content": "ensures the convexity of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g ( \\delta )"
+          },
+          {
+            "type": "text",
+            "content": ". Consider the following helper "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        470,
+        880,
+        503
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "h _ {3} (\\delta) := \\left(1 + 2 \\theta \\left(\\frac {1}{n} - \\delta\\right)\\right) ^ {- 7 / 2} \\left(1 + 2 \\theta \\left(\\frac {1}{n} + \\frac {\\delta}{n - 1}\\right)\\right) ^ {- \\frac {n - 1}{2} - 2}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0cd224c9d22bd24c2074ed69c14be6d5f6f3a2eb0f32f0ac8b564d750c68e701.jpg"
+        }
+      },
+      "bbox": [
+        259,
+        516,
+        733,
+        558
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 3 }"
+          },
+          {
+            "type": "text",
+            "content": ", we compute "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 1 } ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        570,
+        336,
+        588
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} h _ {1} ^ {\\prime} (\\delta) = h _ {3} (\\delta) \\left((- \\frac {5}{2}) (- 2 \\theta) (1 + 2 \\theta (\\frac {1}{n} + \\frac {\\delta}{n - 1})) + (- \\frac {n - 3}{2}) \\frac {2 \\theta}{n - 1} (1 + 2 \\theta (\\frac {1}{n} - \\delta))\\right) \\\\ = h _ {3} (\\delta) \\theta \\left(5 \\left(1 + 2 \\theta / n + \\frac {2 \\theta \\delta}{n - 1}\\right) - \\frac {n - 3}{n - 1} \\left(1 + 2 \\theta / n - 2 \\theta \\delta\\right)\\right) \\\\ = h _ {3} (\\delta) \\theta \\underbrace {\\left(\\frac {4 n - 2}{n - 1} + 2 \\theta \\frac {4 n - 2}{n - 1} + 2 \\theta \\delta \\frac {n + 2}{n - 1}\\right)} _ {h _ {4} (\\delta) :=} \\\\ = \\theta h _ {3} (\\delta) h _ {4} (\\delta). \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/387466ba037a1e0eb9cb09b1e2c74553cdfc834aecfc218adbb813f30724f0f5.jpg"
+        }
+      },
+      "bbox": [
+        179,
+        602,
+        815,
+        753
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Clearly we have "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { 3 } ( \\delta ) , h _ { 4 } ( \\delta ) \\geq 0"
+          },
+          {
+            "type": "text",
+            "content": "for all valid choices of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\delta"
+          },
+          {
+            "type": "text",
+            "content": "which finishes the proof. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        770,
+        751,
+        787
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix D. Proof of Lemma 2 "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        352,
+        824,
+        640,
+        838
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The main idea is based on a particular coupling of random matrices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": ". Consider the truncated SVD decomposition of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } = U \\mathrm { d i a g } ( \\sigma ) V ^ { \\top }"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "U \\in \\mathbb { R } ^ { d \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V \\in \\mathbb { R } ^ { n \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "are orthogonal matrices. Due to the orthogonality, the law of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } U"
+          },
+          {
+            "type": "text",
+            "content": "is the same as those of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G V"
+          },
+          {
+            "type": "text",
+            "content": ". By "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        848,
+        880,
+        897
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        491,
+        900,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "coupling "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } U = G V"
+          },
+          {
+            "type": "text",
+            "content": ", we get "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        90,
+        341,
+        107
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\left(\\mathcal {W} _ {2} (\\mu (W _ {\\ell} H _ {\\ell}), \\mu (G / \\sqrt {n}))\\right) ^ {2} = \\inf _ {\\mathrm {a l l t h e c o u p l i n g s}} \\mathbb {E} \\| W _ {\\ell} U \\mathrm {d i a g} (\\sigma) V ^ {\\top} - G V V ^ {\\top} / \\sqrt {n} \\| _ {F} ^ {2} \\\\ \\leq \\mathbb {E} \\| G V (\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}) V ^ {\\top} \\| _ {F} ^ {2} \\\\ = \\mathbb {E} \\operatorname {T r} (G V (\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}) V ^ {\\top} V (\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}) V ^ {\\top} G ^ {\\top}) \\\\ = \\operatorname {T r} (V (\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}) (\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}) V ^ {\\top} \\mathbb {E} [ G ^ {\\top} G ]) \\\\ = \\mathbb {E} \\operatorname {T r} \\left(\\left(\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}\\right) \\left(\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}\\right) V ^ {\\top} V\\right) \\\\ = \\mathbb {E} \\| (\\operatorname {d i a g} (\\sigma) - I / \\sqrt {n}) \\| _ {F} ^ {2} \\\\ = \\mathbb {E} \\left[ \\sum_ {i = 1} ^ {n} \\left(\\sigma_ {i} - 1 / \\sqrt {n}\\right) ^ {2} \\right] \\\\ = \\mathbb {E} \\left[ \\sum_ {i = 1} ^ {n} \\left(\\sigma_ {i} ^ {2} - 1 / n\\right) ^ {2} / \\left(\\sigma_ {i} + 1 / \\sqrt {n}\\right) ^ {2} \\right] \\\\ \\leq n \\mathbb {E} \\left[ \\sum_ {i = 1} ^ {n} \\left(\\sigma_ {i} ^ {2} - 1 / n\\right) ^ {2} \\right] \\\\ \\leq n \\mathbb {E} \\left[ V ^ {2} \\left(H _ {\\ell}\\right) \\right] \\\\ \\leq 2 n \\mathbb {E} \\left[ V \\left(H _ {\\ell}\\right) \\right]. \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/134c248ad7cefedd625518fc775b275e138b5163283033753fde5af6348a78f8.jpg"
+        }
+      },
+      "bbox": [
+        153,
+        113,
+        844,
+        450
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix E. Orthogonality gap for the iterative initialization "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        202,
+        467,
+        792,
+        482
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recall the proposed initialization for weights based on SVD decomposition "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } = U _ { \\ell } \\Sigma _ { \\ell } V _ { \\ell } ^ { \\top }"
+          }
+        ]
+      },
+      "bbox": [
+        130,
+        489,
+        841,
+        508
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\ell} = \\frac {1}{\\| \\Sigma_ {\\ell} ^ {1 / 2} \\| _ {F}} V _ {\\ell} ^ {\\prime} \\Sigma_ {\\ell} ^ {- 1 / 2} U _ {\\ell} ^ {\\top}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/b7024ac797979fbcaee51a4bbd58771ea7f6f4cccfd71b3ea8ec68b97bb263b8.jpg"
+        }
+      },
+      "bbox": [
+        395,
+        515,
+        601,
+        554
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we show that "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        559,
+        267,
+        574
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "V \\left(H _ {\\ell}\\right) > V \\left(W _ {\\ell} H _ {\\ell}\\right) \\tag {17}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c151fd34aab2c26529119aa56fa7a398622ccf33ca7c986086e86a12f1d730bd.jpg"
+        }
+      },
+      "bbox": [
+        116,
+        584,
+        571,
+        599
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds as long as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } ) \\neq 0"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { 1 } ( \\alpha , \\ell )"
+          },
+          {
+            "type": "text",
+            "content": "holds. Given singular values "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ", we get "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        607,
+        746,
+        625
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} V \\left(H _ {\\ell}\\right) = \\sum_ {i = 1} ^ {n} \\left(\\sigma_ {i} ^ {2} - \\frac {1}{n}\\right) ^ {2} \\tag {18} \\\\ = \\sum_ {i} \\sigma_ {i} ^ {4} - 1 / n, \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/fb849ee8077c287f7c122b8dbf2c9affbbbb2b8a5b374aef6ac186fe2d491844.jpg"
+        }
+      },
+      "bbox": [
+        116,
+        632,
+        594,
+        710
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where we used "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle \\sum _ { i = 1 } ^ { n } \\sigma _ { i } ^ { 2 } = 1"
+          },
+          {
+            "type": "text",
+            "content": "(see Eq. (2)). Now, we compute "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } )"
+          },
+          {
+            "type": "text",
+            "content": "using the singular values. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        719,
+        844,
+        738
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\ell} H _ {\\ell} = \\frac {1}{\\| \\Sigma_ {\\ell} ^ {1 / 2} \\| _ {F}} V _ {\\ell} ^ {\\prime} \\Sigma_ {\\ell} ^ {1 / 2} V _ {\\ell}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/61f74487c63a83a976d63a4042cb6f1921a838b00a851196051fa3447854a3cf.jpg"
+        }
+      },
+      "bbox": [
+        398,
+        743,
+        601,
+        782
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Hence, the following holds "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        787,
+        323,
+        804
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} V (W _ {\\ell} H _ {\\ell}) = \\sum_ {i = 1} ^ {n} \\left(\\frac {\\sigma_ {i}}{\\sum_ {j} \\sigma_ {j}} - \\frac {1}{n}\\right) ^ {2} \\\\ = \\frac {1}{\\left(\\sum_ {i = 1} ^ {n} \\sigma_ {i}\\right) ^ {2}} - 1 / n \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/823c29f8b94d435f88c4fcb90ee0c69a231b0c25467d52320660fec280306124.jpg"
+        }
+      },
+      "bbox": [
+        375,
+        811,
+        622,
+        893
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "19 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Combining with Eq. (18), we get "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        90,
+        375,
+        107
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "V (H _ {\\ell}) - V (W _ {\\ell} H _ {\\ell}) = \\sum_ {i = 1} ^ {n} \\sigma_ {i} ^ {4} - \\frac {1}{(\\sum_ {i = 1} ^ {n} \\sigma_ {i}) ^ {2}}.",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7ece9c8bcda8b8b74fff29c76dbbbc52eeab44df27c91d8380ad25932a69f44c.jpg"
+        }
+      },
+      "bbox": [
+        330,
+        116,
+        665,
+        159
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To show that the right side of the above equation is positive, we need to prove "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        167,
+        732,
+        185
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\sum_ {i} \\sigma_ {i} ^ {4} \\left(\\sum_ {i = 1} ^ {n} \\sigma_ {i}\\right) ^ {2} > 1 = \\left(\\sum_ {i} \\sigma_ {i} ^ {2}\\right) ^ {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/aafedd6b624915bce635a3563f91508007f1e0399406bfe1a566c965a3f98667.jpg"
+        }
+      },
+      "bbox": [
+        359,
+        191,
+        635,
+        241
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds. Using Cauchy-Schwarz inequality, we get "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        248,
+        491,
+        265
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\left(\\sum_ {i} \\sigma_ {i} ^ {2}\\right) ^ {4} = \\left(\\sum_ {i} \\sigma_ {i} ^ {3 / 2} \\sigma_ {i} ^ {1 / 2}\\right) ^ {4} \\\\ \\leq \\left(\\sum_ {i} \\sigma_ {i}\\right) ^ {2} \\left(\\sum_ {i} \\sigma_ {i} ^ {2} \\sigma_ {i}\\right) ^ {2} \\\\ \\leq \\left(\\sum_ {i} \\sigma_ {i}\\right) ^ {2} \\left(\\sum_ {i} \\sigma_ {i} ^ {4}\\right) ^ {2}, \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/0fd41a97c369dde80a26aa8b08ef029341cf3aa27b35e299d50afb711e5d7cda.jpg"
+        }
+      },
+      "bbox": [
+        352,
+        272,
+        645,
+        421
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where the equality in the above inequality is met only for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\sigma _ { i } ^ { 2 } = \\frac { 1 } { n } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "(so "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V ( H _ { \\ell } ) = 0"
+          },
+          {
+            "type": "text",
+            "content": ") under "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A } _ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        430,
+        834,
+        450
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix F. Activation functions and the orthogonality "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        230,
+        473,
+        764,
+        488
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We have shown hidden representations become increasingly orthogonal through layers of BN MLPs with linear activations. We observed a similar results for MLP with ReLU activations and also a simple convolution network (see Figure 5). Here, we elaborate more on the role activation functions in our analysis. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        497,
+        883,
+        563
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7dd239893acae9989a74a90b5cc69b75099e4e75054c20f1ef8b05893bd1daac.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) MLP "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        196,
+        589,
+        475,
+        741
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ce32f014b0d5cef075fff876e8c59b978b0ed012a12bf86b2fff8104a984938a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) ConvNet "
+          },
+          {
+            "type": "text",
+            "content": "Figure 5. Orthogonality gap of layers for BatchNorm vs vanilla network with ReLU, for MLP and a basic convolutional network on CIFAR10. Batch size was set to 8, the number of hidden layers for both networks was set to 30, with 100 width for MLP and 100 channels for ConvNet in all hidden layers. For the ConvNet, the kernel size was set to 3, across all hidden layers, with zero-padding to make convolutional feature maps equal sized. The standard deviations were computed for 50 different randomly sampled batches. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        508,
+        590,
+        785,
+        741
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "20 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For an arbitrary activation function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "F"
+          },
+          {
+            "type": "text",
+            "content": ", the hidden representations make the following Markov chain: "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        90,
+        880,
+        122
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "Q _ {\\ell + 1} = B N (W _ {\\ell} F (Q _ {\\ell})).",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d135201b9b0fcee2bd3573f1656a617d589c4d6cbd6c0168359c32559c4ab0aa.jpg"
+        }
+      },
+      "bbox": [
+        401,
+        128,
+        593,
+        148
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "F.1. Conjecture. Suppose that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ Q _ { \\ell } \\}"
+          },
+          {
+            "type": "text",
+            "content": "is ergodict (Eberle, 2009), and admits a unique invariant distribution denoted by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\nu"
+          },
+          {
+            "type": "text",
+            "content": ". We define function "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L : \\mathbb { R } ^ { d \\times n } \\to \\mathbb { R } _ { + }"
+          },
+          {
+            "type": "text",
+            "content": "as "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        159,
+        880,
+        191
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "L \\left(Q _ {\\ell}\\right) = \\left\\| Q _ {\\ell} ^ {\\top} Q _ {\\ell} - \\mathbb {E} _ {Q \\sim \\nu} \\left[ Q ^ {\\top} Q \\right] \\right\\| _ {F}. \\tag {19}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7d4702937742899eee01ee4c1c4d52f2cdaaac1243417397365ee684b34a28df.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        196,
+        638,
+        226
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We conjecture that there exits an integer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "such that for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell > k"
+          },
+          {
+            "type": "text",
+            "content": "the following holds: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        231,
+        764,
+        247
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ L \\left(Q _ {\\ell}\\right) \\right] = \\mathcal {O} \\left(\\frac {1}{\\sqrt {d}}\\right). \\tag {20}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/6b0fda368f20d5484203d0eccef4ebd7f6c716734ba1b354070adc0b6562cc51.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        253,
+        584,
+        287
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 6 experimentally validates that the above result holds for standard activations such as ReLU, sigmoid, and tanh. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        292,
+        880,
+        325
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/458c7f62151fe436355c9fd3e47edbc2128fba36dd729953d122ebd5a0a67e90.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6. Validating the conjecture. Horizontal axis: "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\log ( d )"
+          },
+          {
+            "type": "text",
+            "content": "; vertical axis: log( 11000 P1000k=1 "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\log ( \\frac { 1 } { 1 0 0 0 } \\sum _ { k = 1 } ^ { 1 0 0 0 } L ( Q _ { k } ) ) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ". The difference between plots for the activation functions is negligible, so not visible. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        321,
+        359,
+        640,
+        522
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "F.2. Odd activation. We observe that Theorem 1 holds for odd activations such as sin and tanh. For these activation result of Theorem 1. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        608,
+        880,
+        638
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathbb {E} \\left[ V (H _ {\\ell + 1}) \\right] = \\mathcal {O} \\left((1 - \\alpha) ^ {\\ell} + \\frac {1}{\\sqrt {d}}\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/b1befd4840dea7ee8e230a906fe99489f671c76aae857762e1d4904a232805e3.jpg"
+        }
+      },
+      "bbox": [
+        359,
+        643,
+        635,
+        680
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "holds under "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { 1 } ( \\alpha , \\ell )"
+          },
+          {
+            "type": "text",
+            "content": ". This also aligns with our conjecture for all activations as we observed that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V = Q"
+          },
+          {
+            "type": "text",
+            "content": "for these activations. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        686,
+        880,
+        717
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Appendix G. Experiments for convolutional networks "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        243,
+        734,
+        751,
+        750
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The introduced initialization scheme in Section 5 extends to convnets. In convolutional networks, hidden representation are in the tensor form "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } \\in \\mathbb { R } ^ { d \\times m \\times m \\times n }"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "is the number of filters and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "is the image dimensions. Let matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell } ^ { d \\times k ^ { 2 } }"
+          },
+          {
+            "type": "text",
+            "content": "are weights of convolutions layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell"
+          },
+          {
+            "type": "text",
+            "content": "with kernel size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "filters. A 2D convolution is a matrix multiplication combined by projections as: "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        758,
+        880,
+        825
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\operatorname {c o n v 2 d} \\left(W _ {\\ell}, H _ {\\ell}\\right) = \\operatorname {f o l d} \\left(W _ {\\ell} \\underbrace {\\operatorname {u n f o l d} \\left(H _ {\\ell}\\right)} _ {H _ {\\ell} ^ {\\prime}}\\right) \\tag {21}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/9377d2a33e4e9adc53e9f97cc8041c29a1386809420da81b8eefd9a5cc20246a.jpg"
+        }
+      },
+      "bbox": [
+        114,
+        830,
+        653,
+        893
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "21 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        898,
+        506,
+        909
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c808399861107e0c9e708269165c7101e779c9483e0a34f832eb473f9bed9865.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "20 layers "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        192,
+        122,
+        464,
+        262
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e15398245c2fcdf46bb8c2f7759e283ccb35f7a91a367f94610d815f32a8435f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "80 layers "
+          },
+          {
+            "type": "text",
+            "content": "Figure 7. Training convolutional networks. Convergence of SGD for Xavier initialization (Glorot and Bengio, 2010) (in blue) and also the proposed initialization method that ensures the orthogonality of hidden representations (in red). Mean and 95% confidence interval of 4 independent runs. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        516,
+        122,
+        785,
+        262
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where the unfolding extract batches of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k \\times k"
+          },
+          {
+            "type": "text",
+            "content": "from images in tensor "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ", folding operation combines the computed convolution for the extracted batches. We use the SVD decomposition "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H _ { \\ell } ^ { \\prime } = U _ { \\ell } \\Sigma _ { \\ell } V _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": "to initialize weights "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ", exactly the same as Eq. (6): "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        359,
+        883,
+        409
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\ell} = \\frac {1}{\\| \\Sigma_ {\\ell} ^ {1 / 2} \\| _ {F}} V _ {\\ell} ^ {\\prime} \\Sigma_ {\\ell} ^ {- 1 / 2} U _ {\\ell} ^ {\\top},",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a876ddb96fb07935d45b1e0845e842c53f6a539b708007c8fd1754976001cb6b.jpg"
+        }
+      },
+      "bbox": [
+        393,
+        412,
+        601,
+        452
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V _ { \\ell } ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": "is a slice of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V _ { \\ell }"
+          },
+          {
+            "type": "text",
+            "content": ". We experimentally validate the performance of this initialization for two convolution networks with ReLU activations consist of 20 and 80 convolutions. Table 3 outlines the details of these neural architectures. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        455,
+        883,
+        505
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/042752953294e277aec3cab23e8abe4161686eca07e760b5e1ad157a6588e666.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3. Convolutional networks used in the experiment. These neural architectures are obtained from adding layers to AlexNet (Srivastava et al., 2014). The kernel size is 3 for all the convolutional layers. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>The network with 20 layers</td><td>The network with 80 layers</td></tr><tr><td>Conv2d(3, 64) + MaxPool2d(2) + RELU</td><td>Conv2d(3, 64) + MaxPool2d(2) + RELU</td></tr><tr><td>Conv2d(64, 192) + MaxPool2d(2) + ReLU</td><td>Conv2d(64, 192) + MaxPool2d(2) + ReLU</td></tr><tr><td>Conv2d(192, 256) + Conv2d(256, 256) +ReLU</td><td>Conv2d(192, 256) Conv2d(256, 256) + ReLU</td></tr><tr><td>{Conv2d(256, 256) +ReLU} × 16</td><td>{Conv2d(256, 256) +ReLU} × 76</td></tr><tr><td>MaxPool2d(2) + ReLU</td><td>MaxPool2d(2) + ReLU</td></tr><tr><td>Dropout(0.5) + Linear(1024,4096) + ReLU</td><td>Dropout(0.5) + Linear(1024,4096) + ReLU</td></tr><tr><td>Dropout(0.5) + Linear(4096,4096) + ReLU</td><td>Dropout(0.5) + Linear(4096,4096) + ReLU</td></tr><tr><td>Linear(4096,10)</td><td>Linear(4096,10)</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        120,
+        513,
+        877,
+        669
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 7 shows the performance of SGD (with stepsize 0.001 and batchsize 30) for the proposed initialization. This initialization slows SGD for the shallow network with 20 compared to standard Xavier’s initialization Glorot and Bengio (2010). However, this initialization outperforms Xavier’s initialization when the depth is significantly large. This result substantiates the role of the orthogonality in training and shows that the experimental result of Figure 4 extends to convolutional neural networks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        744,
+        883,
+        842
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "22 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        898,
+        506,
+        909
+      ]
+    }
+  ]
+]

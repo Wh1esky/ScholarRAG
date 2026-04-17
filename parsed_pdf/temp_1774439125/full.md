@@ -1,0 +1,398 @@
+# SwinTextSpotter: Scene Text Spotting via Better Synergy between Text Detection and Text Recognition
+
+Mingxin Huang1† Yuliang Liu2† Zhenghao Peng2 Chongyu Liu1 Dahua Lin2
+
+Shenggao Zhu3 Nicholas Yuan3 Kai Ding4 Lianwen Jin1,5∗
+
+1South China University of Technology 2Chinese University of Hong Kong 3Huawei Cloud AI
+
+4IntSig Information Co., Ltd 5Peng Cheng Laboratory
+
+eelwjin@scut.edu.cn
+
+# Abstract
+
+End-to-end scene text spotting has attracted great attention in recent years due to the success of excavating the intrinsic synergy of the scene text detection and recognition. However, recent state-of-the-art methods usually incorporate detection and recognition simply by sharing the backbone, which does not directly take advantage of the feature interaction between the two tasks. In this paper, we propose a new end-to-end scene text spotting framework termed SwinTextSpotter. Using a transformer encoder with dynamic head as the detector, we unify the two tasks with a novel Recognition Conversion mechanism to explicitly guide text localization through recognition loss. The straightforward design results in a concise framework that requires neither additional rectification module nor character-level annotation for the arbitrarily-shaped text. Qualitative and quantitative experiments on multi-oriented datasets RoIC13 and ICDAR 2015, arbitrarily-shaped datasets Total-Text and CTW1500, and multi-lingual datasets ReCTS (Chinese) and VinText (Vietnamese) demonstrate SwinTextSpotter significantly outperforms existing methods. Code is available at https: //github.com/mxin262/SwinTextSpotter.
+
+# 1. Introduction
+
+Scene text spotting, which aims to detect and recognize the entire word or sentence in natural images, has raised a lot of attention due to its wide range of applications in autonomous driving [64], intelligent navigation [42, 50], and key entities recognition [51, 65], etc. Traditional scene text spotting methods treat detection and recognition as two separate tasks and adopt a pipeline that first localizes and crops
+
+![](images/b4f40730e43633770957ea08976c7b549891ccd3b90c55d747fb040c688cd608.jpg)  
+(a) Without Recognition Conversion
+
+![](images/ab6caadbd8d6736ec21196d70b6a91ed7db5778a03a742e0104bede0cb44f239.jpg)  
+(b) With Recognition Conversion
+
+![](images/c19ba889e374350aee364c1a3398a5a933f6a9211eddb05c38d24d3751eac032.jpg)  
+(c) The recognition loss with and without Recognition Conversion.   
+Figure 1. Effectiveness of Recognition Conversion. The proposed Recognition Conversion explicitly guides the detection, leading to better text spotting performance.
+
+the text regions on the input images and then predicts the text sequence by feeding the cropped regions into text recognizer [9, 14, 16, 23, 35]. Such a pipeline may have some limitations, such as (1) error accumulation between these two tasks, e.g., imprecise detection result may heavily hinder the performance of text recognition; (2) separate optimization of the two tasks might not maximizing the final performance of text spotting; (3) intensive memory consumption and low inference efficiency.
+
+Therefore, many methods [12,20,27,32] attempt to solve text spotting in end-to-end systems, i.e., optimizing detection and recognition jointly in unify architectures. The recognizer can improve the performance of the detector by eliminating the false positive detection results [20, 21]. In turn, even if the detection is not precise, the recognizer can
+
+still correctly predict the text sequence by the large receptive field of the feature map [21, 27]. Another advantage is that an end-to-end system is easier to maintain and transfer to new domains compared to a cascaded pipeline where the model is coupled with the data and thus requires substantial engineering efforts [30, 55].
+
+However, there are two limitations in most of the existing end-to-end scene text spotting systems [8, 22, 28, 32, 38, 39, 49].First, if the detection is simply based on the visual information in the input features, the detector is prone to being distracted by background noise and proposes inconsistent detection, as depicted in Figure 1(a). The interaction between texts in the same image is the crucial factor to eliminate the impact of background noise, since different characters of the same word may contain strong similarity, such as the backgrounds and text styles. Using Transformer [48] can learn rich interactions between text instances. For example, Yu et al. [62] use transformer to make texts interact with each other at semantic level. Fang et al. [7] and Wang et al. [57] further adopt transformer to model the visual relationship between texts. Second, the interactions between detection and recognition is not enough by sharing backbone because neither the detector optimizes the recognition loss nor the recognizer utilizes the detection features. To jointly improve detection and recognition, a character segmentation map is designed by Mask TextSpotter [22], which simultaneously optimizes the detection and recognition results in the same branch; ABCNet v2 [30] proposes Adaptive End-to-End Training (AET) strategy using the detection results to extract recognition features instead of only using the ground truths; ARTS [67] improves the performance of the end-to-end text spotting by back-propagating the loss from the recognition branch to the detection branch using a differentiable Spatial Transform Network (STN) [15]. However, these three methods assume the detector proposes text features structurally, e.g. in the reading order. The overall performance of the text spotting is thereafter bounded by the detector.
+
+We propose SwinTextSpotter, an end-to-end trainable Transformer-based framework, stepping toward better synergy between the text detection and recognition. To better distinguish the densely scattered text instances in crowded scenes, we use Transformer and a two-level self-attention mechanism in SwinTextSpotter, stimulating the interactions between the text instances. Addressing the challenge in arbitrarily-shaped scene text spotting, inspired by [13, 45], we regard text detection task as a set-prediction problem and thus adopt a query-based text detector. We further propose Recognition Conversion (RC), which implicitly guides the recognition head through incorporating the detection features. RC can back-propagate recognition information to the detector and suppress the background noise in the features for recognition, leading to the joint optimization of
+
+the detector and recognizer. Empowered by the proposed RC, SwinTextSpotter has a concise framework without the character-level annotation and rectification module used in previous works to improve the recognizer. SwinTextSpotter has superior performance in both the detection and the recognition. As illustrated in Figure 1(b), the detector of SwinTextSpotter can accurately localize difficult samples. On the other hand, more accurate detection features can improve the recognizer and result in faster convergence and better performance, as shown in Figure 1(c).
+
+We conduct extensive experiments on six benchmarks, including multi-oriented dataset RoIC13 [22] and ICDAR 2015 [18], arbitrarily-shaped dataset Total-Text [6] and SCUT-CTW1500 [29], and multilingual dataset ReCTS (Chinese) [66] and VinText (Vietnamese) [36]. The results demonstrate the superior performance of the SwinTextSpotter: (1) SwinTextSpotter achieves $8 8 . 0 \%$ F-measure for the detection task on SCUT-CTW1500 and Total-Text, exceeding previous methods by a large margin; (2) SwinTextSpotter significantly outperforms ABCNet v2 [30] by $9 . 8 \%$ in terms of 1-NED for the text spotting task in ReCTs dataset. Additionally, without using character-level annotation on ReCTs, SwinTextSpotter outperforms previous state-of-theart methods MaskTextSpotter [21] and AE TextSpotter [54] that use such annotation; (3) SwinTextSpotter shows better robustness for the extremely rotated instances on RoIC13 dataset compared to MaskTextSpotter v3 [21]. The main contributions of this work are summarized as follows.
+
+• SwinTextSpotter groundbreakingly shows that Transformer and the set-prediction scheme are effective in end-to-end scene text spotting.   
+• SwinTextSpotter adopts the Recognition Conversion to exploit the synergy of text detection and recognition.   
+• SwinTextSpotter is a concise framework that does not require character-level annotation as well as specifically designed rectification module for recognizing arbitrarily-shaped text.   
+• SwinTextSpotter achieves state-of-the-art performance on multiple public scene text benchmarks.
+
+# 2. Related Work
+
+Separate Scene Text Spotting. In past decades, the emergence of deep learning approaches greatly promote the development of scene text spotting. Wang et al. [52] use a sliding-window-based detector to detect characters and then classify each character. Bissacco et al. [2] combine DNN and HOG features and build a text extraction system by using characters classification. Liao et al. [24] propose the TextBoxes that incorporates the single-shot detector and a text recognizer [43] in two-stage manner. However, the
+
+![](images/b41e0fc33964d6fd3abe262d4651f807972cf3257b60df2566713e0bb00984de.jpg)  
+Figure 2. The framework of the proposed SwinTextSpotter. The gray arrows denote the feature extraction from images. The green arrows and orange arrows represent the detection stage and the recognition stage, respectively. The outputs of detection head are refined in K stages. The output detection in the $K ^ { t h }$ stage serves as the input to the recognition stage.
+
+aforementioned methods treat detection and recognition as separate tasks without exchange of information between the two tasks.
+
+End-to-End Text Spotting. Recently, researchers try to combine detection and recognition into one system. Li et al. [20] unify the detection and recognition into an end-to-end trainable scene text spotting framework. FOTS [27] uses an one stage detector to generate a rotated boxes and adopts RoIRotate to sample the oriented text feature into horizontal grid for connecting the detection and recognition. He et al. [12] propose a similar framework using an attention-based recognizer.
+
+For the task of arbitrarily-shaped scene text spotting, Mask TextSpotter series [21, 22, 32] solve the problem without explicit rectification by using character segmentation branch to improve the performance of the recognizer. TextDragon [8] combines the two tasks by RoISlide, a technique transforms the predicting segments of the text instances into horizontal features. Wang et al. [49] adopt Thin-Plate-Spline [3] transformation to rectify the features. ABCNet [28] and its improved version ABCNet v2 [30] use the BezierAlign to transform the arbitrary-shape texts into regular ones. These methods achieve great progress by using rectification module to unify detection and recognition into end-to-end trainable systems. Qin et al. [39] propose RoI Masking to extract the feature for arbitrarily-shaped text recognition. Similar to [39], $\mathrm { P A N + + }$ [55] is based on a faster detector [56]. AE TextSpotter [54] uses the results of recognition to guide detection through language model. Though achieve significantly improvement on the performance of text spotting by sharing backbone, the aforementioned methods neither back-propagate recognition loss to the detector nor use detection features in the recognizer. The detector and the recognizer thus are still relatively independent to each other without joint optimization. Recently, Zhong et al. [67] propose ARTS which passes the gradient of recognition loss to the detector using Spatial Transform Network (STN) [15], demonstrating the power of synergy between the detection and recognition in text spotting.
+
+# 3. Methodology
+
+The overall architecture of SwinTextSpotter is presented in Figure 2, which consists of four components: (1) a backbone based on Swin-Transformer [31]; (2) a querybased text detector; (3) a Recognition Conversion module to bridge the text detector and recognizer; and (4) an attentionbased recognizer.
+
+As illustrated in the green arrows of Figure 2, in the first stage of detection, we first randomly initialize trainable parameters to be the boxes $b b o x _ { 0 }$ and proposal features $f _ { 0 } ^ { p r o p }$ . To make the proposal features contain global information, we use global average pooling to extract the image features and add them into $f _ { 0 } ^ { p r o p }$ . We then extract the RoI features using $b b o x _ { 0 }$ . The RoI features and $f _ { 0 } ^ { p r o p }$ are fed into the Transformer encoder with dynamic head. The output of the Transformer encoder is flattened and forms the proposal features $f _ { 1 } ^ { p r o p }$ , which will be fed into the detection head to output the detection result. The box $b b o x _ { k - 1 }$ and proposal feature $f _ { k - 1 } ^ { p r o p }$ will serve as the input to later $k ^ { t h }$ stage of detection. The proposal feature $f _ { k } ^ { p r o p }$ fk recurrently updates itself by fusing the RoI features with previou s f propk−1 , which $f _ { k - 1 } ^ { p r o p }$ - makes proposal features preserve the information from previous stages. We repeat such refinement for totally K stages, resembling the iterative structure in the query-based detector [4,13,45,68]. Such design allows more robust detection in sizes and aspect ratios [45]. More details of the detector is explained in Section 3.2.
+
+Since the recognition stage (orange arrows) requires higher rate of resolution than detection, we use the final detection stage output box $b b o x _ { K }$ to obtain the RoI features whose resolution is four times as much as that in the detection stage. In order to keep the resolution of features consistent with the detector when fused with proposal features, we down-sample the RoI features to get three feature maps of descending sizes, denoting by $\{ a _ { 1 } , a _ { 2 } , a _ { 3 } \}$ . Then we obtain detection features $f ^ { d e t }$ by fusing the smallest $a _ { 3 }$ and the proposal features $f _ { K } ^ { p r o p }$ .The detection features $f ^ { d e t }$ in recognition stage contain all previous detection information. Finally the $\{ a _ { 1 } , a _ { 2 } , a _ { 3 } \}$ and the detection features $f ^ { d e t }$
+
+![](images/1b6b5221b5d482b7188000ca07a1dacbdc8aa26c65a91e9c4b9d26c86b15f9d6.jpg)  
+Figure 3. Illustration of the designed Dilated Swin-Transformer. The DC refers to two dilated convolution layers, one vanilla convolution layers and one residual structure.
+
+are sent into Recognition Conversion and recognizer for generating the recognition result. More details of Recognition Conversion and recognizer are explained in Section 3.3 and Section 3.4, respectively.
+
+# 3.1. Dilated Swin-Transformer
+
+Vanilla convolutions operate locally at fixed size (e.g. $3 \times 3 \time$ ), which causes low efficacy in connecting remote features. For text spotting, however, modeling the relationships between different texts is critical since scene texts from the same image share strong similarity, such as their backgrounds and text styles. Considering the global modeling capability and computational efficiency, we choose Swin-Transformer [31] with a Feature Pyramid Network (FPN) [25] to build our backbone. Given the blanks existing between words in a line of text, the receptive field should be large enough to help distinguish whether adjacent texts belong to the same text line. To achieve such receptive field, as illustrated in Figure 3, we incorporate two dilated convolution layers [63], one vanilla convolution layers and one residual structure into the original Swin-Transformer, which also introduce the properties of CNN to Transformer [59].
+
+# 3.2. A Query Based Detector
+
+We use a query based detector to detect the text. Based on Sparse R-CNN [45], the query based detector is built on ISTR [13] which treats detection as a set-prediction problem. Our detector uses a set of learnable proposal boxes, alternative to replace massive candidates from the RPN [40], and a set of learnable proposal features, representing highlevel semantic vectors of objects. The detector is empirically designed to have six query stages.With the Transformer encoder with dynamic head, latter stages can access the information in former stages stored in the proposal features [17, 45, 47]. Through multiple stages of refinement, the detector can be applied to text at any scale.
+
+The architecture of the detection head in $k ^ { t h }$ stage is illustrated in Figure 4.The proposal features in $k - 1$ stage is represented by $f _ { k - 1 } ^ { p r o p } \in \mathbb { R } ^ { N , d }$ . At the stage $k$ , the proposal
+
+![](images/6e87736cc337b6cb25e088aa8c2aa93d27de3e6e1b4046bc9a85c04b48748b59.jpg)  
+Figure 4. Illustration of $k ^ { t h }$ stage in detection. k−1 f prop is the pro- $f _ { k - 1 } ^ { p r o p }$ posal features output by previous stage. $M S A _ { k }$ refers to the multihead-attention in $k ^ { t h }$ stage. $f _ { k } ^ { p r o p }$ will serve as the input to next stage.
+
+features $f _ { k - 1 } ^ { p r o p }$ produced in previous stage is fed into a selfattention module [48] $M S A _ { k }$ to model the relationships and generate two sets of convolutional parameters. The detection information in previous stages is therefore embedded into the convolutions.The convolutions conditioned on the previous proposal features is used to encode the RoI features. The RoI features are extracted by $b b o x _ { k - 1 }$ , the detection result in previous stage, using RoIAlign [11].The output features of the convolutions is fed into a linear projection layer to produce the $f _ { k } ^ { p r o p }$ for next stage. The $f _ { k } ^ { p r o p }$ is subsequently fed the into prediction head to generate $b b o x _ { k }$ and $m a s k _ { k }$ . To reduce computation, the 2D mask is transformed into 1D mask vector by the Principal Component Analysis [58] so the $m a s k _ { k }$ is an one-dimensional vector.
+
+When $k = 1$ , the $b b o x _ { 0 }$ and $f _ { 0 } ^ { p r o p }$ are randomly initialized parameters, which is the input of the first stage. During training, these parameters are updated via back propagation and learn the inductive bias of the high-level semantic features of text.
+
+We view the text detection task as a set-prediction problem.Formally, we use the bipartite match to match the predictions and ground truths [4,13,44,45]. The matching cost becomes:
+
+$$
+L _ {\text {m a t c h}} = \lambda_ {\text {c l s}} \cdot L _ {\text {c l s}} + \lambda_ {L 1} \cdot L _ {L 1} + \lambda_ {\text {g i o u}} \cdot L _ {\text {g i o u}} + \lambda_ {\text {m a s k}} \cdot L _ {\text {m a s k}}, \tag {1}
+$$
+
+where $\lambda$ is the hyper-parameter used to balance the loss. $L _ { c l s }$ is the focal loss [26]. The losses for regressing the bounding boxes are L1 loss $L _ { L 1 }$ and generalized IoU loss $L _ { g i o u }$ [41]. We compute the mask loss $L _ { m a s k }$ following [13], which calculates the cosine similarity between the prediction mask and ground truth. The detection loss is similar to the matching cost but we use the L2 loss and dice loss [33] to replace the cosine similarity as in [13].
+
+# 3.3. Recognition Conversion
+
+To better coordinate the detection and recognition, we propose Recognition Conversion (RC) to spatially inject the
+
+features from detection head into the recognition stage, as illustrated in Figure 5. The RC consists of the Transformer encoder [48] and four up-sampling structures. The input of RC are the detection features $f ^ { d e t }$ and three down-sampling features $\{ a _ { 1 } , a _ { 2 } , a _ { 3 } \}$ .
+
+The detection features are sent to the Transformer encoder $T r E ( )$ , making the information of previous detection stages further fused with $a _ { 3 }$ . Then through a stack of upsampling operation $E _ { u } ( \boldsymbol { \mathbf { \rho } } )$ and Sigmoid function $\phi ( )$ , three masks $\{ M _ { 1 } , M _ { 2 } , M _ { 3 } \}$ for text regions are generated:
+
+$$
+d _ {1} = \quad T r E (f ^ {d e t}), \tag {2}
+$$
+
+$$
+d _ {2} = \left(E _ {u} \left(d _ {1}\right) + a _ {2}\right), \tag {3}
+$$
+
+$$
+d _ {3} = \left(E _ {u} \left(d _ {2}\right) + a _ {1}\right), \tag {4}
+$$
+
+$$
+M _ {i} = \phi (d _ {i}), i = 1, 2, 3. \tag {5}
+$$
+
+With the masks $\{ M _ { 1 } , M _ { 2 } , M _ { 3 } \}$ and the input features $\{ a _ { 1 } , a _ { 2 } , a _ { 3 } \}$ , we further integrate these features effectively under the following pipeline:
+
+$$
+r _ {1} = \quad M _ {1} \cdot a _ {3}, \tag {6}
+$$
+
+$$
+r _ {2} = M _ {2} \cdot \left(E _ {u} \left(r _ {1}\right) + a _ {2}\right), \tag {7}
+$$
+
+$$
+r _ {3} = M _ {3} \cdot \left(E _ {u} \left(r _ {2}\right) + a _ {1}\right), \tag {8}
+$$
+
+where $\{ r _ { 1 } , r _ { 2 } , r _ { 3 } \}$ denote the recognition features. The $r _ { 3 }$ is the fused features in Figure 5, which is finally sent to the recognizer at the highest resolution. As shown in the blue dashed lines in Figure 5, the gradient of the recognition loss $L _ { r e g }$ can be back-propagated to the detection features, enabling RC to implicitly improve the detection head through the recognition supervision.
+
+Generally, to suppress the background, the fused features will be multiplied by a $m a s k _ { K }$ predicted by detection head (with the supervision of $L _ { m a s k }$ ). However, the background noise still remains in the feature maps as the detection box is not tight enough. Such issue can be alleviated by the proposed RC since RC uses the detection features to generate tight masks to suppress the background noise, which is supervised by the recognition loss apart from the detection loss. As shown in the upper right corner of Figure 5, $M _ { 3 }$ suppresses more background noise than $m a s k _ { K }$ , where $M _ { 3 }$ has higher activation in texts region and lower in the background. Therefore the masks $\{ M _ { 1 } , M _ { 2 } , M _ { 3 } \}$ produced by RC, which will be applied to the recognition features $\{ r _ { 1 } , r _ { 2 } , r _ { 3 } \}$ , makes recognizer easier to concentrate on the text regions.
+
+With RC, the gradient of recognition loss not only flows back to the backbone network, but also to the proposal features. Optimized by both detection supervision and recognition supervision, the proposal features can better encode the high-level semantic information of the texts. Therefore, the proposed RC can incentivize the coordination between detection and recognition.
+
+![](images/f1dd3e9b69da0df9186e8790d73be5166d866c2adca3c6a041cf875053088f4d.jpg)  
+Figure 5. Detailed structure of Recognition Conversion.
+
+# 3.4. Recognizer
+
+After applying RC on the feature map, background noise is effectively suppressed and thus the text regions can be bounded more precisely. This enables us to merely use a sequential recognition network to obtain promising recognition results without rectification modules such as TPS [3], RoISlide [8], Bezier-Align [28] or character-level segmentation branch used in MaskTextSpotter [21]. To enhance the fine-grained feature extraction and sequence modeling, we adopt a bi-level self-attention mechanism, inspired by [61], as the recognition encoder. The two-level self-attention mechanism (TLSAM) contains both finegrained and coarse-grained self-attention mechanisms for local neighborhood regions and global regions, respectively. Therefore, it can effectively extract fine-grained features while maintaining global modeling capability. As for the decoder, we simply follow MaskTextSpotter by using the Spatial Attention Module (SAM) [22]. The recognition loss is as follow:
+
+$$
+L _ {r e g} = - \frac {1}{T} \sum_ {k = 1} ^ {T} \log p \left(y _ {i}\right), \tag {9}
+$$
+
+wherein $T$ is the max length of the sequence and $p ( y _ { i } )$ is the probability of sequence.
+
+# 4. Experiments
+
+We conduct experiments on various scene text benchmarks, including multi-oriented scene text benchmarks RoIC13 [22] and ICDAR 2015 [18], multilingual datasets ReCTS [66] and Vintext [36], and two arbitrarily-shaped scene text benchmarks Total-Text [6] and SCUT-CTW 1500 [29]. The ablation studies are conducted on Total-Text to
+
+Table 1. End-to-end recognition result on ICDAR 2015. “S”, “W”, and “G” represent recognition with “Strong”, “Weak”, and “Generic” lexicon, respectively.   
+
+<table><tr><td rowspan="2">Method</td><td colspan="3">ICDAR 2015 End-to-End</td></tr><tr><td>S</td><td>W</td><td>G</td></tr><tr><td>FOTS [27]</td><td>81.1</td><td>75.9</td><td>60.8</td></tr><tr><td>Mask TextSpotter [21]</td><td>83.0</td><td>77.7</td><td>73.5</td></tr><tr><td>CharNet [60]</td><td>83.1</td><td>79.2</td><td>69.1</td></tr><tr><td>TextDragon [8]</td><td>82.5</td><td>78.3</td><td>65.2</td></tr><tr><td>Mask TextSpotter v3 [22]</td><td>83.3</td><td>78.1</td><td>74.2</td></tr><tr><td>MANGO [37]</td><td>81.8</td><td>78.9</td><td>67.3</td></tr><tr><td>PAN++ [55]</td><td>82.7</td><td>78.2</td><td>69.2</td></tr><tr><td>ABCNet v2 [30]</td><td>82.7</td><td>78.5</td><td>73.0</td></tr><tr><td>SwinTextSpotter</td><td>83.9</td><td>77.3</td><td>70.5</td></tr></table>
+
+Table 2. End-to-end text spotting result and detection result on ReCTS.   
+
+<table><tr><td rowspan="2">Method</td><td colspan="3">Detection</td><td rowspan="2">1-NED</td></tr><tr><td>R</td><td>P</td><td>H</td></tr><tr><td>FOTS [27]</td><td>82.5</td><td>78.3</td><td>80.31</td><td>50.8</td></tr><tr><td>MaskTextSpotter [21]</td><td>88.8</td><td>89.3</td><td>89.0</td><td>67.8</td></tr><tr><td>AE TextSpotter [54]</td><td>91.0</td><td>92.6</td><td>91.8</td><td>71.8</td></tr><tr><td>ABCNet v2 [30]</td><td>87.5</td><td>93.6</td><td>90.4</td><td>62.7</td></tr><tr><td>SwinTextSpotter</td><td>87.1</td><td>94.1</td><td>90.4</td><td>72.5</td></tr></table>
+
+verify each component of our proposed method. Unless specified, all values in the table are in percentage.
+
+# 4.1. Implementation Details
+
+We follow the training strategy in [37]. First, the model is pretrained on the Curved SynthText [28], ICDAR-MLT [34], and the corresponding dataset for 450K iterations. The initialized learning rate is $2 . 5 \times 1 0 ^ { - 5 }$ , which reduces to $2 . 5 \times 1 0 ^ { - 6 }$ at $3 8 0 K ^ { t h }$ iteration and $2 . 5 \times 1 0 ^ { - 7 }$ at $4 2 0 K ^ { t h }$ iteration. Then we jointly train the pretrained model for 80K iterations on the Total-Text, ICDAR 2013, and ICDAR-MLT, which decays to a tenth at 60K. Finally, we fine-tune the jointly trained model on the corresponding datasets. We also follow the training strategies in [30] and [36] to train the model on Chinese and Vietnamese.
+
+We extract 4 feature maps with 1/4, 1/8, 1/16, 1/32 resolution of the input image for text detection and recognition.
+
+We train our model with image batch size of 8. The following data augmentation strategies are used: (1) random scaling; (2) random rotation; and (3) random crop. Other strategies such as random brightness, contrast, and saturation are also applied during training.
+
+# 4.2. Datasets
+
+We use the following datasets: Curved SynthText [28] is a synthesized dataset for arbitrarily-shaped scene text. It
+
+contains 94,723 images with multi-oriented text and 54,327 images with curved text. ICDAR 2013 [19] is a scene text dataset proposed in 2013. It contains 229 training images and 233 test images. ICDAR 2015 [18] is built in 2015. It contains 1,000 training images and 500 test images. IC-DAR 2017 [34] is a multi-lingual text dataset. It contains 7,200 training images, 1,800 validation images. We only select the images containing English texts for training. IC-DAR19 ArT [5] is a dataset for arbitrarily shaped text. It contains 5,603 training images. ICDAR19 LSVT [46] is a large number of Chinese datasets which contains 30,000 for training images. Total-Text [6] is the benchmark for arbitrarily-shaped scene text. It consists of 1,255 training images and 300 testing images. The word-level polygon boxes are provided as the annotations. SCUT-CTW1500 [29] is a text-line level arbitrarily-shaped scene text dataset. It consists of 1,000 training images and 500 testing images. Compared to Total-Text, this dataset contains denser and longer text. ReCTS [66] consists of 20,000 training images and 5,000 testing images. It also provides character-level bounding boxes, which are not used in our method. Vin-Text [36] is a recently proposed Vietnamese text dataset. It consists of 1,200 training images and 500 testing images.
+
+# 4.3. Comparisons with State-of-the-Art methods
+
+Except in special cases, all values in the table are in percentage.
+
+Multi-oriented and Multilingual datasets. We first conduct experiments on ICDAR 2015, showing the superiority of SwinTextSpotter on oriented scene text. Table 1 shows that SwinTextSpotter achieves the best strong lexicon results on ICDAR 2015, without using the character-level annotations which were used by ABCNet v2 and Mask-TextSpotter v3. We also conduct experiments on RoIC13 dataset proposed in [22] to verify the rotation robustness of SwinTextSpotter. The end-to-end recognition results are shown in Table 3. Both in Rotation Angle $4 5 ^ { \circ }$ and in Rotation Angle $6 0 ^ { \circ }$ datasets, SwinTextSpotter can achieve the state-of-the-art in terms of the H-mean metric. Our method significantly outperforms the Mask TextSpotter v3 by $1 . 5 \%$ in terms of H-mean on Rotation Angle $4 5 ^ { \circ }$ and $1 . 3 \%$ on Rotation Angle $6 0 ^ { \circ }$ . In addition to English, we also conduct experiment on Chinese dataset ReCTS and Vietnamese dataset VinText to verify the generality of SwinTextSpotter. As shown in Table 2, for ReCTS, our method surpasses ABCNet v2, which only works on word-level annotation, by $9 . 8 \%$ in 1-NED. SwinTextSpotter has $0 . 7 \%$ higher 1- NED than AE-TextSpotter, the SOTA method requiring additional character-level annotation. For VinText, the endto-end results are presented in Table 4, “D” means using dictionary for the training of recognizer. SwinTextSpotter can also outperform previous methods on VinText, showing the generalization of our method. It is worth noting that for
+
+Table 3. End-to-end recognition result on RoIC13. P, R, H represent precision, recall and Hmean, respectively.   
+
+<table><tr><td rowspan="2">Method</td><td colspan="3">Rotation Angle 45°</td><td colspan="3">Rotation Angle 60°</td></tr><tr><td>R</td><td>P</td><td>H</td><td>R</td><td>P</td><td>H</td></tr><tr><td>CharNet [60]</td><td>35.5</td><td>34.2</td><td>33.9</td><td>8.4</td><td>10.3</td><td>9.3</td></tr><tr><td>Mask TextSpotter [21]</td><td>45.8</td><td>66.4</td><td>54.2</td><td>48.3</td><td>68.2</td><td>56.6</td></tr><tr><td>Mask TextSpotter v3 [22]</td><td>66.8</td><td>88.5</td><td>76.1</td><td>67.6</td><td>88.5</td><td>76.6</td></tr><tr><td>SwinTextSpotter</td><td>72.5</td><td>83.4</td><td>77.6</td><td>72.1</td><td>84.6</td><td>77.9</td></tr></table>
+
+Table 4. End-to-end text spotting result on VinText. ABCNet+D means adding the methods proposed in [36] to ABCNet. The same to Mask Textspotter $\mathbf { v } 3 { + } \mathbf { D }$ .   
+
+<table><tr><td>Method</td><td>H-mean</td></tr><tr><td>ABCNet [28]</td><td>54.2</td></tr><tr><td>ABCNet+D [36]</td><td>57.4</td></tr><tr><td>Mask Textspotter v3 [36]</td><td>53.4</td></tr><tr><td>Mask Textspotter v3+D [36]</td><td>68.5</td></tr><tr><td>SwinTextSpotter</td><td>71.1</td></tr></table>
+
+Table 5. End-to-end text spotting result and detection result on Total-Text. SwinTextSpotter-Res means using the ResNet50 with FPN as backbone. “None” represents lexicon-free. “Full” represents that we use all the words appeared in the test set.   
+
+<table><tr><td rowspan="2">Method</td><td>Detection</td><td colspan="2">End-to-End</td></tr><tr><td>H-mean</td><td>None</td><td>Full</td></tr><tr><td>CharNet [60]</td><td>85.6</td><td>66.6</td><td>-</td></tr><tr><td>ABCNet [28]</td><td>-</td><td>64.2</td><td>75.7</td></tr><tr><td>PGNet [53]</td><td>86.1</td><td>63.1</td><td>-</td></tr><tr><td>Mask TextSpotter [21]</td><td>85.2</td><td>65.3</td><td>77.4</td></tr><tr><td>Qin et al. [39]</td><td>-</td><td>67.8</td><td>-</td></tr><tr><td>Mask TextSpotter v3 [22]</td><td>-</td><td>71.2</td><td>78.4</td></tr><tr><td>MANGO [37]</td><td>-</td><td>72.9</td><td>83.6</td></tr><tr><td>ABCNet v2 [30]</td><td>87.0</td><td>70.4</td><td>78.1</td></tr><tr><td>PAN++ [55]</td><td>-</td><td>68.6</td><td>78.6</td></tr><tr><td>SwinTextSpotter-Res</td><td>87.2</td><td>72.4</td><td>83.0</td></tr><tr><td>SwinTextSpotter</td><td>88.0</td><td>74.3</td><td>84.1</td></tr></table>
+
+the above tasks, we do not use dictionary for the training of recognizer as ABCNet+D and Mask TextSpotter $\mathbf { v } 3 { + } \mathbf { D }$ . The qualitative results of these three benchmarks are shown in Figure 6 (c)(d)(e)(f).
+
+Irregular text. We conduct experiments on two arbitrarily-shaped scene text datasets (Total-Text and SCUT-CTW1500) for both detection and end-to-end scene text spotting tasks. In text detection task, the results in Table 5 and 6 demonstrate that SwinTextSpotter can achieve $8 8 \%$ H-mean on both datasets, which outperforms previous state-of-the-art methods $1 . 0 \%$ and $3 . 3 \%$ for Total-Text and SCUT-CTW1500, respectively. As for end-to-end scene text spotting task, according to Table 5, SwinTextSpot-
+
+Table 6. End-to-end text spotting result and detection result on SCUT-CTW1500. “None” represents lexicon-free. “Full” represents that we use all the words appeared in the test set.   
+
+<table><tr><td rowspan="2">Method</td><td>Detection</td><td colspan="2">End-to-End</td><td rowspan="2">1-NED</td></tr><tr><td>H-mean</td><td>None</td><td>Full</td></tr><tr><td>TextDragon [8]</td><td>83.6</td><td>39.7</td><td>72.4</td><td>-</td></tr><tr><td>ABCNet [28]</td><td>81.4</td><td>45.2</td><td>74.1</td><td>-</td></tr><tr><td>MANGO [37]</td><td>-</td><td>58.9</td><td>78.7</td><td>-</td></tr><tr><td>ABCNet v2 [30]</td><td>84.7</td><td>57.5</td><td>77.2</td><td>46.9</td></tr><tr><td>SwinTextSpotter</td><td>88.0</td><td>51.8</td><td>77.0</td><td>45.7</td></tr></table>
+
+ter significantly outperforms previous methods on Total-Text with $7 4 . 3 \%$ F-measure, $3 . 9 \%$ higher than ABCNet v2 and $1 . 4 \%$ higher than MANGO. Besides, for fair comparison to previous methods, we replace our Dilated Swin-Transformer backbone with ResNet-50 and the performance is still comparable to the best result $( 7 2 . 4 \%$ in our method and $7 2 . 9 \%$ in MANGO). On SCUT-CTW1500, however, as presented in Table 6, though our method can achieve the best performance on text detection, the end-to-end text spotting result still contain a gap. We discuss and analyze such phenomenon in Section 4.5. Some qualitative results are shown in Figure 6(a)(b).
+
+# 4.4. Ablation Studies
+
+To evaluate the effectiveness of the proposed components, we conduct ablation studies on Total-Text. ResNet-50 is used as the baseline backbone. In ablation studies, we only train different variants of SwinTextSpotter on the Curved SynthText, ICDAR-MLT and the corresponding dataset as the first stage described in Section 4.1.
+
+Recognition Conversion. As shown in Table 7, with RC, the results can be improved by $3 . 0 \%$ and $6 . 9 \%$ for detection and end-to-end scene text spotting, respectively. RC greatly improve the performance of the detector and recognizer. This is mainly because the RC can generate more discriminative features for text regions to boost the performance of text recognition so as to benefit the text detector.
+
+Dilated Swin-Transformer. We also compare the performance of different backbones. The model with Swin-Transformer can achieve $2 . 9 \%$ improvement on end-to-end results over the ResNet-50, but there is no improvement
+
+Table 7. Ablation studies on Total-Text without finetuning. ResNet-50 is used as the baseline backbone. TLSAM stands for the two-level self-attention mechanism.   
+
+<table><tr><td rowspan="2">Method</td><td rowspan="2">Recognition Conversion</td><td rowspan="2">Swin-Transformer</td><td rowspan="2">TLSAM</td><td rowspan="2">Dilated convolution</td><td colspan="2">Total-Text</td></tr><tr><td>Det-Hmean</td><td>E2E-Hmean</td></tr><tr><td>Baseline</td><td colspan="4"></td><td>78.9</td><td>55.7</td></tr><tr><td>Baseline+</td><td>✓</td><td></td><td></td><td></td><td>81.9</td><td>62.6</td></tr><tr><td>Baseline+</td><td>✓</td><td>✓</td><td></td><td></td><td>81.7</td><td>65.5</td></tr><tr><td>Baseline+</td><td>✓</td><td></td><td>✓</td><td></td><td>81.7</td><td>62.5</td></tr><tr><td>Baseline+</td><td>✓</td><td>✓</td><td></td><td>✓</td><td>82.4</td><td>66.0</td></tr><tr><td>SwinTextSpotter</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>83.2</td><td>66.9</td></tr></table>
+
+![](images/2bf2df0fbf995deaf0531ff343dcbe35de74e0fb09032f0da6ba350d4006b4a8.jpg)  
+(a) Total-Text
+
+![](images/a39c82cd52d25c603a900400d6d8644146b453f2c1b9c9b8f7749f5e87efd20c.jpg)
+
+![](images/66173c22ff35469d74d3eb39a4503259a3084a0139a93d972a12dad2ae6e9591.jpg)
+
+![](images/f7ec27d9d688902c12f503c129586b5f7595e0a8961b498cc058a2c8b4af4e95.jpg)
+
+![](images/cad73ca42c32d633fe8f3a9ba14947a634a5b9092bb5fe0b3232ae364cd29be3.jpg)
+
+![](images/7bd77599d54aade5fa49abe5c9c89c7f93b83f65aafb80f7804f7e95f4e6ed55.jpg)  
+(b) CTW1500
+
+![](images/900cae843edcb83b723743b23d9e319aefb557f3160bcea46d7c07dbddb205c6.jpg)  
+(d) ReCTS
+
+![](images/f7af7c060a5d90f3ad75b1b1d2bac00c67418d731a2f418ee4025e4e33731fb6.jpg)
+
+![](images/7df4528f18827de1483350b68bbde8f84a223743a5f22db824f0b549fb71d7e1.jpg)
+
+![](images/79226f811be63e6de5fa19ba6a365dc90ab685dc0e332b0ca1eaec434f86edb2.jpg)  
+(e) ICDAR2015
+
+![](images/ff90f8f2f2bca048d61b116a9e07c58aa002b3cdbe6fd4e7f1aefe6dd0002695.jpg)  
+(c) VinText
+
+![](images/2921730abcdbfe7face8fa9279c83edd62bd08df8032076702d8924163e4743c.jpg)  
+(f) RoIC13   
+Figure 6. Visualization results of our method. White text represents the correct results; Red text represents the wrong results; Blue text represents that the GT of the text instance is marked as “do not care”. Best view in screen.
+
+for detection. Incorporating dilated convolution into Swin-Transformer can further boost detection by $0 . 7 \%$ and $0 . 5 \%$ in end-to-end results.
+
+Two-level self-attention mechanisms. In Table 7, we further conduct experiments to explore the influence of fine-grained features. Dilated Swin-Transformer performs poorly in capturing fine-grained features, while two-level self-attention mechanisms can effectively make up for this shortcoming. The enhancement of fine-grained features from two-level self-attention mechanism can result in $0 . 8 \%$ and $0 . 9 \%$ improvement on text detection and end-to-end text spotting results, respectively.
+
+# 4.5. Limitation and Discussion
+
+Long Arbitrarily-Shaped Text. We know that the long arbitrarily-shaped text requires a high resolution feature map to be recognized. When the feature map becomes larger, attention map in the recognizer will also expand. Large attention map may result in mismatch of the recognizer, which leads to the low end-to-end text spotting performance on SCUT-CTW1500. The amount of long arbitrarily-shaped data is limited. Our recognition decoder needs more training data than the 1D-Attention [1] and CTC
+
+[10] and so it is not well trained yet. However, the 1-NED result and “Full” result shown in Table 6 narrow the gaps between our method and ABCNet v2, which suggests that the errors mainly occur in individual characters.
+
+# 5. Conclusion
+
+In this paper, we propose SwinTextSpotter. To the best of our knowledge, SwinTextSpotter is the first successful attempt using Transformer-based method and set-prediction scheme for end-to-end scene text spotting. With the core idea to make text recognition as a part of detection, the proposed model tightly couples the detection and recognition instead of only sharing information in the backbone. The proposed Recognition Conversion enables the suppression of background noise in the recognition features by making the detection results differentiable with respect to the recognition loss. Such design greatly simplifies the text spotter framework by removing the rectification module and enables the joint optimization of both the detection and the recognition module toward better spotting performance without character-level annotation. Extensive experiments on public benchmarks demonstrate that SwinTextSpotter can achieve superior performance in end-to-end scene text
+
+spotting on arbitrarily-shaped text and multi-lingual text. Acknowledgement This research is supported in part by NSFC (Grant No.: 61936003) and GD-NSF (No.2017A030312006, No.2021A1515011870).
+
+# Appendix
+
+# A. Qualitative Comparisons
+
+We make some qualitative analysis with previous method which is shown in Fig 7. It can be seen that previous methods failed on the difficult text instance such as “Party”, while SwinTextSpotter can handle such case by exploiting the synergy of text detection and recognition.
+
+Intuitively, the detection result of SwinTextSpotter is more accurate.
+
+![](images/91cd49f89483e6787d4d776b26103ef6575637a58c078ba4340335ca411d7f34.jpg)  
+(a) MaskTextSpotter
+
+![](images/a318de4c7f340c5112c7c9e838057d7e1d17576e3db4c705d4d57865d8ec0e18.jpg)  
+)   
+MaskTextSpot-
+
+![](images/a1c537c8c6e33f076bdbb8677b91c6489df845d80163513150e59f08c3725b08.jpg)  
+(c) ABCNet
+
+![](images/b7b68fc33e732d8a0a070a29af44286c89ceea253900d43576d72636b60c5d44.jpg)  
+terV3   
+(d) ABCNetv2
+
+![](images/fbea34d72fd5d124de8ee71a579b8b6c1733dbf4d72b4419e4bbfbb0c0097749.jpg)  
+(e) MANGO
+
+![](images/296648463e0f76ef03fa9c7dac6a128de2795b840759d89401534b2012940ed5.jpg)  
+(f) SwinTextSpotter   
+Figure 7. Qualitative analysis of SwinTextSpotter and other existing methods. Best view in screen.
+
+Table 8. Ablation study on Recognition Conversion.   
+
+<table><tr><td rowspan="2">Method</td><td colspan="2">Total-Text</td></tr><tr><td>Det-Hmean</td><td>E2E-Hmean</td></tr><tr><td>SwinTextSpotter-withou RC</td><td>82.8</td><td>63.4</td></tr><tr><td>SwinTextSpotter</td><td>83.2</td><td>66.9</td></tr></table>
+
+# B. Ablation study of Recognition Conversion
+
+We verify the effectiveness of other components without RC which helps to better reveal the effectiveness of RC.
+
+From Table 8, the performance, that using other components without RC, drops from $8 3 . 2 \%$ to $8 2 . 8 \%$ for detection and $6 6 . 9 \%$ to $6 3 . 4 \%$ for end-to-end scene text spotting.
+
+# C. Comparison different backbone in different frameworks
+
+We also try to replace ResNet50 with Swin-Transformer on ABCNet. From Table 9, the result can be improved by $1 . 8 \%$ with Swin-Transformer in text spotting. But there is no improvement for detection. It is similar to the case in SwinTextSpotter.
+
+Table 9. Comparison different backbone on different architectures. ABC-R50 means ABCNet with ResNet50. ABC-Swin means ABCNet with SwinTransformer. Det. means detection result. E2E means end-to-end text spotting result.   
+
+<table><tr><td colspan="2">ABC-R50</td><td colspan="2">ABC-Swin</td><td colspan="2">Our-R50</td><td colspan="2">Our-Swin</td></tr><tr><td>Det.</td><td>E2E</td><td>Det.</td><td>E2E</td><td>Det.</td><td>E2E</td><td>Det.</td><td>E2E</td></tr><tr><td>86.0</td><td>67.1</td><td>86.0</td><td>68.9</td><td>87.2</td><td>72.4</td><td>87.3</td><td>74.0</td></tr></table>
+
+# References
+
+[1] Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. Neural machine translation by jointly learning to align and translate. arXiv preprint arXiv:1409.0473, 2014. 8   
+[2] Alessandro Bissacco, Mark Cummins, Yuval Netzer, and Hartmut Neven. Photoocr: Reading text in uncontrolled conditions. In Proceedings of the IEEE International Conference on Computer Vision, pages 785–792, 2013. 2   
+[3] Fred L. Bookstein. Principal warps: Thin-plate splines and the decomposition of deformations. IEEE Transactions on Pattern Analysis and Machine Intelligence, 11(6):567–585, 1989. 3, 5   
+[4] Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, and Sergey Zagoruyko. End-toend object detection with transformers. In European Conference on Computer Vision, pages 213–229. Springer, 2020. 3, 4   
+[5] Chee Kheng Chng, Yuliang Liu, Yipeng Sun, Chun Chet Ng, Canjie Luo, Zihan Ni, ChuanMing Fang, Shuaitao Zhang, Junyu Han, Errui Ding, et al. Icdar2019 robust reading challenge on arbitrary-shaped text-rrc-art. In 2019 International Conference on Document Analysis and Recognition (ICDAR), pages 1571–1576. IEEE, 2019. 6   
+[6] Chee-Kheng Ch’ng, Chee Seng Chan, and Cheng-Lin Liu. Total-text: toward orientation robustness in scene text detection. International Journal on Document Analysis and Recognition (IJDAR), 23(1):31–52, 2020. 2, 5, 6   
+[7] Shancheng Fang, Hongtao Xie, Yuxin Wang, Zhendong Mao, and Yongdong Zhang. Read like humans: Autonomous, bidirectional and iterative language modeling for scene text recognition. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 7098–7107, 2021. 2   
+[8] Wei Feng, Wenhao He, Fei Yin, Xu-Yao Zhang, and Cheng-Lin Liu. Textdragon: An end-to-end framework for arbitrary
+
+shaped text spotting. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 9076–9085, 2019. 2, 3, 5, 6, 7   
+[9] Llu´ıs Gomez and Dimosthenis Karatzas. Textproposals: a ´ text-specific selective search algorithm for word spotting in the wild. Pattern Recognition, 70:60–74, 2017. 1   
+[10] Alex Graves, Santiago Fernandez, Faustino Gomez, and ´ Jurgen Schmidhuber. Connectionist temporal classification: ¨ labelling unsegmented sequence data with recurrent neural networks. In Proceedings of the 23rd International Conference on Machine Learning, pages 369–376, 2006. 8   
+[11] Kaiming He, Georgia Gkioxari, Piotr Dollar, and Ross Gir- ´ shick. Mask r-cnn. In Proceedings of the IEEE International Conference on Computer Vision, pages 2961–2969, 2017. 4   
+[12] Tong He, Zhi Tian, Weilin Huang, Chunhua Shen, Yu Qiao, and Changming Sun. An end-to-end textspotter with explicit alignment and attention. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 5020–5029, 2018. 1, 3   
+[13] Jie Hu, Liujuan Cao, Yao Lu, ShengChuan Zhang, Yan Wang, Ke Li, Feiyue Huang, Ling Shao, and Rongrong Ji. Istr: End-to-end instance segmentation with transformers. arXiv preprint arXiv:2105.00637, 2021. 2, 3, 4   
+[14] Max Jaderberg, Karen Simonyan, Andrea Vedaldi, and Andrew Zisserman. Reading text in the wild with convolutional neural networks. International Journal of Computer Vision, 116(1):1–20, 2016. 1   
+[15] Max Jaderberg, Karen Simonyan, Andrew Zisserman, and Koray Kavukcuoglu. Spatial transformer networks. MIT Press, 2015. 2, 3   
+[16] Max Jaderberg, Andrea Vedaldi, and Andrew Zisserman. Deep features for text spotting. In European Conference on Computer Vision, pages 512–528. Springer, 2014. 1   
+[17] Xu Jia, Bert De Brabandere, Tinne Tuytelaars, and Luc V Gool. Dynamic filter networks. Advances in Neural Information Processing Systems, 29:667–675, 2016. 4   
+[18] Dimosthenis Karatzas, Lluis Gomez-Bigorda, Anguelos Nicolaou, Suman Ghosh, Andrew Bagdanov, Masakazu Iwamura, Jiri Matas, Lukas Neumann, Vijay Ramaseshan Chandrasekhar, Shijian Lu, et al. Icdar 2015 competition on robust reading. In 2015 13th International Conference on Document Analysis and Recognition (ICDAR), pages 1156–1160. IEEE, 2015. 2, 5, 6   
+[19] Dimosthenis Karatzas, Faisal Shafait, Seiichi Uchida, Masakazu Iwamura, Lluis Gomez i Bigorda, Sergi Robles Mestre, Joan Mas, David Fernandez Mota, Jon Almazan Almazan, and Lluis Pere De Las Heras. Icdar 2013 robust reading competition. In 2013 12th International Conference on Document Analysis and Recognition, pages 1484–1493. IEEE, 2013. 6   
+[20] Hui Li, Peng Wang, and Chunhua Shen. Towards end-toend text spotting with convolutional recurrent neural networks. In Proceedings of the IEEE International Conference on Computer Vision, pages 5238–5246, 2017. 1, 3   
+[21] M. Liao, P. Lyu, M. He, C. Yao, W. Wu, and X. Bai. Mask textspotter: An end-to-end trainable neural network for spotting text with arbitrary shapes. IEEE Transactions on Pattern
+
+Analysis and Machine Intelligence, 43(2):532–548, 2021. 1, 2, 3, 5, 6, 7   
+[22] Minghui Liao, Guan Pang, Jing Huang, Tal Hassner, and Xiang Bai. Mask textspotter v3: Segmentation proposal network for robust scene text spotting. In Computer Vision– ECCV 2020: 16th European Conference, Glasgow, UK, August 23–28, 2020, Proceedings, Part XI 16, pages 706–722. Springer, 2020. 2, 3, 5, 6, 7   
+[23] Minghui Liao, Baoguang Shi, and Xiang Bai. Textboxes++: A single-shot oriented scene text detector. IEEE Transactions on Image Processing, 27(8):3676–3690, 2018. 1   
+[24] Minghui Liao, Baoguang Shi, Xiang Bai, Xinggang Wang, and Wenyu Liu. Textboxes: A fast text detector with a single deep neural network. In Thirty-first AAAI Conference on Artificial Intelligence, 2017. 2   
+[25] Tsung-Yi Lin, Piotr Dollar, Ross Girshick, Kaiming He, ´ Bharath Hariharan, and Serge Belongie. Feature pyramid networks for object detection. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 2117–2125, 2017. 4   
+[26] Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Dollar. Focal loss for dense object detection. In ´ Proceedings of the IEEE International Conference on Computer Vision, pages 2980–2988, 2017. 4   
+[27] Xuebo Liu, Ding Liang, Shi Yan, Dagui Chen, Yu Qiao, and Junjie Yan. Fots: Fast oriented text spotting with a unified network. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 5676– 5685, 2018. 1, 2, 3, 6   
+[28] Yuliang Liu, Hao Chen, Chunhua Shen, Tong He, Lianwen Jin, and Liangwei Wang. Abcnet: Real-time scene text spotting with adaptive bezier-curve network. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 9809–9818, 2020. 2, 3, 5, 6, 7   
+[29] Yuliang Liu, Lianwen Jin, Shuaitao Zhang, Canjie Luo, and Sheng Zhang. Curved scene text detection via transverse and longitudinal sequence connection. Pattern Recognition, 90:337–345, 2019. 2, 5, 6   
+[30] Yuliang Liu, Chunhua Shen, Lianwen Jin, Tong He, Peng Chen, Chongyu Liu, and Hao Chen. Abcnet v2: Adaptive bezier-curve network for real-time end-to-end text spotting. arXiv preprint arXiv:2105.03620, 2021. 2, 3, 6, 7   
+[31] Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo. Swin transformer: Hierarchical vision transformer using shifted windows. International Conference on Computer Vision (ICCV), 2021. 3, 4   
+[32] Pengyuan Lyu, Minghui Liao, Cong Yao, Wenhao Wu, and Xiang Bai. Mask textspotter: An end-to-end trainable neural network for spotting text with arbitrary shapes. In Proceedings of the European Conference on Computer Vision (ECCV), pages 67–83, 2018. 1, 2, 3   
+[33] Fausto Milletari, Nassir Navab, and Seyed-Ahmad Ahmadi. V-net: Fully convolutional neural networks for volumetric medical image segmentation. In 2016 Fourth International Conference on 3D Vision (3DV), pages 565–571. IEEE, 2016. 4
+
+[34] Nibal Nayef, Fei Yin, Imen Bizid, Hyunsoo Choi, Yuan Feng, Dimosthenis Karatzas, Zhenbo Luo, Umapada Pal, Christophe Rigaud, Joseph Chazalon, et al. Icdar2017 robust reading challenge on multi-lingual scene text detection and script identification-rrc-mlt. In 2017 14th IAPR International Conference on Document Analysis and Recognition (ICDAR), volume 1, pages 1454–1459. IEEE, 2017. 6   
+[35] Luka´s Neumann and Ji ˇ ˇr´ı Matas. Real-time lexicon-free scene text localization and recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence, 38(9):1872–1885, 2015. 1   
+[36] Nguyen Nguyen, Thu Nguyen, Vinh Tran, Triet Tran, Thanh Ngo, Thien Nguyen, and Minh Hoai. Dictionary-guided scene text recognition. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2021. 2, 5, 6, 7   
+[37] Liang Qiao, Ying Chen, Zhanzhan Cheng, Yunlu Xu, Yi Niu, Shiliang Pu, and Fei Wu. Mango: A mask attention guided one-stage scene text spotter. In Proceedings of the Thirty-Fifth AAAI Conference on Artificial Intelligence (AAAI), pages 2467–2476, 2021. 6, 7   
+[38] Liang Qiao, Sanli Tang, Zhanzhan Cheng, Yunlu Xu, Yi Niu, Shiliang Pu, and Fei Wu. Text perceptron: Towards endto-end arbitrary-shaped text spotting. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 34, pages 11899–11907, 2020. 2   
+[39] Siyang Qin, Alessandro Bissacco, Michalis Raptis, Yasuhisa Fujii, and Ying Xiao. Towards unconstrained end-to-end text spotting. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 4704–4714, 2019. 2, 3, 7   
+[40] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun. Faster r-cnn: Towards real-time object detection with region proposal networks. Advances in Neural Information Processing Systems, 28:91–99, 2015. 4   
+[41] Hamid Rezatofighi, Nathan Tsoi, JunYoung Gwak, Amir Sadeghian, Ian Reid, and Silvio Savarese. Generalized intersection over union: A metric and a loss for bounding box regression. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 658–666, 2019. 4   
+[42] Xuejian Rong, Bing Li, J Pablo Munoz, Jizhong Xiao, Aries Arditi, and Yingli Tian. Guided text spotting for assistive blind navigation in unfamiliar indoor environments. In International Symposium on Visual Computing, pages 11–22. Springer, 2016. 1   
+[43] Baoguang Shi, Xiang Bai, and Cong Yao. An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence, 39(11):2298–2304, 2016. 2   
+[44] Russell Stewart, Mykhaylo Andriluka, and Andrew Y Ng. End-to-end people detection in crowded scenes. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 2325–2333, 2016. 4   
+[45] Peize Sun, Rufeng Zhang, Yi Jiang, Tao Kong, Chenfeng Xu, Wei Zhan, Masayoshi Tomizuka, Lei Li, Zehuan
+
+Yuan, Changhu Wang, et al. Sparse r-cnn: End-to-end object detection with learnable proposals. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 14454–14463, 2021. 2, 3, 4   
+[46] Yipeng Sun, Zihan Ni, Chee-Kheng Chng, Yuliang Liu, Canjie Luo, Chun Chet Ng, Junyu Han, Errui Ding, Jingtuo Liu, Dimosthenis Karatzas, et al. Icdar 2019 competition on large-scale street view text with partial labeling-rrc-lsvt. In 2019 International Conference on Document Analysis and Recognition (ICDAR), pages 1557–1562. IEEE, 2019. 6   
+[47] Zhi Tian, Chunhua Shen, and Hao Chen. Conditional convolutions for instance segmentation. In Computer Vision– ECCV 2020: 16th European Conference, Glasgow, UK, August 23–28, 2020, Proceedings, Part I 16, pages 282–298. Springer, 2020. 4   
+[48] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. Attention is all you need. In Advances in Neural Information Processing Systems, pages 5998–6008, 2017. 2, 4, 5   
+[49] Hao Wang, Pu Lu, Hui Zhang, Mingkun Yang, Xiang Bai, Yongchao Xu, Mengchao He, Yongpan Wang, and Wenyu Liu. All you need is boundary: Toward arbitrary-shaped text spotting. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 34, pages 12160–12167, 2020. 2, 3   
+[50] Hsueh-Cheng Wang, Chelsea Finn, Liam Paull, Michael Kaess, Ruth Rosenholtz, Seth Teller, and John Leonard. Bridging text spotting and slam with junction features. In 2015 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pages 3701–3708. IEEE, 2015. 1   
+[51] Jiapeng Wang, Chongyu Liu, Lianwen Jin, Guozhi Tang, Jiaxin Zhang, Shuaitao Zhang, Qianying Wang, Yaqiang Wu, and Mingxiang Cai. Towards robust visual information extraction in real world: New dataset and novel solution. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 35, pages 2738–2745, 2021. 1   
+[52] Kai Wang, Boris Babenko, and Serge Belongie. End-to-end scene text recognition. In 2011 International Conference on Computer Vision, pages 1457–1464. IEEE, 2011. 2   
+[53] Pengfei Wang, Chengquan Zhang, Fei Qi, Shanshan Liu, Xiaoqiang Zhang, Pengyuan Lyu, Junyu Han, Jingtuo Liu, Errui Ding, and Guangming Shi. Pgnet: Real-time arbitrarilyshaped text spotting with point gathering network. arXiv preprint arXiv:2104.05458, 2021. 7   
+[54] Wenhai Wang, Xuebo Liu, Xiaozhong Ji, Enze Xie, Ding Liang, ZhiBo Yang, Tong Lu, Chunhua Shen, and Ping Luo. Ae textspotter: Learning visual and linguistic representation for ambiguous text spotting. In European Conference on Computer Vision, pages 457–473. Springer, 2020. 2, 3, 6   
+[55] Wenhai Wang, Enze Xie, Xiang Li, Xuebo Liu, Ding Liang, Yang Zhibo, Tong Lu, and Chunhua Shen. Pan $^ { + + }$ : Towards efficient and accurate end-to-end spotting of arbitrarilyshaped text. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2021. 2, 3, 6, 7   
+[56] Wenhai Wang, Enze Xie, Xiaoge Song, Yuhang Zang, Wenjia Wang, Tong Lu, Gang Yu, and Chunhua Shen. Efficient
+
+and accurate arbitrary-shaped text detection with pixel aggregation network. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 8440–8449, 2019. 3   
+[57] Yuxin Wang, Hongtao Xie, Shancheng Fang, Jing Wang, Shenggao Zhu, and Yongdong Zhang. From two to one: A new scene text recognizer with visual language modeling network. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 14194–14203, 2021. 2   
+[58] Svante Wold, Kim Esbensen, and Paul Geladi. Principal component analysis. Chemometrics and Intelligent Laboratory Systems, 2(1-3):37–52, 1987. 4   
+[59] Haiping Wu, Bin Xiao, Noel Codella, Mengchen Liu, Xiyang Dai, Lu Yuan, and Lei Zhang. Cvt: Introducing convolutions to vision transformers. arXiv preprint arXiv:2103.15808, 2021. 4   
+[60] Linjie Xing, Zhi Tian, Weilin Huang, and Matthew R Scott. Convolutional character networks. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 9126–9136, 2019. 6, 7   
+[61] Jianwei Yang, Chunyuan Li, Pengchuan Zhang, Xiyang Dai, Bin Xiao, Lu Yuan, and Jianfeng Gao. Focal self-attention for local-global interactions in vision transformers. arXiv preprint arXiv:2107.00641, 2021. 5   
+[62] Deli Yu, Xuan Li, Chengquan Zhang, Tao Liu, Junyu Han, Jingtuo Liu, and Errui Ding. Towards accurate scene text recognition with semantic reasoning networks. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 12113–12122, 2020. 2   
+[63] Fisher Yu and Vladlen Koltun. Multi-scale context aggregation by dilated convolutions. In ICLR, 2016. 4   
+[64] Chongsheng Zhang, Yuefeng Tao, Kai Du, Weiping Ding, Bin Wang, Ji Liu, and Wei Wang. Character-level street view text spotting based on deep multi-segmentation network for smarter autonomous driving. IEEE Transactions on Artificial Intelligence, pages 1–1, 2021. 1   
+[65] Peng Zhang, Yunlu Xu, Zhanzhan Cheng, Shiliang Pu, Jing Lu, Liang Qiao, Yi Niu, and Fei Wu. Trie: End-to-end text reading and information extraction for document understanding. In Proceedings of the 28th ACM International Conference on Multimedia, pages 1413–1422, 2020. 1   
+[66] Rui Zhang, Yongsheng Zhou, Qianyi Jiang, Qi Song, Nan Li, Kai Zhou, Lei Wang, Dong Wang, Minghui Liao, Mingkun Yang, et al. Icdar 2019 robust reading challenge on reading chinese text on signboard. In 2019 International Conference on Document Analysis and Recognition (ICDAR), pages 1577–1581. IEEE, 2019. 2, 5, 6   
+[67] Humen Zhong, Jun Tang, Wenhai Wang, Zhibo Yang, Cong Yao, and Tong Lu. Arts: Eliminating inconsistency between text detection and recognition with auto-rectification text spotter. arXiv preprint arXiv:2110.10405, 2021. 2, 3   
+[68] Xizhou Zhu, Weijie Su, Lewei Lu, Bin Li, Xiaogang Wang, and Jifeng Dai. Deformable detr: Deformable transformers for end-to-end object detection. arXiv preprint arXiv:2010.04159, 2020. 3

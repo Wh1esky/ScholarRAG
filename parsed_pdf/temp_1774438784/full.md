@@ -1,0 +1,570 @@
+# Spatio-Temporal Representation Factorization for Video-based Person Re-Identification
+
+Abhishek Aich?,2, Meng Zheng1, Srikrishna Karanam1, Terrence Chen1, Amit K. Roy-Chowdhury2, and Ziyan Wu1
+
+1United Imaging Intelligence, Cambridge, MA, USA, 2University of California, Riverside, CA, USA
+
+{aaich001@, amitrc@ece.}ucr.edu, {first.last}@uii-ai.com
+
+# Abstract
+
+Despite much recent progress in video-based person re-identification (re-ID), the current state-of-the-art still suffers from common real-world challenges such as appearance similarity among various people, occlusions, and frame misalignment. To alleviate these problems, we propose Spatio-Temporal Representation Factorization (STRF), a flexible new computational unit that can be used in conjunction with most existing 3D convolutional neural network architectures for re-ID. The key innovations of STRF over prior work include explicit pathways for learning discriminative temporal and spatial features, with each component further factorized to capture complementary person-specific appearance and motion information. Specifically, temporal factorization comprises two branches, one each for static features (e.g., the color of clothes) that do not change much over time, and dynamic features (e.g., walking patterns) that change over time. Further, spatial factorization also comprises two branches to learn both global (coarse segments) as well as local (finer segments) appearance features, with the local features particularly useful in cases of occlusion or spatial misalignment. These two factorization operations taken together result in a modular architecture for our parameter-wise light STRF unit that can be plugged in between any two 3D convolutional layers, resulting in an end-to-end learning framework. We empirically show that STRF improves performance of various existing baseline architectures while demonstrating new state-of-the-art results using standard person re-ID evaluation protocols on three benchmarks.
+
+# 1. Introduction
+
+We consider the problem of video-based person re-IDentification (re-ID). Given a video tracklet of a person of interest, the task is to retrieve the closest match (which ideally should be the true match) among a gallery set of video
+
+![](images/cb78c2876f74f5b8f09ec16e391651ab53d266997c4b71ea1696c9a11ef3f5e9.jpg)  
+Figure 1: Illustration of proposed concept and its efficacy. We present the intuition behind our proposed Spatio-Temporal Representation Factorization (STRF) module designed to conquer common real-world re-ID system issues, e.g., similar-appearance identities, occlusions and misaligned frame. By capturing temporally static/dynamic and spatially coarse/fine information at different layers of a 3D-CNN, STRF produces robust discriminative representation to tackle these challenges as demonstrated here through attention maps of penultimate layer of feature extractor.
+
+tracklets. With numerous applications in security, surveillance, and forensics [2], this problem has seen a dramatic increase in interest and various methodologies in the vision community [7, 16, 32, 33, 36, 42, 56, 60].
+
+While there has been admirable progress in image-based re-ID as evidenced by recent quantitative results [7], there are many challenges that still preclude the ubiquitous use of re-ID algorithms in real-world systems. One such issue is appearance similarity, where multiple people wear similar looking clothes (e.g., large conferences or public events with a strict dress code). Other challenging issues include occlusions and frame misalignment that are a direct consequence of large crowd flow densities (e.g., in airports just after flight arrival) and inter-camera viewpoint disparities.
+
+Having access to additional data, e.g., an extra temporal dimension like videos instead of 2D images, can help alleviate some of these issues by leveraging spatio-temporal data.
+
+Video-based re-ID has seen much recent work [4, 5, 17, 22, 31, 51, 52, 55] in part due to the availability of relevant large-scale video datasets [47, 58]. However, learning a spatio-temporal representation that can alleviate the issues noted above still remains a challenge. While advances in general 3D convolutional networks (3D-CNNs) provide reasonable baseline spatio-temporal features, existing re-ID techniques typically rely on specialized architectures [23, 51, 52, 55] that are inflexible to be used with these baseline models. Other lines of work are focused entirely on learning either temporal or spatial representations separately [4, 5, 22], overlooking the complementarity that both streams of information provide in challenging scenarios, e.g., distinguishing people wearing similar clothes.
+
+To address the aforementioned issues, we present a flexible new computational unit called Spatio-Temporal Representation Factorization (STRF) module. Given a feature volume from a certain 3D convolutional layer in a baseline 3D-CNN model, STRF extracts complementary information along both spatial $( h \times w )$ and temporal (time, t) dimensions. By design, the proposed STRF module can be inserted in an existing 3D-CNN model after any convolutional layer, introducing only ${ \sim } 0 . 1 5$ million learnable parameters per unit (for instance, this results in only a ${ \sim } 1 . 7 3 \%$ overall parameter increase with I3D [3]), resulting in a flexible and parameter-wise economic framework that is end-to-end trainable. STRF comprises two modules, called temporal feature factorization module (FFM) and spatial feature factorization module, to process feature tensors. The design principles of these modules are motivated by certain observations in video tracklets, which we discuss next.
+
+The intuition behind STRF is demonstrated in Figure 1. We begin with the factorization module in the temporal dimension. First, the overall or “global” appearance of the person (e.g., color of clothes, skin, hair, etc) in a tracklet does not change (static) substantially over time. While one can argue these can change with illumination variations, we assume these variations are limited in a given camera view over a short period of time. Next, the walking patterns of a person may change over time, e.g., walking on a level surface vs. climbing stairs (dynamic). Consequently, there are two possible information factorization strategies when processing feature maps: low-frequency (static) sampling and high-frequency (dynamic) sampling. Low-frequency sampling of feature maps results in capturing the “slowlymoving” or approximately constant features, i.e., the appearance information. On the other hand, high-frequency sampling of feature maps results in capturing information that is more dynamically varying, i.e., walking patterns [35]. The temporal factorization module results in capturing static and dynamic features across time, which is especially helpful in identifying different individuals with similar appearance (see last row video tracklet in Figure 1).
+
+The spatial factorization module, on the other hand, does the same low-frequency (which we call “coarse”) and highfrequency (which we call “fine”) sampling and processing as above, but along the spatial $h \times w$ dimensions. This is motivated by commonly occurring real-world issues such as occlusions and frame misalignment. Under these scenarios, the spatial FFM’s high-frequency sampling and processing unit is able to capture more “details” of the person of interest as opposed to the other entities that are the causes of occlusion, or other background information in the case of misalignment. To understand this better, observe the attention maps for top row video tracklet in Figure 1. The baseline model, without our proposed module, highlights mostly the bicycle regions in the feature maps, whereas by adding our module, the model is able to capture the person regions in the frames more comprehensively. Similarly, to cover cases where there are no occlusions or misalignment, the spatial FFM’s low-frequency sampling and processing unit become responsible for capturing more slowly-varying or spatially global appearance information. This results in the spatial factorization module to capture two separate streams of spatial information for robust representations.
+
+To summarize, when multiple people in the gallery “look alike” (e.g., same clothes), features from our temporal factorization branch help disambiguate (i.e., people may look alike but walk differently). On the other hand, with occlusion/clutter, our idea is to rely on “local” features, which can be learned using our spatial branch. Our main contributions are as follows.
+
+• We present a novel framework in video-based re-ID to learn discriminative 3D features by factorizing both temporal and spatial dimension of features into low-frequency (static/coarse) and high-frequency (dynamic/fine) components to tackle misalignment, occlusion, and similar appearance problems.   
+• To realize these factorization, we propose a flexible trainable unit with negligible computational overhead, called Spatio-Temporal Representation Factorization (STRF) module, that can be used in conjunction with any baseline 3D-CNN based re-ID architecture (see Figure 2).   
+• We conduct extensive experiments on multiple datasets to demonstrate how the proposed STRF module improves the performance of baseline architectures and also achieves state-of-the-art performance obtained by standard re-ID evaluation protocols (see Table 2 and 3).
+
+# 2. Related Work
+
+In this section, we review some recent methods pertaining to video-based person re-ID, and later discuss 3D-CNNs as feature extractors for video re-ID tasks.
+
+Video-based re-ID. Following the success in image-based re-ID [7, 26, 32, 33, 36, 42, 56, 60], there has been much recent progress in video-based re-ID as well [5, 13, 17, 22,
+
+31, 34, 50, 62]. For instance, [51] proposed multi-granular hypergraph learning framework which leveraged hierarchically divided feature maps at last layer of feature encoder with different levels of granularities to capture spatial and temporal cues, treating both the spatial and temporal dimensions the same. Additionally, there have also been a class of methods [22, 28] that perform feature modulation by expanding the feature extractor with additional learning modules instead of processing just the last layer’s output as in [51]. Different from all the above works, we focus on learning factorized (dynamic/static and coarse/fine) information in both spatial and temporal dimensions (see Figure 2). This leads to a flexible feature processing module that can be used anywhere in any 3D-CNN based re-ID architecture, leading to improved performance of various baseline 3D-CNN models (see Table 2). We provide a characteristic comparison of recent works in Table 1.
+
+3D-CNN based Feature Extractor. 3D-CNNs [24] naturally process input videos to output spatio-temporal features, whereas 2D-CNNs need additional modules such as recurrent networks to extract temporal information. Given this advantage, 3D-CNNs are more suitable for videorelated applications [6, 11, 24, 48, 49], including videobased re-ID tasks [17, 29, 34]. For example, [14] introduced a two-stream model with the first branch comprised of 3D-CNNs and the other comprised of 2D-CNNs to extract temporal and spatial cues. In [17], appearance-preserving 3D convolution (AP3D) was proposed to leverage the idea of image registration [63] to perform feature-level image alignment. While these methods demonstrated good results, they either required both 3D and 2D CNNs [29], or additional operations, e.g., non-local convolutions, to achieve best performances [17], leading to parameter-wise bulky models. Furthermore, these methods do no explicitly exploit spatial cues of video tracklets. On the other hand, our proposed STRF method modifies the backbone feature encoder by means of a modular computational unit, does not require specialized modules such as recurrent networks or non-local operations, leading to only a minimal increase in learnable parameters while also demonstrating state-of-theart performance on benchmark datasets.
+
+Table 1: Characteristic comparison with state-of-the-art works. We compare our STRF with few current state-of-the-art works. Unlike these methods, STRF uses factorized information from both spatial (S) and temporal (T) dimensions, does not require non-local operations, and is adaptable to multiple baselines.   
+
+<table><tr><td rowspan="2">METHODS</td><td colspan="2">FACTORIZATION</td><td rowspan="2">WITHOUT
+NON-LOCAL?</td><td rowspan="2">GENERIC?</td></tr><tr><td>T?</td><td>S?</td></tr><tr><td>AP3D [17]</td><td>X</td><td>✓</td><td>X</td><td>✓</td></tr><tr><td>MGH [51]</td><td>✓</td><td>✓</td><td>X</td><td>X</td></tr><tr><td>AFA [5]</td><td>✓</td><td>X</td><td>✓</td><td>✓</td></tr><tr><td>STRF (Ours)</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr></table>
+
+# 3. Spatio-Temporal Factorization
+
+As noted in Section 1, existing re-ID methods for learning video representations do not focus on the complementarity that is provided by the spatial and temporal dimensions. Specifically, we conjecture that the temporal dimension contains both static (e.g., appearance across time) as well as dynamic (e.g., walking patterns) content, whereas the spatial dimension comprises both fine (e.g., focus on details such as a person’s legs that may be missed under occlusions) as well as coarse (e.g., overall global appearance) details. Consequently, we argue that all these features should be learned jointly in order to deal with unavoidable challenges such as appearance similarity, occlusions, and frame misalignment.
+
+To address these issues, we introduce Spatio-Temporal Representation Factorization (STRF), a generic parameterwise lightweight computational unit that can be inserted between convolutional layers in any 3D-CNN architecture for re-ID (note that by the term factorization, we refer to the joint sampling and processing operations for discussion below). This modularity makes STRF particularly appealing for practical applications that may require customized architectures based on data distribution. Along with the performance improvements in baseline architectures (see Table 2), STRF also demonstrates superior utility of the proposed module over existing specialized architectures for learning spatio-temporal re-ID representations (see Table 3) [17, 23, 29, 51, 52].
+
+Notations. Let ${ \pmb { \mathscr { V } } } = \left[ { \pmb { \mathscr { v } } } _ { 1 } , { \pmb { \mathscr { v } } } _ { 2 } , \cdots , { \pmb { \mathscr { v } } } _ { t } \right] \in \mathbb { R } ^ { t \times h \times w }$ denote an input video tracklet comprising $t$ frames each of height $h$ and width $w$ . Let $\mathcal { F } _ { \pmb { \theta } } ( \cdot )$ denote the feature encoder of any baseline 3D-CNN (e.g., I3D ResNet-50 [3]). Let $\pmb { f } _ { \ell } \in \overline { { \mathbb { R } ^ { c _ { \ell } \times t _ { \ell } \times h _ { \ell } \times w _ { \ell } } } }$ be the feature tensor at the `th layer of $\mathcal { F } _ { \theta } ( \cdot )$ , where $c _ { \ell } , t _ { \ell } , h _ { \ell }$ , and $w _ { \ell }$ indicate number of channels, number of frames, height, and width, respectively. Let the input and output feature volumes of our STRF module at the `th layer be $\pmb { f } _ { \ell } ^ { ( i ) }$ and $\pmb { f } _ { \ell } ^ { ( o ) }$ , respectively. Finally, let the static/coarse and dynamic/fine components be denoted with $\varsigma$ and $\tau$ , respectively and subscript $\pmb { t }$ and s denote the temporal and spatial dimension, respectively. We use $d \in \{ t , s \}$ and $k \in \{ \tau , \varsigma \}$ for compact notations.
+
+# 3.1. Feature Factorization Module (FFM)
+
+Given $\pmb { f } _ { \ell } ^ { ( i ) }$ f` , we propose to factorize this feature volume into four parts: static and dynamic content from temporal $t _ { \ell }$ dimension, and coarse and fine detail from spatial $h _ { \ell } \times w _ { \ell }$ dimension. The intuition here is that the static content in the temporal dimension will capture “what does not change over time”, e.g., appearance such as color of clothes, and the dynamic content will capture “what may change over time”, e.g., walking patterns [35]. Similarly, coarse details in the spatial dimension will capture overall global information in the current feature map (e.g., “where is the person?”) whereas fine detail helps address situations where the per-
+
+![](images/8c696d1fb467dd9957fc90a1b0f72bb59ee6537321b4f1b6d99fb4fb0d2d21bb.jpg)  
+Figure 2: Overview of STRF module. Our proposed module contains four factorization units being applied on input feature volume at `th layer to extract static/coarse and dynamic/fine information and generate richer feature representation. Each unit is composed of a Feature Factorization Module aided by the proposed Factorized Attention Mask block.
+
+son of interest may be occluded by other entities, by capturing local context at different locations of the feature map.
+
+Our motivations above are particularly relevant given existing 3D-CNN architectures for re-ID do not have explicit mechanisms to focus on features corresponding to the person of interest in cases such as occlusions, image misalignment, or people with similar clothing appearing together in same tracklet. Furthermore, such a factorization enables a 3D-CNN to weight features that are important for downstream matching and re-ID, e.g., the dynamic content along the temporal dimension is more important in cases where people wear similar clothes and can be distinguished only by their walking patterns.
+
+To realize this proposed factorization and feature reweighting, STRF proposes to use four FFM modules, in which each FFM learns a different type of attention mask from Factorized Attention Mask (FAM) block (we discuss detailed architecture of FAM in next section) for either static/dynamic or coarse/fine content along the temporal and spatial dimensions respectively, and output refined feature volumes. Specifically, given $\mathbf { \Delta } _ { f _ { \ell } ^ { \left( i \right) } }$ , we first reshape it into the feature volume $\widehat { f } _ { \ell } ^ { ( i ) }$ with size $c _ { \ell } t _ { \ell } \times h _ { \ell } w _ { \ell }$ and then, use the FAM block to generate a factorized attention mask $\mathcal { M } _ { d k }$ . This mask is then used to compute a new feature volume as:
+
+$$
+\widehat {\boldsymbol {f}} _ {\ell} ^ {(d k)} = \widehat {\boldsymbol {f}} _ {\ell} ^ {(\boldsymbol {i})} \mathcal {M} _ {d k} \quad d \in \{\boldsymbol {t}, \boldsymbol {s} \}, k \in \{\tau , \varsigma \} \tag {1}
+$$
+
+STRF then integrates the four attention-weighted feature volumes {f(t` $\{ \widehat { { \pmb f } } _ { \ell } ^ { ( t \tau ) } , \widehat { { \pmb f } } _ { \ell } ^ { ( t \varsigma ) } , \widehat { { \pmb f } } _ { \ell } ^ { ( s \tau ) } , \widehat { { \pmb f } } _ { \ell } ^ { ( s \varsigma ) } \}$ to output a new feature volume which is then passed on to the subsequent convolutional layer. The output of this subsequent layer is then processed by the next instantiation of the STRF. This way, STRF provides a flexible computational unit that can be easily integrated with existing 3D-CNN architectures. Our proposed methodology is illustrated in Figure 2 where one can note that the four individual factorization modules, $\mathrm { F F M } ( t , \tau )$ , $\operatorname { F F M } ( t , \varsigma )$ , $\operatorname { F F M } ( s , \tau )$ , and $\mathrm { F F M } ( s , \varsigma )$ , combine to produce an enhanced feature representation f(o)` $\pmb { f } _ { \ell } ^ { ( o ) }$ using their respective FAM blocks. We next discuss the fac-
+
+torization attention masks and each of these proposed individual FFM modules in more detail.
+
+# 3.2. Factorized Attention Masks (FAM) Block
+
+To realize the four-way factorization for the feature volume f (i)` $\pmb { f } _ { \ell } ^ { ( i ) }$ discussed above, we define four functions below:
+
+$$
+\mathcal {T} _ {d} ^ {k} \left(\boldsymbol {f} _ {\ell} ^ {(i)}\right) = \mathcal {G} _ {d k} \left(\mathcal {H} _ {d k} \left(\boldsymbol {f} _ {\ell} ^ {(i)}\right)\right), \tag {2}
+$$
+
+$$
+\text {w i t h}, \quad d \in \left\{\boldsymbol {t}, \boldsymbol {s} \right\}, k \in \left\{\tau , \varsigma \right\}
+$$
+
+where $\mathcal { G } _ { d k } ( \cdot )$ are the factorizing functions. Different for each FFM block, $\mathcal { G } _ { d k } ( \cdot )$ is designed using pooling functions to extract specific information after the input feature volume is passed through a channel reduction layer $\mathcal { H } _ { d k } ( \cdot ) : c _ { \ell } $ $c _ { \ell } / n$ , where $\mathcal { H } _ { d k } ( \cdot )$ is a convolutional layer with $c _ { \ell } / n$ kernels of size 1. Following [17, 25], we set $n = 1 6$ . With the output composite function $\mathcal { T } _ { d } ^ { k } \big ( f _ { \ell } ^ { ( i ) } \big )$ of size $c _ { \ell } / n t _ { \ell } \times h _ { \ell } w _ { \ell }$ from (2), we summarize input features by computing their variance matrix $\mathcal { C } _ { d k }$ to obtain a representation of each point of $T _ { d } ^ { k } \big ( f _ { \ell } ^ { ( i ) } \big )$ a s:
+
+$$
+\mathcal {C} _ {d k} = \kappa \mathcal {T} _ {d} ^ {k} \left(\boldsymbol {f} _ {\ell} ^ {(i)}\right) ^ {\top} \mathcal {T} _ {d} ^ {k} \left(\boldsymbol {f} _ {\ell} ^ {(i)}\right) \tag {3}
+$$
+
+where $\top$ represents transpose operation. We set the temperature hyper-parameter $\kappa$ as 4 following [17, 22]. Then, the factorizing mask is computed using the unnormalized sample covariance matrix as $\mathcal { M } _ { d k } ( q ) = \sigma ( \mathcal { C } _ { d k } )$ , where $\sigma ( \cdot )$ is the softmax function. This factorized mask is employed in (1) to obtain the specific factorized representation of $\pmb { f } _ { \ell } ^ { ( i ) }$ . Next, each factorization module is discussed in more detail.
+
+Temporal Factorization Module, $\mathbf { F F M } ( t , \tau , \varsigma )$ . While methods for learning static and dynamic information have been presented in prior work [1, 11, 19, 44], we take a modular approach to this problem, proposing computational units that can be applied at multiple layers of the base feature encoder. Instead of skipping frames as in [11], we define the following temporal factorizing functions:
+
+$$
+\mathcal {G} _ {\boldsymbol {t} \tau} = \operatorname {p o o l} \left(\boldsymbol {r} _ {\boldsymbol {t} \tau}, 1, 1\right), \mathcal {G} _ {\boldsymbol {t} \varsigma} = \operatorname {p o o l} \left(\boldsymbol {r} _ {\boldsymbol {t} \varsigma}, 1, 1\right) \tag {4}
+$$
+
+![](images/0120079e888d0a22161bf8a54339fe5c6c3e00b51a0ba50e390b719cb7d29dd7.jpg)  
+Figure 3: Illustration of our 3D-CNN model training and examples of proposed blocks. In our framework, we employ a 3D-CNN based model to learn discriminative features for input video tracklets (see Figure (A)). This model is built with inflated 2D-residual blocks with Stage 2 and Stage 3 replaced by our proposed STRF aided residual blocks (see Figure (B)).
+
+where $r _ { t \varsigma } > r _ { t \tau }$ . These degenerate pool functions can be implemented using the max pooling (denoted as $m$ ) and average pooling (denoted as $a$ ) operations with their corresponding static temporal resolutions $r _ { t \varsigma }$ and dynamic temporal resolutions $r _ { t \tau }$ . We also use suitable padding on $\mathcal { \bar { H } } _ { t \varsigma } ( f _ { \ell } ^ { ( i ) } )$ and $\mathcal { H } _ { t \tau } ( f _ { \ell } ^ { ( i ) } )$ to maintain the same size between the input and output feature volumes. The intuition behind setting $r _ { t \varsigma } > r _ { t \tau }$ is to factorize features in time dimension to capture the information that does not vary much, whereas $r _ { t \tau }$ helps in summarizing information that shows more variations. Capturing such static information with $\mathcal { G } _ { t \varsigma }$ will aid in learning the global appearance features of the person that does not change much along the time dimension. On the other hand, $\mathcal { G } _ { t \tau }$ captures dynamic information in the input feature volume, e.g., walking patterns of the person. Finally, the output of $\mathrm { F F M } ( t , \tau , \varsigma )$ is defined as:
+
+$$
+\boldsymbol {f} _ {\ell} ^ {(t o)} = \widehat {\boldsymbol {f}} _ {\ell} ^ {(t \tau)} + \widehat {\boldsymbol {f}} _ {\ell} ^ {(t \varsigma)} \tag {5}
+$$
+
+where $\widehat { f } _ { \ell } ^ { ( t \tau ) }$ and $\widehat { f } _ { \ell } ^ { ( t \varsigma ) }$ are computed using (1).
+
+Spatial Factorization Modules, $\mathbf { F F M } ( s , \tau , \varsigma )$ . Similar to the temporal dimension above, we factorize the feature volume along the spatial dimension as well, extracting coarselevel and fine-level information. The intuition here is that coarse-level information in the spatial dimension comprise global features of the person in the input frames that do not have much occlusion. For frames where the person is occluded or there is spatial misalignment, fine-level features capture the “person-part” of the frame. To realize this, we define the following spatial factorizing functions:
+
+$$
+\mathcal {G} _ {\boldsymbol {s} \tau} = \operatorname {p o o l} \left(1, r _ {\boldsymbol {s} \tau}, r _ {\boldsymbol {s} \tau}\right), \mathcal {G} _ {\boldsymbol {s} \varsigma} = \operatorname {p o o l} \left(1, r _ {\boldsymbol {s} \varsigma}, r _ {\boldsymbol {s} \varsigma}\right) \tag {6}
+$$
+
+where $r _ { s \varsigma } > r _ { s \tau }$ are the spatially coarse and fine resolution, respectively. As in $\mathrm { F F M } ( t , \tau , \varsigma )$ , we use appropriate padding on $\mathcal { H } _ { s _ { \zeta } } ( f _ { \ell } ^ { ( i ) } )$ and $\mathcal { H } _ { s \tau } ( \pmb { f } _ { \ell } ^ { ( i ) } )$ to maintain the same size between the input and output feature volumes. Finally, the output of $\mathrm { F F M } ( \pmb { s } , \tau , \varsigma )$ is defined as:
+
+$$
+\boldsymbol {f} _ {\ell} ^ {(s o)} = \widehat {\boldsymbol {f}} _ {\ell} ^ {(s \tau)} + \widehat {\boldsymbol {f}} _ {\ell} ^ {(s \varsigma)} \tag {7}
+$$
+
+where $\widehat { f } _ { \ell } ^ { ( s \tau ) }$ and $\widehat { f } _ { \ell } ^ { ( s \varsigma ) }$ are computed using (1). Note that when the resolutions are set as 1 in (6) and (4), the factorizing functions behave as identity mapping. In our experiments, we set $r _ { s \tau } = r _ { t \tau }$ and $r _ { s \varsigma } = r _ { t \varsigma }$ for simplicity.
+
+Integration and overall STRF output. After computing f (to)` $f _ { \ell } ^ { ( t o ) }$ and $\pmb { f } _ { \ell } ^ { ( s o ) }$ as discussed above, we provide two schemes to integrate them and generate the final feature volume output of our proposed STRF computational unit:
+
+$$
+\boldsymbol {f} _ {\ell} ^ {(o)} = \phi \left(\boldsymbol {f} _ {\ell} ^ {(t o)}, \boldsymbol {f} _ {\ell} ^ {(s o)}\right) \quad \text {w h e r e ,} \phi (\cdot) \in \{\rightarrow , \| \} \tag {8}
+$$
+
+Here, denotes using the temporal and spatial factorization modules in cascade, and $\parallel$ denotes using them in parallel. When in cascade, the input $\pmb { f } _ { \ell } ^ { ( i ) }$ is fed to both modules in sequence, i.e. $\mathrm { F F M } ( \pmb { s } , \tau , \varsigma )$ followed by $\mathrm { F F M } ( t , \tau , \varsigma )$ , or vice-versa. When in parallel, the outputs of $\mathrm { F F M } ( \pmb { s } , \tau , \varsigma )$ and $\mathrm { F F M } ( t , \tau , \varsigma )$ are simply added. In our experiments, we noticed only minor performance differences across these operations (see Figure 4(c)).
+
+Learning Objective. Any STRF-aided network can be trained in an end-to-end manner with following objective:
+
+$$
+\mathcal {L} = \mathcal {L} _ {\mathrm {c e}} + \mathcal {L} _ {\text {t r i p l e t}} \tag {9}
+$$
+
+where $\mathcal { L } _ { \mathrm { c e } }$ is the standard cross-entropy classification, $\mathcal { L } _ { \mathrm { t r i p l e t } }$ is the cosine distance based triplet loss with batchhard mining [21], and $\mathcal { L }$ is the overall loss function. Note that our method demonstrates state-of-the-art results (see Table 3) without any re-ID tricks [38], e.g. label smoothing [43], in our learning objective.
+
+How do we employ STRF? The problem of person re-ID benefited tremendously with introduction of residual blocks [15, 20]. With the backbone feature extractor as inflated C2D (time dimension of kernel set to 1) residual network, we propose to enhance its feature representation learning paradigm by simply replacing residual blocks at different stages with different STRF-aided I3D or STRF-aided Pseudo-3D (P3D) [39] residual blocks (see Figure 2(B)). To
+
+![](images/de8973b3579208cf3f8cfd3277afe44990544db4a83df7622fd282f67668d9f0.jpg)
+
+![](images/31725334ac4719bf6c5bfbb0e0afdb9dd51ce5902248e2e37006b58363cec7d1.jpg)
+
+![](images/9b4d519cec2d0bc36804cf355bd2ee91c1af348faa8e8527b6e3a178b6512324.jpg)  
+  
+Figure 4: Analysis of different components of STRF. (a) Each $( r _ { \varsigma } , r _ { \varsigma } )$ refers to spatially coarse resolutions $: ( 1 , r _ { \varsigma } , r _ { \varsigma } )$ , spatially fine resolutions : $( 1 , r _ { \tau } , r _ { \tau } )$ , temporally static resolutions : $( r _ { \varsigma } , 1 , 1 )$ , temporally dynamic resolutions : $( r _ { \tau } , 1 , 1 )$ . Best results are obtained with $( r _ { \varsigma } , r _ { \varsigma } ) = ( 1 , 3 )$ . (b) Performance of different combinations of factorizing functions $\mathcal { G } _ { d k } ( \cdot )$ : Best results are obtained when all $\mathcal { G } _ { d k } ( \cdot )$ are set as maxpooling function. (c) Performance of different integration operations $\phi ( \cdot )$ : Best results are obtained when the spatial module is followed by the temporal module.
+
+convert P3D residual blocks to their STRF-P3D forms, we add the STRF module with the convolutional layer of kernel size $3 \times 1 \times 1$ demonstrating the generic ability of the proposed unit. We have empirically analyzed and discussed this choice of location in the supplementary material. Moreover, a single STRF module introduces only minimal extraparameters which makes it parameter-wise lightweight but performance-wise beneficial (see Table 2).
+
+# 3.3. Discussion
+
+FAM vs Channel Attention (CA). We note that there are substantial differences between FAM and the popular CA strategy [8, 18, 54]. Unlike CA that has one global feature pooling layer, i.e., no separate spatial and temporal operations, FAM has four pooling functions $\mathcal { G } _ { d k } ( \cdot )$ , defined in (4) and (6). This captures both spatial and temporal feature dependencies without any new learning parameters. In fact, with $r _ { \varsigma }$ and $r _ { \tau }$ set to same size of the input feature maps, CA can be considered to be a special case of FAM.
+
+FFM vs Non-Local (NL). Unlike the popular NL module [46] where there is no factorization, FFM factorizes $f ^ { ( i ) }$ into its constituent spatio/temporal factors. The appropriate weighting of $f ^ { ( i ) }$ with these factors to obtain $f ^ { \left( o \right) }$ is automatically learned with FAM, making the proposed design different from NL and more suitable for re-ID. For additional empirical substantiation, using the P3DC architecture on the MARS dataset [58], the NL module gives $8 4 . 8 \%$ mAP and $8 9 . 9 \%$ R@1, whereas STRF gives $8 6 . 1 \%$ mAP and $9 0 . 3 \%$ R@1. Further, STRF only adds an additional ${ \sim } 0 . 5$ million parameters (w.r.t. the baseline) as opposed to NL’s ${ \sim } 5 $ million additional parameters, demonstrating better compute efficiency.
+
+Please see supplementary material for additional insights and discussions on our proposed STRF module.
+
+# 4. Experimentation
+
+Datasets, implementation details, and evaluation metrics. We conduct extensive experiments on standard publicly available video-based person re-ID datasets, includ-
+
+ing MARS [58], DukeMTMC-VideoReID [47], and iLIDS-VID [45]. For evaluation, we use the value of the cumulative matching characteristic curve at rank-1 $( \mathbb { R } ^ { @ 1 ) }$ , and mean average precision (mAP) [59]. See supplementary material for full implementation details.
+
+# 4.1. Improvement over Baselines
+
+Quantitative analysis. We build a model with inflated 2D convolutions in ResNet50 (temporal kernel size set to 1) architecture. We then replace stage 2 and stage 3 (See Table 5) with four residual blocks I3D (temporal kernel size set to 3) and three pseudo-3D residual blocks P3D-A, P3D-B and P3D-C to create four baselines. For comparative evaluation, we replace these I3D and P3D residual blocks with STRF-I3D, STRF-P3DA, STRF-P3DB and STRF-P3DC residual blocks respectively and summarize the results in Table 2. One can clearly note that the STRF-aided models give improved performance (at least $2 . 5 \%$ mAP increment for P3D baselines and about $0 . 5 \%$ mAP increment for I3D baseline on MARS), with the best performance achieved with STRF-P3DC. Similar trends can be observed on the DukeMTMC-VideoReID as well. Furthermore, when compared to the number of baseline model parameters (denoted in Table 2 as P(M) on MARS in the millions of parameters), the number of new parameters introduced by our proposed module is only 0.05 million more compared with I3D or P3D models, suggesting it does not add any substantial computational overhead. This also demonstrates that STRF can improve performance of diverse architectures. For all subsequent experiments, we report results with STRF-P3DC following its best performance from Table 2.
+
+Qualitative Analysis. To qualitatively demonstrate STRF’s impact, we visualize feature maps of challenging videos (e.g., occlusions, misalignment) using off-the-shelf techniques [17, 53] in Figure 5. Note that STRF helps focus more clearly on the person of interest (e.g., under “occlusion”, unlike the baseline, STRF is able to more clearly distinguish between person’s foreground and occlusion regions). Please see supplementary material for more qualitative and attention map results.
+
+Table 2: Baseline improvement. STRF consistently improves the performance of baseline models. P(M) is model size in millions.   
+
+<table><tr><td rowspan="3">MODEL</td><td rowspan="3">P(M)</td><td colspan="4">DATASETS</td></tr><tr><td colspan="2">MARS [58]</td><td colspan="2">DukeMTMC [47]</td></tr><tr><td>mAP (%)</td><td>R@1 (%)</td><td>mAP (%)</td><td>R@1 (%)</td></tr><tr><td>I3D</td><td>28.92</td><td>82.70</td><td>88.50</td><td>95.20</td><td>95.40</td></tr><tr><td>+ STRF</td><td>28.97</td><td>83.10</td><td>88.70</td><td>95.20</td><td>95.90</td></tr><tr><td>P3DA</td><td>25.48</td><td>83.20</td><td>88.90</td><td>95.00</td><td>95.00</td></tr><tr><td>+ STRF</td><td>25.53</td><td>85.40</td><td>89.80</td><td>95.60</td><td>96.00</td></tr><tr><td>P3DB</td><td>25.48</td><td>83.00</td><td>88.80</td><td>95.40</td><td>95.30</td></tr><tr><td>+ STRF</td><td>25.53</td><td>85.60</td><td>90.30</td><td>96.40</td><td>97.40</td></tr><tr><td>P3DC</td><td>25.48</td><td>83.10</td><td>88.50</td><td>95.30</td><td>95.30</td></tr><tr><td>+ STRF</td><td>25.53</td><td>86.10</td><td>90.30</td><td>96.20</td><td>97.20</td></tr></table>
+
+# 4.2. Ablation Study
+
+Utility of FAM block. Our temporal and spatial factorization modules are realized with the proposed factorized attention masks $\mathcal { M } _ { d k }$ . These self-attention masks are utilized to re-weight the input feature volume $\pmb { f } _ { \ell } ^ { ( i ) }$ in order to produce a richer representation of the video tracklet. Specific information captured via $\mathcal { M } _ { d k }$ (due to different $\mathcal { G } _ { d k }$ for both low-frequency (static/coarse) and high-frequency (dynamic/fine) information) enhance input feature volume to represent robust features by re-weighting them as in (1). Consequently, FAM is an important component of our proposed STRF module. To validate this, we present an analysis of STRF with and without the FAM in Figure 6(a) on MARS [58]. It can be observed that without FAM, the proposed module weakens the feature representations (non-weighted multiplication $( \otimes )$ of $\pmb { f } ^ { ( i ) }$ with itself) resulting in a comparatively lower performance. More concretely, without FAM, we do not have “coarse/fine” and “static/dynamic” factors, and hence FFM does not receive appropriate factors to re-weight $\pmb { f } ^ { ( i ) }$ . Note that using FAM alone (without FFM) is not possible by design.
+
+Analysis of different components. The proposed static and dynamic factorizing functions differ essentially in their temporal and spatial resolutions, and in Figure 4(a), we analyze various combinations of these resolution parameters while keeping the static resolution (or coarser) $r _ { \varsigma }$ larger than the dynamic (or finer) resolution $r _ { \tau }$ . Note that we keep the low- and high-frequency (static and coarse) resolutions of both these modules the same for simplicity and reduced parameter search space. The maximum resolution is dependent on output size of the last conv layer STRF is applied to. In our case, this last layer output is $\mathbf { \bar { \pmb f } } ^ { ( i ) } \in \mathbb { R } ^ { 2 0 4 8 \times 8 \times 1 4 \times 7 }$ , giving only possible choices of 1, 3, 5, and 7. A (1, 7, 7) filter will give $\pmb { f } ^ { ( o ) } \in \mathbb { R } ^ { 2 0 4 8 \times 8 \times 7 \times 1 }$ , i.e., $7 \times 1$ spatial dimension, unsuitable for computing $\mathcal { M } _ { d k }$ . As coarse resolution should be larger than fine resolution, only 4 plausible pairs (including $( r _ { \tau } , r _ { \varsigma } ) = ( 1 , 1 )$ for reference) results are presented. One can note from the graph that STRF performs the best with the resolution pair $( r _ { \tau } , r _ { \varsigma } ) = ( 1 , 3 )$ . The graph also shows that STRF is not very sensitive to the different resolution pairs, with a difference of $0 . 4 \%$ mAP
+
+![](images/1b0462564fbba400f377e7c0d7b1e0ee9f923581b9992ba92c2ec02360e485ec.jpg)  
+Figure 5: Attention map visualizations. STRF helps baseline models extract more discriminative features.
+
+when $( r _ { \tau } , r _ { \varsigma } ) = ( 3 , 5 )$ , and difference of $0 . 2 \%$ mAP when $( r _ { \tau } , r _ { \varsigma } ) = ( 1 , 5 )$ . Next, we analyze various combinations of factorizing functions defined as part of STRF modules in Figure 4(b). Our framework performs the best with both temporal and spatial $\mathcal { G } _ { d k }$ set to the max pool $( m )$ operation. This is likely because factorization based on max pooling helps focus on information that represents the discriminative portion of the feature volume. Finally, we analyze the different integration functions described in (8), where we note that the best performance is obtained when we first factorize $\pmb { f } _ { \ell } ^ { ( i ) }$ by the temporal factorization module $\mathrm { F F M } ( t , \tau , \varsigma )$ and then feed this output to spatial factorization module $\mathrm { F F M } ( \pmb { s } , \tau , \varsigma )$ , i.e., when $\phi ( \cdot ) = $ . Further, when $\phi ( \cdot ) = \|$ , a comparable performance is observed with a difference of about $0 . 4 \%$ in mAP.
+
+Which stage to add? Table 5 presents results of adding STRF at various stages of a baseline model. Using STRF module in Stage 2 and Stage 3 gives the best performance, but reduces (in mAP) when added to Stage 1. This is likely because with Stage 1, low-level features do not contain enough descriptive semantic information for detailed factorization. Additionally, Stage 4 (last two rows in Table 5) exhibits differing behavior, likely due to the feature pooling operation performed at this layer (for subsequent classification), which provides spatio-temporally-entangled gradients which may not be useful for our STRF module. Please see supplementary material for more results.
+
+Influence of each factorization module. To study the efficacy of each module, we perform an ablation analysis (see Table 4). Each individual module $\mathrm { F F M } ( t , \tau )$ , $\mathrm { F F M } ( t , \varsigma )$ , $\mathrm { F F M } ( \pmb { s } , \tau )$ , and $\mathrm { F F M } ( s , \varsigma )$ improves the baseline with at least $2 \%$ in mAP and $1 . 2 \%$ in $\mathbb { R } \ @ 1$ . Further, temporal and spatial factorization modules perform better when used together. The temporal/spatial similarity (in margins) in Ta-
+
+Table 3: Comparison with the state-of-the-art. STRF gives state-of-the-art performance on all datasets (best results in red, second best in blue, and third best results in green.)   
+
+<table><tr><td rowspan="3">METHODS</td><td rowspan="3">VENUE</td><td colspan="5">DATASETS</td></tr><tr><td colspan="2">MARS [58]</td><td colspan="2">DukeMTMC [47]</td><td>iLiDS-VID [45]</td></tr><tr><td>mAP (%)</td><td>R@1 (%)</td><td>mAP (%)</td><td>R@1 (%)</td><td>R@1 (%)</td></tr><tr><td>ADFD [57]</td><td>CVPR 2019</td><td>78.20</td><td>87.00</td><td>-</td><td>-</td><td>86.30</td></tr><tr><td>VRSTC [23]</td><td>CVPR 2019</td><td>82.30</td><td>88.50</td><td>93.50</td><td>95.00</td><td>86.30</td></tr><tr><td>COSAM [41]</td><td>ICCV 2019</td><td>79.90</td><td>84.90</td><td>94.10</td><td>95.40</td><td>79.60</td></tr><tr><td>GLTR [28]</td><td>ICCV 2019</td><td>78.50</td><td>87.00</td><td>93.74</td><td>96.29</td><td>86.00</td></tr><tr><td>MGH [51]</td><td>CVPR 2020</td><td>85.80</td><td>90.00</td><td>-</td><td>-</td><td>85.60</td></tr><tr><td>STGCN [52]</td><td>CVPR 2020</td><td>83.70</td><td>89.95</td><td>95.70</td><td>97.29</td><td>-</td></tr><tr><td>MG-RAFA [55]</td><td>CVPR 2020</td><td>85.90</td><td>88.80</td><td>-</td><td>-</td><td>88.60</td></tr><tr><td>TACAN [30]</td><td>WACV 2020</td><td>84.00</td><td>89.10</td><td>95.40</td><td>96.20</td><td>88.90</td></tr><tr><td>M3D [29]</td><td>TPAMI 2020</td><td>79.46</td><td>88.63</td><td>93.67</td><td>95.49</td><td>86.67</td></tr><tr><td>AFA [5]</td><td>ECCV 2020</td><td>82.90</td><td>90.20</td><td>95.40</td><td>97.20</td><td>88.50</td></tr><tr><td>AP3D [17]</td><td>ECCV 2020</td><td>85.60</td><td>90.70</td><td>96.10</td><td>97.20</td><td>88.70</td></tr><tr><td>TCLNet [22]</td><td>ECCV 2020</td><td>85.10</td><td>89.80</td><td>96.20</td><td>96.90</td><td>86.60</td></tr><tr><td>STRF</td><td>Ours</td><td>86.10</td><td>90.30</td><td>96.40</td><td>97.40</td><td>89.30</td></tr></table>
+
+ble 4 suggests each module is equally effective in identifying unique features w.r.t. baseline. Finally, the best performance is obtained when all modules are put together, demonstrating their focus on complementary information.
+
+# 4.3. Comparison with state-of-the-art approaches
+
+Despite being parameter-wise lightweight and agnostic to baseline architectures, STRF gives competitive results when compared to sophisticated 3D-CNN methods. As can be observed in Figure 6(b), STRF outperforms both AP3D and M3D with ${ \sim } 6$ million (w.r.t. AP3D [17]) and ${ \sim } 7 5$ mil-
+
+Table 4: Contribution of each factorization module. All four STRF modules $\mathrm { F F M } ( t , \tau )$ , FFM(t, ς) FFM(s, τ ), and $\mathrm { F F M } ( \pmb { s } , \pmb { \varsigma } )$ show improvement individually and collectively with the P3DC baseline on MARS [58].   
+Table 5: Per-stage influence of STRF. All four STRF modules are effective at various stages, with best results at Stage 2 and 3 of STRF-P3DC on MARS [58].   
+
+<table><tr><td rowspan="2">MODEL</td><td colspan="4">MODULES</td><td colspan="2">MARS [58]</td></tr><tr><td>(s,τ)</td><td>(s,ζ)</td><td>(t,τ)</td><td>(t,ζ)</td><td>mAP (%)</td><td>R@1 (%)</td></tr><tr><td>Baseline</td><td></td><td></td><td></td><td></td><td>83.10</td><td>88.50</td></tr><tr><td rowspan="9">Baseline + STRF</td><td>✓</td><td></td><td></td><td></td><td>85.20</td><td>89.70</td></tr><tr><td></td><td>✓</td><td></td><td></td><td>85.10</td><td>89.90</td></tr><tr><td></td><td></td><td>✓</td><td></td><td>85.20</td><td>89.90</td></tr><tr><td></td><td></td><td></td><td>✓</td><td>85.10</td><td>90.00</td></tr><tr><td>✓</td><td>✓</td><td></td><td></td><td>85.50</td><td>90.10</td></tr><tr><td></td><td></td><td>✓</td><td>✓</td><td>85.30</td><td>89.70</td></tr><tr><td>✓</td><td></td><td>✓</td><td></td><td>85.40</td><td>90.00</td></tr><tr><td></td><td>✓</td><td></td><td>✓</td><td>85.70</td><td>90.10</td></tr><tr><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>86.10</td><td>90.30</td></tr></table>
+
+<table><tr><td>MODEL</td><td>STAGE</td><td>mAP (%)</td><td>R@1 (%)</td></tr><tr><td>Baseline</td><td></td><td>83.10</td><td>88.50</td></tr><tr><td rowspan="6">Baseline + STRF</td><td>1</td><td>83.40</td><td>88.80</td></tr><tr><td>1,2</td><td>83.60</td><td>89.00</td></tr><tr><td>2,3</td><td>86.10</td><td>90.30</td></tr><tr><td>1,2,3</td><td>84.70</td><td>89.30</td></tr><tr><td>2,3,4</td><td>85.50</td><td>90.00</td></tr><tr><td>1,2,3,4</td><td>83.70</td><td>88.70</td></tr></table>
+
+lion (w.r.t. M3D [29]) fewer parameters. Finally, STRF establishes a new state-of-the-art (w.r.t. mAP) on MARS, DukeMTMC, and iLIDS-VID as shown in Table 3.
+
+![](images/440bd2f3e31f942bca4ba909780d9f5d6687aeef6507ad2e02bcb8111a8902cb.jpg)  
+(a) FAM ablation analysis
+
+![](images/404c2778f2ac703b8f632434717e3ca727d7f742f0355426fa5005bbaf412db5.jpg)  
+(b) Parameters vs mAP analysis   
+Figure 6: Advantages of STRF. (a) Without FAM block, FFM cannot factorize features leading to poor performance, signifying FAM’s importance in STRF. (b) STRF is comparatively parameterwise most light-weight and best performing 3D-CNN architecture.
+
+# 5. Conclusion
+
+We proposed a novel Spatio-Temporal Representation Factorization (STRF) computational unit that learns complementary spatio-temporal feature representations to deal with real-world re-ID challenges such as occlusions, imperfect detection, and appearance similarity. Our STRF module factorizes temporal dynamic/static, and spatial coarse/fine components from input 3D-CNN feature maps, helping baseline models discover more complementary and discriminative spatio-temporal representations for robust video re-ID. Extensive evaluations of our STRF module with various baseline architectures on benchmark videobased re-ID datasets show its efficacy and generality. As part of future work, we would like to extend it to general video understanding problems like semantic segmentation.
+
+Acknowledgements. This work was partially supported by ONR grants N00014-19-1-2264 and N00014-18-1-2252.
+
+# References
+
+[1] Abhishek Aich, Akash Gupta, Rameswar Panda, Rakib Hyder, M Salman Asif, and Amit K Roy-Chowdhury. Non-Adversarial Video Synthesis with Learned Prior. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 6090–6099, 2020. 4   
+[2] Octavia Camps, Mengran Gou, Tom Hebble, Srikrishna Karanam, Oliver Lehmann, Yang Li, Richard J Radke, Ziyan Wu, and Fei Xiong. From the Lab to the Real World: Re-Identification in an Airport Camera Network. IEEE Transaction on Circuit Systems and Video Technology, 27(3):540– 553, 2016. 1   
+[3] Joao Carreira and Andrew Zisserman. Quo Vadis, Action Recognition? A New Model and the Kinetics Dataset. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 6299–6308, 2017. 2, 3   
+[4] D. Chen, H. Li, T. Xiao, S. Yi, and X. Wang. Video Person Re-Identification With Competitive Snippet-Similarity Aggregation and Co-Attentive Snippet Embedding. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 1169–1178, 2018. 2   
+[5] Guangyi Chen, Yongming Rao, Jiwen Lu, and Jie Zhou. Temporal Coherence or Temporal Motion: Which is More Critical for Video-based Person Re-identification? In Proceedings of the European Conference of Computer Vision, 2020. 2, 3, 8, 14   
+[6] Wei Chen, Boqiang Liu, Suting Peng, Jiawei Sun, and Xu Qiao. S3D-UNet: Separable 3D U-Net for Brain Tumor Segmentation. In International MICCAI Brainlesion Workshop, pages 358–368. Springer, 2018. 3   
+[7] X. Chen, C. Fu, Y. Zhao, F. Zheng, J. Song, R. Ji, and Y. Yang. Salience-Guided Cascaded Suppression Network for Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, 2020. 1, 2   
+[8] Tao Dai, Jianrui Cai, Yongbing Zhang, Shu-Tao Xia, and Lei Zhang. Second-Order Attention Network for Single Image Super-Resolution. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 11065–11074, 2019. 6   
+[9] Afshin Dehghan, Shayan Modiri Assari, and Mubarak Shah. GMMCP tracker: Globally Optimal Generalized Maximum Multi-Clique Problem for Multiple Object Tracking. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 4091–4099, 2015. 13   
+[10] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. ImageNet: A Large-Scale Hierarchical Image Database. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 248–255. IEEE, 2009. 14   
+[11] Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He. SlowFast Networks for Video Recognition. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 6202–6211, 2019. 3, 4, 14   
+[12] Pedro F Felzenszwalb, Ross B Girshick, David McAllester, and Deva Ramanan. Object Detection with Discriminatively Trained Part-based Models. IEEE Transactions on Pattern Analysis and Machine Intelligence, 32(9):1627–1645, 2009. 13   
+[13] Jiyang Gao and Ram Nevatia. Revisiting Temporal Mod-
+
+eling for Video-based Person Re-Id. arXiv preprint arXiv:1805.02104, 2018. 2   
+[14] N. Gheissari, T. B. Sebastian, and R. Hartley. Person Reidentification Using Spatio-temporal Appearance. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 1528–1535, 2006. 3   
+[15] Mengran Gou, Ziyan Wu, Angels Rates-Borras, Octavia Camps, Richard J Radke, et al. A Systematic Evaluation and Benchmark for Person Re-Identification: Features, Metrics, and Datasets. IEEE Transactions on Pattern Analysis and Machine Intelligence, 41(3):523–536, 2018. 5   
+[16] Douglas Gray, Shane Brennan, and Hai Tao. Evaluating Appearance Models for Recognition, Re-acquisition, and Tracking. In Proceedings of the IEEE International Workshop on Performance Evaluation for Tracking and Surveillance, 2007. 1   
+[17] Xinqian Gu, Hong Chang, Bingpeng Ma, Hongkai Zhang, and Xilin Chen. Appearance-Preserving 3D Convolution for Video-based Person Re-identification. In Proceedings of the European Conference of Computer Vision, 2020. 2, 3, 4, 6, 8, 14   
+[18] Akash Gupta, Abhishek Aich, and Amit K Roy-Chowdhury. ALANET: Adaptive Latent Attention Network for Joint Video Deblurring and Interpolation. In Proceedings of the 28th ACM International Conference on Multimedia, pages 256–264, 2020. 6   
+[19] Akash Gupta, Padmaja Jonnalagedda, Bir Bhanu, and Amit K. Roy-Chowdhury. Ada-VSR: Adaptive Video Super-Resolution with Meta-Learning. In Proceedings of the 28th ACM International Conference on Multimedia, 2021. 4   
+[20] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep Residual Learning for Image Recognition. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 770–778, 2016. 5, 14   
+[21] Alexander Hermans, Lucas Beyer, and Bastian Leibe. In Defense of the Triplet Loss for Person Re-Identification. arXiv preprint arXiv:1703.07737, 2017. 5   
+[22] Ruibing Hou, Hong Chang, Bingpeng Ma, Shiguang Shan, and Xilin Chen. Temporal Complementary Learning for Video Person Re-Identification. In Proceedings of the European Conference of Computer Vision, 2020. 2, 3, 4, 8, 14   
+[23] Ruibing Hou, Bingpeng Ma, Hong Chang, Xinqian Gu, Shiguang Shan, and Xilin Chen. VRSTC: Occlusion-Free Video Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 7176–7185. IEEE, 2019. 2, 3, 8   
+[24] Shuiwang Ji, Wei Xu, Ming Yang, and Kai Yu. 3D Convolutional Neural Networks for Human Action Recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence, 35(1):221–231, 2012. 3   
+[25] Xin Jin, Cuiling Lan, Wenjun Zeng, Zhibo Chen, and Li Zhang. Style Normalization and Restitution for Generalizable Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 3143–3152, 2020. 4   
+[26] Srikrishna Karanam, Mengran Gou, Ziyan Wu, Angels Rates-Borras, Octavia Camps, Richard J Radke, et al. A Systematic Evaluation and Benchmark for Person Re-Identification: Features, Metrics, and Datasets. IEEE Transactions on Pattern Analysis and Machine Intelligence, 41(3):523–536, 2018. 2   
+[27] Diederik P Kingma and Jimmy Ba. Adam: A Method for
+
+Stochastic Optimization. arXiv preprint arXiv:1412.6980, 2014. 14   
+[28] Jianing Li, Jingdong Wang, Qi Tian, Wen Gao, and Shiliang Zhang. Global-Local Temporal Representations for Video Person Re-Identification. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 3958– 3967, 2019. 3, 8   
+[29] J. Li, S. Zhang, and T. Huang. Multi-scale temporal cues learning for video person re-identification. IEEE Transactions on Image Processing, 29:4461–4473, 2020. 3, 8   
+[30] Mengliu Li, Han Xu, Jinjun Wang, Wenpeng Li, and Yongli Sun. Temporal Aggregation with Clip-level Attention for Video-based Person Re-Identification. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision, pages 3376–3384, 2020. 8   
+[31] Shuang Li, Slawomir Bak, Peter Carr, and Xiaogang Wang. Diversity Regularized Spatiotemporal Attention for Videobased Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 369–378, 2018. 2, 3   
+[32] Wei Li, Xiatian Zhu, and Shaogang Gong. Harmonious Attention Network for Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, 2018. 1, 2   
+[33] S. Liao, Y. Hu, X. Zhu, and S. Z. Li. Person Re-Identification by Local Maximal Occurrence Representation and Metric Learning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 2197– 2206, 2015. 1, 2   
+[34] Xingyu Liao, Lingxiao He, Zhouwang Yang, and Chi Zhang. Video-based Person Re-Identification via 3D Convolutional Networks and Non-Local Attention. In Asian Conference on Computer Vision, pages 620–634, 2018. 3   
+[35] Yasushi Makihara, Daisuke Adachi, Chi Xu, and Yasushi Yagi. Gait Recognition by Deformable Registration. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops, pages 561–571, 2018. 2, 3   
+[36] Hyeonseob Nam, Jung-Woo Ha, and Jeonghee Kim. Dual Attention Networks for Multimodal Reasoning and Matching. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 299–307, 2017. 1, 2   
+[37] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, et al. PyTorch: An Imperative Style, High-Performance Deep Learning Library. In Advances in Neural Information Processing Systems, pages 8026–8037, 2019. 14   
+[38] Priyank Pathak, Amir Erfan Eshratifar, and Michael Gormish. Video Person Re-ID: Fantastic Techniques and Where to Find Them. arXiv preprint arXiv:1912.05295, 2019. 5   
+[39] Zhaofan Qiu, Ting Yao, and Tao Mei. Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 5533–5541, 2017. 5, 14   
+[40] Ergys Ristani, Francesco Solera, Roger Zou, Rita Cucchiara, and Carlo Tomasi. Performance Measures and a Data set for Multi-Target, Multi-Camera Tracking. In European Conference on Computer Vision, pages 17–35. Springer, 2016. 13   
+[41] Arulkumar Subramaniam, Athira Nambiar, and Anurag Mit-
+
+tal. Co-Segmentation Inspired Attention Networks for Video-based Person Re-Identification. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 562–572, 2019. 8   
+[42] Yifan Sun, Liang Zheng, Yi Yang, Qi Tian, and Shengjin Wang. Beyond Part Models: Person Retrieval with Refined Part Pooling (and A Strong Convolutional Baseline). In Proceedings of the European Conference of Computer Vision, 2018. 1, 2, 14   
+[43] Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jon Shlens, and Zbigniew Wojna. Rethinking the Inception Architecture for Computer Vision. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 2818–2826, 2016. 5   
+[44] Sergey Tulyakov, Ming-Yu Liu, Xiaodong Yang, and Jan Kautz. MoCoGAN: Decomposing Motion and Content for Video Generation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 1526–1535, 2018. 4   
+[45] Taiqing Wang, Shaogang Gong, Xiatian Zhu, and Shengjin Wang. Person Re-Identification by Video Ranking. In Proceedings of the European Conference on Computer Vision, pages 688–703. Springer, 2014. 6, 8, 12, 13   
+[46] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He. Non-local Neural Networks. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 7794–7803, 2018. 6   
+[47] Yu Wu, Yutian Lin, Xuanyi Dong, Yan Yan, Wanli Ouyang, and Yi Yang. Exploit the Unknown Gradually: One-Shot Video-based Person Re-Identification by Stepwise Learning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 5177–5186, 2018. 2, 6, 7, 8, 12, 13, 16, 17, 18   
+[48] Saining Xie, Chen Sun, Jonathan Huang, Zhuowen Tu, and Kevin Murphy. Rethinking Spatio-Temporal Feature Learning: Speed-Accuracy Trade-offs in Video Classification. In Proceedings of the European Conference on Computer Vision, pages 305–321, 2018. 3   
+[49] Huijuan Xu, Abir Das, and Kate Saenko. R-C3D: Region Convolutional 3D Network for Temporal Activity Detection. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 5783–5792, 2017. 3   
+[50] Shuangjie Xu, Yu Cheng, Kang Gu, Yang Yang, Shiyu Chang, and Pan Zhou. Jointly Attentive Spatial-Temporal Pooling Networks for Video-based Person Re-Identification. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 4733–4742, 2017. 3   
+[51] Yichao Yan, Jie Qin, Jiaxin Chen, Li Liu, Fan Zhu, Ying Tai, and Ling Shao. Learning Multi-Granular Hypergraphs for Video-based Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 2899–2908, 2020. 2, 3, 8   
+[52] Jinrui Yang, Wei-Shi Zheng, Qize Yang, Ying-Cong Chen, and Qi Tian. Spatial-Temporal Graph Convolutional Network for Video-based Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 3289–3299, 2020. 2, 3, 8, 14   
+[53] Sergey Zagoruyko and Nikos Komodakis. Paying More Attention to Attention: Improving the Performance of Convolutional Neural Networks via Attention Transfer. arXiv preprint arXiv:1612.03928, 2016. 6   
+[54] Yulun Zhang, Kunpeng Li, Kai Li, Lichen Wang, Bineng
+
+Zhong, and Yun Fu. Image Super-Resolution using Very Deep Residual Channel Attention Networks. In Proceedings of the European Conference on Computer Vision, pages 286–301, 2018. 6   
+[55] Zhizheng Zhang, Cuiling Lan, Wenjun Zeng, and Zhibo Chen. Multi-Granularity Reference-Aided Attentive Feature Aggregation for Video-based Person Re-identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 10407–10416, 2020. 2, 8   
+[56] Z. Zhang, C. Lan, W. Zeng, X. Jin, and Z. Chen. Relation-Aware Global Attention for Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, 2020. 1, 2   
+[57] Yiru Zhao, Xu Shen, Zhongming Jin, Hongtao Lu, and Xiansheng Hua. Attribute-Driven Feature Disentangling and Temporal Aggregation for Video Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 4913–4922, 2019. 8   
+[58] Liang Zheng, Zhi Bie, Yifan Sun, Jingdong Wang, Chi Su, Shengjin Wang, and Qi Tian. MARS: A Video Benchmark for Large-Scale Person Re-Identification. In Proceedings of the European Conference on Computer Vision, pages 868– 884, 2016. 2, 6, 7, 8, 12, 13, 14, 17, 18   
+[59] Liang Zheng, Liyue Shen, Lu Tian, Shengjin Wang, Jingdong Wang, and Qi Tian. Scalable Person Re-Identification: A Benchmark. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 1116–1124, 2015. 6   
+[60] M. Zheng, S. Karanam, Z. Wu, and R. J. Radke. Re-Identification with Consistent Attentive Siamese Networks. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, 2019. 1, 2   
+[61] Zhun Zhong, Liang Zheng, Guoliang Kang, Shaozi Li, and Yi Yang. Random Erasing Data Augmentation. In Proceedings of the AAAI Conference on Artificial Intelligence, pages 13001–13008, 2020. 14   
+[62] Zhen Zhou, Yan Huang, Wei Wang, Liang Wang, and Tieniu Tan. See the Forest for the Trees: Joint Spatial and Temporal Recurrent Neural Networks for Video-based Person Re-Identification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 4747– 4756, 2017. 3   
+[63] Barbara Zitova and Jan Flusser. Image Registration Methods: A Survey. Image and Vision Computing, 21(11):977–1000, 2003. 3
+
+# Spatio-Temporal Representation Factorization for Video-based Person Re-Identification (Supplementary Material)
+
+# CONTENTS
+
+A. Simplified Demonstration of STRF 13   
+B. Datasets Details . . 13   
+C. Implementation Details . . . . 14   
+D. Additional Discussions on STRF . . . 14   
+E. Attention Maps 15   
+F. Qualitative Results . . 15
+
+# List of Tables
+
+1 Additional experiments on per-stage influence of STRF . . . . . . . . . 14   
+2 Additional analysis of STRF’s four factorization components . . . . . . 14
+
+# List of Figures
+
+1 Sample tracklets from DukeMTMC-VideoReID [47], MARS [58], iLIDS-VID [45] datasets. . 13   
+2 Design choice for STRF: Location of STRF in residual modules . . . . 14   
+3 More attention maps visualization on DukeMTMC-VideoReID [47], MARS [58] . 17   
+4 Rank-1 $( \mathbb { R } ^ { \ @ 1 ) }$ retrieval results in challenging scenarios on DukeMTMC-VideoReID [47], MARS [58] 18
+
+![](images/dddf498a49de91636d110fce464cbf4b91796d08abaf8152775f7dcc7e3b6d29.jpg)
+
+![](images/f03e51308be2d47a87815e2f68046294142b2d45985d07d742098f7642838e2a.jpg)  
+(a) DukeMTMC-VideoReID [47]
+
+![](images/a2fe5e9458cbc87ec3d93b1de37ab58be78e4b45310228b0a45e70b18a9d5927.jpg)
+
+![](images/18db468716b064e02ebb93376e93dda22fe8549fa9f0aad49ceb44d08ec43929.jpg)  
+(b) MARS [58]
+
+![](images/b7a750cf7f8373e685e57c213d97d5a4e37bceeb25b4daf456b06314f21575b2.jpg)
+
+![](images/1846142047aa9065799a17e894366702e7e8f6b30c704e91e20e3b2c2b2d3e57.jpg)  
+(c) iLIDS-VID [45]  
+Figure 1: Sample tracklets from the (a) DukeMTMC-VideoReID, (b) MARS, (c) iLIDS-VID datasets. Rows correspond to different persons. As seen from the tracklets, video-based person re-identification is a challenging problem due to occlusions, similar appearances in different identities, and misaligned frames. Best viewed in color.
+
+# A. Simplified Demonstration of STRF
+
+We present a simplified demonstration of our proposed framework STRF. STRF is designed to extract four types of information from input feature maps. Intuitively, STRF learns:
+
+I. What is static temporally or changing slowly in time (e.g., how people look, TS)   
+II. What is changing temporally or dynamic in time (e.g., how people move, $T D$ )   
+III. What is coarsely observable spatially (e.g., global appearance/outline, SC)   
+IV. What is finely observable spatially (e.g., fine appearance details, $S F$
+
+Each “factor” above has its own contribution. For instance, $T D$ can provide robust features when people can only be distinguished based on motion/dynamics (e.g., same dress code). Under frame misalignment, TS (with SF/SC) can provide person-specific features while suppressing background/occlusions. The questions, then, are
+
+Q1. How are they learned?
+
+Q2. How to “weight” the input feature map using them?
+
+Factor-specific pooling functions $\mathcal { G } _ { d k } ( \cdot )$ help answer Q1 above. Given input feature map $\pmb { f } _ { \ell } ^ { ( i ) } \in \mathbb { R } ^ { c _ { \ell } \times f _ { \ell } \times h _ { \ell } \times w _ { \ell } }$ (e.g., channels $c _ { \ell } = 2 0 4 8$ , frames $f _ { \ell } = 8$ , height $h _ { \ell } = 1 4$ , width $w _ { \ell } = 7$ ), each $\mathcal { G } _ { d k } ( \cdot )$ operates differently. For instance, $\mathcal { G } _ { t \varsigma } ( \cdot )$ of TS uses a $4 \times 1 \times 1$ kernel (with stride 4) to give intermediate feature map $\pmb { f } _ { \ell } ^ { ( p ) } \in \mathbb { R } ^ { c \times 2 \times h \times w }$ , i.e., temporally pooling 8 into 2 feature maps to capture what changes slowly over time. On the other hand, TD’s $\mathcal { G } _ { t \tau } ( \cdot )$ , with kernel $2 \times 1 \times 1$ , gives $\pmb { f } _ { \ell } ^ { ( p ) } \in \mathbb { R } ^ { c \times { 4 } \times h \times w }$ , i.e., more temporal feature maps (i.e. 4) since one needs more data points to capture what is changing dynamically (compared to TS above) in time. Similar argument holds for SF/SC spatially. Finally, the factor-specific attention map $\mathcal { M } _ { d k }$ helps weight feature volumes appropriately using matrix multiplication in eq. (1) (main paper) towards our objective function (helping answer question Q2 above). This shows why 4 pooling functions are necessary. As each FFM has unique $\mathcal { G } _ { d k } ( \cdot )$ , they are different and help in focusing different aspects of information available in input feature maps.
+
+# B. Datasets Details
+
+In this section, we provide more details for each of the three datasets, MARS [58], DukeMTMC-VideoReID [47], and iLIDS-VID [45], used in the paper. Sample video tracklets for each are shown in Figure 1.
+
+ MARS [58]: MARS is a large-scale multi-camera (six views) dataset, comprising 17503 tracklets corresponding to 1261 identities, with an average number of 59 frames per tracklet. Of the 1261 identities, 625 identities are used for training and the rest for testing. Additionally, it has 3248 distractor tracklets to be used as part of the gallery. Each bounding box is detected and subsequently tracked using the DPM detection [12] and GMCP tracking [9] algorithms, respectively.   
+ DukeMTMC-VideoReID [47]: DukeMTMC-VideoReID is part of the DukeMTMC tracking dataset [40], comprising 1812 identities of which 702 are used for training, 702 for testing, and the rest 408 as distractors. In total, there are 2196 video tracklets for training and 2636 video tracklets for testing. Each frame in the video tracklet is sampled at an interval of 12 frames and has manually annotated bounding boxes.   
+ iLIDS-VID [45]: iLIDS-VID is a two-camera-view dataset comprising 600 video tracklets with 300 identities with an average of 73 frames per identity and manually annotated bounding boxes.
+
+# C. Implementation Details
+
+Hyperparameters Details. We build our feature extractors by first inflating 2D-ResNet50 [20], pre-trained on ImageNet [10], with time dimension of all kernels set to 1 (See Figure 2(A) in main manuscript). The last stride of the model is set to 1 following [42, 52]. Then, we replace stage 2 and 3 with the proposed STRF-P3D residual blocks. We train our model with the Adam [27] optimizer with a weight decay of 0.0005 for 250 epochs. The initial learning rate is set to 0.0003, and is reduced by a factor of 10 times after every 50 epochs. For data augmentation, we use random erasing [61] and random horizontal flip following [5, 22]. As part of each training batch, we randomly sample 4 frames with a stride of 8 frames to form a clip for each tracklet. Each batch contains 8 persons with 4 video clips each. All the frames are resized to $2 5 6 \times 1 2 8$ . The feature dimension is set to 2048 which is obtained after temporal pooling for both training and testing. We use PyTorch [37] for all our experiments. Training time is ${ \sim } 1 0$ hrs on 3 NVIDIA Tesla-V100 GPUs.
+
+Testing Protocol. For fair comparisons, we follow exact testing protocols as in prior works [17, 22]. We split each video tracklet into several four-frame clips and extract their feature representations. The final feature representation is computed by averaging across all the clips. Finally, for retrieval, cosine distances are computed between query and gallery video features.
+
+# D. Additional Discussions on STRF
+
+Location of STRF in Pseudo-3D [39] residual blocks. We observe in our preliminary experiments that STRF is more effective with the $3 \times 1 \times 1$ convolutional layer rather than the $1 \times 3 \times 3$ convolutional layer (see Figure 1). Hence, we place the STRF module with the $3 \times 1 \times 1$ convolutional layer as indicated in Figure 2(B) of the main manuscript. One explanation for this behavior of STRF can be attributed to the fact that time-degenerate convolutions are more effective in extracting rich information of temporal dimension which has shown to be more important for recognition in [5, 11]. Moreover, the temporal integrity is diminished with $1 \times 3 \times 3$ as each feature map in the volume is treated individually. Hence, after the proposed enhancement of the feature volume, the $3 \times 1 \times 1$ convolutional layer performs comparatively well.
+
+Additional analysis of STRF on different stages of feature extractor. We present additional analysis of the impact of adding the proposed STRF module at various stages to the baseline model in Table 2. We can observe that the STRF module is effective at every stage to enhance the performance of the baseline model.
+
+Table 1: Per-stage influence of STRF. STRF is effective at various stages of STRF-P3DC on MARS [58].   
+
+<table><tr><td>MODEL</td><td>STAGE</td><td>mAP (%)</td><td>R@1 (%)</td></tr><tr><td>Baseline</td><td></td><td>83.10</td><td>88.50</td></tr><tr><td rowspan="4">Baseline +STRF</td><td>2</td><td>85.40</td><td>89.70</td></tr><tr><td>3</td><td>85.20</td><td>89.80</td></tr><tr><td>3,4</td><td>84.00</td><td>89.40</td></tr><tr><td>2,3,4</td><td>85.30</td><td>90.10</td></tr></table>
+
+![](images/4dbeb6420cbe945fb9c11c0fb768d98c7678c0d90f849fb6f8b5b70b23cfaca9.jpg)  
+Figure 2: Location of STRF. Our STRF module performs the best with $3 \times 1 \times 1$ compared to $1 \times 3 \times 3$ as demonstrated here on MARS [58].
+
+Additional analysis of STRF’s four factorization components. We present additional analysis of the different combinations of factorization modules of STRF in Table 2.
+
+Table 2: Contribution of each factorization module. Additional analysis of STRF’s four factorization components with the P3DC baseline on MARS [58].   
+
+<table><tr><td>(s,τ)</td><td>(s,ζ)</td><td>(t,τ)</td><td>(t,ζ)</td><td>mAP(%)</td><td>R@1(%)</td></tr><tr><td>✓</td><td></td><td></td><td>✓</td><td>85.40</td><td>89.50</td></tr><tr><td></td><td>✓</td><td>✓</td><td></td><td>85.30</td><td>89.60</td></tr><tr><td>✓</td><td>✓</td><td></td><td>✓</td><td>85.60</td><td>90.10</td></tr><tr><td>✓</td><td>✓</td><td>✓</td><td></td><td>85.70</td><td>90.20</td></tr><tr><td>✓</td><td></td><td>✓</td><td>✓</td><td>85.40</td><td>89.80</td></tr><tr><td></td><td>✓</td><td>✓</td><td>✓</td><td>85.60</td><td>90.00</td></tr></table>
+
+# E. Attention Maps
+
+In this section, we present the efficacy of the proposed STRF module in challenging real-world scenarios of occlusion, frame misalignment, and different identities with similar appearance. From Figure 3(a) (DukeMTMC-VideoReID) and Figure 3(b) (MARS), it can be observed that STRF is able to locate the person of interest more precisely when employed with the baseline model. Note that these attention maps are obtained from stage 3 of the feature extractor as we add our proposed module here.
+
+# F. Qualitative Results
+
+In this section, we present some cases where the baseline model was unable to find the right match of the query in the gallery (see Figure 4(a) for DukeMTMC-VideoReID and Figure 4(b) for MARS) in Rank-1 retrieval. It can be observed that our proposed module helps to enhance the ability of the baseline model to identify the person of interest in difficult examples.
+
+![](images/13c9ba0e57772c021819da21bbd398e22d1950fd1341e29274624339921f5f31.jpg)
+
+![](images/bc37b9e3d9bbdaf4d2014f689f41ac1bd133c3937478effe577fbc7a0ec09e66.jpg)
+
+![](images/bb7cfd6efb3aa563f5f69693deeced85dc40b491d8abdc86ea6a7f52f43bf625.jpg)  
+similar appearance different identites
+
+![](images/5e35bc451c88b1250061ec8d11e0d609df4d85619a2effc992786fe9e157f884.jpg)
+
+![](images/45362829fb6a5d7a1f8b492eb54491a85959122db5585a2811244b2c24cf0ded.jpg)
+
+![](images/3cf42809bc28943c88d6cdfe58cc63f06c496776a2307a9978b8358ef6237d0a.jpg)
+
+![](images/9ada14f73ba7ff8b30748a16d481a43ec088e52bdd7565cf89d301a138fcdcfd.jpg)
+
+![](images/3c6053b92aee64d37402833fb0284871e88e86a539bedab48aef51af2292b5a2.jpg)
+
+![](images/34ba250607adb633827bbcbb6b0be63c5375f742d3ba7e95ad86244d7db74bfe.jpg)  
+misalignment
+
+![](images/036673e5264a7256371ce7994a52067c0eb5a87c55903bb7a84958887c524c20.jpg)
+
+![](images/18c81f6975a0226381808beba9c533f1628a07bd7eb27f8bd94ac75478d1acb7.jpg)
+
+![](images/189abd2149703ae9a4e76f8d846048a4945cec1dae6d6dca6539e81025e9046c.jpg)
+
+![](images/2c5bf0a1aabf7ea8f1f8ee175e83215871ebd3d3ffd1448ae0035868014d6ee8.jpg)
+
+![](images/2666e79167b6a46a2779e11ce33880565e75d2ab5c52d7a5abec01cf4f852dfe.jpg)
+
+![](images/09ecb688db775ee7a1684a33008aec1e0b95f9e59746b192ab733d1035277731.jpg)
+
+![](images/b9af3c21b9d0ccbeb79343d8d4a81370a1c5c8ab509a5f79212b809260cf10ab.jpg)
+
+![](images/7281787b44bf0d93a2fe218ea1e8ec503773c9d91f72894d5e9bc75aba10200a.jpg)
+
+![](images/a6cb4307ff0ad95341adca77a1a4ae9f37795c7b7b63a696a48dd982f3d06192.jpg)
+
+![](images/3c16f33891e1edf19ec155c046a9aced921009fa3540fedaff66304df0b1dcea.jpg)
+
+![](images/53d94f8737f78afb84267975311a4b3b312c05582b651f1fe99562a9ab1705e1.jpg)
+
+![](images/f8749d9e594a9560d4e83b016e7d120dfc3a8993a013281907a701229d421a5d.jpg)
+
+![](images/accfcad87872649282061c13630f9e0cf4c0a9b4022bfd08379feef2f2f914e4.jpg)
+
+![](images/d46e8f4b204c400145c80981dd4938ddf41e73deb0ac129c58141b5de71ac6a6.jpg)
+
+![](images/4054947720e031052635665a7a6b3ba34cd031b1165553dce1e9eda6efa0c7f4.jpg)  
+occlusion   
+(a) DukeMTMC-VideoReID [47]
+
+![](images/7692f2f99f180635c7ec8b04a67c2dec85f088af188555143fa169ba33064c48.jpg)  
+video tracklet
+
+![](images/f45d19af99384e465f6bfc7746c7f38182579bbd4dad640f69bdd8675b0b6719.jpg)  
+Baseline
+
+![](images/f3241af2c8efe9212853f79b88451a1b0a54e5791be73b8519ad645d19d1b360.jpg)  
+Baseline + STRF
+
+![](images/0e4ab956bda43ff96030c2f7ac83e595391f41757cb64df88e5607cebeda661e.jpg)
+
+![](images/12a2083dc7c3a2c75852d9ff3190b50e402e3518d543fa6b59a7d4b30248cf9c.jpg)
+
+![](images/ffdc5829d18adc0f82bf7075c29e84ddc1a6b8b66d2ad42d8db3a733c04dd303.jpg)
+
+![](images/a667838db7bb581533807cbb9cca3c8965bb49ffe886344f9dd51587137716ce.jpg)
+
+![](images/4efdce145ea67196565a35aef3fe596781be03a51fcb40ee001f43d531d569f4.jpg)
+
+![](images/60da7afd1741166c632d5df4fc2a55e19dc0de4c385ac8515b1461441d84dd58.jpg)  
+similar appearance different identites
+
+![](images/c7752788e17568d539045908127a973d10d1a19a0d3909ba787e27d2a8c896f4.jpg)
+
+![](images/88bf7ece94630745fd93141ca759126ded3cf1b5ff51c9de730e69acfe0f6681.jpg)
+
+![](images/4dc1075196ca4e18eb28be0f1f627b9e11801c3f88e5b846a0c1da93cfa87c15.jpg)
+
+![](images/90d0d8676d10e399a63bc43b8f51cad425e170b9dde5569201c508850ef12911.jpg)
+
+![](images/f2e17c5ab12728621184e5615872853d028cc7c34ed6d23b3396bc417d0f61d3.jpg)
+
+![](images/ce6dade7d7d7b850fc6c855a37642106d2433e177a089b781ec8fbd015f797e0.jpg)  
+misalignment
+
+![](images/3456cf29d85872f9559edd2ee3173b6c6984880f97a7eb974d495cfc0b95c91e.jpg)
+
+![](images/9e8808a31879f24ed23a4cde80e9e5ed787de1821376999f5298dc5f19f554d6.jpg)
+
+![](images/05b3d0473e5c91a2e192cbcb05f3703d3ac5efb939b4ae507206d7db878a024b.jpg)
+
+![](images/e58de148c2f97924aed2b81ea1d1b9f672453315286a1a1044ac3ae1ae764570.jpg)
+
+![](images/610916379f786595428e13871b0ef88378c3735e5a5564beb3d9576c84a2165e.jpg)
+
+![](images/ef9f9fa220460c47cd9f782442d9b58e146b5cf3d6e581d3af55a6b8b5e5c3a4.jpg)
+
+![](images/2d92f4ecc0c1f15f95d36ef9e3f6611126e2bf7bbd59725137f846420eaad707.jpg)
+
+![](images/a2f630dee7fbbc0782cb30c9ecba9e69309d9b2cfafa3caf84b842cbaee5dc2b.jpg)
+
+![](images/13fda64343edfeaeae12db9dbe017abbfea645f3d08501a6ca95309533e9ae99.jpg)  
+occlusion   
+(b) MARS [58]   
+Figure 3: More attention maps visualization on DukeMTMC-VideoReID [47], MARS [58]. We present attention maps corresponding to different real-world challenges where our proposed module STRF enabled the baseline (P3DB for DukeMTMC-VideoReID [47], P3DC for MARS [58]) to correctly locate the person of interest in the video tracklet. Best viewed in color.
+
+![](images/344b0b0dc641c1fc3b46788afae68093cb4b3d94ae7831c16dece3231e3ef8a0.jpg)  
+0046
+
+![](images/cadb84006113cbb1ed1a20f3744a1bfcfa160c486bcb2ab66d715541c9493f38.jpg)  
+0047
+
+![](images/5fc78b2300e4ebc9bb2e039ce8a8942198660698eba363a6b1d468851b8e11a6.jpg)  
+Baseline + STRF  
+0046
+
+![](images/dbb96ad2820a9cd2c047da10d3663383b7488c7c4c9ce3c0940a520dcb4a50e6.jpg)  
+0149
+
+![](images/139272c605ff3eb80bbcb38450d85f5dc83f3caa4423fdab061a28fbeb2ff5f2.jpg)  
+0516
+
+![](images/b7fa99c9ee0207c898802e312bb94eea4e4b198b17c7ff43693e127b34c4e59f.jpg)  
+0149
+
+![](images/9560be816133f94e5cf027d6d4368e0069cd4b2a98a9658a0653222ac1719fe4.jpg)  
+0756
+
+![](images/9cd11b646a430201721b3a9681faf79fbe529dfa57df19395defc31560d88b97.jpg)  
+0755
+
+![](images/110c01dad4c6b3887184e6fbbd6fe5ff2deed35a402f1a03ed4beead26cd4ddb.jpg)  
+0756   
+(a) DukeMTMC-VideoReID [47]
+
+![](images/43209d86add9fe014b2665771d88f15a22b9c20f4dfd47f053a859d0787d204d.jpg)  
+Query   
+0008
+
+![](images/68fe35e267422d4d4702814cb8be6aaca04fbc7bc5b5cdba991cbe579a233ddc.jpg)  
+0292
+
+![](images/a032aaf0dc23bd0aa8bca202c16c620e00c6dda33b9c3518cb9bbbb173e42519.jpg)  
+0008
+
+![](images/c5622ffe676ac5e4e18edd2be7c96b8403af9bf762bfcb6a8c1803abc13b92e5.jpg)  
+0024
+
+![](images/64287ecee616d71a466ad5c9bf7daac5ac686b578c543e0df43c7a8e9a116608.jpg)  
+0000
+
+![](images/7b3a76516d3b4988666c9fe181533533bbf76d43efa2bff299f6fc12dbcf5bd5.jpg)  
+0024
+
+![](images/d00d74f501b1b1dfb8f7e4110044dc0c54e75578a97fca33d4f5cc4723a2658e.jpg)  
+0130
+
+![](images/78dd5e5372e467a03967dc70810945eef7d1355c24012582bf877d40b1d717a7.jpg)  
+0630
+
+![](images/45b3ad38d3a79dca83e31e67ad9a885837740c6ee88ab7f610f32be823e44078.jpg)  
+0130   
+(b) MARS [58]   
+Figure 4: Rank-1 $( \mathbf { R } @ \mathbf { 1 } )$ retrieval results in challenging scenarios on DukeMTMC-VideoReID [47], MARS [58]. We present $\mathbf { R } \ @ 1$ retrieval cases where our proposed module STRF enabled the baseline (P3DB for DukeMTMC-VideoReID [47], P3DC for MARS [58]) to correctly identify the query in the gallery. Red bounding boxes indicates incorrect retrieval. Green bounding boxes indicates correct retrieval. Blue indicates labels. Best viewed in color.

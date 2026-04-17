@@ -1,0 +1,4188 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Knowledge Base Question Answering by Case-based Reasoning over Subgraphs "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        282,
+        109,
+        691,
+        156
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Rajarshi Das * 1 Ameya Godbole * 2 Ankita Naik 1 Elliot Tower 1 Robin Jia 2 Manzil Zaheer 3 Hannaneh Hajishirzi 4 Andrew McCallum 1 "
+          }
+        ]
+      },
+      "bbox": [
+        210,
+        198,
+        759,
+        229
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        241,
+        258,
+        318,
+        273
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Question answering (QA) over knowledge bases (KBs) is challenging because of the diverse, essentially unbounded, types of reasoning patterns needed. However, we hypothesize in a large KB, reasoning patterns required to answer a query type reoccur for various entities in their respective subgraph neighborhoods. Leveraging this structural similarity between local neighborhoods of different subgraphs, we introduce a semiparametric model (CBR-SUBG) with (i) a nonparametric component that for each query, dynamically retrieves other similar "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "-nearest neighbor (KNN) training queries along with query-specific subgraphs and (ii) a parametric component that is trained to identify the (latent) reasoning patterns from the subgraphs of KNN queries and then apply them to the subgraph of the target query. We also propose an adaptive subgraph collection strategy to select a query-specific compact subgraph, allowing us to scale to full Freebase KB containing billions of facts. We show that CBR-SUBG can answer queries requiring subgraph reasoning patterns and performs competitively with the best models on several KBQA benchmarks. Our subgraph collection strategy also produces more compact subgraphs (e.g. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "55 \\%"
+          },
+          {
+            "type": "text",
+            "content": "reduction in size for WebQSP while increasing answer recall by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "4 . 8 5 \\% ) ^ { 1 }"
+          },
+          {
+            "type": "text",
+            "content": "1 . "
+          }
+        ]
+      },
+      "bbox": [
+        117,
+        284,
+        444,
+        691
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1. Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        86,
+        713,
+        217,
+        728
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Knowledge bases (KBs) store massive amounts of rich symbolic facts about real-world entities in the form of relation "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        739,
+        475,
+        768
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/20847b21fe12c1d08a097873d5b64ccce74f3eeae746d4847b8adeb5561fccc7.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: Figure shows an input query and two queries in the training set that are similar to the input query. The relevant subgraph for each query (query subgraph) is also shown. Note that the “reasoning patterns” required to answer the queries (edges in red) repeats in the subgraphs of each query. Also note, the corresponding answer nodes (marked as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 3"
+          },
+          {
+            "type": "text",
+            "content": ") are analogously located within the reasoning patterns in each subgraph. Thus the answer node can be found by identifying the node in the query subgraph that is most similar to the answer nodes in the subgraph of KNN queries. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        258,
+        885,
+        459
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "triples— "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\left( \\mathrm { { e } _ { 1 } , \\mathrm { { r } , \\mathrm { { e } _ { 2 } } } } \\right)"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "e _ { 1 } , e _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "denote entities and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": "denotes a semantic relation. KBs can be naturally described as a graph where the entities are nodes and the relations are labelled edges. An effective and user-friendly way of accessing the information stored in a KB is by issuing queries to it. Such queries can be structured (e.g. queries for booking flights) or unstructured (e.g. natural language queries). The set of KB facts useful for answering a query induce a reasoning pattern—e.g. a chain of KB facts forming a path or more generally a subgraph in the knowledge graph (KG) (set of red edges in Figure 1). It is very laborious to annotate the reasoning patterns for each query at scale and hence it is important to develop weakly-supervised knowledge base question answering (KBQA) models that do not depend on the availability of the annotated reasoning patterns. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        637,
+        887,
+        864
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We are interested in developing models that can answer queries requiring complex subgraph reasoning patterns. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        871,
+        887,
+        902
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2202.10610v2 [cs.CL] 17 Jun 2022 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        268,
+        57,
+        705
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "*Equal contribution 1UMass Amherst 2University of Southern California 3Google DeepMind 4University of Washington. Correspondence to: Rajarshi Das <rajarshi@cs.washington.edu>, Ameya Godbole <ameyagod@usc.edu>. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        776,
+        473,
+        829
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "Proceedings of the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ { \\it 3 9 } ^ { t h } }"
+          },
+          {
+            "type": "text",
+            "content": "International Conference on Machine Learning, Baltimore, Maryland, USA, PMLR 162, 2022. Copyright 2022 by the author(s). "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        839,
+        475,
+        877
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1Code, model, and subgraphs are available at https:// github.com/rajarshd/CBR-SUBG "
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        878,
+        473,
+        905
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Many previous works in KBQA (Neelakantan et al., 2015; Xiong et al., 2017; Das et al., 2018) reason over individual relational paths. However, many queries require a model to reason over a set of facts jointly. For example, the query in Figure 1 cannot be answered by considering individual paths. Furthermore, a model has to learn a large number of reasoning patterns because of the diverse nature of possible questions. Moreover, a model may encounter very few examples of a particular pattern during training, making it challenging for the models to learn and encode the patterns entirely in its parameters. A possible solution to this challenge might lie in a classical AI paradigm proposed decades back—Case-based Reasoning (CBR) (Schank, 1982). In a CBR framework, a new problem is solved by retrieving other similar problems and reusing their solution to derive a solution for the given problem. In other words, models, instead of memorizing patterns in its parameters, can instead reuse the reasoning patterns of other similar queries, retrieved dynamically during inference. Recently, CBR was successfully used for KB completion by Das et al. (2020a;b). "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        85,
+        473,
+        385
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This paper introduces a semiparametric CBR-based model (CBR-SUBG) for QA over KBs with a nonparametric component, that for each query, dynamically retrieves other similar "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "-nearest neighbor (KNN) queries from the training set. To retrieve similar queries, we use masked sentence representation of the query (Soares et al., 2019) obtained from pre-trained language models. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        395,
+        473,
+        500
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We hypothesize that the reasoning patterns required for answering similar queries reoccur within the subgraph neighborhood of entities present in those queries (Figure 1). The answer nodes for each query are also analogously nestled within the reasoning patterns (marked as in Figure 1) of the query subgraphs, i.e. they have similar neighborhoods. However, we do not have annotated reasoning patterns that could be used to search for the answer node. Moreover, a subgraph can have tens of thousands of entity nodes. How do we still identify the answer nodes in the query subgraph? "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        508,
+        473,
+        657
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To identify the answer nodes, our model has a parametric component comprising of a graph neural network (GNN) that is trained to identify the (latent) reasoning patterns from the subgraphs of KNN queries and apply it to the subgraph of the target query. GNNs have been shown to be effective in encoding structural properties of local neighborhoods in the node representations (Duvenaud et al., 2015; Kipf & Welling, 2017). We leverage node representations obtained from GNNs for finding answer nodes. Specifically, the answer nodes are identified by performing a nearest neighbor search for the most similar nodes in the query subgraph w.r.t the representation of answer nodes in the KNN subgraph. The parametric model is trained via contrastive learning (§3.3) (Chopra et al., 2005; Gutmann & Hyvarinen ¨ , 2010). "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        666,
+        473,
+        876
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A practical challenge for KBQA models is to select a com-"
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        885,
+        473,
+        898
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "pact subgraph for a query. The goal is to ensure that the subgraph has high recall and is small enough to fit into GPU memory for gradient-based learning. Many KBQA methods usually consider few hops of edges around entities as the query subgraph (Neelakantan et al., 2015; Saxena et al., 2020) leading to query-independent and (often) large subgraphs, because of the presence of hub nodes in large KBs. We propose an adaptive subgraph collection method tailored for each query where we use our nonparametric approach of retrieving KNN queries to help gather the query subgraph leading to compact subgraphs with higher recall of reasoning patterns (§ 3.2). "
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        85,
+        883,
+        265
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "An important property of nonparametric models is its ablility to grow and reason with new data. Being true to its nonparametric design, CBR-SUBG uses sparse representations of entities that makes it easy to represent new entities. Moreover, we also demonstrate that the performance of CBR-SUBG improves as more evidence is retrieved, suggesting that CBR-SUBG can reason with new evidence. "
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        273,
+        885,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Contributions. To summarize, this paper introduces CBR-SUBG, a semiparametric model for weakly-supervised KBQA that retrieves similar queries and utilizes the similarities in graph structure of local subgraphs to answer a query (§3.3). We also propose a practical algorithm for gathering query-specific subgraphs that utilizes the retrieved KNN queries to produce compact query-specific subgraphs (§3.2). We show that CBR-SUBG can model (latent) subgraph reasoning patterns (§4.1), more effectively than parametric models; can reason with new entities (§4.1) and new evidence (§4.3). Lastly, we perform competitively with state-of-the-art KBQA models on multiple benchmarks. For example, on the FreebaseQA dataset (Jiang et al., 2019), we outperform most competitive baseline by 14.45 points. "
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        386,
+        885,
+        597
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2. Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        501,
+        618,
+        635,
+        633
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CBR-based models for KB reasoning. Recently, Das et al. (2020a;b) proposed a CBR-based technique for KB completion. However, their work has several limitations. Firstly, it can only model simple linear chains. Secondly, it uses exact symbolic matching to find similarities in patterns between cases and the query. Lastly, it cannot handle natural language queries and only works with structured slot-filling queries. In contrast, CBR-SUBG can model arbitrary reasoning patterns; uses soft-matching by comparing representations of answer nodes and can handle natural language queries. Lastly, our method outperforms Das et al. (2020a) on various benchmarks. A follow up work of Das et al. (2021) proposed a CBR model that can handle natural language queries, however that work requires the availability of annotated reasoning patterns for training, an important distinction from our work that does not need any annotation of reasoning patterns. "
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        643,
+        885,
+        898
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Semiparametric models for KBQA. GraftNet (Sun et al., 2018) and PullNet (Sun et al., 2019a) are two semiparametric models for KBQA where they like us, provide both a mechanism of collecting a query-subgraph and reasoning over them. For their nonparametric component, these work employ a retrieval process where a parametric model classifies which edges would be relevant to the query. Being parametric, these models cannot generalize to new type of questions without re-training the model parameters. However, our nonparametric approach will work as it retrieves similar queries on-the-fly. For their reasoning model, both works use a graph convolution model and treat the answer prediction as a node classification task. However, unlike us they do not reason with subgraphs of similar KNN queries. Lastly, we compare extensively with them and outperform them on multiple benchmarks. Our approach also has similarities with retriever-reader architecture for open-domain QA over text (Chen et al., 2017) where a retriever selects evidence specific to the query and the reader reasons with them to produce the answer. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        85,
+        473,
+        385
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Graph representations using contrastive learning. Recently, there has been a lot of work on learning graph representations via contrastive learning (Hassani & Khasahmadi, 2020; You et al., 2020; Sun et al., 2020; Qiu et al., 2020a; Zhu et al., 2020) where they create two views of the same graph by randomly dropping edges and nodes. Next, the two views of subgraphs are treated as positive pair and their representations are contrasted wrt other negative samples. Our work differs from them because we do not create different views of the same graph, rather we follow the CBR hypothesis and make node representations of answer nodes of two query-specific subgraphs similar provided the queries have relational similarity. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        395,
+        473,
+        589
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Semantic parsing. Classic works in semantic parsing (Zelle & Mooney, 1996; Zettlemoyer & Collins, 2005; 2007) were among the early works to use statistical learning to convert queries to executable logical forms. However, these work needed annotated logical forms during training. Follow up work (Berant et al., 2013; Kwiatkowski et al., 2013) learned semantic parser directly from question answer pairs. However, their model relied on simple hand crafted features. Recent approaches to semantic parsing (Saxena et al., 2020; He et al., 2021) uses powerful neural models and achieve strong performance. However unlike us, these parametric models learn dense representation of entities and hence will not generalize to unseen entities like our approach. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        598,
+        473,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Inductive KB reasoning. Our model is also related to Teru et al. (2020) as it explores KB reasoning in an inductive setting. They also have a sparse representation of entities. However, the task they consider is predicting a KB relation between two nodes which is an easier task than performing KBQA using natural language queries. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        801,
+        473,
+        891
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Graph neural networks. A model like CBR-SUBG is possible for KBQA because of tremendous progress made in graph representation learning by message passing neural networks (Kipf & Welling, 2017; Velickovic et al., 2018; Schlichtkrull et al., 2018, inter-alia). CBR-SUBG is not dependent on any specific message passing scheme and can work with any GNN architecture that can operate over heterogenous knowledge graphs. For our experiments, we use the widely used relational-GCN (Schlichtkrull et al., 2018). Further related work is included in the appendix (§F). "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        85,
+        885,
+        234
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3. Model "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        500,
+        247,
+        573,
+        263
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This section describes the nonparametric and parametric components of CBR-SUBG. In CBR, a case is defined as an abstract representation of a problem along with its solution. In our KBQA setting, a case is a natural language query along with its answer. Note in KBQA, answers are entities in the KB (or nodes in KG). "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        271,
+        885,
+        359
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Task Description. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": "be a natural language query and let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "be a symbolic KG that needs to be queried to retrieve an answer list "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { A }"
+          },
+          {
+            "type": "text",
+            "content": "containing the answer(s) for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": ". We assume access to a training set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r l } { \\mathcal { D } } & { { } = } \\end{array}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ ( q _ { 1 } , \\mathcal { A } _ { 1 } ) , ( q _ { 2 } , \\mathcal { A } _ { 2 } ) , . . . ( q _ { N } , \\mathcal { A } _ { N } ) \\}"
+          },
+          {
+            "type": "text",
+            "content": "of query-answer pairs where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "denote the list of answer nodes for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { i }"
+          },
+          {
+            "type": "text",
+            "content": ". The training set "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D }"
+          },
+          {
+            "type": "text",
+            "content": "forms the ‘case-base’. The reasoning pattern (a.k.a. logical form) required to answer a query are the set of KG edges required to deduce the answer to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": ". Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P _ { q }"
+          },
+          {
+            "type": "text",
+            "content": "denote this set of edges. For example, in Figure 1, for q = “Who plays ‘MJ’ in No Way Home?”, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P _ { q } = \\{ \\mathrm { ( M J }"
+          },
+          {
+            "type": "text",
+            "content": ", played by, Zendaya), (No Way Home, has character, MJ), (No Way Home, cast, Zendaya)}. We define reasoning pattern ‘type’ for a pattern as the set of edges where the entities have been replaced by free variables. For example, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T ( P _ { q } ) = \\{ ( { \\bf M } , { \\bf p l a y e d . b y } , Z )"
+          },
+          {
+            "type": "text",
+            "content": "(S, has character, M), (S, cast, Z)}. It should be noted that CBR-SUBG does not assume access to annotated "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P _ { q }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        368,
+        885,
+        625
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Method overview. For input "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": ", CBR-SUBG first retrieves "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "similar query-answer(s) w.r.t "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": "from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D }"
+          },
+          {
+            "type": "text",
+            "content": "(§ 3.1). Denote this retrieved set as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { k N N } _ { q } \\subset \\mathcal { D }"
+          },
+          {
+            "type": "text",
+            "content": ". Next, CBR-SUBG finds query-specific subgraphs "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "for each query in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ q \\} \\cup"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { k N N } _ { q }"
+          },
+          {
+            "type": "text",
+            "content": "(§ 3.2). According to the CBR hypothesis, the reasoning required to solve a new problem will be similar to the reasoning required to solve other similar problems. Similarly for our KBQA setting, we hypothesize that the reasoning pattern type, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T ( P _ { q } )"
+          },
+          {
+            "type": "text",
+            "content": "repeats across the neighborhood of query subgraphs of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { k N N } _ { q }"
+          },
+          {
+            "type": "text",
+            "content": ". Next, CBR-SUBG uses graph neural networks (GNNs) to encode local structure into node representations "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\ S \\ 3 . 3 )"
+          },
+          {
+            "type": "text",
+            "content": ". Now, if the CBR hypothesis holds true, then the representation of the answer nodes in each query subgraphs will be similar as the local structure around them share similarities. Hence, the answer node of the given query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": "can be identified by searching for the node that has the most similar representations to the answer nodes in the query subgraphs of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { k N N } _ { q }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        632,
+        885,
+        904
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/892e0b65d0adbae0762fbe390bf4fdaeb40622ff5de96a920c901c708279cfa4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: Figure shows the query-subgraph selection procedure with 1-nearest neighbor retrieved query. Graph paths connecting the entities in the retrieved query and its answer are collected. Next the sequence of relations (path types) are gathered and are then followed starting from the entity in the given query. All the edges spanned by this process are collected to form the query-specific subgraph. This process is repeated for each of the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "retrieved queries. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        91,
+        80,
+        885,
+        258
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1. Retrieval of Similar Cases "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        84,
+        366,
+        302,
+        380
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given the input query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": ", CBR-SUBG first retrieves other similar cases from the training set. We represent the query by embeddings obtained from large pre-trained language models (Liu et al., 2019). Inspired by the recent advances in neural dense passage retrieval (Karpukhin et al., 2020), we use a ROBERTA-base encoder to encode each question independently. A single representation is obtained by mean pooling over the token-level representations. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        388,
+        475,
+        511
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Generally, we want to retrieve questions that express similar relations rather than retrieving questions that are about similar entities. For example, for the query, ‘Who played Natalie Portman in Star Wars?’, we would like to retrieve queries such as ‘Who played Ken Barlow in Coronation St.?’ instead of ‘What sports does Natalie Portman like to play?’. To obtain entity-agnostic representation, we replace the entity spans with a special ‘[MASK]’ token in the query, i.e. the original query becomes ‘Who played [MASK] in [MASK]?’. The entity masking strategy has previously been successfully used in learning entity-independent relational representations (Soares et al., 2019). The similarity score between two queries is given by the inner product between their normalized vector representations (cosine similarity). We pre-compute the representations of queries in the train set. During inference, the most similar query representations are obtained by doing a nearest neighbor search over the representations stored in the case-base. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        517,
+        477,
+        789
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2. Query-subgraph Selection "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        84,
+        806,
+        303,
+        821
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A practical challenge for KBQA models is to select a subgraph around the entities present in the query. The goal is to ensure that the necessary reasoning patterns and answers are included while producing a graph small enough to fit into GPU memory for gradient-based learning. A na¨ıve strategy "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        829,
+        475,
+        906
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "to select a subgraph is to consider all edges in 2-3 hops around the query entities. This strategy leads to subgraphs which are independent of the query. Moreover, in large KGs like Freebase (Bollacker et al., 2008), considering the full 2 or 3-hop subgraph often leads to accumulation of millions of edges because of the presence of hub nodes. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        364,
+        885,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We propose a nonparametric approach of query subgraph collection that utilizes the retrieved cases, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { k N N } _ { q }"
+          },
+          {
+            "type": "text",
+            "content": ", from the last step (Figure 2). For each of the retrieved case, chains of edges (or paths) in the graph that connect the entity in the retrieved query to its answers are collected by doing a depth-first search. (Note, since the retrieved queries are from the training set, we know the answer to them). Next, the sequence of relations are collected from each chain and they are followed starting from the entities of the input query. If a chain of relations do not exist from the query, then they are simply ignored. This process is repeated for each of the retrieved cases. Note that, not all chains collected from the nearest neighbors are meaningful for the query. For example, the last (3-hop) chain collected in Figure 2 is not relevant for answering the query and even though it ended at the answer for the retrieved query, the same is not the case for the input query. Such paths are often referred to as spurious paths or evidence (He et al., 2021). All the edges gathered by following this process form the subgraph for the input query. The underlying idea behind the subgraph selection procedure is simple — since the paths connect queries and answers of similar queries, they should also be relevant for answering the given query. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        464,
+        888,
+        811
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "There is a class of prior work such as Graft-Net (Sun et al., 2018) and PullNet (Sun et al., 2019a) that learn a parametric model to choose a query-specific subgraph. These models employ a retrieval process where a parametric model classifies which edges would be relevant to the query. Being "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        818,
+        888,
+        896
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "parametric, these models cannot generalize to new type of questions without re-training the model parameters. However, our nonparametric approach will work as long as it has access to similar queries, which it can retrieve on-the-fly. Our subgraph selection procedure is similar to the approach proposed in (Das et al., 2020a). However, Das et al. (2020a) do not use this approach to collect a query-specific subgraph. Rather it uses each of the paths to independently predict the answer to a query. In contrast, we collect all edges in the path to form a subgraph and then reason jointly over the subgraph of the query as well as the subgraph of retrieved cases as detailed in the next sub-section. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        85,
+        475,
+        265
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3. Reasoning over Multiple Subgraphs "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        84,
+        282,
+        370,
+        297
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This section describes how CBR-SUBG reasons across the subgraphs of the given query and the subgraphs of the retrieved cases. We use graph neural networks (GNNs) (Scarselli et al., 2008) to encode the local structure into the node representations of each subgraph. During training, the answer node representations of different subgraphs are made more similar to each other in comparison to other non-answer nodes. Inference reduces to searching for the most similar node in the query subgraph w.r.t the answer nodes in the KNN-subgraphs. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        306,
+        473,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Modern GNNs employ a neighborhood aggregation strategy (message passing) where a node representation is iteratively updated by aggregating representations from its neighbors (Gilmer et al., 2017). Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q } ~ = ~ ( V _ { q } , E _ { q } )"
+          },
+          {
+            "type": "text",
+            "content": "represent the subgraph for a query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q"
+          },
+          {
+            "type": "text",
+            "content": "obtained from (§3.2). Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { v }"
+          },
+          {
+            "type": "text",
+            "content": "denote the node feature vectors for each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v \\in V _ { q }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        465,
+        473,
+        556
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Input node representations. A property of nonparametric models is its ability to represent, reason and grow with new data. Knowledge graphs store facts about the world and as the world evolves, new entities and facts are added to the KG. Models developed for KG reasoning (Bordes et al., 2013; Schlichtkrull et al., 2018; Sun et al., 2019b, inter-alia) learn dense representations of a fixed vocabulary of entities and are hence unable to handle new entities added to the KG. Following our nonparametric design principles, each entity node is represented as a sparse vector of its outogoing edge (relation) types, i.e. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { x } _ { v } \\in \\{ 0 , 1 \\} ^ { | \\mathcal { R } | }"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "denotes the set of relation types in the KG. If entity "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x _ { v }"
+          },
+          {
+            "type": "text",
+            "content": "has m distinct outgoing edge types, then the dimension corresponding to those types are set to 1. This is an extremely simple and flexible way of representing entities which also expresses the local structural information around each node. Also note that, as new entities are added or new facts are updated about an entity, the sparse representation makes it very easy to represent new entities or update existing embeddings. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        561,
+        475,
+        849
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Relative distance embedding. Each query-specific subgraph "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q }"
+          },
+          {
+            "type": "text",
+            "content": "has a few special entities — the entities present in the input query. This is because the reasoning pattern is "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        857,
+        475,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "usually in the immediate subgraph surrounding the query entity. We treat the query entities as ‘center’ entities and append a relative distance embedding to every other node in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q }"
+          },
+          {
+            "type": "text",
+            "content": "(Zhang & Chen, 2018; Teru et al., 2020). Specifically, for each node, the representation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\scriptstyle { \\mathbf { { \\mathit { x } } } } _ { \\mathit { v } }"
+          },
+          {
+            "type": "text",
+            "content": "is appended with an one-hot distance embedding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { x } _ { d } \\in \\{ 0 , 1 \\} ^ { | d | }"
+          },
+          {
+            "type": "text",
+            "content": "where the component corresponding to the shortest distance from the query entity is set to 1. In practice, we consider subgraphs upto 3-hops from the query entities, i.e. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d = 4"
+          },
+          {
+            "type": "text",
+            "content": ". For queries with multiple query entities, the minimum distance is considered. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        84,
+        887,
+        236
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Message passing. Our GNN uses the graph structure and the sparse input node features "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X _ { v }"
+          },
+          {
+            "type": "text",
+            "content": "to learn intermediate node features capturing the local structure within them. We follow the general message-passing scheme where a node representation is iteratively updated by combining it with aggregation of it’s neighbors’ representation (Xu et al., 2019). In particular, the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l ^ { t h }"
+          },
+          {
+            "type": "text",
+            "content": "layer of a GNN is, "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        243,
+        887,
+        349
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {a} _ {v} ^ {l} = \\text {A G G R E G A T E} ^ {l} \\left(\\left\\{\\boldsymbol {h} _ {s} ^ {l - 1}: s \\in \\mathcal {N} (v) \\right\\}, \\boldsymbol {h} _ {v} ^ {l - 1}\\right), \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/85085b06de71860cb96d018c187ce08d55401becbdda09d3fb72347a40888f7a.jpg"
+        }
+      },
+      "bbox": [
+        504,
+        356,
+        883,
+        376
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {h} _ {v} ^ {l} = \\operatorname {C O M B I N E} ^ {l} \\left(\\boldsymbol {h} _ {v} ^ {l - 1}, \\boldsymbol {a} _ {v} ^ {l}\\right), \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/da737a39c6c015ce8fde7534fa12fd8cbfe8e766df9f8928e54b14ad8b441654.jpg"
+        }
+      },
+      "bbox": [
+        504,
+        378,
+        883,
+        397
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { \\Delta } _ { \\mathbf { \\alpha } \\mathbf { \\beta } _ { v } } ^ { l }"
+          },
+          {
+            "type": "text",
+            "content": "denote the aggregated message from the neighbors of node v, "
+          },
+          {
+            "type": "equation_inline",
+            "content": " { \\boldsymbol { h } } _ { v } ^ { l }"
+          },
+          {
+            "type": "text",
+            "content": "denote the node representation of node "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v"
+          },
+          {
+            "type": "text",
+            "content": "in the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": "-th layer and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { N } ( v )"
+          },
+          {
+            "type": "text",
+            "content": "denotes the neighboring nodes of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "v"
+          },
+          {
+            "type": "text",
+            "content": ". Since KGs are heterogenous graphs with labelled edges, we adopt the widely used multi-relational R-GCN model model (Schlichtkrull et al., 2018) which defines the aggregate step as: "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\pmb { a } _ { v } ^ { l } = \\sum _ { r = 1 } ^ { \\mathcal { R } } \\sum _ { s \\in \\mathcal { N } _ { r } ( v ) } \\frac { 1 } { \\left| \\mathscr { N } _ { r } ( v ) \\right| } W _ { r } ^ { l } h _ { s } ^ { l - 1 } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "and the combine step as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h _ { v } ^ { l } = \\mathrm { R e L U } ( W _ { \\mathrm { s e l f } } ^ { l } h _ { v } ^ { l - 1 } + { \\pmb a } _ { v } ^ { l } )"
+          },
+          {
+            "type": "text",
+            "content": ". For each answer node, we consider the representation obtained from the last layer. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        406,
+        885,
+        561
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Training. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "a _ { i } , a _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "be an answer node in the corresponding query-subgraphs of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "(i.e. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": ", Gqj ) respectively. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sin ( \\mathbf { a } _ { i } , \\mathbf { a } _ { j } ) \\ = \\ \\mathbf { a } _ { i } ^ { \\top } \\mathbf { a } _ { j } / \\lVert \\mathbf { a } _ { i } \\rVert \\lVert \\mathbf { a } _ { j } \\rVert"
+          },
+          {
+            "type": "text",
+            "content": "denote the inner product between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "normalized answer representations (i.e. cosine similarity). In general there can be multiple answer nodes for a query. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "denote the set of all answer nodes for query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "in its subgraph "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { j } }"
+          },
+          {
+            "type": "text",
+            "content": ". Let sim(ai, Aj ) = 1|A | "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\mathrm { s i m } ( { \\bf a } _ { i } , \\mathcal { A } _ { j } ) = \\frac { 1 } { \\lvert A _ { j } \\rvert } \\sum _ { a _ { j } \\in A _ { j } } \\mathrm { s i m } ( { \\bf a } _ { i } , { \\bf a } _ { j } ) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ", i.e. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { s i m } ( \\bar { \\mathbf { a } } _ { i } , \\mathcal { A } _ { j } )"
+          },
+          {
+            "type": "text",
+            "content": "represents the mean of the scores between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "a _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "and all answer nodes in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { j } }"
+          },
+          {
+            "type": "text",
+            "content": ". We aggregate the similarity score from all retrieved queries "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { k N N } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "for the current query "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { i }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        569,
+        887,
+        738
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The loss function we use is, "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        744,
+        684,
+        758
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "- \\log \\frac {\\sum_ {a _ {i} \\in \\mathcal {A} _ {i}} \\exp (\\sum_ {q _ {j} \\in \\mathrm {K N N} _ {q _ {i}}} \\sin (\\boldsymbol {a} _ {i} , \\mathcal {A} _ {j}) / \\tau)}{\\sum_ {x _ {i} \\in \\nu (\\mathcal {G} _ {q _ {i}})} \\exp (\\sum_ {q _ {j} \\in \\mathrm {K N N} _ {q _ {i}}} \\sin (\\boldsymbol {x} _ {i} , \\mathcal {A} _ {j}) / \\tau)},",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/6a40f4031280ef23a52291f3b91e3bf050bb4420c54c2f313a26789555cc43f6.jpg"
+        }
+      },
+      "bbox": [
+        514,
+        766,
+        867,
+        808
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { j }"
+          },
+          {
+            "type": "text",
+            "content": "denotes the set of all answer nodes in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { j } }"
+          },
+          {
+            "type": "text",
+            "content": "for a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { j } \\in \\mathrm { k N N } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "goes over all nodes in query-subgraph "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau"
+          },
+          {
+            "type": "text",
+            "content": "denotes a temperature parameter. In other words, the loss encourages the answer nodes in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "to be scored higher than all other nodes in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "w.r.t the answer nodes in the retrieved query subgraphs. This loss is an extension of "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        814,
+        885,
+        905
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the the normalized temperature-scaled cross entropy loss (NT-Xent) used in Chen et al. (2020). "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        85,
+        473,
+        113
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Inference. During inference, message passing is run over each of the query-subgraph "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "and the subgraphs "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { j } }"
+          },
+          {
+            "type": "text",
+            "content": "of its "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "retrieved queries "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q _ { j } \\in \\mathrm { k N N } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "to obtain the node representations and the highest scoring node in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { q _ { i } }"
+          },
+          {
+            "type": "text",
+            "content": "w.r.t all the answer nodes in the retrieved query sub-graphs is returned as the answer. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        114,
+        475,
+        204
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\boldsymbol {a} _ {i} = \\arg \\max  _ {\\boldsymbol {x} _ {i}} \\sum_ {\\boldsymbol {x} _ {i} \\in \\mathcal {V} (\\mathcal {G} _ {\\boldsymbol {q} _ {i}})} \\exp \\left(\\sum_ {\\boldsymbol {q} _ {j} \\in \\mathrm {k N N} _ {\\boldsymbol {q} _ {i}}} \\operatorname {s i m} (\\boldsymbol {x} _ {i}, \\mathcal {A} _ {j})\\right)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ed61d0c922c6b7dc39f82703d0d5c59895c2ee129d6aadaff502fa446f80d185.jpg"
+        }
+      },
+      "bbox": [
+        98,
+        210,
+        459,
+        258
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4. Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        84,
+        273,
+        217,
+        290
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we demonstrate the effectiveness of the semiparametric approach of CBR-SUBG and show that the nonparametric and parametric component offer complementary strengths. For example, we show that the model performance improves as more evidence is dynamically retrieved by the nonparametric component (§4.3). Similarly, CBR-SUBG can handle queries requiring reasoning patterns more complex than simple chains (i.e. subgraphs) because of the inductive bias provided by GNNs (§4.1). It can handle new and unseen entities because of the sparse entity input features as a part of its design (§4.1). We also show that the nonparametric subgraph selection of CBR-SUBG allows us to operate over a massive real-world KG (full Freebase KG) and obtain very competitive performance on several benchmark datasets including WebQuestionsSP (Yih et al., 2016), FreebaseQA (Jiang et al., 2019) and MetaQA (Zhang et al., 2018). "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        299,
+        475,
+        555
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1. Reasoning over Complex Patterns "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        84,
+        571,
+        354,
+        588
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We want to test whether CBR-SUBG can answer queries requiring complex reasoning patterns. Note that, the reasoning patterns are always latent to the model, i.e. the model has to answer a given query from the query-subgraph and the retrieved KNN-subgraphs without any knowledge of the structure of the pattern. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        595,
+        473,
+        686
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To test the model capacity to identify reasoning patterns, we devise a controlled setting in which the model has to infer reasoning patterns of various shapes (Figure 3), inspired by Ren et al. (2020). Note that in their work, the task was to execute the input structured query on an incomplete KB, i.e, the shape of the input patterns are known to the model. In contrast, in our setting, the model has to find the answer node (marked "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\bigcirc"
+          },
+          {
+            "type": "text",
+            "content": "), which is nestled in each of the structured pattern without the knowledge of the pattern structure. Also note, there can be multiple nodes of same type as the answer type, so the task cannot be completed by solving easier task of determining entity types. Instead the model has to identify specific "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\bigcirc"
+          },
+          {
+            "type": "text",
+            "content": "nodes which are at the end of reasoning patterns (there can be multiple "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\bigcirc"
+          },
+          {
+            "type": "text",
+            "content": "nodes in the graph). "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        694,
+        475,
+        906
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/fe952a7c41275b19cef1ab6cb8875fdb49236c8934620a1cb896979b71ea863b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: Various reasoning pattern types considered. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        500,
+        80,
+        883,
+        183
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Data Generation Process. We first define a type system with a set of entity types "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E }"
+          },
+          {
+            "type": "text",
+            "content": "and relation types "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": ". The type-system also specifies a set of ‘allowed relation types’ between different pairs of entity types. For example, an ‘employee’ KB relation is defined between an ‘organization’ and ‘people’ entity types. Entities (or nodes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\nu"
+          },
+          {
+            "type": "text",
+            "content": ") are then generated uniformly from the set of entity types "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E }"
+          },
+          {
+            "type": "text",
+            "content": ". Next, relation edges (uniformly sampled from the allowed types) are joined between a pair of nodes with a probability "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p"
+          },
+          {
+            "type": "text",
+            "content": "following the Erdos-R ˝ enyi model ( ´ Erdos et al., 1960) of random graph generation. To ensure that models only rely on the graph structure, each graph has a ‘unique’ set of entities and no two graphs share entities. This also effectively tests how much the nonparametric property of CBR-SUBG can reason with unseen entities. More details regarding the hyperparameters "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } , \\mathcal { R } , \\mathcal { V }"
+          },
+          {
+            "type": "text",
+            "content": "are included in the appendix B. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        217,
+        887,
+        460
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Pattern Generation. A pattern is next sampled from the set of shapes shown in Figure 3. The sampled pattern merely suggests the structure of the desired pattern. ‘Grounding’ a pattern shape involves assigning each nodes with an entity present in a generated graph. Similarly each edge of the pattern type is assigned a relation from the set of allowed relation types. After grounding the pattern, we “insert” the pattern in the graph. Since the nodes of the grounded pattern already exists in the graph, inserting a pattern in the graph amounts to adding the edges of the grounded pattern to the graph that already did not exist in it. We also define a ‘pattern type’ — that refers to a pattern whose edges have been assigned relation types but the nodes have not been assigned to specific entities (bottom-left corner in Figure 4). Each pattern type is assigned an identifier and queries with the same pattern type are grouped together. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        465,
+        887,
+        708
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We generate 1000 graphs in each of the training, validation and test sets. We generate 200 pattern types whose shapes are uniformly sampled from the 5 shapes shown in Figure 3. Therefore, there are around 40 examples of each pattern shape and around 5 examples of each pattern type. This is consistent with real-world setting where a model will encounter a reasoning pattern only very few times during training. For a query with a particular pattern type, other training queries with the same pattern type form its nearest neighbors. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        715,
+        885,
+        866
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Baselines. Because of the inductive nature of this task where only new entities are seen at test time, most para-"
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        875,
+        887,
+        905
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        326,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f5db514c5fa9fbd755c64fba2f3e5fdf566044e1dc3ed49d4a6281c8ff751573.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: Setup for reasoning over subgraph patterns. Note that the same ‘pattern type’ repeats across subgraphs. Also note, that the query graph (bottom) has two answer nodes (e14, e17). Since every subgraph has its own set of unique entities, hence a model has to reason over the similarities in graph structures to find the answer node in the querysubgraph. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        89,
+        83,
+        477,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "metric KG reasoning algorithms (Bordes et al., 2013; Yang et al., 2015; Sun et al., 2019b) will not work out of the box. We extend the widely used KG reasoning model — TransE (Bordes et al., 2013) to work in the inductive setting. Specifically, instead of having a fixed vocabulary of entities, the objective function is computed on the dense representation obtained from the output of the GNN layers. This also makes the comparision with CBR-SUBG fair since it also operates on the same representations albeit with a contrastive loss. KG completion algorithms also need a query-relation as input. Each pattern type for a query serves as the query relation. Apart from the parametric baseline, we also test a simple nonparametric approach, CBR-path in which path patterns which connect source and target entities are gathered and applied for the current query. Comparing CBR-SUBG to CBR-path will help us understand the importance of modeling subgraph patterns rather than simple chains. "
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        387,
+        475,
+        657
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Does CBR-SUBG have the right inductive bias? The first research question that we try to answer is, if CBR-SUBG has the right inductive bias for this task. We test CBR-SUBG that has undergone no training, i.e. the parameters of the GNN are randomly initialized. Note the model still takes as input the sparse representation of entities. This experiment will help us answer if the node representations actually capture the local structure around them and whether the answer node can be found by doing a search w.r.t the answer nodes in the KNN-query subgraphs. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        666,
+        473,
+        818
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 1 reports the strict hits "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@ 1"
+          },
+          {
+            "type": "text",
+            "content": "on this task, i.e. to score a query correctly, a model has to identify and rank all answer nodes above all other nodes in the graph. The first row of Table 1 shows the results. For comparison, a random performance on this task is "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle { \\frac { 1 } { | { \\mathcal { V } } | } } = { \\frac { 1 } { 1 2 0 } } { \\bar { = } } 0 . 8 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". As it is clear "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        825,
+        475,
+        904
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/01b5eb4b28497c30b34505ffa01f54d084049fd1e7ae5be558fcbda2045530b0.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: Strict Hits1 "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\% )"
+          },
+          {
+            "type": "text",
+            "content": "for predicting all the answer nodes correctly. CBR-SUBG (NT) denotes using CBR-SUBG with no training and we see that it performs decently suggesting that it has the right inductive bias for the task. On training, the performance improves on all subgraph patterns. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>2p</td><td>3p</td><td>2i</td><td>ip</td><td>pi</td><td>avg.</td></tr><tr><td>CBR-SUBG (NT)</td><td>68.56</td><td>84.35</td><td>23.00</td><td>34.85</td><td>35.35</td><td>47.28</td></tr><tr><td>GNN + TransE</td><td>80.03</td><td>74.49</td><td>80.00</td><td>52.67</td><td>81.53</td><td>72.69</td></tr><tr><td>CBR-path</td><td>69.71</td><td>54.39</td><td>100.00</td><td>69.12</td><td>51.24</td><td>71.09</td></tr><tr><td>CBR-SUBG</td><td>96.64</td><td>88.43</td><td>90.46</td><td>70.02</td><td>86.81</td><td>85.68</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        500,
+        82,
+        890,
+        160
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "from the results, an un-trained CBR-SUBG achieves performance much higher than random performance. Its quite high for the simple 2p and 3p patterns. For other patterns that need the more complicated intersection operation, the performance degrades, but is still much higher than random. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        260,
+        887,
+        338
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our Results. On training CBR-SUBG, the performance of the model drastically improves for each pattern type reaching an average performance of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 5 . 6 8 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". The performance on pattern types which are more complex than chains (ip, pi) etc are worse than chain-type patterns (2p, 3p) suggesting that our task is non-trivial. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        343,
+        887,
+        434
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "On comparison to parametric model. This experiment helps us understand whether a model can learn to memorize and store patterns effectively (for each query relations) when it has seen few examples of that pattern during training. Row 2 of Table 1 shows the performance of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { G N N + }"
+          },
+          {
+            "type": "text",
+            "content": "TransE model. We find that the parametric model performs worse than CBR-SUBG on all the query types reaching an average performance of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "13 \\%"
+          },
+          {
+            "type": "text",
+            "content": "point below CBR-SUBG. This shows that a semiparametric model with a nonparametric component that retrieves similar queries at inference can make it easier for the model to reason effectively. In practice, we had to train this model for a much longer time than training CBR-SUBG. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        434,
+        888,
+        630
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "On comparison to path-based model. From Table 1, we can see that CBR-SUBG outperforms CBR-path by more than "
+          },
+          {
+            "type": "equation_inline",
+            "content": "14 \\%"
+          },
+          {
+            "type": "text",
+            "content": "points suggesting that reasoning over subgraphs is a more powerful approach that reasoning with each paths independently. On the ‘2i’ pattern, CBR-path outperforms CBR-SUBG since ‘2i’ can be seen as 2 independent paths intersecting at one node and CBR is able to model that perfectly. However, when the pattern needs composition and intersection and path-traversal, CBR-path struggles and performs much worse. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        630,
+        887,
+        781
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2. Performance on benchmark datasets "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        496,
+        797,
+        785,
+        811
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next, we test the performance of CBR-SUBG on various KBQA benchmarks — MetaQA (Zhang et al., 2018), WebQSP (Yih et al., 2016) and FreebaseQA (Jiang et al., 2019). MetaQA comes with its own KB. For other datasets, the underlying KB is the full Freebase KB containing over 45 "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        821,
+        885,
+        898
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/1b8e16276e539bb5cf75bb53106b4149370dd35092a3ba84a7a46fac79bcc7a0.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Performance on WebQSP and MetaQA benchmarks. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Model</td><td colspan=\"3\">MetaQA</td><td rowspan=\"2\">WebQSP</td></tr><tr><td>1-hop</td><td>2-hop</td><td>3-hop</td></tr><tr><td>KVMemNN (Miller et al., 2016)</td><td>95.8</td><td>25.1</td><td>10.1</td><td>46.7</td></tr><tr><td>GraftNet (Sun et al., 2018)</td><td>97.0</td><td>94.8</td><td>77.7</td><td>66.4</td></tr><tr><td>PullNet (Sun et al., 2019a)</td><td>97.0</td><td>99.9</td><td>91.4</td><td>68.1</td></tr><tr><td>SRN (Qiu et al., 2020b)</td><td>97.0</td><td>95.1</td><td>75.2</td><td>-</td></tr><tr><td>ReifKB (Cohen et al., 2020)</td><td>96.2</td><td>81.1</td><td>72.3</td><td>52.7</td></tr><tr><td>EmbedKGQA (Saxena et al., 2020)</td><td>97.5</td><td>98.8</td><td>94.8</td><td>66.6</td></tr><tr><td>NSM (He et al., 2021)</td><td>97.2</td><td>99.9</td><td>98.9</td><td>74.3</td></tr><tr><td>CBR-SUBG (Ours)</td><td>97.1</td><td>99.8</td><td>99.3</td><td>72.1</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        86,
+        71,
+        524,
+        247
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/00f0f359fc2b2282a9da61ea9a6c351752eb47f7846640a91d58e250d6dcfa96.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>Accuracy</td></tr><tr><td colspan=\"2\">KB-only models</td></tr><tr><td>HR-BiLSTM (Yu et al., 2017)</td><td>28.40</td></tr><tr><td>KBQA-Adapter (Wu et al., 2019)</td><td>28.78</td></tr><tr><td>KEQA (Huang et al., 2019)</td><td>28.73</td></tr><tr><td>FOFE (Jiang et al., 2019)</td><td>37.00</td></tr><tr><td>BuboQA (Mohammed et al., 2018)</td><td>38.25</td></tr><tr><td>CBR-SUBG (Ours)</td><td>52.07</td></tr><tr><td colspan=\"2\">LM pre-training + KB</td></tr><tr><td>EAE (Févry et al., 2020)</td><td>53.4</td></tr><tr><td>FAE (Verga et al., 2020)</td><td>63.3</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        555,
+        79,
+        875,
+        284
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "million entities (nodes) and 3 billion facts (edges). Please refer to the appendix for details about each dataset (§C). "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        296,
+        473,
+        327
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our main baselines are the two semiparametric models that provide both a mechanism to gather query subgraphs for a given query and reason over them to find the answer — GraftNet (Sun et al., 2018), PullNet (Sun et al., 2019a). GraftNet uses personalized page rank to determine which edges are relevant for a particular query and PullNet uses a multi-step retriever that at each step, classifies if an edge is relevant to the current representation of the query. For their reasoning model, both works use a graph convolution model and treat the answer prediction as a node classification task. However unlike us, they do not use query-subgraphs of KNN queries. Followup KBQA works (Saxena et al., 2020; He et al., 2021, inter-alia) use the query-specific graphs provided by GraftNet from their open-source code and do not provide a mechanism to gather query-specific subgraphs. However, for completeness, we report and compare with those methods as well. "
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        334,
+        475,
+        590
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 2 reports the performance on WebQSP and all three partitions of MetaQA. When compared to GraftNet and PullNet, CBR-SUBG performs much better on an average on both the datasets. On the more challenging 3-hop subset of MetaQA, CBR-SUBG outperforms PullNet by more than 7 points and GraftNet by more than 15 points. This shows that even though these two models use a GNN for reasoning, using information from subgraphs from similar KNN queries leads to much better performance. On WebQSP, we outperform all models except the recently proposed NSM model (He et al., 2021). But as we noted before, NSM operates on the subgraph created by GraftNet and does not provide any particular mechanism to create its own query-specific subgraph (an important contribution of our model). Moreover NSM is a parametric model and will not have some advantages of nonparametric architectures such as ability to handle new entities and reasoning with more data. Table 3 reports the results on the FreebaseQA dataset, which contains real trivia questions obtained from various trivia competitions. Thus the questions can be challenging in na-"
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        598,
+        477,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 3: Top- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "accuracy on the FreebaseQA dataset. The top section reports performance of models that operate only on KBs. The bottom section reports performance on models that also use additional knowledge stored in large language models. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        294,
+        885,
+        369
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ture. We compare with other KBQA models reported in Han et al. (2020). Most of the models are pipelined KBQA systems that rely on relation extraction to map the query into a KB edge. CBR-SUBG outperforms all the models by a large margin. We also report the performance on two models that use large LMs and large-scale pre-training. CBR-SUBG, which only operates on the KB has a performance very close to the performance of Entity-as-Experts model (Fevry ´ et al., 2020). We leave the integration of large LMs into our parametric reasoning component as future work. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        383,
+        888,
+        536
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3. Analysis "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        496,
+        551,
+        591,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "How effective is our adaptive subgraph collection strategy? Table 4 reports few average graph statistics for the query-subgraphs collected by our graph-collection strategy. We also compare to GraftNet’s subgraphs. As can be seen, our adaptive graph collection strategy produces much more compact and smaller graphs while increasing recall of answers. We also consistently find that our graph contains relations which is more relevant to the questions than the "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        575,
+        888,
+        696
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/34632c2f7628c414a41cf7b38488499ca6dad5d6ea530de89dc4eb54df159e47.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Our adaptive subgraph collection strategy produces a compact subgraph for a query while increasing recall. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Subgraph</td><td>#edges</td><td>#relations</td><td>#entities</td><td>coverage(%)</td></tr><tr><td colspan=\"5\">WebQSP</td></tr><tr><td>Graft-net</td><td>4306.00</td><td>294.69</td><td>1447.68</td><td>89.93%</td></tr><tr><td>CBR-SUBG</td><td>1934.65</td><td>36.42</td><td>1403.87</td><td>94.30%</td></tr><tr><td>% diff</td><td>-55.07%</td><td>-87.64%</td><td>-3.02%</td><td>+4.85%</td></tr><tr><td colspan=\"5\">MetaQA-2</td></tr><tr><td>Graft-net</td><td>1126.0</td><td>18.00</td><td>468.00</td><td>99%</td></tr><tr><td>CBR-SUBG</td><td>89.21</td><td>4.72</td><td>77.52</td><td>99.9%</td></tr><tr><td>% diff</td><td>-92.07%</td><td>-73.78%</td><td>-83.43%</td><td>+0.91%</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        500,
+        705,
+        885,
+        857
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2a26b401d957abded3ab9687ea163b8558015a24d041f125c463e78270a2de86.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5: Performance of CBR-SUBG as more nearest neighbors are introduced at test-time. Results on different partitions of MetaQA. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        89,
+        385,
+        207
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "subgraph produced by GraftNet (§E). Table 5 reports the performance of CBR-SUBG when trained and tested on the subgraph obtained from Graftnet and our adaptive procedure, demonstrating the effectiveness of our adaptive subgraph collection method. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        277,
+        475,
+        351
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/1bfad249b3be21fce3bd44f8a6890cd3cfeb3281e2e67c96a3f354d26fa30ff8.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5: Performance of CBR-SUBG with adaptive subgraph and GraftNet subgraph "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Subgraph</td><td>WebQSP</td><td>MetaQA-3</td></tr><tr><td>GraftNet</td><td>65.61%</td><td>96.90%</td></tr><tr><td>Adaptive</td><td>72.10%</td><td>99.30%</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        161,
+        364,
+        398,
+        419
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Can CBR-SUBG reason with more evidence? A desirable property of nonparametric models is to be able to ‘improve’ its prediction as more evidence is made available. We test CBR-SUBG by taking a trained model and issuing it an increasing number of nearest neighbor queries. As we see from Figure 5, the performance of CBR-SUBG drastically improves as we increase the number of nearest neighbors from 1 to 7 and then increases at a lower rate and converges at around 10 nearest neighbors. This is because, the model has all the required information it needs from its nearest neighbors. However, in the much smaller WebQSP dataset we observe a different behavior (Table 6). This is because of the limited size of the dataset, irrelevant questions starts appearing in the context as we increase the number of KNNs beyond a certain limit. "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        482,
+        473,
+        708
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Are relative distance embeddings important? Figure 6 shows the performance of CBR-SUBG with and without the relative distance embeddings (§3.3). It is clear that capturing "
+          }
+        ]
+      },
+      "bbox": [
+        84,
+        717,
+        473,
+        762
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/a2a214a5626ce26ce0ca3e71ca25ec49722f18622def056bdb8ed84bf37ac59c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6: Performance on WebQSP w.r.t varying number of KNN questions. Unlike MetaQA, the performance decreases on adding KNNs beyond a certain point as irrelevant questions are retrieved because of the limited size of WebQSP training set. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>1</td><td>2</td><td>3</td><td>5</td><td>7</td><td>10</td><td>20</td></tr><tr><td>Acc</td><td>69.06</td><td>70.28</td><td>71.20</td><td>72.11</td><td>71.14</td><td>70.71</td><td>69.12</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        89,
+        771,
+        488,
+        815
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/355926ecf4144d562579261440408842694a4e0907b7cff4ab8936767e1f8002.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6: Performance with and without relative distance embedding. The relative distance from the query entity clearly is important for achieving good performance. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        526,
+        85,
+        851,
+        204
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the relative distance from the query entities provide serves as a helpful feature for the model. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        268,
+        883,
+        299
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5. Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        496,
+        318,
+        616,
+        334
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this work, we explored a semiparametric approach for KBQA. We demonstrated CBR-SUBG poses several desirable properties approach in which nonparametric and parametric component offer complementary strengths. By retrieving similar queries and utilizing the similarities in graph structure of local subgraphs to answer a query, our approach is able to handle complex questions as well as generalize to new types of questions. Exploring different types of parametric models with different reasoning capabilities (LMs, GNNs, etc.) would be an interesting future research direction. Another avenue of potential research would be a never-ending learning type of system where we keeps adding newly discovered facts in the nonparametric part. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        344,
+        887,
+        541
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Acknowledgments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        496,
+        560,
+        656,
+        577
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This work is funded in part by the IBM Research AI through the AI Horizons Network, the Chan Zuckerberg Initiative under the project Scientific Knowledge Base Construction, the National Science Foundation under Grant Number IIS-1763618, the National Science Foundation under Grant Number IIS-1922090, the Defense Advanced Research Projects Agency via Contract No. FA8750-17-C-0106 under Subaward No. 89341790 from the University of Southern California, and the Office of Naval Research via Contract No. N660011924032 under Subaward No. 123875727 from the University of Southern California. The work reported here was performed using high performance computing equipment obtained under a grant from the Collaborative R&D Fund managed by the Massachusetts Technology Collaborative. "
+          }
+        ]
+      },
+      "bbox": [
+        495,
+        585,
+        887,
+        811
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        496,
+        832,
+        594,
+        847
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Berant, J., Chou, A., Frostig, R., and Liang, P. Semantic parsing on freebase from question-answer pairs. In EMNLP, 2013. "
+          }
+        ]
+      },
+      "bbox": [
+        496,
+        856,
+        885,
+        901
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bollacker, K., Evans, C., Paritosh, P., Sturge, T., and Taylor, J. Freebase: A collaboratively created graph database for structuring human knowledge. In ICDM, 2008. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bordes, A., Usunier, N., Garcia-Duran, A., Weston, J., and Yakhnenko, O. Translating embeddings for modeling multi-relational data. In Neurips, 2013. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chen, D., Fisch, A., Weston, J., and Bordes, A. Reading wikipedia to answer open-domain questions. In ACL, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chen, T., Kornblith, S., Norouzi, M., and Hinton, G. A simple framework for contrastive learning of visual representations. In ICML, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chopra, S., Hadsell, R., and LeCun, Y. Learning a similarity metric discriminatively, with application to face verification. In CVPR, 2005. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Cohen, W. W., Sun, H., Hofer, R. A., and Siegler, M. Scalable neural methods for reasoning with a symbolic knowledge base. arXiv preprint arXiv:2002.06115, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Das, R., Dhuliawala, S., Zaheer, M., Vilnis, L., Durugkar, I., Krishnamurthy, A., Smola, A., and McCallum, A. Go for a walk and arrive at the answer: Reasoning over paths in knowledge bases using reinforcement learning. In ICLR, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Das, R., Godbole, A., Dhuliawala, S., Zaheer, M., and Mc-Callum, A. A simple approach to case-based reasoning in knowledge bases. In AKBC, 2020a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Das, R., Godbole, A., Monath, N., Zaheer, M., and McCallum, A. Probabilistic case-based reasoning for openworld knowledge graph completion. In Findings of EMNLP, 2020b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Das, R., Zaheer, M., Thai, D., Godbole, A., Perez, E., Lee, J.-Y., Tan, L., Polymenakos, L., and McCallum, A. Casebased reasoning for natural language queries over knowledge bases. In EMNLP, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Duvenaud, D., Maclaurin, D., Aguilera-Iparraguirre, J., Gomez-Bombarelli, R., Hirzel, T., Aspuru-Guzik, A., ´ and Adams, R. P. Convolutional networks on graphs for learning molecular fingerprints. arXiv preprint arXiv:1509.09292, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Erdos, P., Renyi, A., et al. On the evolution of random ´ graphs. Publ. Math. Inst. Hung. Acad. Sci, 1960. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Fevry, T., Soares, L. B., FitzGerald, N., Choi, E., and ´ Kwiatkowski, T. Entities as experts: Sparse memory access with entity supervision. In EMNLP, 2020. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        84,
+        475,
+        905
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Gilmer, J., Schoenholz, S. S., Riley, P. F., Vinyals, O., and Dahl, G. E. Neural message passing for quantum chemistry. In ICML, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Gu, J., Wang, Y., Cho, K., and Li, V. O. Search engine guided neural machine translation. In AAAI, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Gutmann, M. and Hyvarinen, A. Noise-contrastive esti- ¨ mation: A new estimation principle for unnormalized statistical models. In AIStats, 2010. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Han, N., Topic, G., Noji, H., Takamura, H., and Miyao, Y. An empirical analysis of existing systems and datasets toward general simple question answering. In CoNLL, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hashimoto, T. B., Guu, K., Oren, Y., and Liang, P. A retrieve-and-edit framework for predicting structured outputs. In Neurips, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hassani, K. and Khasahmadi, A. H. Contrastive multi-view representation learning on graphs. In ICML, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "He, G., Lan, Y., Jiang, J., Zhao, W. X., and Wen, J.-R. Improving multi-hop knowledge base question answering by learning intermediate supervision signals. In WSDM, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Huang, X., Zhang, J., Li, D., and Li, P. Knowledge graph embedding based question answering. In WSDM, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jiang, K., Wu, D., and Jiang, H. Freebaseqa: a new factoid qa data set matching trivia-style question-answer pairs with freebase. In NAACL, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Karpukhin, V., Oguz, B., Min, S., Wu, L., Edunov, S., Chen, ˘ D., and Yih, W.-t. Dense passage retrieval for opendomain question answering. In EMNLP, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Khandelwal, U., Levy, O., Jurafsky, D., Zettlemoyer, L., and Lewis, M. Generalization through memorization: Nearest neighbor language models. In ICLR, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Khandelwal, U., Fan, A., Jurafsky, D., Zettlemoyer, L., and Lewis, M. Nearest neighbor machine translation. In ICLR, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kipf, T. N. and Welling, M. Semi-supervised classification with graph convolutional networks. In ICLR, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kwiatkowski, T., Choi, E., Artzi, Y., and Zettlemoyer, L. Scaling semantic parsers with on-the-fly ontology matching. In EMNLP, 2013. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., Levy, O., Lewis, M., Zettlemoyer, L., and Stoyanov, V. Roberta: A robustly optimized bert pretraining approach. arXiv preprint arXiv:1907.11692, 2019. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        84,
+        885,
+        905
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        71
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Miller, A., Fisch, A., Dodge, J., Karimi, A.-H., Bordes, A., and Weston, J. Key-value memory networks for directly reading documents. In EMNLP, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Mohammed, S., Shi, P., and Lin, J. Strong baselines for simple question answering over knowledge graphs with and without neural networks. In NAACL, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Neelakantan, A., Roth, B., and McCallum, A. Compositional vector space models for knowledge base completion. In ACL, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Qiu, J., Chen, Q., Dong, Y., Zhang, J., Yang, H., Ding, M., Wang, K., and Tang, J. Gcc: Graph contrastive coding for graph neural network pre-training. In KDD, 2020a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Qiu, Y., Wang, Y., Jin, X., and Zhang, K. Stepwise reasoning for multi-relation question answering over knowledge graph with weak supervision. In WSDM, 2020b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ren, H., Hu, W., and Leskovec, J. Query2box: Reasoning over knowledge graphs in vector space using box embeddings. In ICLR, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Saxena, A., Tripathi, A., and Talukdar, P. Improving multihop question answering over knowledge graphs using knowledge base embeddings. In ACL, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Scarselli, F., Gori, M., Tsoi, A. C., Hagenbuchner, M., and Monfardini, G. The graph neural network model. IEEE transactions on neural networks, 2008. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Schank, R. C. Dynamic memory: A theory of reminding and learning in computers and people. cambridge university press, 1982. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Schlichtkrull, M., Kipf, T. N., Bloem, P., Van Den Berg, R., Titov, I., and Welling, M. Modeling relational data with graph convolutional networks. In ESWC, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Soares, L. B., FitzGerald, N., Ling, J., and Kwiatkowski, T. Matching the blanks: Distributional similarity for relation learning. In ACL, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sun, F.-Y., Hoffmann, J., Verma, V., and Tang, J. Infograph: Unsupervised and semi-supervised graph-level representation learning via mutual information maximization. In ICLR, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sun, H., Dhingra, B., Zaheer, M., Mazaitis, K., Salakhutdinov, R., and Cohen, W. W. Open domain question answering using early fusion of knowledge bases and text. In EMNLP, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sun, H., Bedrax-Weiss, T., and Cohen, W. W. Pullnet: Open domain question answering with iterative retrieval on knowledge bases and text. In EMNLP, 2019a. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        84,
+        475,
+        905
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sun, Z., Deng, Z.-H., Nie, J.-Y., and Tang, J. Rotate: Knowledge graph embedding by relational rotation in complex space. In ICLR, 2019b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Teru, K., Denis, E., and Hamilton, W. Inductive relation prediction by subgraph reasoning. In ICML, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Velickovic, P., Cucurull, G., Casanova, A., Romero, A., Lio,` P., and Bengio, Y. Graph attention networks. In ICLR, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Verga, P., Sun, H., Soares, L. B., and Cohen, W. W. Facts as experts: Adaptable and interpretable neural memory over symbolic knowledge. arXiv preprint arXiv:2007.00849, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Wu, P., Huang, S., Weng, R., Zheng, Z., Zhang, J., Yan, X., and Chen, J. Learning representation mapping for relation detection in knowledge base question answering. In ACL, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Xiong, W., Hoang, T., and Wang, W. Y. Deeppath: A reinforcement learning method for knowledge graph reasoning. In EMNLP, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Xu, K., Hu, W., Leskovec, J., and Jegelka, S. How powerful are graph neural networks? In ICLR, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yang, B., Yih, W.-t., He, X., Gao, J., and Deng, L. Embedding entities and relations for learning and inference in knowledge bases. In ICLR, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yih, W.-t., Richardson, M., Meek, C., Chang, M.-W., and Suh, J. The value of semantic parse labeling for knowledge base question answering. In ACL, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "You, Y., Chen, T., Sui, Y., Chen, T., Wang, Z., and Shen, Y. Graph contrastive learning with augmentations. Neurips, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yu, M., Yin, W., Hasan, K. S., Santos, C. d., Xiang, B., and Zhou, B. Improved neural relation detection for knowledge base question answering. In ACL, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zelle, J. M. and Mooney, R. J. Learning to parse database queries using inductive logic programming. In NCAI, 1996. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zettlemoyer, L. and Collins, M. Online learning of relaxed ccg grammars for parsing to logical form. In EMNLP, 2007. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zettlemoyer, L. S. and Collins, M. Learning to map sentences to logical form: Structured classification with probabilistic categorial grammars. In UAI, 2005. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhang, M. and Chen, Y. Link prediction based on graph neural networks. In Neurips, 2018. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        500,
+        84,
+        887,
+        905
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        71
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhang, Y., Dai, H., Kozareva, Z., Smola, A. J., and Song, L. Variational reasoning for question answering with knowledge graph. In AAAI, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhu, Y., Xu, Y., Yu, F., Liu, Q., Wu, S., and Wang, L. Deep graph contrastive representation learning. arXiv preprint arXiv:2006.04131, 2020. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        86,
+        84,
+        475,
+        184
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A. Hyperparameters "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        88,
+        83,
+        263,
+        99
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For MetaQA, we use 3 GCN layers with GCN layer dimension of 32. For training we have used 5 nearest neighbors and 10 are used for evaluation for the 1-hop, 2-hop and 3-hop queries.We optimize the loss using Adam Optimizer with beta1 of 0.9, beta2 of 0.999 and epsilon of 1e-8. As well as the learning rate is set to be 0.00099 with temperature value of 0.0382 (1-hop), 0.0628 (2-hop) ,0.0779 (3-hop). All the models are trained for 5 epochs. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        109,
+        887,
+        169
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Similarly for WebQSP, we use 3 GCN layers with GCN layer dimension of 32. But for training we used 10 nearest neighbors and 5 are used for evaluation. We optimize the loss using Adam Optimizer with beta1 of 0.9, beta2 of 0.999 and epsilon of 1e-8. As well as a learning rate of 0.0024 and temperature of 0.0645 is used. The model is trained for about 30 epochs. All hyper-parameters can also be found in our code-base. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        176,
+        887,
+        237
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B. Generating synthetic data for control experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        88,
+        256,
+        529,
+        273
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We generate the dataset for running control experiments extending the Erdos-R ˝ enyi model ( ´ Erdos et al., 1960) for sampling random graphs to heterogeneous graphs (graphs with types edges and/or nodes). "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        282,
+        887,
+        313
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "(i) In the first stage, a type system for the KB is created by sampling a fixed set of 16 entity types and edges are added between types with a chance of 0.3. Our sampled KB type system has 74 relation types. This is the exact Erdos-R ˝ enyi ´ model. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "(ii) Next, given a pattern shape we generate a ‘grounded pattern’. The first query entity is selected at random. From there every entity type/relation in the pattern type is sampled from the types allowed by the KB system. For example, given a "
+              },
+              {
+                "type": "equation_inline",
+                "content": "2 i"
+              },
+              {
+                "type": "text",
+                "content": "pattern shape, we sample an entity type "
+              },
+              {
+                "type": "equation_inline",
+                "content": "t 1"
+              },
+              {
+                "type": "text",
+                "content": "for the first query entity e1. Then we assign a type "
+              },
+              {
+                "type": "equation_inline",
+                "content": "r 1"
+              },
+              {
+                "type": "text",
+                "content": "to outgoing edge from the allowed outgoing edge types for t0. This assigns a type "
+              },
+              {
+                "type": "equation_inline",
+                "content": "t _ { a } n s"
+              },
+              {
+                "type": "text",
+                "content": "to the answer node ?ans. Then we sample a type "
+              },
+              {
+                "type": "equation_inline",
+                "content": "r 2"
+              },
+              {
+                "type": "text",
+                "content": "to incoming edge from the allowed incoming edge types for "
+              },
+              {
+                "type": "equation_inline",
+                "content": "t _ { a } n s"
+              },
+              {
+                "type": "text",
+                "content": ". This assigns a type "
+              },
+              {
+                "type": "equation_inline",
+                "content": "t 2"
+              },
+              {
+                "type": "text",
+                "content": "to the second query entity "
+              },
+              {
+                "type": "equation_inline",
+                "content": "e 2"
+              },
+              {
+                "type": "text",
+                "content": ". The final ‘grounded’ "
+              },
+              {
+                "type": "equation_inline",
+                "content": "2 i"
+              },
+              {
+                "type": "text",
+                "content": "pattern is then ((e1, r1, ?ans), (e2, r2, ?ans)). "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "(iii) Next, to sample a query graph, we create an empty graph with 120 entities each randomly assigned a type from the 16 types. The query entities have pre-assigned entity types based on the pattern type (e1 and "
+              },
+              {
+                "type": "equation_inline",
+                "content": "e 2"
+              },
+              {
+                "type": "text",
+                "content": "from the previous example are fixed to be type t1 and "
+              },
+              {
+                "type": "equation_inline",
+                "content": "t 2"
+              },
+              {
+                "type": "text",
+                "content": "respectively) . Starting from the query entities, we sample edges allowed by the KB type system. We add an edge between two entities with a chance of 0.4. We ensure that the entities in the subgraph are at most a distance of 3-hops from the query entities. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "(iv) Finally, we execute the pattern on the graph to assign labels to answer nodes. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        320,
+        887,
+        570
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our control dataset samples 200 pattern types and 15 graphs per pattern type distributing them equally (i.e. 5 each) between train, validation and test. For each of the 15 graphs that share a common pattern type, we assign the 5 graphs that were put in the train set as the kNN queries. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        577,
+        887,
+        622
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "C. Dataset details and statistics "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        88,
+        641,
+        349,
+        657
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/db4e320a56bd1887917aa88c6a75b4f8fa9fd4e8a5a7c851973fb82a4605c1a8.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 7 summarizes the basic statistics of the datasets used in our experiments. "
+          },
+          {
+            "type": "text",
+            "content": "Table 7: Dataset Statistics "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Train</td><td>Dev</td><td>Test</td></tr><tr><td>MetaQA 1-hop</td><td>96,106</td><td>9,992</td><td>9,947</td></tr><tr><td>MetaQA 2-hop</td><td>118,980</td><td>14,872</td><td>14,872</td></tr><tr><td>MetaQA 3-hop</td><td>114,196</td><td>14,274</td><td>14,274</td></tr><tr><td>WebQSP</td><td>2,848</td><td>250</td><td>1,639</td></tr><tr><td>FreebaseQA</td><td>20,358</td><td>2308</td><td>3996</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        336,
+        731,
+        635,
+        825
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "D. Retrieving cases by masking query entities "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        88,
+        83,
+        467,
+        99
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/372cb0bedbbd42b2594cfb43f9dd3049f2a49f72abc5f7733e08397ad2b8ff7e.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 8: Retrieval by masking the question entity prevents the returned kNN queries from focusing on the entity and instead rely on the question structure and relation involved. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>KNN for Unmasked Query</td><td>KNN for Masked Query</td></tr><tr><td>Query</td><td>what did james k polk do before he was president</td><td>what did [MASK] do before he was president</td></tr><tr><td>Retrieved kNN</td><td>1. what did james k polk believe in2. what did barack obama do before he took office</td><td>1. what did abraham lincoln do before he was president2. what did barack obama do before he took office</td></tr><tr><td>Query</td><td>what are the songs that justin bieber wrote</td><td>what are the songs that [MASK] wrote</td></tr><tr><td>Retrieved kNN</td><td>1. what is the name of justin bieber brother2. what are all the inventions benjamin franklin made3. what are all the movies channing tatum has been in</td><td>1. what are all the songs nicki minaj is in2. what songs did mozart write3. what songs did richard marx write</td></tr><tr><td>Query</td><td>where did edgar allan poe died</td><td>where did [MASK] died</td></tr><tr><td>Retrieved kNN</td><td>1. what college did edgar allan poe go to2. what magazine did edgar allan poe work for3. what year did edgar allan poe go to college</td><td>1. where did mendeleev died2. where did benjamin franklin died3. where did thomas jefferson died</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        169,
+        116,
+        802,
+        268
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 8 shows example of query retrieval when the entity mentions in the input query is masked or not. Since CBR-SUBG prefers KNN queries that have more relational similarity and not necessarily about the same entity in the question, it is clear that masking of query helps in retrieving more relevant questions. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        335,
+        883,
+        380
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "E. Adaptive subgraph collection tailors subgraphs to the query "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        88,
+        398,
+        611,
+        417
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 7, 8 and 9 shows example of few query-subgraphs collected by GraftNet and our adaptive subgraph collection strategy (§3.2). Each figure plots the most frequent (top 15) relations gathered by each subgraph collection procedure. The size of each subgraph denote the number of edges collected by each subgraph collection procedure. The subgraph collected by our adaptive strategy produces both compact subgraphs as well as has edges which are more relevant for the query. For example, in Figure 7, for the question ”What form of currency does China have?” – subgraph collected by GraftNet has edges with generic relation types such as ”topic.notable types”, ”tropical cyclone.affected areas” etc, whereas the subgraph collected by our proposed adaptive strategy has edges relevant to answering the question - e.g. ”dated money value.currency”. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        426,
+        883,
+        532
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "F. Further Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        88,
+        550,
+        295,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CBR-SUBG shares similarities with the RETRIEVE-AND-EDIT framework (Hashimoto et al., 2018) which utilizes retrieved nearest neighbor for structured prediction. However, unlike our method they only retrieve a single nearest neighbor and will unlikely be able to generate programs for questions requiring relations from multiple nearest neighbors. There has also been a lot of recent work in general NLP which uses KNN-based approaches. For example, Khandelwal et al. (2020) demonstrate improvements in language modeling by utilizing explicit examples from training data. There has been work in machine translation (Gu et al., 2018; Khandelwal et al., 2021) that uses nearest neighbor translation pair to guide the decoding process. "
+          }
+        ]
+      },
+      "bbox": [
+        88,
+        577,
+        883,
+        683
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/62ef250657c9ce272d615564c41900c44ecef14357e51dfc1389420ab629364e.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "What form of currency does China have? "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        112,
+        127,
+        823,
+        287
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b189fac97f503364c979acdf0f7df030d0d4bec351a5e45bf6121999ded60fb8.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        143,
+        290,
+        823,
+        474
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/16fed6f8db663525363beae5e63b3eca69b57f2f58aa146806a5d006aff3cb78.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "What do Jamaican people speak? "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        112,
+        496,
+        823,
+        657
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e7ffe69a2d802ceadabeec20a295ba32625baccce0dcc5eea527f1ddc4aa3bf4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7 "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        169,
+        659,
+        823,
+        844
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/46df15f1d6caac96d4a34aa242ccfe78fccb94078ac986ee0eae5e420e66eddb.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        109,
+        90,
+        823,
+        455
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/80b80f15bf1828b96ac99137c2d24d3302ea3e54f43ab97060d10a9479850bf8.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Who inspired Obama? "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        109,
+        494,
+        825,
+        656
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/aa4ad3438e362a4dc96f8d168e15db71a167a25b3ea1a2358f27da1f98bad2ce.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 8 "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        109,
+        659,
+        823,
+        843
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/07b0023c3bb2cb5a4845e8b3d59e6d6f962834bc57774e9e4ffb04baceaa37aa.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        109,
+        90,
+        823,
+        455
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d4354832ef409a44a7802930610ce1af1738f679d7e2f5ae3e7d876a97baf1b6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 9 "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        109,
+        479,
+        825,
+        843
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Case-based Reasoning for KBQA over Subgraphs "
+          }
+        ]
+      },
+      "bbox": [
+        328,
+        56,
+        643,
+        70
+      ]
+    }
+  ]
+]

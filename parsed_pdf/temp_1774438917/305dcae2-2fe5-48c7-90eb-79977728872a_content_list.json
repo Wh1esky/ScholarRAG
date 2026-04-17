@@ -1,0 +1,2592 @@
+[
+    {
+        "type": "text",
+        "text": "ScaleNet: A Shallow Architecture for Scale Estimation ",
+        "text_level": 1,
+        "bbox": [
+            207,
+            130,
+            759,
+            150
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Axel Barroso-Laguna ",
+        "bbox": [
+            181,
+            181,
+            356,
+            199
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Yurun Tian ",
+        "bbox": [
+            439,
+            181,
+            529,
+            196
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Imperial College London ",
+        "bbox": [
+            383,
+            199,
+            584,
+            217
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "{axel.barroso17, yurun.tian, k.mikolajczyk}@imperial.ac.uk ",
+        "bbox": [
+            225,
+            218,
+            738,
+            233
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Krystian Mikolajczyk ",
+        "bbox": [
+            612,
+            181,
+            787,
+            199
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            233,
+            268,
+            313,
+            284
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we address the problem of estimating scale factors between images. We formulate the scale estimation problem as a prediction of a probability distribution over scale factors. We design a new architecture, ScaleNet, that exploits dilated convolutions as well as selfand cross-correlation layers to predict the scale between images. We demonstrate that rectifying images with estimated scales leads to significant performance improvements for various tasks and methods. Specifically, we show how ScaleNet can be combined with sparse local features and dense correspondence networks to improve camera pose estimation, 3D reconstruction, or dense geometric matching in different benchmarks and datasets. We provide an extensive evaluation on several tasks, and analyze the computational overhead of ScaleNet. The code, evaluation protocols, and trained models are publicly available at https://github.com/axelBarroso/ScaleNet. ",
+        "bbox": [
+            76,
+            301,
+            473,
+            556
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1. Introduction ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            588,
+            209,
+            603
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Establishing correspondences is the very first step in many different 3D pipelines. Advancing on this task will have a direct impact on the performance of downstream applications such as camera pose estimation [40], autonomous driving [6], or 3D reconstructions [42]. However, methods that search for correspondences between images face significant challenges, and although some solutions are more mature than others, the task still is far from being solved. ",
+        "bbox": [
+            75,
+            613,
+            468,
+            733
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "As the field advances, even though the intermediate tasks in the correspondence search remain the same, their methods are being revisited and redesigned, e.g., keypoint detectors/descriptors [11, 12, 38], dense geometric matchers [26,54], or geometric verification techniques [32,41,47]. These new approaches have shown that the downstream tasks can be pushed to new performance levels through robust correspondences. The key objective of these new methods is to handle more and more extreme cases where previous pipelines failed, and although some methods are arguably application-specific [61], their robustness to extreme ",
+        "bbox": [
+            75,
+            734,
+            470,
+            901
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/a21dcaf78be1a941a38d8d86b79d01ca536a7418b2256c0f4e51e1724ef3b4e7.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            498,
+            267,
+            888,
+            383
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/e4440fba205438d212c7848769563fac1204e8a58a946e1bb3c0b1a0dbeae995.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            504,
+            390,
+            689,
+            536
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/751abaeba38a2f2989a79be11b0cbe377b0d335cd6a498d95a2d41c5f5f349f5.jpg",
+        "image_caption": [
+            "Figure 1. We propose a scale-aware system that helps establish correspondences under strong scale changes, allowing to correctly match pairs where previous pipelines were not successful. We introduce ScaleNet, a network that estimates the scale distribution between two images so that regions of interest can be corrected and exhibit the same scale factor (top). We display (bottom) an indoor and outdoor example where matches from R2D2 with multi-scale pyramid (left) increase if using ScaleNet rectification (right). "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            699,
+            390,
+            883,
+            536
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "conditions is the main reason for success. ",
+        "bbox": [
+            500,
+            674,
+            774,
+            686
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Inspired by the previous methods targeting visual robustness [30, 31, 59], we address the problem of handling the scale change between images, which is a long-standing challenge in computer vision [24, 27]. Scale robustness and estimation have been the focus of much research in the area of handcrafted feature extraction [24, 55, 61] as a reliable solution that can significantly boost the performance of existing methods. Moreover, the scale change is arguably the most challenging, and the most important parameter to estimate compared to rotation, translation, or even local affine deformations [55]. There are several strategies to deal with scale changes, with the multi-scale pyramid being one of the most popular solutions [3,4,12,24,38,53,55]. Although the multi-scale pyramid mitigates the problem of different ",
+        "bbox": [
+            496,
+            689,
+            893,
+            900
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2112.04846v3 [cs.CV] 5 Jul 2022 ",
+        "bbox": [
+            22,
+            277,
+            58,
+            700
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_number",
+        "text": "1 ",
+        "bbox": [
+            480,
+            924,
+            488,
+            936
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "scales, it increases complexity and ambiguity as the matcher needs to establish correspondences among multiple scale levels. Figure 1 (bottom) shows an example of extreme pairs for which R2D2 [38] with multi-scale pyramid can only get a high number of correct matches once we rectify the scales. Besides the added complexity, a multi-scale pyramid is not always a straightforward solution to incorporate in some methods, such as dense correspondence networks [19,46,54]. In contrast to multi-scale pyramids, some works aim at being invariant to different scales through their learning process [11, 35], however, as a side effect, they become progressively less discriminative [56]. Another possible direction, and popular strategy, is to estimate the local or global transformations and rectify the images prior to establishing the correspondences [31, 37, 51, 59]. ",
+        "bbox": [
+            80,
+            90,
+            467,
+            316
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "The scale factor characterizes the relationship between pairs of images and, in general, an accurate estimate can only be achieved when considering both images at the same time. Using pairs of images as input may increase the complexity beyond acceptable in some applications such as large-scale retrieval and localization unless used in their final verification stage. Nonetheless, solving the scale before the main analysis improves the discriminative power and allows less robust but more efficient methods to be used in challenging scenarios [35]. Hence, we propose a new approach that estimates and corrects the scale factor between a given pair of images before the correspondence search, which is illustrated at the top of figure 1. Our scale predictor network, termed ScaleNet, is inspired by dense geometric methods [26, 52, 54] and conditioned local features extractors [15, 35, 56]. ScaleNet extracts features from two low-resolution images and exploits CNN correlation layers to predict the scale factor. Due to the non-linear nature of scale changes, we formulate the scale regression problem as the estimation of a probability distribution in logarithmic space. We show how ScaleNet can be combined with different methods and demonstrate the improvements on different tasks and datasets. ",
+        "bbox": [
+            80,
+            318,
+            467,
+            662
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Our contributions include: 1) a scale-aware matching system based on a novel scale predictor architecture, 2) a strategy to measure and label the scale factor between two images, and 3) a learning scheme that tackles the non-linear nature of scale changes. ",
+        "bbox": [
+            80,
+            665,
+            467,
+            739
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2. Related work ",
+        "text_level": 1,
+        "bbox": [
+            80,
+            753,
+            210,
+            768
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Recent works have allowed significant progress in establishing good correspondences between images. Although many works have focused on solving entire tasks in an end-to-end manner [5, 40], there are lots of efforts focused on identifying limitations and improving the robustness of individual steps in modern pipelines [3, 29, 41]. ",
+        "bbox": [
+            80,
+            779,
+            467,
+            869
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Image rectification consists of predicting or applying a ",
+        "bbox": [
+            80,
+            885,
+            467,
+            900
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "set of transformations to the images so that the search for correspondences is done in an optimum setting. Pioneering work on this area is ASIFT [59], which applies multiple affine transformations to find less challenging image pairs for matching with SIFT [24]. MODS [30] investigated this line of work by introducing an iterative scheme to generate intermediate synthetic views between images. MODS also proposed an adaptive system to avoid applying synthetic transformations to easy-to-match pairs, being faster and more versatile than previous ASIFT. Closer to our work is [61], which computes the scale factor between a pair of images by detecting and matching exhaustively SIFT features on multiple scale levels. Although it shows that they can deal with strong scale changes, their method is tied to the need of visiting all possible scaled images before the actual local feature matching stage. One negative aspect of these methods is that they still require a blind exploration of synthetic views to find the optimal image transformations. A few works have tried to overcome the previous limitation and proposed to learn such parameterizations directly from the images. One of the first attempts is [58], where authors introduced a neural network to assign a canonical orientation to every input image patch before the descriptor architecture. In AffNet [31], authors follow this trend and learn a full affine shape estimator to geometrically align input patches before the descriptor. Moreover, [37] proposed a scene-specific overlapping estimator and showed that scale rectification based on image overlapping can improve feature matching. Unlike previously learned methods, our labeling strategy is based on keypoint distance ratios, resulting in a scene-agnostic scale predictor that uses pairs of images as input. Even though our ScaleNet tackles only the scale factor out of several possible transformation parameters, we show in section 5 that the scale factor is crucial for boosting the performance of current methods. ",
+        "bbox": [
+            503,
+            90,
+            888,
+            618
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Visual robustness has been the focus of numerous works in the field of correspondence search [4, 14, 25]. The rotation has been addressed by correcting input patches [14, 24, 31] before extracting local descriptors [29,49,50], or by designing robust architectures [4, 23, 25]. However, in the context of scale changes, the standard strategy is the well-known multi-scale (M-S) pyramid approach, which applies methods at different re-scaled versions of the image [12, 38, 48]. Even though M-S pyramids offer a versatile solution for many applications, it does not provide a suitable approach for extreme scale changes (cf. section 5), and thus, both, single and multi-scale feature extractors, benefit from correcting the scale factor before extracting features. Moreover, recent works show that there is growing interest in pair-wise methods, i.e., that use two input images at the same time to establish the local or dense correspondences [15, 19, 26, 36, 46, 54, 56], but, in that scenario, there is no ",
+        "bbox": [
+            503,
+            643,
+            888,
+            898
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            480,
+            925,
+            488,
+            935
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "image",
+        "img_path": "images/8cef063098627b5393f96c98ea65df13258c07f6b675b1b5efdaf48c8af34945.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            81,
+            95,
+            388,
+            286
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/d2dcc36e819d18ce3c07bf552fff0d8b933b4a901bdcd0dd624cc003b6f25d2f.jpg",
+        "image_caption": [
+            "Figure 2. ScaleNet uses a multi-scale (M-S) feature extractor and a combination of self- and cross-correlation layers to calculate the relationship within each image and between them. The M-S extractor is composed of a common CNN and an ASPP block [7, 8]. The ASPP module consists of three 3x3 convolutional layers with different dilation rates. Conv blocks perform 1x1 convolutions to learn the cross-channel interactions that go into the self- and cross-correlation layers. Correlation volumes’ dimensionality is reduced through a CNN, and its results are concatenated into a flat feature vector. Finally, consecutive fully connected layers calculate the scale distribution. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            392,
+            98,
+            893,
+            272
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "clear or effective strategy for dealing with scale changes. Hence, given that such methods already take two images as inputs, ScaleNet rectification offers a more natural and intuitive process towards visual robustness than M-S pyramids. ",
+        "bbox": [
+            75,
+            395,
+            470,
+            457
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3. Method ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            467,
+            168,
+            482
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "ScaleNet embraces several key concepts to deliver good performance in practical settings. The first key aspect is that it is effective for low-resolution images, which makes it more efficient. Another important idea is the formulation of the scale estimation as a distribution prediction in logarithmic space rather than a regression problem [18, 31, 57]. This allows using a simple and shallow, yet effective architecture. Figure 2 presents our ScaleNet architecture, and the following sections detail each of the aspects of ScaleNet and its learning scheme. ",
+        "bbox": [
+            75,
+            492,
+            468,
+            643
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.1. ScaleNet architecture ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            650,
+            277,
+            666
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Consider $A$ and $B$ as input images to ScaleNet. Lowresolution images $A$ and $B$ are processed by a multi-scale feature extractor block, which is composed of a generic network, e.g., VGG, or ResNet, followed by the atrous spatial pyramid pooling (ASPP) [7, 8]. The ASPP block achieves multi-scale robustness by applying to the feature map $3 \\times 3$ dilated convolutions, each with a different dilation rate, e.g., 2, 3, and 4. Thus, the ASPP block allows the network to compute and fuse features from different receptive fields. M-S features are concatenated and fed into a final $1 \\times 1$ convolution, which combines the features from local and global areas at a minimum cost. We then apply self- and crosscorrelation layers to multi-scale features $f _ { A }$ and $f _ { B }$ , and obtain the correlation maps, cA, $c _ { B }$ , and $c _ { A - B }$ , which contain the self- and cross-pairwise similarities. As in [39], ReLU ",
+        "bbox": [
+            75,
+            672,
+            470,
+            900
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "and L2-normalization are applied to the correlation maps before the feature reduction blocks, which are composed of four Conv-Batch-ReLU layers each. Finally, $c _ { A } ^ { \\prime }$ , $c _ { B } ^ { \\prime }$ , and $c _ { A - B } ^ { \\prime }$ maps are flattened, concatenated, and fed into a set of fully connected layers to predict the scale distribution $P$ , with a final softmax activation layer. ",
+        "bbox": [
+            496,
+            395,
+            892,
+            487
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.2. Predicting scale distributions ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            494,
+            759,
+            510
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "ScaleNet outputs a scale distribution rather than a regressed single scale factor, which helps the network to converge to a reliable model. In contrast, when tackling the problem as a regression task, the same network cannot predict an accurate scale (cf. appendix C.1). We attribute this to the fact that the network can learn and interpret the relationships between the quantized scale ranges and solve an easier classification task, which requires it to assign the weights to the predefined scale factors instead of predicting its actual value. ",
+        "bbox": [
+            496,
+            517,
+            890,
+            667
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We formulate the scale estimation as a problem of predicting the probability distribution in a scale-space quantized into $L$ bins. Given images $A$ and $B$ , our objective function measures the distance between our computed scale distribution, $P _ { A  B }$ , and the ground-truth distribution $P _ { A  B } ^ { g t }$ : ",
+        "bbox": [
+            496,
+            667,
+            890,
+            760
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\nL o s s (A, B) = K L \\left(P _ {A \\rightarrow B}, P _ {A \\rightarrow B} ^ {g t}\\right), \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            571,
+            768,
+            890,
+            787
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "where $K L ( \\cdot , \\cdot )$ is the Kullback-Leibler divergence loss. To obtain the scale factor from the probability distribution $P _ { A  B }$ , we combine all scale levels using a soft-scale computation. It enables the network to output scale factors that interpolate between the quantized scale values, thus covering all possible scales between images $A$ and $B$ Soft-assignment gives the architecture further flexibility and ",
+        "bbox": [
+            496,
+            794,
+            890,
+            900
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            478,
+            924,
+            490,
+            936
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/e48f18e17eb4a841b54e060fb83ee92eb4dd8d680962f3a80af0e2b95eef53d4.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            89,
+            274,
+            184
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/3a4629b3c70a844ff80de189e7f085a53a07b436a8b4185638d79e7f9e36eb59.jpg",
+        "image_caption": [
+            "Figure 3. In the dataset generation, we randomly pick pairs of corresponding points in both views and compute their distances in the image planes. The final scale ground-truth is the average of the distance ratios of all picked keypoints. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            276,
+            89,
+            460,
+            184
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "robustness when inferring scales as shown in section 5.4. ",
+        "bbox": [
+            75,
+            279,
+            452,
+            292
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The scale factor is a relative ratio operator, hence, it is non-linear. To avoid a bias by high scale values when computing the soft-scale, we transform the quantized scale classes, $s _ { i }$ , to logarithmic space. The logarithmic transformation allows to calculate the soft-scale, $\\bar { S } _ { A  B }$ , as a linear combination of the logarithmic scales, $\\bar { s } _ { i }$ , weighted by the predicted scale probabilities from softmax output $p _ { i }$ . The global scale factor $\\bar { S } _ { A  B }$ in log-scale is given as: ",
+        "bbox": [
+            75,
+            294,
+            467,
+            415
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\bar {S} _ {A \\rightarrow B} = \\sum_ {i = 0} ^ {L - 1} p _ {i} \\cdot l n \\left(s _ {i}\\right), \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            187,
+            426,
+            468,
+            467
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $s _ { i } ~ = ~ \\sigma ^ { t }$ corresponds to the quantized scale for bin i, σ is our predefined base scale factor, integer $t \\in [ - ( L - 1 ) / 2 , \\dots , 0 , \\dots , ( L - 1 ) / 2 ]$ , and $L$ is the total number of scale bins. Moreover, we improve the robustness of our scale estimator by a simple yet effective consistency check trick, where we compute the scale factor, $\\bar { S } _ { A  B }$ , and its inverse, $\\bar { S } _ { B  A }$ , and combine them as: ",
+        "bbox": [
+            75,
+            479,
+            468,
+            585
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\hat {S} _ {A \\rightarrow B} = \\frac {\\bar {S} _ {A \\rightarrow B} - \\bar {S} _ {B \\rightarrow A}}{2} \\quad \\text {a n d} \\quad S _ {A \\rightarrow B} = e ^ {\\hat {S} _ {A \\rightarrow B}}, \\tag {3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            84,
+            597,
+            468,
+            628
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "with $S _ { A  B }$ as the final scale factor between the images. ",
+        "bbox": [
+            76,
+            638,
+            447,
+            654
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "3.3. Dataset generation ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            664,
+            256,
+            680
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "ScaleNet is trained with synthetically generated image pairs as well as images from real scenes. ",
+        "bbox": [
+            75,
+            688,
+            468,
+            718
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Synthetic pairs. We define a set of planar affine transformations to map one image into another. Such image pairs are easy to generate on-demand for any ground-truth scale $S _ { g t }$ , however, they do not include the real noise from different imaging conditions. ",
+        "bbox": [
+            75,
+            733,
+            468,
+            809
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Real pairs present more challenging conditions than synthetic pairs, i.e., non-planar viewpoint changes, weather/illumination conditions, or occlusions, among others. In addition, in contrast to the previous synthetic global transformations, the scale between two real images may ",
+        "bbox": [
+            75,
+            825,
+            468,
+            900
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "spatially vary, and areas of different depth or strong perspective changes may include various scale factors. Thus, we introduce a new approach for obtaining training data by estimating the scale factors between real images. We use 3D reconstruction datasets, where 3D point clouds and their corresponding projected 2D positions on the images are available. First of all, given the 3D model, we find pairs of images with an overlap higher than $10 \\%$ computed as in [12, 33]. For each pair of images $A$ and $B$ , we identify the 3D points of the model that are visible in both images. Using the registered 3D points from the model as opposed to sampling random positions ensures that the regions used for computing the scale are discriminative. Thus, given the covisible 3D points, we query its projected 2D positions, $k _ { A }$ , and $k _ { B }$ , on image $A$ and $B$ . We randomly sample pairs of points, $k _ { A }$ and $k _ { B }$ , and compute their distances as shown in figure 3. ",
+        "bbox": [
+            496,
+            90,
+            890,
+            347
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The scale factor between two images with keypoints $i$ and $j$ is calculated as the ratio of their distances in image $A$ and $B$ : ",
+        "bbox": [
+            498,
+            347,
+            890,
+            391
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nS _ {i - j} = \\frac {\\left\\| k _ {B i} - k _ {B j} \\right\\|}{\\left\\| k _ {A i} - k _ {A j} \\right\\|} \\quad \\text {a n d} \\quad i, j \\in [ 1, \\dots , K ], \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            539,
+            401,
+            890,
+            434
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "with $K$ as the total number of covisible 3D points between images $A$ and $B$ . As different regions may exhibit different scale factors, we compute the global scale factor as the average of ratios in logarithmic scale after sampling $R$ different pairs of points: ",
+        "bbox": [
+            496,
+            444,
+            890,
+            520
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nS _ {A \\rightarrow B} ^ {g t} = e ^ {\\bar {S} _ {A \\rightarrow B}} \\quad \\text {w h e r e} \\quad \\bar {S} _ {A \\rightarrow B} = \\frac {1}{R} \\sum_ {i \\neq j} l n \\left(S _ {i - j}\\right). \\tag {5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            513,
+            531,
+            890,
+            580
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "As detailed in section 3.2, the ScaleNet learning scheme minimizes the K-L divergence between the predicted scales and ground-truth distributions. We, therefore, build the ground-truth scale distribution, $P _ { A  B } ^ { g t }$ , such as it satisfies: ",
+        "bbox": [
+            496,
+            582,
+            890,
+            643
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\ln \\left(S _ {A \\rightarrow B} ^ {g t}\\right) = \\bar {S} _ {A \\rightarrow B} ^ {g t} = \\sum_ {i = 0} ^ {L - 1} p _ {i} ^ {g t} * \\ln \\left(s _ {i}\\right), \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            557,
+            654,
+            890,
+            695
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $s _ { i }$ are the quantized scale factors, and $P _ { A  B } ^ { g t } \\ =$ $[ p _ { 0 } ^ { g t } , . . . , p _ { ( L - 1 ) } ^ { g t } ]$ is the ground-truth distribution of the scale estimated as a normalized histogram of point pairs. ",
+        "bbox": [
+            500,
+            708,
+            890,
+            755
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4. Implementation notes ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            768,
+            705,
+            786
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "ScaleNet details. ScaleNet predicts a scale distribution with $L \\ = \\ 1 3$ bins and $\\sigma = { \\sqrt { 2 } }$ , giving possible scale factors in range $S ~ \\in ~ [ 0 . 1 6 , . . . , 6 ]$ . ASPP module has 3 levels with dilation rates 2, 3, and 4. During training, ScaleNet uses Adam Optimizer with a learning rate of $1 0 ^ { - 4 }$ and a decay factor of 0.1 every ten epochs. The training takes on average 40 epochs, 20 hours on a machine ",
+        "bbox": [
+            496,
+            794,
+            890,
+            900
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            478,
+            924,
+            490,
+            935
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "table",
+        "img_path": "images/9b4b26c6974bf565a47d64b7e82db224aa2d1171fce7bafcd4f2197b832cb1a1.jpg",
+        "table_caption": [
+            "Table 1. Ablation study of the different ScaleNet’s design choices. Baseline refers to SuperPoint [11] without scale correction. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\"></td><td colspan=\"3\">Pose estimation (AUC)</td><td rowspan=\"2\">Time (ms)</td></tr><tr><td>at 5°</td><td>at 10°</td><td>at 20°</td></tr><tr><td>Baseline</td><td>4.8</td><td>7.4</td><td>10.4</td><td>-</td></tr><tr><td>VGG-16</td><td>5.4</td><td>8.3</td><td>11.8</td><td>8.3</td></tr><tr><td>ResNet-50</td><td>5.6</td><td>8.8</td><td>12.7</td><td>15.8</td></tr><tr><td>VGG w/ self-corr.</td><td>6.2</td><td>9.3</td><td>12.5</td><td>11.3</td></tr><tr><td>VGG w/ ASPP</td><td>7.3</td><td>11.1</td><td>15.7</td><td>16.6</td></tr><tr><td>Ours (VGG+self-corr+ASPP)</td><td>8.4</td><td>12.3</td><td>17.6</td><td>19.4</td></tr><tr><td>Ours + Consistency check</td><td>8.7</td><td>13.4</td><td>19.5</td><td>19.8</td></tr></table>",
+        "bbox": [
+            84,
+            87,
+            460,
+            213
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "with an i7-7700 CPU running at 3.60GHz, and an NVIDIA GeForce GTX 1080-Ti. ScaleNet model and training scripts are implemented in PyTorch [34]. ",
+        "bbox": [
+            76,
+            282,
+            468,
+            329
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Dataset details. We use Megadepth dataset [21] for generating our custom training and testing dataset. We discard scenes that are in the PhotoTourism test from our training set as in [41] to avoid overlap. We keep $10 \\%$ of the training scenes as our validation set. During data generation, we sample $R = 2 0 0$ random pairs of 3D points (cf. equation 5) for a robust scale estimation between the two images. We sample pairs of images with scale factors $S \\in [ 0 . 1 6 , . . . , 6 ]$ and create a collection of 250,000 training and 25,000 validation pairs where all scale factors are well represented. Synthetic pairs are generated on the fly from the Megadepth training images during training. We include more details and examples of our training set in appendix A. ",
+        "bbox": [
+            75,
+            343,
+            468,
+            541
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "5. Experiments ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            554,
+            209,
+            571
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "This section presents results for ScaleNet integrated with state-of-the-art methods on several datasets and tasks. Refer to appendix for more experiments and qualitative examples. ",
+        "bbox": [
+            76,
+            579,
+            468,
+            626
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "5.1. Preliminaries ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            635,
+            217,
+            648
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Multi-scale pyramid & ScaleNet. Multi-scale (M-S) pyramids and ScaleNet aim at making methods more robust against arbitrary scale changes. Although both approaches tackle the same problem, each has its strengths, e.g., M-S pyramids can compute a higher number of features by visiting multiple resized images, and ScaleNet offers a more natural integration into tasks where two images are given as input [15, 26, 54, 56]. Besides, we claim that ScaleNet improves not only single-scale feature extractors but also multi-scale ones. We analyze in figure 4a the robustness of methods against synthetic scale transformations and show how the combination with ScaleNet benefits them. In this experiment, we use 2,000 random images from the Megadepth dataset and scale them to create the pairs. We measure the mean matching accuracy (MMA) computed as in [38]. As expected, results indicate that the performance ",
+        "bbox": [
+            75,
+            657,
+            470,
+            900
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/bdc3f8d9d6fc590b1ab2b1241380280dbfd31e4eaad5a2ccceb85fef2d759cf8.jpg",
+        "image_caption": [
+            "(a) Mean matching accuracy under synthetic scale transformations, s. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            501,
+            87,
+            883,
+            181
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/9ab41785ffc93fd136a3da189bf74987cc760ca7a3bd3eb8136c62a98a9de7b2.jpg",
+        "image_caption": [
+            "(b) Histogram of the scale ratios, $r$ , between the globally and locally estimated scales in image pairs used for training, with $r = s _ { a } / s _ { b }$ , and where $s _ { a } = m a x ( s _ { l o c a l } , s _ { g l o b a l } )$ , and $s _ { b } = m i n ( s _ { l o c a l } , s _ { g l o b a l } )$ . ",
+            "Figure 4. Analysis on the visual robustness against pure scale changes, and comparison of local vs global scales. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            501,
+            215,
+            867,
+            316
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "of single-scale methods, Key.Net [3] and R2D2 [38], drop notably even when images present small scale perturbations $( s > 1 . 5 )$ . Meanwhile, M-S pyramid or ScaleNet strategies mitigate the effect and lead to a better approach. Moreover, we observe that the combination of M-S pyramids and ScaleNet achieves the top performance, and proves that both strategies contribute and work well together. ",
+        "bbox": [
+            496,
+            429,
+            890,
+            536
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Local vs global scale estimation. ScaleNet can predict a scale for each point within the image, however, it is not straightforward to correct the scale factor locally for networks that process the whole image, e.g., dense correspondences networks [26, 52, 54], or dense local feature extractors [11, 12, 38]. Figure 4b shows the histogram of the average scale ratios between the globally and the locally estimated scales per image. To compute the local scale values, we restrict the random sampling to spatially neighboring keypoints in equation 4 rather than points sampled across the whole image. Figure 4b shows that in the majority of images the differences between global and local estimations are small and within 1.0 and 1.2. A ratio $r$ of 1.0 indicates that the local and the global scales between the two images are the same, and therefore, the global scale is valid across the whole image. Based on results in figure 4b, we argue that although local scales could bring an extra benefit in scenes with strong viewpoint or perspective changes, a single global scale will significantly contribute towards correcting images. ",
+        "bbox": [
+            496,
+            551,
+            892,
+            854
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Ablation study in table 1 displays the contributions of each ScaleNet’s block towards robust scale estimation. We com-",
+        "bbox": [
+            500,
+            869,
+            890,
+            900
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            480,
+            924,
+            488,
+            936
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "table",
+        "img_path": "images/0b75e210b0eb99344025b52deb8e988195b9106ccec085e85b9630f5d204d3ad.jpg",
+        "table_caption": [
+            "Pose estimation (AUC) ",
+            "Table 2. Relative camera pose results on custom Megadepth split with and without ScaleNet correction. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>at 5°</td><td>at 10°</td><td>at 20°</td></tr><tr><td>SIFT</td><td>9.8</td><td>15.4</td><td>22.0</td></tr><tr><td>w/ ScaleNet</td><td>12.9 (+32%)</td><td>19.5 (+27%)</td><td>27.4 (+25%)</td></tr><tr><td>R2D2-SS</td><td>3.1</td><td>4.4</td><td>5.6</td></tr><tr><td>w/ ScaleNet</td><td>6.5 (+110%)</td><td>9.7 (+121%)</td><td>12.8 (+129%)</td></tr><tr><td>R2D2-MS</td><td>10.5</td><td>13.1</td><td>18.9</td></tr><tr><td>w/ ScaleNet</td><td>13.2 (+26%)</td><td>17.5 (+34%)</td><td>21.0 (+11%)</td></tr><tr><td>Key.Net-SS</td><td>4.7</td><td>6.9</td><td>9.3</td></tr><tr><td>w/ ScaleNet</td><td>8.9 (+89%)</td><td>14.0 (+103%)</td><td>19.5 (+110%)</td></tr><tr><td>Key.Net-MS</td><td>14.0</td><td>22.1</td><td>31.6</td></tr><tr><td>w/ ScaleNet</td><td>17.2 (+23%)</td><td>26.4 (+20%)</td><td>38.4 (+22%)</td></tr><tr><td>SuperPoint</td><td>5.4</td><td>8.2</td><td>11.0</td></tr><tr><td>w/ ScaleNet</td><td>8.1 (+50%)</td><td>12.4 (+51%)</td><td>17.3 (+57%)</td></tr><tr><td>SP+SuperGlue</td><td>16.5</td><td>25.3</td><td>35.0</td></tr><tr><td>w/ ScaleNet</td><td>22.5 (+36%)</td><td>33.9 (+34%)</td><td>45.5 (+30%)</td></tr></table>",
+        "bbox": [
+            86,
+            101,
+            460,
+            316
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "bine different architecture’s designs with SuperPoint [11] and test them in the task of relative camera pose estimation. We use Lowe’s ratio test [24] and MAGSAC [2] to compute camera poses, and, as in [41,46], report the AUC of the pose errors at $5 ^ { \\circ }$ , $1 0 ^ { \\circ }$ , and $2 0 ^ { \\circ }$ , where the error is calculated as the maximum of the rotation and translation angular errors. We sample 2,000 image pairs with scale factors between 0.16 and 6 from an independent validation set. Besides the AUC, we report the overhead inference time of each design. ",
+        "bbox": [
+            75,
+            383,
+            467,
+            518
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "We first compare the effect of different pre-trained feature extractors on ImageNet [10] (cf. figure 2), VGG-16 [45], and ResNet-50 [16], and see that the more complex ResNet representation contributes towards better poses with the downside of a higher computational cost. Thus, to keep our method light and fast, and given the similarity of the AUC scores, we use the VGG feature extractor for following experiments. In addition to the extractors, we analyze the effect of the self-correlation layers and the multi-scale ASPP component and observe that both boost the performance. Self-correlations capture the intra-image relationships and, therefore, give a better awareness of the global content. Additionally, ASPP offers a mechanism to extract more global features, thus, address larger scale changes. Furthermore, we show that the consistency check offers a higher AUC at a low computation cost. Note that M-S features and correlation layers only need to be computed once in inference and, hence, the extra cost for consistency check is small and proportional to running the dense layers twice. ",
+        "bbox": [
+            75,
+            518,
+            467,
+            806
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "5.2. Relative camera pose ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            816,
+            274,
+            832
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Protocol. We first evaluate ScaleNet on the camera pose estimation task due to its natural integration into the existing pipelines. Similar to the previous ablation experiment, given a collection of image pairs, we calculate ",
+        "bbox": [
+            75,
+            839,
+            468,
+            901
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/72f82f48b4b8dead97536a191e4fc385f2beddefc3a3775e2d658cc09f05cedb.jpg",
+        "table_caption": [
+            "Geometric matching (PCK-5 %) ",
+            "Table 3. Results on sparse correspondences for full, easy, and hard splits in Megadepth, consisting of 1,600, 627, and 440 pairs, respectively. Improvements from ScaleNet are across all splits, in particular, geometric matchers benefit largely from scale correction when there are large scale changes $\\mathit { \\Pi } _ { \\mathcal { S } } ^ { ' } > 1 . 8 )$ ). "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>All</td><td>Easy</td><td>Hard</td></tr><tr><td>DGC-Net</td><td>40.2</td><td>34.4</td><td>4.5</td></tr><tr><td>w/ ScaleNet</td><td>41.4 (+3%)</td><td>36.8 (+7%)</td><td>20.1 (+347%)</td></tr><tr><td>GLU-Net</td><td>55.5</td><td>55.4</td><td>10.8</td></tr><tr><td>w/ ScaleNet</td><td>57.8 (+4%)</td><td>56.3 (+2%)</td><td>26.8 (+148%)</td></tr></table>",
+        "bbox": [
+            527,
+            101,
+            864,
+            174
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "the AUC of the camera pose error at $5 ^ { \\circ }$ , $1 0 ^ { \\circ }$ , and $2 0 ^ { \\circ }$ as in [41, 46]. We use the test scenes from Megadepth and mine 4,000 images pairs with small and strong scale changes such as $s ~ \\in ~ [ 0 . 1 6 , 6 ]$ . Appendix contains more details and examples of our dataset. We study the effect of ScaleNet on popular and publicly available local feature methods [3, 11, 24, 29, 38], and refer to Key.Net/HardNet as Key.Net in the following tables and figures. ",
+        "bbox": [
+            496,
+            285,
+            890,
+            407
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Results in table 2 show that ScaleNet corrections boost the performance of all methods. As discussed previously, even though ScaleNet excels when combined with a single-scale method, e.g., SuperPoint, ScaleNet is also able to improve the pose estimation of multi-scale extractors. We observe that the average improvements are $7 7 \\%$ and $24 \\%$ for single and multi-scale methods, respectively. In addition, we report results with SuperPoint and SuperGlue [41] and see that even this state-of-the-art matcher benefits ( $+ 3 3 \\%$ on average) from a scale correction prior to the feature extraction. ",
+        "bbox": [
+            496,
+            422,
+            890,
+            575
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "5.3. Geometric matching ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            588,
+            692,
+            604
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Protocol. We also evaluate ScaleNet on the geometric correspondence task by integrating it into the popular DGC-Net [26] and GLU-Net [54]. Note that ScaleNet can also be combined with other recent methods [46, 52, 53]. ScaleNet rescales one of the images before the dense correspondence network estimates the dense flow fields between the two images. Due to the lack of dense annotations on real image pairs with large viewpoint and illumination changes, we evaluate ScaleNet using sparse correspondences available in the Megadepth [21] dataset. Specifically, we follow the protocol of 1,600 image pairs introduced in [44] to compute the percentage of correct keypoints (PCK) under a 5 pixel acceptance threshold. The experiment is extended with multiple acceptance thresholds in appendix C.5. ",
+        "bbox": [
+            496,
+            612,
+            890,
+            824
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Results in table 3 show the PCK scores obtained with and without scale correction before the dense architectures, DGC-Net and GLU-Net. Moreover, to highlight the benefit of ScaleNet for images at different scale factors, besides ",
+        "bbox": [
+            496,
+            839,
+            890,
+            900
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            478,
+            925,
+            491,
+            936
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/1749d69853e7dc7267d7cf84e30630b6a1aa8dcc0068f9a30de6ed8f9d4f6c4f.jpg",
+        "table_caption": [
+            "Table 4. 3D reconstruction results on the 10 test scenes (100 images each) from the IMC dataset [60] with and without ScaleNet correction. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td></td><td>Reg. Images</td><td>Num. Obs.</td><td>Track Length</td><td>Rep. Error</td><td></td><td>Reg. Images</td><td>Num. Obs.</td><td>Track Length</td><td>Rep. Error</td></tr><tr><td rowspan=\"9\">IMC Dataset (10 scenes)</td><td>SIFT</td><td>98.5</td><td>93k</td><td>7.26</td><td>0.80</td><td>SuperPoint</td><td>99.0</td><td>78k</td><td>10.47</td><td>1.17</td></tr><tr><td>w/ ScaleNet</td><td>98.6</td><td>126k</td><td>10.20</td><td>0.87</td><td>w/ ScaleNet</td><td>99.5</td><td>135k</td><td>12.71</td><td>1.26</td></tr><tr><td>w/ D-ScaleNet</td><td>98.5</td><td>118k</td><td>9.55</td><td>0.85</td><td>w/ D-ScaleNet</td><td>99.3</td><td>98k</td><td>11.96</td><td>1.22</td></tr><tr><td>R2D2-SS</td><td>96.0</td><td>52k</td><td>8.35</td><td>0.93</td><td>R2D2-MS</td><td>97.9</td><td>86k</td><td>14.19</td><td>1.05</td></tr><tr><td>w/ ScaleNet</td><td>97.2</td><td>89k</td><td>10.71</td><td>1.02</td><td>w/ ScaleNet</td><td>99.0</td><td>114k</td><td>15.35</td><td>1.13</td></tr><tr><td>w/ D-ScaleNet</td><td>96.4</td><td>72k</td><td>9.43</td><td>1.01</td><td>w/ D-ScaleNet</td><td>97.7</td><td>95k</td><td>14.37</td><td>1.08</td></tr><tr><td>Key.Net-SS</td><td>99.1</td><td>82k</td><td>11.05</td><td>1.06</td><td>Key.Net-MS</td><td>99.5</td><td>114k</td><td>16.23</td><td>0.96</td></tr><tr><td>w/ ScaleNet</td><td>99.6</td><td>148k</td><td>14.22</td><td>1.16</td><td>w/ ScaleNet</td><td>99.6</td><td>148k</td><td>19.23</td><td>1.09</td></tr><tr><td>w/ D-ScaleNet</td><td>99.2</td><td>126k</td><td>12.71</td><td>1.10</td><td>w/ D-ScaleNet</td><td>99.5</td><td>147k</td><td>17.62</td><td>1.02</td></tr></table>",
+        "bbox": [
+            130,
+            85,
+            849,
+            233
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "reporting the results for the full dataset (All), we create the Easy $( s > 1 . 2 )$ and Hard $s > 1 . 8 )$ splits, where $s$ indicates scale distortions factor between images. Each split has 1,600, 627, and 440 image pairs, respectively. We observe that ScaleNet integration does not bring significant improvements in the All data, where the majority of images have small scale variations, but it is important to note that it does not hurt the performance either. Meanwhile, in extreme cases (Hard split), current dense correspondence methods fail under severe scale changes, and their integration with ScaleNet improves the results by $34 \\%$ and $148 \\%$ for DGC-Net and GLU-Net. ",
+        "bbox": [
+            75,
+            287,
+            470,
+            467
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5.4. 3D reconstruction ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            482,
+            251,
+            498
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Protocol. ScaleNet can be easily integrated into geometric correspondence or relative camera pose pipelines, which are often a part of a more general 3D reconstruction system. To evaluate ScaleNet in this scenario, we follow the protocol proposed in the Local Feature Evaluation Benchmark [43] for building 3D reconstruction models. As ScaleNet can upsample one of the images, and that could result in a higher number of candidate keypoints, we limit the number of features to the top 2,048 keypoints based on the protocol proposed in [60]. We present results for the test split from the IMC dataset [60], which includes ten different scenes with 100 images each. IMC images pose significant challenges, e.g., weather/illumination, perspective, scale, as well as strong occlusions. ",
+        "bbox": [
+            75,
+            508,
+            468,
+            718
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "As ScaleNet is applied to image pairs before the feature extraction, the detectors and descriptors are recomputed every time the scale is corrected. Hence, to reduce the computation time, we propose a discrete variant of ScaleNet (D-ScaleNet) that makes the extraction process more efficient. D-ScaleNet implements a hard-assignment by selecting the maximum scale instead of the soft-scale and consistency check from equation 2 and 3. Analogous to multi-scale pyramid approaches, we run the detectors/descriptors at multiple resized images but then select the optimal set of pre-computed features for matching based on D-ScaleNet estimation. ",
+        "bbox": [
+            75,
+            719,
+            470,
+            900
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "table",
+        "img_path": "images/a7a12ec86f6f1a494599d44a23573785bfa0c18ecbd886f4912db980a45bb38c.jpg",
+        "table_caption": [
+            "Table 5. 3D reconstruction times on the British Museum scene (100 images) from IMC dataset [60]. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td colspan=\"4\">Time (s)</td></tr><tr><td></td><td>Extraction</td><td>Matching</td><td>Reconst.</td><td>Total</td></tr><tr><td>SuperPoint</td><td>10.3</td><td>16.7</td><td>195.3</td><td>222.3</td></tr><tr><td>w/ ScaleNet</td><td>980.5</td><td>46.3</td><td>208.9</td><td>1235.7</td></tr><tr><td>w/ D-ScaleNet</td><td>141.8</td><td>161.8</td><td>205.6</td><td>509.2</td></tr></table>",
+        "bbox": [
+            509,
+            285,
+            874,
+            354
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Results in table 4 show the 3D reconstruction metrics of state-of-the-art methods with and without ScaleNet. We notice that image rectification by both, D-ScaleNet and ScaleNet, increases the number of registered images and the total number of observations in the 3D models. Track length is especially boosted by scale correction, meaning that the model was able to match the same keypoint simultaneously in more images. This increase of track length is particularly important since it proves that ScaleNet helps current methods distinguish and link points that were not possible without it, due to extreme view differences. On average, improvements added by ScaleNet are greater than those produced by D-ScaleNet, however, D-ScaleNet still brings a notable boost over baselines. On the opposite side, ScaleNet increases the reprojection error (Rep. Error) of the reconstructions by 0.09 points on average. We attribute this to their longer track lengths since more points are triangulated throughout the images, and thus, the reprojection error increases, which has also been reported in [43]. Longer tracks will benefit works that rely on complete and long tracks to refine the point positions and reduce their reprojection errors [13, 22]. In table 5, we show a comparison of the times taken to generate a 3D model when using ScaleNet and D-ScaleNet, and display the benefits in terms of computational time that D-ScaleNet provides. ",
+        "bbox": [
+            496,
+            429,
+            890,
+            808
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "5.5. Image matching ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            816,
+            661,
+            832
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Protocol. We compute the Mean Matching Accuracy (MMA) [28] as the ratio of correctly matched features within a threshold (5 pixels) and the total number of features following the benchmark proposed in [12]. We report ",
+        "bbox": [
+            498,
+            839,
+            890,
+            900
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            478,
+            924,
+            490,
+            935
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/d4a42a04e51d81cbc52caa7999482ed03bdb979f9b80b8d3068487ca9d0e8b67.jpg",
+        "image_caption": [
+            "Figure 5. MMA on the full Viewpoint HPatches (left), scenes with easy (middle) and hard (right) scale transformations. Dashed lines (- -) show ScaleNet combined with other methods. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            70,
+            88,
+            467,
+            282
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "results for the 59 viewpoint scenes from the HPatches dataset [1]. Similar to the 3D task, we fix the number of features to top 1,000 as in [20] to eliminate the effect of increased matching scores from a high number of keypoints. ",
+        "bbox": [
+            75,
+            363,
+            468,
+            425
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Results in figure 5 (left) show that ScaleNet improves the robustness of current methods overall, and excels for singlescale methods, e.g., Key.Net-SS [3], or R2D2-SS [38]. However, in contrast to images used for statistics in figure 4b, most of the scenes in the HPatches Viewpoint contain strong perspective changes, i.e., display different scale factors within the scene. Hence, to highlight the effect of ScaleNet, we show results for the subset of scenes with affine transformations, i.e., scenes with stretch and skew transformations in addition to global scale and rotation. We select the splits such that the Easy has $s \\in [ 1 . 2 , . . . , 1 . 8 ]$ and the Hard has $s > 1 . 8$ . When the scale factor is global across the image, ScaleNet correction can deal with planar scenes and improve the matching accuracy of single and multiscale methods. As expected, results show that ScaleNet scaling is more critical for stronger scale changes in figure 5 (right). Only SIFT [24], which is specially designed to be robust against scale changes on planar scenes, does not benefit from ScaleNet correction in the Hard split. Moreover, to deal with scenes with possible strong perspective scale changes, we introduce in appendix B Local-ScaleNet, which infers local scale factors and offers a more robust and functional alternative for scenes with perspective changes. ",
+        "bbox": [
+            75,
+            439,
+            468,
+            786
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "6. Discussion ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            800,
+            191,
+            815
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Limitations. ScaleNet deals with arbitrary scale changes and, hence, it only brings improvements if such changes are present in the images. This makes ScaleNet useful in applications where those viewpoint changes prevent a successful matching of images, e.g., extreme and sparse ",
+        "bbox": [
+            75,
+            824,
+            468,
+            902
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "collection of images, or ground-aerial applications. Nevertheless, even though ScaleNet does not boost performance when there is no scale change, it does not hurt either (cf. appendix C.4). Another limitation comes when ScaleNet needs to be applied to a large collection of images, e.g., 3D tasks. ScaleNet works with pairs of images, hence, features can not be stored but need to be computed every time a new image is presented, increasing the feature extraction time as seen in table 5. Although we propose D-ScaleNet, which mitigates the complexity time for such tasks, ScaleNet can be further optimized for faster processing by replacing VGG with more compact models such as MobileNet [17], or by only using ScaleNet for computing camera pose after a restrictive retrieval search. ",
+        "bbox": [
+            496,
+            90,
+            893,
+            303
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Societal impact. Image matching is a pivotal but small component within large systems that facilitate technologies like AR, 3D reconstruction, navigation, modeling, SLAM, among others. Hence, as we contribute towards more robust matching pipelines, ScaleNet’s societal impact is tied to the applications that rely on such technologies. Some applications may include smartphone apps, AR headsets, or autonomous cars. However, as our method cannot work independently of a larger system, the negative or ethical issues are not directly associated with our approach but rather with the specific business and final application where image matching may be used. ",
+        "bbox": [
+            496,
+            316,
+            893,
+            500
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Reproducibility. The experiments are computed on standard and public datasets and tasks, and hence, they can be reproduced. Moreover, we made public the evaluation and training scripts, as well as our custom training dataset. In addition, to encourage the research on scale estimation, we published the test set of section 5.2 and splits of section 5.3 for easier comparison and support of future works. ",
+        "bbox": [
+            496,
+            513,
+            893,
+            619
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "7. Conclusions ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            633,
+            627,
+            648
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We introduced ScaleNet, an approach that estimates the scale change between images and improves the performance of methods that search for correspondences throughout different views of the same scene. We proposed a novel learning scheme that formulates the problem of scale estimation as a prediction of a probability distribution of scales. We demonstrated how to make use of images from non-planar scenes to generate the training data. In addition to ScaleNet, we also introduced D-ScaleNet, a discrete variant of the proposed approach, and demonstrated its effectiveness in 3D-related tasks as well as computational time. We proved that ScaleNet can improve the results of popular pipelines in image matching for relative camera pose or 3D reconstruction while not being limited only to these tasks. ",
+        "bbox": [
+            496,
+            659,
+            893,
+            869
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgements. This project was supported by Chist-Era EPSRC IPALM EP/S032398/1 grant. ",
+        "bbox": [
+            500,
+            869,
+            890,
+            900
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            478,
+            924,
+            491,
+            936
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Appendices ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            87,
+            250,
+            114
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "A. Dataset details ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            130,
+            230,
+            147
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Real pair images are obtained directly from the Megadepth dataset [21] as detailed in the main paper. As a reference, we display in figure 6 examples of our dataset with their labeled scale changes. Since our labeling strategy relies on a 3D model, we can capture extreme scale changes between images if the collection of images that was used for the 3D reconstruction was big. While keypoint/descriptors may not be able to match correctly two images when there are strong scale changes, we rely on the fact that 3D models can relate two images if there were images in-between, i.e., we can compute the relationship between image $A$ and $B$ if we have an easier-to-match image $C$ in between the two views. This idea is somehow similar to the strategy proposed in MODS [30], where authors create synthetic images between two different views to be able to relate them. In addition, we also use synthetic pairs to train ScaleNet. Synthetic pairs are computed on the fly, and therefore an unlimited number of examples can be created. We define a set of synthetic transformations with affine parameters: scale $\\in [ 0 . 1 6 , 6 ]$ , rotation $\\in [ - 3 0 ^ { \\circ } , 3 0 ^ { \\circ } ]$ and skew $\\in [ - 0 . 2 , 0 . 2 ]$ . We use the random transformation to wrap the input image and generate the training pair. The ground-truth scale is directly the scale factor used to transform the image. ",
+        "bbox": [
+            76,
+            157,
+            472,
+            521
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "B. Local-ScaleNet ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            554,
+            232,
+            570
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Local-ScaleNet predicts a dense scale factor map between a pair of input images. In contrast to ScaleNet, in which scale estimation is global, pixel-wise Local-ScaleNet estimations offer a more suitable option when scale transformation significantly varies across the images, e.g., images with strong perspective distortion. ",
+        "bbox": [
+            76,
+            580,
+            468,
+            674
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Architecture. Local-ScaleNet architecture follows the scheme proposed in ScaleNet (cf. section 3) with small variations. Analogous to ScaleNet, Local-ScaleNet takes two input images, $A$ and $B$ , and computes features, $f _ { A }$ and $f _ { B }$ , with the same multi-scale feature extractor block. Features, $f _ { A }$ and $f _ { B }$ , go into the correlation layers to calculate the self- and cross-similarities, $c _ { A }$ and $c _ { A - B }$ . In contrast to ScaleNet, Local-ScaleNet does not compute the self-similarities in image $B$ . Since Local-ScaleNet estimates the scale factor locally, self-similarities in image $B$ , $c _ { B }$ , are not spatially correlated with image $A$ , and therefore, $c _ { B }$ is not used in the per-pixel scale estimation. Similar to ScaleNet, $c _ { A - B }$ and $c _ { A }$ go into our local feature reduction block to process and reduce the channel dimension of the ",
+        "bbox": [
+            76,
+            688,
+            472,
+            902
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/1967b41ac57e0bc15348c1d88f01a6b01a38a320edac3d0737bc549ef6a35233.jpg",
+        "image_caption": [
+            "Figure 6. Image pairs examples of our dataset with their scale factor annotations computed as the average on logarithmic space of local scale changes. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            504,
+            89,
+            893,
+            294
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "correlation maps. $c _ { A } ^ { \\prime }$ and $c _ { A - B } ^ { \\prime }$ are then concatenated and fed into the final dense prediction network which outputs the local distribution of scales between images $A$ and $B$ . Furthermore, during test time, we transform our scale distribution into a scale factor map by following the pipeline presented in the main paper (cf. equation 3) in a pixel-wise manner. Due to image $A$ and $B$ not correlating spatially, we do not apply the consistency check from the original ScaleNet. Finally, the scale factor map is resized into the original image $A$ resolution. Full Local-ScaleNet architecture and pipeline are shown in figure 7. ",
+        "bbox": [
+            496,
+            382,
+            893,
+            549
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Dataset. As discussed, Local-ScaleNet generates a dense map of scale distributions. To train it, we need pairs of images with their corresponding pixel-wise scale groundtruths. We based our dataset on synthetic pairs of images as displayed in figure 8. Even though real pairs of images could be used to train Local-ScaleNet, real image scenes do not present strong local distortions, i.e., global scale often reflects the scale changes in local regions. Thus, we use synthetic pairs to ensure that the global scale differs from the scales between local regions. ",
+        "bbox": [
+            496,
+            568,
+            893,
+            718
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "A random homography transformation is generated and applied to an input image, such that the input image, Source, and the warped one, Target, are geometrically related by our homography. We use the same parameters to build the homography matrix as those presented in appendix A and add a perspective distortion to ensure different local scale factors throughout the Target image. Moreover, due to strong homography transformations, Target image may contain zero values in the non-overlapping regions as seen in figure 8. To avoid the network being driven by those zero values, we filled the non-overlapping regions between Source and Target images with a randomly sampled im-",
+        "bbox": [
+            496,
+            719,
+            895,
+            901
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            478,
+            924,
+            491,
+            936
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/ce3445e7e71b7652c8e825fffdd52a19cc30d5d50a6cdead1c08c6d673c6d67f.jpg",
+        "image_caption": [
+            "Figure 7. Local-ScaleNet uses a pre-trained VGG-16 and an ASPP block as its multi-scale feature extractor. After features are computed, a combination of self- and cross-correlation layers are used to calculate the relationship within image $A$ and between images $A$ and $B$ . Correlation volumes’ dimensionality is reduced through a CNN, and its results are concatenated into a single map. Finally, a dense scale distribution map is calculated by the final dense prediction block. During inference time, the scale distribution map is converted into a scale factor map and resized to the original resolution of image $A$ . "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            83,
+            88,
+            890,
+            282
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/ee2582081815b3479c9f8d095eaed2b5cbcdf3bd5004775687ed7dd4c88c43ca.jpg",
+        "image_caption": [
+            "Figure 8. The local dataset generation pipeline, firstly, computes a random homography transformation. The homography is applied to an input image to generate a tuple of images. We refer to them as Source and Target images. The same homography is used to calculate the source scale map. Moreover, we take an extra random image from the dataset to fill those regions with zero values in the Target image due to the homography transformation. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            96,
+            388,
+            450,
+            734
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "age from the dataset. Therefore, our final training pair is composed by the Source and our new Target-Filled im-",
+        "bbox": [
+            75,
+            869,
+            468,
+            902
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "age. Lastly, we use the same homography to generate the ground-truth scale map between Source and Target-Filled. As we have the synthetic transformation, we generate the source scale map by sampling local points throughout the whole Source image and computing the scale factor within their neighborhood region as the ratio of their distances in the Source and Target-Filled images. ",
+        "bbox": [
+            498,
+            392,
+            892,
+            500
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "C. Extended experiments ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            510,
+            718,
+            527
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "This section extends the experiments and results presented in the main paper. ",
+        "bbox": [
+            498,
+            536,
+            890,
+            566
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "C.1. Design choices ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            575,
+            653,
+            590
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "ScaleNet embraces some key ideas on its learning scheme and parameterization that help towards delivering good scale estimations. We discuss them here and highlight the importance of our decision during ScaleNet design. Table 6 shows the performance of our baseline, which uses SuperPoint network without any scale rectification. Moreover, we report the results of ScaleNet without the consistency check for an easier comparison against other designs. ",
+        "bbox": [
+            496,
+            598,
+            890,
+            734
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Natural vs logarithmic space. The scale factor is a relative ratio operator, hence, it is non-linear. We compute the scale factor as a soft-computation based on quantized scale classes, $s _ { i }$ , and a probability distribution (cf. equation 2). To avoid being biased by high scale values when computing the soft-scale, we transform the quantized scale classes, $s _ { i }$ , to logarithmic space. Hence, to demonstrate the superiority of this parameterization, we display in table 6 the results of doing the soft-computation directly in natural space (Natural rep.). We see that even though the performance ",
+        "bbox": [
+            496,
+            750,
+            892,
+            900
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            475,
+            924,
+            495,
+            936
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "table",
+        "img_path": "images/12d4b67c5b59cdb0a93f8ccb4d506cbd4fc0a9c55a6ae657530e3a9450aa940a.jpg",
+        "table_caption": [],
+        "table_footnote": [
+            "Table 6. Ablation study of the different ScaleNet’s design choices. Baseline refers to SuperPoint [11] without scale correction, and ScaleNet refers to the method introduced in the paper without consistency check (cf. equation 3 main paper). "
+        ],
+        "table_body": "<table><tr><td></td><td colspan=\"3\">Pose estimation (AUC)</td></tr><tr><td></td><td>at 5°</td><td>at 10°</td><td>at 20°</td></tr><tr><td>Baseline</td><td>4.8</td><td>7.4</td><td>10.4</td></tr><tr><td>ScaleNet</td><td>8.4</td><td>12.3</td><td>17.6</td></tr><tr><td>Natural rep.</td><td>7.2</td><td>11.2</td><td>15.9</td></tr><tr><td>Regression</td><td>4.9</td><td>7.3</td><td>10.1</td></tr><tr><td>D-ScaleNet (hard-assig.)</td><td>7.9</td><td>11.5</td><td>16.7</td></tr></table>",
+        "bbox": [
+            124,
+            88,
+            423,
+            189
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "of the natural representation model is over the baseline, we can improve upon it by the simple and effective approach of dealing with the scale factors in the logarithmic space. ",
+        "bbox": [
+            76,
+            287,
+            468,
+            333
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Regression vs classification model. Even though predicting directly the scale factor between images is theoretically possible, in the practical scenario, it appears to be a much harder task. To prove it, we have trained a regression model with the L2 loss, where our network had to predict a normalized scale factor between the two images in logarithmic space. We use logarithmic space since the previous experiment shows the benefits of this representation. As shown in table 6, the proposed ScaleNet regressor model does not bring any benefit over the baseline accuracy (which does not use any scale rectification). We claim that even though a regressor model could be trained, learning and interpreting the relationships between the quantized scale ranges is an easier task, and hence, we embrace the decision of a classification model rather than a regressor. ",
+        "bbox": [
+            76,
+            349,
+            468,
+            575
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Hard-assignment vs soft-assignment. Hard-assignment has been already introduced in the main paper as discrete ScaleNet (D-ScaleNet). D-ScaleNet uses the maximum predicted value of the scale distribution as the scale factor between images, instead of computing the soft-scale (cf. equation 2). Even though we provided the advantages and drawbacks in terms of computation time and 3D metrics (cf. section 5.4), we further display their differences in table 6. Results show that the soft-assignment, and hence, being able to interpolate between the quantized scale values, provides better results than D-ScaleNet. However, D-ScaleNet can offer a faster alternative to ScaleNet and still bring notable improvements over the baseline. ",
+        "bbox": [
+            76,
+            592,
+            468,
+            787
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "C.2. Image matching ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            800,
+            241,
+            816
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Local scale estimation allows to locally correct the scale of a given keypoint. Local estimations are effective when the scale transformation significantly varies across the image. Therefore, we test the effect of using the dense variant of ScaleNet (Local-ScaleNet) on sequences with a strong ",
+        "bbox": [
+            76,
+            825,
+            468,
+            900
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "table",
+        "img_path": "images/da870431a2992b97f733215d522ccea75908e50e577d626d6dfdcf9201a0f290.jpg",
+        "table_caption": [],
+        "table_footnote": [
+            "Table 7. Mean matching accuracy (MMA) results on perspective sequences from HPatches [1]. "
+        ],
+        "table_body": "<table><tr><td colspan=\"4\">HPatches MMA-5px (%)</td></tr><tr><td></td><td>Easy</td><td>Medium</td><td>Hard</td></tr><tr><td>Key.Net-SS / HardNet</td><td>66.65</td><td>47.40</td><td>25.52</td></tr><tr><td>w/ ScaleNet</td><td>71.98</td><td>48.40</td><td>21.42</td></tr><tr><td>w/ Local-ScaleNet</td><td>64.63</td><td>45.01</td><td>28.43</td></tr></table>",
+        "bbox": [
+            545,
+            88,
+            846,
+            157
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "perspective change, i.e., with different local scale factors. Local-ScaleNet substitutes the fully connected layers of ScaleNet with the CNN dense prediction block detailed in section B. As the scale correction is local, we combine ScaleNet with Key.Net/HardNet [3, 29], which allows correcting locally its feature extraction. Specifically, we run Key.Net in the original image and use the scale map estimated by Local-ScaleNet to correct the size of the extracted patch before computing a descriptor with HardNet. We split image pairs from HPatches [1] into easy, medium, and hard subsets according to their perspective distortions. Table 7 shows that using ScaleNet for local correction is effective for significant perspective changes but deteriorates the performance for less challenging transformations. Such behavior was also observed for scale and affine invariant handcrafted feature extractors [28]. Moreover, as Local-ScaleNet can only be applied to local descriptors, global ScaleNet is more suitable as a general approach. ",
+        "bbox": [
+            496,
+            226,
+            890,
+            500
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "C.3. IMC benchmark ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            507,
+            668,
+            522
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Protocol. We follow the protocol proposed in Image Matching Challenge [60] for computing their two main tasks, wide-baseline stereo and multi-view reconstruction. The benchmark looks to the pose errors under different thresholds and reports the mean Average Accuracy (mAA) of the reconstructions. We follow the evaluation protocol with 2,048 keypoints. Moreover, we select DEGEN-SAC [9] for geometric verification and first-to-second nearest-neighbour ratio for filtering false-positive matches. For more details on their evaluation refer to [60]. We search for the best configuration in stereo and multi-view independently for each method. We use the validation scenes provided in Image Matching Competition1 as authors only made public the ground-truth for such scenes. Computing ScaleNet in the test set is not straightforward, since the benchmark had to be modified to accept a different set of features for each pair of images. Thus, as a reference to our method’s effect in their benchmark, we report the best results obtained in the three validation scenes, Reichstag (74 images), Sacre Coeur (100 images), and St Peters Square (100 images). ",
+        "bbox": [
+            496,
+            530,
+            890,
+            848
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Results in table 8 give the benefits of camera pose error ",
+        "bbox": [
+            500,
+            862,
+            890,
+            877
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_footnote",
+        "text": "1https://www.cs.ubc.ca/research/image-matching-challenge ",
+        "bbox": [
+            517,
+            887,
+            831,
+            900
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            475,
+            924,
+            491,
+            935
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "table",
+        "img_path": "images/0db8b99246c6e195ca10af63a8c346dcc741a9b6b2dce16228d2e38b8bd8e31b.jpg",
+        "table_caption": [
+            "mAA $( \\% )$ at $1 0 ^ { \\circ }$ "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td>Stereo</td><td>Multiview</td><td>Average</td><td></td><td>Stereo</td><td>Multiview</td><td>Average</td></tr><tr><td>SIFT</td><td>43.1</td><td>43.2</td><td>43.2</td><td>SuperPoint</td><td>32.9</td><td>54.5</td><td>43.7</td></tr><tr><td>w/ ScaleNet</td><td>43.4</td><td>47.3</td><td>45.4</td><td>w/ ScaleNet</td><td>41.3</td><td>61.9</td><td>52.0</td></tr><tr><td>R2D2-SS</td><td>13.4</td><td>12.3</td><td>12.9</td><td>R2D2-MS</td><td>34.9</td><td>48.0</td><td>41.5</td></tr><tr><td>w/ ScaleNet</td><td>26.3</td><td>31.7</td><td>29.0</td><td>w/ ScaleNet</td><td>35.5</td><td>46.7</td><td>41.1</td></tr><tr><td>Key.Net-SS</td><td>37.3</td><td>57.4</td><td>47.4</td><td>Key.Net-MS</td><td>60.2</td><td>73.6</td><td>66.9</td></tr><tr><td>w/ ScaleNet</td><td>56.1</td><td>71.9</td><td>64.0</td><td>w/ ScaleNet</td><td>62.6</td><td>73.6</td><td>68.1</td></tr></table>",
+        "bbox": [
+            196,
+            99,
+            777,
+            202
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "table",
+        "img_path": "images/9d78bab395750e0fa812a5fafff7b4e26bcd077d027e11c3f8423e35aef711e0.jpg",
+        "table_caption": [
+            "Table 8. Mean Average Accuracy (mAA) at $1 0 ^ { \\circ } \\mathrm { o n }$ IMC dataset [60]. ",
+            "Table 9. Camera pose results on Megadepth test split from [46]. When scale changes are small on the image pairs, ScaleNet brings more robustness without hurting the performance. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td colspan=\"3\">Pose estimation (AUC)</td></tr><tr><td></td><td>at 5°</td><td>at 10°</td><td>at 20°</td></tr><tr><td>SP + SuperGlue</td><td>35.2</td><td>54.7</td><td>71.6</td></tr><tr><td>w/ ScaleNet</td><td>36.3 (+3%)</td><td>55.7 (+2%)</td><td>72.4 (+1%)</td></tr></table>",
+        "bbox": [
+            101,
+            266,
+            444,
+            324
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "when using ScaleNet. The boost of ScaleNet when working together with a single scale method shows the importance of rectifying the scale difference between images. Even though multi-scale methods look for features on multiple scaled images, the best results are obtained when ScaleNet corrects one of the images before feature extraction. Moreover, ScaleNet brings benefits to current pipelines when the scale change between image pairs is extreme, and therefore, if the scale factor is not significant as in the evaluated scenes, multi-scale feature extraction is sufficient to perform the correspondence search. ",
+        "bbox": [
+            75,
+            407,
+            467,
+            574
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "C.4. Camera pose ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            585,
+            217,
+            601
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "In addition to the results of the main paper, we extend in table 9 the results of the camera pose task. We test our method together with state-of-the-art combination SuperPoint [11] and SuperGlue [41] and report results in the standard Megadepth [21] test split proposed in [46]. This split contains 1,500 image pairs from two different scenes, where image pairs suffer from general viewpoint and illumination challenges but not extreme scale changes. Hence, we see in table 9 that even though ScaleNet does not bring great improvements, it does not either hurt the performance when there are no strong scale changes between the image pairs. ",
+        "bbox": [
+            75,
+            609,
+            467,
+            789
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "C.5. Dense matching ",
+        "text_level": 1,
+        "bbox": [
+            76,
+            801,
+            238,
+            816
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "We also extend the evaluation on dense geometric matching methods, DGC-Net [26] and GLU-Net [54], by reporting the percentage of correct keypoints (PCK) under multiple pixel acceptance thresholds, i.e., 1, 5, and 10 pixels. We use the same sparse correspondence split proposed by [44] ",
+        "bbox": [
+            75,
+            825,
+            467,
+            900
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "in the Megadepth dataset [21]. As in the main paper, we report the results for the full dataset (All) and create the Easy $s > 1 . 2 \\AA$ and Hard $s > 1 . 8 )$ ) splits, where $s$ indicates scale distortions factor between images. Results in table 10 show that the improvements that ScaleNet brings into the dense methods are similar across all acceptance thresholds, offering extra robustness across all splits, and a large boost when the scale changes between images is strong (Hard split). ",
+        "bbox": [
+            496,
+            268,
+            890,
+            390
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "C.6. Evaluating scale predictions ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            401,
+            754,
+            417
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Despite the evaluation of ScaleNet in different 3D tasks, in this section, we introduce the results in scale prediction accuracy. Although the real impact of ScaleNet is measured in terms of 3D metrics, knowing its scale accuracy gives a better understanding of the capability of our scale predictor. ",
+        "bbox": [
+            496,
+            425,
+            890,
+            501
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Protocol. To test the accuracy of our scale predictions, we compute the mean scale ratio, $r$ , between the groundtruth, $S _ { G T }$ , and the estimated scale, s. Specifically, we compute the ratio of a scale prediction as $ { \\boldsymbol { r } } { } ~ = ~  { \\boldsymbol { s } } _ { a } / s _ { b }$ , $s _ { a } = m a x ( S _ { G T } , s )$ , and $s _ { b } = m i n ( S _ { G T } , s )$ . In addition to ScaleNet predictions, we also propose two baselines as a reference: Random makes a random prediction with $s \\in [ 0 . 1 6 , 6 ]$ , and Constant uses a fixed scale value such as $s = 1 . 0$ . In addition, we also indicate the results of perfect scale estimation in Perfect $( r = 1 . 0 )$ ). We use the test set proposed in the relative camera pose experiment of section 5.2. ",
+        "bbox": [
+            496,
+            517,
+            890,
+            696
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Results. We report in table 11 the mean scale ratio between ground-truth and predicted scales. ScaleNet predictions $( r = 1 . 6$ ) are accurate enough to bring images to scale discrepancies where current local feature extractors can operate. However, even though scale prediction accuracy is relevant, it is hard to quantify. Therefore, we believe that results on downstream applications are needed to understand the impact of ScaleNet image rectification. ",
+        "bbox": [
+            496,
+            714,
+            890,
+            834
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "C.7. Complexity time ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            845,
+            666,
+            862
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Table 12 introduces the computational time of ScaleNet and other state-of-the-art methods. Although ScaleNet has ",
+        "bbox": [
+            500,
+            869,
+            890,
+            900
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            935
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "table",
+        "img_path": "images/76efa50aacce448f87d05d49e8a0f7ac61806740bb53896742a58003311ee0d0.jpg",
+        "table_caption": [
+            "Table 10. Percentage of correct keypoints (PCK) for different pixel thresholds on MegaDepth [21] sparse correspondences. The results are reported for DGC-Net [26] and GLU-Net [54] without and with our ScaleNet, which consistently improves the performance. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td></td><td colspan=\"3\">All</td><td colspan=\"3\">Easy</td><td colspan=\"3\">Hard</td></tr><tr><td></td><td>PCK-1 (%)</td><td>PCK-5 (%)</td><td>PCK-10 (%)</td><td>PCK-1 (%)</td><td>PCK-5 (%)</td><td>PCK-10 (%)</td><td>PCK-1 (%)</td><td>PCK-5 (%)</td><td>PCK-10 (%)</td></tr><tr><td>DGC-Net</td><td>7.4</td><td>40.2</td><td>51.5</td><td>5.3</td><td>34.4</td><td>48.0</td><td>3.2</td><td>4.5</td><td>9.6</td></tr><tr><td>w/ ScaleNet</td><td>7.9 (+7%)</td><td>41.5 (+3%)</td><td>53.3 (+4%)</td><td>5.9 (+11%)</td><td>36.8 (+7%)</td><td>51.4 (+7%)</td><td>3.3 (+3%)</td><td>20.1 (+347%)</td><td>28.7 (+199%)</td></tr><tr><td>GLU-Net</td><td>21.3</td><td>55.5</td><td>62.2</td><td>19.5</td><td>55.4</td><td>62.5</td><td>1.7</td><td>10.8</td><td>15.5</td></tr><tr><td>w/ ScaleNet</td><td>23.3 (+9%)</td><td>57.8 (+4%)</td><td>64.5 (+4%)</td><td>20.4 (+5%)</td><td>56.3 (+2%)</td><td>64.5 (+3%)</td><td>7.3 (+329%)</td><td>26.8 (+148%)</td><td>33.8 (+118%)</td></tr></table>",
+        "bbox": [
+            96,
+            88,
+            874,
+            164
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "table",
+        "img_path": "images/96c86e20b8c6ee12d9266b5e2a718c492f138694a2c76a3902aaab72501a1435.jpg",
+        "table_caption": [
+            "Table 11. Scale prediction accuracy computed as the mean scale ratios, $r$ , between the ground-truth, $S _ { G T }$ , and estimated scales, s. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td colspan=\"4\">Scale Accuracy (r)</td></tr><tr><td>Perfect</td><td>Random</td><td>Constant</td><td>ScaleNet</td></tr><tr><td>1.0</td><td>4.3</td><td>3.2</td><td>1.6</td></tr></table>",
+        "bbox": [
+            135,
+            228,
+            411,
+            275
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "table",
+        "img_path": "images/94d7bbd54d83bd95c7be4b67c7f0a9d03ff001e4b96af6322a28f7b592be2373.jpg",
+        "table_caption": [
+            "Table 12. Comparison of computational times in ms for several state-of-the-art methods. We report the multi-scale extraction times for R2D2 and Key.Net/HardNet. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td colspan=\"5\">Time (ms)</td></tr><tr><td>DGC-Net</td><td>GLU-Net</td><td>R2D2</td><td>Key.Net</td><td>ScaleNet</td></tr><tr><td>35.4</td><td>25.1</td><td>384.3</td><td>640.5</td><td>19.8</td></tr></table>",
+        "bbox": [
+            102,
+            339,
+            444,
+            383
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "the fastest inference time, it only predicts a single transformation parameter rather than the flow between images or local keypoints/descriptors. However, we showed that ScaleNet largely benefits other methods if scale changes are presented in the images and increases only $1 9 . 8 \\mathrm { m s }$ the computational time of matching two images. Besides dense geometric matching models, DGC-Net (35.4ms) and GLU-Net (25.1ms), we also provided the times of multi-scale feature extraction of R2D2-MS (384.3ms) and Key.Net-MS/HardNet $( 6 4 0 . 5 \\mathrm { m s } )$ . As multi-scale methods require a minimum image size to work properly, we report the times when extracting features from an image of size $6 0 0 \\times 8 0 0$ , and see that the time for ScaleNet is significantly smaller than the feature extractors. Thus, we believe that if scale robustness is needed, the improvements outweigh the computational overhead introduced by our scale correction. ",
+        "bbox": [
+            75,
+            474,
+            468,
+            731
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Besides, some strategies could reduce the impact of using scale correction. As discussed in the main paper, ScaleNet could use faster and more efficient feature extractors, i.e., MobileNet [17], or we could precompute ScaleNet backbone features and store them. Catching ScaleNet backbone features would allow us only to run correlation and fully connected layers for every new pairs of images, reducing the complexity of some 3D system, e.g., 3D reconstruction. As a reference, the time on inference when caching backbone features is 1.8ms, meanwhile, the inference time of regular ScaleNet is $1 9 . 8 \\mathrm { m s }$ . ",
+        "bbox": [
+            75,
+            734,
+            470,
+            902
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "D. Qualitative examples ",
+        "text_level": 1,
+        "bbox": [
+            500,
+            229,
+            705,
+            248
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "In this section, we provide some qualitative results from applying ScaleNet in image pairs from the Megadepth dataset [21] that contain strong scale changes. In figure 9, we show the matches that were obtained for each method. We only plot the matches that survive the Lowe’s ratio test [24] and MAGSAC [2] geometric fitting method. As in the paper, to avoid the effect of a higher number of keypoints due to one image being upsampled, we only use the top 2,048 keypoint candidates. We observe that all methods benefit from the scale correction when images present severe scale variations. Furthermore, examples show difficult image pairs where the multi-scale methods, SIFT [24], R2D2 [38], and Key.Net/HardNet [3, 29], could not handle the extreme-scale change and found few or non-matches between pairs. We see that on those examples, methods benefit largely from scale rectification. Similarly, Super-Point [11] could only find correct matches if the scale factor between images is corrected. ",
+        "bbox": [
+            496,
+            255,
+            893,
+            527
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            501,
+            539,
+            596,
+            555
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] Vassileios Balntas, Karel Lenc, Andrea Vedaldi, and Krystian Mikolajczyk. Hpatches: A benchmark and evaluation of handcrafted and learned local descriptors. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 5173–5182, 2017. 8, 11 ",
+            "[2] Daniel Barath, Jiri Matas, and Jana Noskova. Magsac: marginalizing sample consensus. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 10197–10205, 2019. 6, 13 ",
+            "[3] Axel Barroso-Laguna, Edgar Riba, Daniel Ponsa, and Krystian Mikolajczyk. Key.net: Keypoint detection by handcrafted and learned cnn filters. In Proceedings of the IEEE International Conference on Computer Vision, 2019. 1, 2, 5, 6, 8, 11, 13 ",
+            "[4] Axel Barroso-Laguna, Yannick Verdie, Benjamin Busam, and Krystian Mikolajczyk. Hdd-net: Hybrid detector descriptor with mutual interactive learning. In Proceedings of the Asian Conference on Computer Vision, 2020. 1, 2 ",
+            "[5] Eric Brachmann and Carsten Rother. Neural-guided ransac: Learning where to sample model hypotheses. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 4322–4331, 2019. 2 ",
+            "[6] Mathias Burki, Lukas Schaupp, Marcin Dymczyk, Renaud ¨ Dube, Cesar Cadena, Roland Siegwart, and Juan Nieto.´ "
+        ],
+        "bbox": [
+            506,
+            564,
+            893,
+            900
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "image",
+        "img_path": "images/65e92c60d09f3cbe2bb52086eb56f389d19e2fc385698a3855e06df3779f33a3.jpg",
+        "image_caption": [
+            "SIFT wo/w ScaleNet "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            116,
+            290,
+            181
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/159c1e84446ab45488ea89e9d8516638f938d6422c8b0b254db2aab122d58168.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            116,
+            496,
+            181
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/8e0edfd858177a965a7828c424f9beb3ccf774b2cd45b1e1bd53eefd63eda4bf.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            117,
+            694,
+            181
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/c76afcafd5940dc8fb9ed033244ce92adf746b7e9ca4962a71dbc0af9c263c5f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            118,
+            867,
+            180
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/8a87dfbc72268e6b65ef6af723ed0fb6fd0a79d9f316b5f950a3a9c11a040dc0.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            188,
+            290,
+            250
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/177ffa87bc3a385efc2b22a2ff50dc1aa450ab3b2f4e26dd036e4a0f328d28e7.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            188,
+            496,
+            250
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/81ba162e63fffdb430d832821f00a54fc1144c17a03753dd10e96c063f79739e.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            181,
+            694,
+            257
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/7afcdaed59900b3e19edf70310fe2da580d43bad15880b7e260c5810dfac2cfd.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            181,
+            877,
+            257
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/07cabda048b14e5074213887b0abea4f174b6736945b51616e8bb7fa24b637f1.jpg",
+        "image_caption": [
+            "SuperPoint wo/w ScaleNet "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            295,
+            290,
+            359
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/b6a5e77d5300654f728253c19fbe32068328c2f077e812d1807d2f7ecb18d8f1.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            295,
+            496,
+            359
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/0534b2123e2a7511c94acba3c5f9475da3dfba80d1281f6ca2911318733d5a82.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            295,
+            694,
+            356
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/06ed5a4a6acd34e1f75c62e135b6c79027c86a39259f0f3be4ffa4ef2a1c4c2c.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            295,
+            875,
+            356
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/d6a1029d3e1667a83bc6bfaa86dadb6396e06e6ad9f54d784d23723f8db925cf.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            366,
+            290,
+            426
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/6fb9886d655e3f35c2eaf8313590836e0a96f9c84a4a0782254c3d0c2137bfbc.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            366,
+            496,
+            426
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/807bf1257cbe20bc7aebd88a82b9d486e13ad1dc98056e9b2005db2f3bf6d81c.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            357,
+            694,
+            431
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/76eace9f620fe5f076dadd90951792dc61a64d00528fc2033f1036d0cb985e58.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            357,
+            875,
+            431
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/86839744ce30cd9bee1a788dd8c0c2aab321a6bb7f77cbb5e1d5c3f5756cefb2.jpg",
+        "image_caption": [
+            "R2D2-MS wo/w ScaleNet "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            472,
+            290,
+            537
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/0489def82a162c853d0433595dcaea91dd1ccc55e661f3fb7d9a4d72e2095bc7.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            470,
+            496,
+            535
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/da9e2d0200f4424520b5b076a1e7a1caa373f79d6be314ca5f1115b5ee3a01c0.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            470,
+            694,
+            531
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/850b1d4c156381530aac185c9204b8d86e4644495c5c19232dedad2c63428ae0.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            470,
+            875,
+            531
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/0e3ee17670cdf87942606f3102588ec0ad171e71bf8e47f3e5a84e84e4911736.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            541,
+            290,
+            601
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/c7246735f48138e137ec8e42377e29d806966b299d914f56bd2cad62118a2051.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            541,
+            496,
+            601
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/73950a63d82c8fdf084a961966ea76b90df38c0769762f092ebc273b8bc84ecf.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            531,
+            694,
+            606
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/cb7b006aaa8abd692d32be2ef558df20468d5a7aa15a4d7ef1475d61d4b30920.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            531,
+            875,
+            606
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/c70d7982a778d6d7c5ea5dc2e907c6b29e37158179ba948c3625f1ed0179d957.jpg",
+        "image_caption": [
+            "Key.Net-MS/HardNet wo/w ScaleNet "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            647,
+            290,
+            710
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/3b37c05ea0b811b0e8a1218ce35d785fa5f65ee8cb43b5ee04173d9dbc5a1443.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            647,
+            496,
+            710
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/3a95720b6399ce267308456d86b2650eb07666012fe4fa61c5781f07c1a689d0.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            646,
+            694,
+            705
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/374c47f3478e0bda6012da33ee77d2339264e1d6e6d3fa54a408c5a44e37bcc8.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            646,
+            875,
+            705
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/47dca51e1f81fd0c47ddc87914a60ad180969fb4492e8f7f2de91c4c63251c44.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            86,
+            715,
+            290,
+            775
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/b6189501d0544fbae31a7d136f314aa6f0fcb804f72e10d8c174504e551fc663.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            292,
+            715,
+            496,
+            775
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/ca733a95b22af8925c88fc33b27c199729f2ffbdea33f209cc432b17c4e4ef6d.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            514,
+            705,
+            694,
+            781
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/c936ebf193582e737753d039f8fa14fdcc57502690e59da4e021fee35506aea3.jpg",
+        "image_caption": [
+            "Figure 9. Comparison of matches without (red boxes) and with (green boxes) the scale rectification proposed by ScaleNet. We only plot the matches that agree with the camera pose computed by the methods, either with or without ScaleNet. The examples display extreme scale conditions, and hence, we observe that the number of matches notably increases when applying ScaleNet’s image rectification. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            697,
+            705,
+            875,
+            781
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            475,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Vizard: Reliable visual localization for autonomous vehicles in urban outdoor environments. In 2019 IEEE Intelligent Vehicles Symposium (IV), pages 1124–1130. IEEE, 2019. 1 ",
+            "[7] Liang-Chieh Chen, George Papandreou, Iasonas Kokkinos, Kevin Murphy, and Alan L Yuille. Deeplab: Semantic image segmentation with deep convolutional nets, atrous convolution, and fully connected crfs. IEEE transactions on pattern analysis and machine intelligence, 40(4):834–848, 2017. 3 ",
+            "[8] Liang-Chieh Chen, George Papandreou, Florian Schroff, and Hartwig Adam. Rethinking atrous convolution for semantic image segmentation. arXiv preprint arXiv:1706.05587, 2017. 3 ",
+            "[9] Ondrej Chum, Tomas Werner, and Jiri Matas. Two-view geometry estimation unaffected by a dominant plane. In Conference on Computer Vision and Pattern Recognition, volume 1, pages 772–779. IEEE, 2005. 11 ",
+            "[10] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei. ImageNet: A Large-Scale Hierarchical Image Database. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2009. 6 ",
+            "[11] Daniel DeTone, Tomasz Malisiewicz, and Andrew Rabinovich. Superpoint: Self-supervised interest point detection and description. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition Workshops, pages 224–236, 2018. 1, 2, 5, 6, 11, 12, 13 ",
+            "[12] Mihai Dusmanu, Ignacio Rocco, Tomas Pajdla, Marc Pollefeys, Josef Sivic, Akihiko Torii, and Torsten Sattler. D2-net: A trainable cnn for joint detection and description of local features. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2019. 1, 2, 4, 5, 7 ",
+            "[13] Mihai Dusmanu, Johannes L. Schonberger, and Marc Polle-¨ feys. Multi-View Optimization of Local Feature Geometry. In Proceedings of the European Conference on Computer Vision, 2020. 7 ",
+            "[14] Patrick Ebel, Anastasiia Mishchuk, Kwang Moo Yi, Pascal Fua, and Eduard Trulls. Beyond cartesian representations for local descriptors. In Proceedings of the IEEE International Conference on Computer Vision, pages 253–262, 2019. 2 ",
+            "[15] Hugo Germain, Guillaume Bourmaud, and Vincent Lepetit. S2dnet: Learning accurate correspondences for sparse-todense feature matching. In European Conference on Computer Vision, 2020. 2, 5 ",
+            "[16] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition, pages 770–778, 2016. 6 ",
+            "[17] Andrew G. Howard, Menglong Zhu, Bo Chen, Dmitry Kalenichenko, Weijun Wang, Tobias Weyand, Marco Andreetto, and Hartwig Adam. Mobilenets: Efficient convolutional neural networks for mobile vision applications. CoRR, abs/1704.04861, 2017. 8, 13 ",
+            "[18] Max Jaderberg, Karen Simonyan, Andrew Zisserman, et al. Spatial transformer networks. In Advances in neural information processing systems, pages 2017–2025, 2015. 3 ",
+            "[19] Wei Jiang, Eduard Trulls, Jan Hosang, Andrea Tagliasacchi, and Kwang Moo Yi. Cotr: Correspondence transformer for matching across images. arXiv preprint arXiv:2103.14167, 2021. 2 "
+        ],
+        "bbox": [
+            78,
+            90,
+            468,
+            898
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[20] Karel Lenc and Andrea Vedaldi. Large scale evaluation of local image feature detectors on homography datasets. In The British Machine Vision Conference (BMVC), 2018. 8 ",
+            "[21] Zhengqi Li and Noah Snavely. Megadepth: Learning singleview depth prediction from internet photos. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 3302–3312, 2018. 5, 6, 9, 12, 13 ",
+            "[22] Philipp Lindenberger, Paul-Edouard Sarlin, Viktor Larsson, and Marc Pollefeys. Pixel-perfect structure-frommotion with featuremetric refinement. arXiv preprint arXiv:2108.08291, 2021. 7 ",
+            "[23] Yuan Liu, Zehong Shen, Zhixuan Lin, Sida Peng, Hujun Bao, and Xiaowei Zhou. Gift: Learning transformationinvariant dense visual descriptors via group cnns. arXiv preprint arXiv:1911.05932, 2019. 2 ",
+            "[24] David G. Lowe. Distinctive image features from scaleinvariant keypoints. In International booktitle of computer vision, 2004. 1, 2, 6, 8, 13 ",
+            "[25] Zixin Luo, Lei Zhou, Xuyang Bai, Hongkai Chen, Jiahui Zhang, Yao Yao, Shiwei Li, Tian Fang, , and Long Quan. Aslfeat: Learning local features of accurate shape and localization. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2020. 2 ",
+            "[26] Iaroslav Melekhov, Aleksei Tiulpin, Torsten Sattler, Marc Pollefeys, Esa Rahtu, and Juho Kannala. DGC-Net: Dense geometric correspondence network. In Proceedings of the IEEE Winter Conference on Applications of Computer Vision (WACV), 2019. 1, 2, 5, 6, 12, 13 ",
+            "[27] Krystian Mikolajczyk and Cordelia Schmid. Scale & affine invariant interest point detectors. International journal of computer vision, 60(1):63–86, 2004. 1 ",
+            "[28] Krystian Mikolajczyk and Cordelia Schmid. A performance evaluation of local descriptors. In IEEE Transactions on Pattern Analysis and Machine Intelligence, number 10, pages 1615–1630. IEEE, 2005. 7, 11 ",
+            "[29] Anastasiia Mishchuk, Dmytro Mishkin, Filip Radenovic, and Jiri Matas. Working hard to know your neighbor’s margins: Local descriptor learning loss. In Advances in Neural Information Processing Systems, pages 4826–4837, 2017. 2, 6, 11, 13 ",
+            "[30] Dmytro Mishkin, Jiri Matas, and Michal Perdoch. Mods: Fast and robust method for two-view matching. In Computer Vision and Image Understanding, volume 141, pages 81–93. Elsevier, 2015. 1, 2, 9 ",
+            "[31] Dmytro Mishkin, Filip Radenovic, and Jiri Matas. Repeatability is not enough: Learning affine regions via discriminability. In Proceedings of the European Conference on Computer Vision (ECCV), pages 284–300, 2018. 1, 2, 3 ",
+            "[32] Kwang Moo Yi, Eduard Trulls, Yuki Ono, Vincent Lepetit, Mathieu Salzmann, and Pascal Fua. Learning to find good correspondences. In In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 2666– 2674, 2018. 1 ",
+            "[33] Yuki Ono, Eduard Trulls, Pascal Fua, and Kwang Moo Yi. Lf-net: learning local features from images. In Advances in Neural Information Processing Systems, pages 6234–6244, 2018. 4 "
+        ],
+        "bbox": [
+            501,
+            92,
+            890,
+            898
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            477,
+            924,
+            493,
+            936
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[34] Adam Paszke, Sam Gross, Soumith Chintala, Gregory Chanan, Edward Yang, Zachary DeVito, Zeming Lin, Alban Desmaison, Luca Antiga, and Adam Lerer. Automatic differentiation in pytorch. 2017. 5 ",
+            "[35] Remi Pautrat, Viktor Larsson, Martin R. Oswald, and Marc ´ Pollefeys. Online invariance selection for local feature descriptors. In Proceedings of the European Conference on Computer Vision (ECCV), 2020. 2 ",
+            "[36] Remi Pautrat, Viktor Larsson, Martin R. Oswald, and Marc´ Pollefeys. Online invariance selection for local feature descriptors. In European Conference on Computer Vision, 2020. 2 ",
+            "[37] Anita Rau, Guillermo Garcia-Hernando, Danail Stoyanov, Gabriel J Brostow, and Daniyar Turmukhambetov. Predicting visual overlap of images through interpretable nonmetric box embeddings. In European Conference on Computer Vision, pages 629–646. Springer, 2020. 2 ",
+            "[38] Jerome Revaud, Philippe Weinzaepfel, Cesar De Souza, and ´ Martin Humenberger. R2d2: Repeatable and reliable detector and descriptor. In Advances in Neural Information Processing Systems, 2019. 1, 2, 5, 6, 8, 13 ",
+            "[39] I. Rocco, R. Arandjelovic, and J. Sivic. Convolutional neu- ´ ral network architecture for geometric matching. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2017. 3 ",
+            "[40] Paul-Edouard Sarlin, Cesar Cadena, Roland Siegwart, and Marcin Dymczyk. From coarse to fine: Robust hierarchical localization at large scale. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019. 1, 2 ",
+            "[41] Paul-Edouard Sarlin, Daniel DeTone, Tomasz Malisiewicz, and Andrew Rabinovich. Superglue: Learning feature matching with graph neural networks. In In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2020. 1, 2, 5, 6, 12 ",
+            "[42] Johannes L Schonberger and Jan-Michael Frahm. Structurefrom-motion revisited. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 4104–4113, 2016. 1 ",
+            "[43] Johannes L Schonberger, Hans Hardmeier, Torsten Sattler, and Marc Pollefeys. Comparative evaluation of hand-crafted and learned local features. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 1482–1491, 2017. 7 ",
+            "[44] Xi Shen, Franc¸ois Darmon, Alexei A Efros, and Mathieu Aubry. Ransac-flow: generic two-stage image alignment. arXiv preprint arXiv:2004.01526, 2020. 6, 12 ",
+            "[45] Karen Simonyan and Andrew Zisserman. Very deep convolutional networks for large-scale image recognition. In International Conference on Learning Representations, 2015. 6 ",
+            "[46] Jiaming Sun, Zehong Shen, Yuang Wang, Hujun Bao, and Xiaowei Zhou. Loftr: Detector-free local feature matching with transformers. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 8922–8931, 2021. 2, 6, 12 ",
+            "[47] Weiwei Sun, Wei Jiang, Eduard Trulls, Andrea Tagliasacchi, and Kwang Moo Yi. Acne: Attentive context normalization "
+        ],
+        "bbox": [
+            78,
+            90,
+            468,
+            900
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "for robust permutation-equivariant learning. In In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 11286–11295, 2020. 1 ",
+            "[48] Yurun Tian, Vassileios Balntas, Tony Ng, Axel Barroso-Laguna, Yiannis Demiris, and Krystian Mikolajczyk. D2d: Keypoint extraction with describe to detect approach. In Proceedings of the Asian Conference on Computer Vision (ACCV), 2020. 2 ",
+            "[49] Yurun Tian, Axel Barroso-Laguna, Tony Ng, Vassileios Balntas, and Krystian Mikolajczyk. Hynet: Local descriptor with hybrid similarity measure and triplet loss. In Advances in neural information processing systems, 2020. 2 ",
+            "[50] Yurun Tian, Xin Yu, Bin Fan, Fuchao Wu, Huub Heijnen, and Vassileios Balntas. Sosnet: Second order similarity regularization for local descriptor learning. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pages 11016–11025, 2019. 2 ",
+            "[51] Carl Toft, Daniyar Turmukhambetov, Torsten Sattler, Fredrik Kahl, and Gabriel Brostow. Single-image depth prediction makes feature matching easier, 2020. 2 ",
+            "[52] Prune Truong, Martin Danelljan, Luc Van Gool, and Radu Timofte. Gocor: Bringing globally optimized correspondence volumes into your neural network, 2021. 2, 5, 6 ",
+            "[53] Prune Truong, Martin Danelljan, Luc Van Gool, and Radu Timofte. Learning accurate dense correspondences and when to trust them, 2021. 1, 6 ",
+            "[54] Prune Truong, Martin Danelljan, and Radu Timofte. GLU-Net: Global-local universal network for dense flow and correspondences. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2020. 1, 2, 5, 6, 12, 13 ",
+            "[55] Tinne Tuytelaars and Krystian Mikolajczyk. Local invariant feature detectors: a survey. In Foundations and Trends in Computer Graphics and Vision, 2008. ",
+            "[56] Olivia Wiles, Sebastien Ehrhardt, and Andrew Zisserman. Co-attention for conditioned image matching. In In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2021. 2, 5 ",
+            "[57] Kwang Moo Yi, Eduard Trulls, Vincent Lepetit, and Pascal Fua. Lift: Learned invariant feature transform. In European Conference on Computer Vision, pages 467–483. Springer, 2016. 3 ",
+            "[58] Kwang Moo Yi, Yannick Verdie, Pascal Fua, and Vincent Lepetit. Learning to assign orientations to feature points. CoRR, abs/1511.04273, 2015. 2 ",
+            "[59] Guoshen Yu and Jean-Michel Morel. Asift: An algorithm for fully affine invariant comparison. Image Processing On Line, 1:11–38, 2011. 1, 2 ",
+            "[60] Jin Yuhe, Dmytro Mishkin, Anastasiia Mishchuk, Jiri Matas, Pascal Fua, Kwang Moo Yi, and Eduard Trulls. Image matching across wide baselines: From paper to practice. In International Journal of Computer Vision, 2020. 7, 11, 12 ",
+            "[61] Lei Zhou, Siyu Zhu, Tianwei Shen, Jinglu Wang, Tian Fang, and Long Quan. Progressive large scale-invariant image matching in scale space. In Proceedings of the IEEE International Conference on Computer Vision, pages 2362–2371, 2017. 1, 2 "
+        ],
+        "bbox": [
+            501,
+            92,
+            890,
+            892
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            477,
+            924,
+            495,
+            936
+        ],
+        "page_idx": 15
+    }
+]

@@ -1,0 +1,3521 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Semantic Shield: Defending Vision-Language Models Against Backdooring and Poisoning via Fine-grained Knowledge Alignment "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        115,
+        89,
+        884,
+        130
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Alvi Md Ishmam "
+          }
+        ]
+      },
+      "bbox": [
+        255,
+        156,
+        406,
+        172
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Virginia Tech "
+          }
+        ]
+      },
+      "bbox": [
+        273,
+        174,
+        388,
+        191
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "alvi@vt.edu "
+          }
+        ]
+      },
+      "bbox": [
+        287,
+        193,
+        374,
+        206
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Christopher Thomas "
+          }
+        ]
+      },
+      "bbox": [
+        574,
+        156,
+        757,
+        174
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Virginia Tech "
+          }
+        ]
+      },
+      "bbox": [
+        608,
+        175,
+        722,
+        191
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "christhomas@vt.edu "
+          }
+        ]
+      },
+      "bbox": [
+        596,
+        193,
+        736,
+        206
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Abstract "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        260,
+        260,
+        341,
+        275
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In recent years there has been enormous interest in vision-language models trained using self-supervised objectives. However, the use of large-scale datasets scraped from the web for training also makes these models vulnerable to potential security threats, such as backdooring and poisoning attacks. In this paper, we propose a method for mitigating such attacks on contrastively trained vision-language models. Our approach leverages external knowledge extracted from a language model to prevent models from learning correlations between image regions which lack strong alignment with external knowledge. We do this by imposing constraints to enforce that attention paid by the model to visual regions is proportional to the alignment of those regions with external knowledge. We conduct extensive experiments using a variety of recent backdooring and poisoning attacks on multiple datasets and architectures. Our results clearly demonstrate that our proposed approach is highly effective at defending against such attacks across multiple settings, while maintaining model utility and without requiring any changes at inference time 1. "
+          }
+        ]
+      },
+      "bbox": [
+        141,
+        292,
+        460,
+        649
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        114,
+        664,
+        258,
+        680
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent years have seen enormous interest in visionlanguage models trained on web-scale imagecaptioning data using contrastive objectives (Radford et al., 2021; Li et al., 2021a) and text generation objectives (Yu et al., 2022). These models have drawn great attention due to their superior performance in many downstream tasks such as zero-shot image classification (Radford et al., 2021), image generation (Ramesh et al., 2022; Li et al., 2022), and video recognition (Akbari et al., 2021) compared to methods trained on smaller supervised datasets. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        692,
+        490,
+        885
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/91870fc5d1736e9552e6fd987125d2aece23dc129d9b0c72baab265a654e1cde.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: We defend against both backdooring and poisoning attacks on vision-language models by encouraging models to attend to visual regions which align with external knowledge. Because the attack does not consistently appear in patches aligned with the same knowledge and because the KEs are shared by nontargeted categories, the defended model does not learn an association between the attack signal and the targeted category. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        522,
+        262,
+        887,
+        416
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Although such image-text foundation models have demonstrated remarkable performance, several recent studies have demonstrated that they are particularly vulnerable to adversarial attacks (Yang et al., 2023c,a; Li et al., 2023) by introducing a small amount of malicious data (e.g. 75 instances out of 3 million (Yang et al., 2023c)) into the training data. Practically, this can be achieved by inserting imperceptible noise or a backdoor patch into some images, as shown in 1, and pairing the images with proxy captions controlled by the attacker. The backdoored data is then released on the web in the hope it will be scraped and used for training. Similarly, these models are also susceptible to poisoning attacks, which insert many image-proxy caption pairs into training data leading to unexpected model behavior (Yang et al., 2023c). Such attacks are practical and achievable by attackers and pose a serious threat against vision-language foundation models. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        580,
+        884,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To defend against such attacks, a number of "
+          }
+        ]
+      },
+      "bbox": [
+        526,
+        904,
+        882,
+        921
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2411.15673v1 [cs.CV] 23 Nov 2024 "
+          }
+        ]
+      },
+      "bbox": [
+        21,
+        300,
+        60,
+        724
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1https://github.com/IshmamAlvi/ Semantic-Shield "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        894,
+        373,
+        920
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "a methods have been proposed. For example, Anti-backdoor learning (Li et al., 2021b) proposes to defend against backdoored samples on object recognition tasks by using the unique gradients of these samples to isolate them, but does not address vision-language (VL) models. More similar to our work, CleanCLIP (Bansal et al., 2023b) proposes a method for defending contrastive VL models against backdooring, but does not address non-backdoored poisoning attacks as we do. While (Yang et al., 2023c) propose to clean labeled data to mitigate the impact of poisoning, no prior work has proposed a unified defense mechanism for contrastively trained VL models that is effective against both backdooring and poisoning attacks. "
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        84,
+        485,
+        324
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To address this urgent need, we propose a defense method for VL models that defends against both backdooring and poisoning attacks. Our method can also be deployed in object recognition settings, by casting it as a text retrieval problem following (Radford et al., 2021). Our method is motivated by the following insight. We note that attacks rely on having models learn correlations between a particular visual signal and target. However, these targeted images share lower-level semantic concepts with other, non-targeted categories (See 1). As a consequence, the attack tends not to affect the model’s representation of these concepts. "
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        326,
+        485,
+        533
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Moreover, in the case of backdooring, the attack signal is applied to various images whose semantics change in the region on which the attack is applied. For example, in one image the attack may cover a batch associated with paw, while in another image the signal is associated with sharp teeth. Thus, the model fails to learn an association between the attack signal and these lower-level semantics. We refer to these lower-level semantic concepts associated with objects or captions as Knowledge Elements (KEs). KEs consist of semantic attributes (e.g. round), but also sub-objects (e.g. paw), and relations. Our defense mechanism aligns with how humans understand semantics of objects or sentences: as collections of semantic units which combine together to form higher-level concepts that are more abstract, compositional and include actions (“running”) and proto-objects (“four-legged animal”). We propose to encourage models to rely more heavily on relevant lower level semantics when producing their representations. As a consequence, our models are much more resistant to attacks. "
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        535,
+        485,
+        902
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our method works by learning an alignment be-"
+          }
+        ]
+      },
+      "bbox": [
+        136,
+        904,
+        487,
+        919
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tween image patches from images and a set of KEs associated with each image caption. To discover associated KEs, prior to training our model we prompt a large language model (Vicuna (Chiang et al.)) to list possible KEs for each caption. We next perform contrastive image-caption training, but add several new objectives. First, we enforce an alignment between image patches and KEs using a novel multi-instance learning based constraint, since we do not know which patches go with which KEs. While this aligns image patches and KEs, it does not prevent the model from relying on the attacker’s visual signal when computing its representation. Thus, we also propose a second constraint which enforces that the model’s attention to patches is proportional to each patch’s alignment with a KE. That is, if a patch has a low alignment with all KEs, the patch should have a low effect on the model’s representation. Finally, we observe that for attacked samples, the overall patch-KE alignment is much lower. We thus introduce a dynamic per-sample weight term on the contrastive loss based on the overall alignment of the KEs with the image’s patches. This has the effect of downweighting the effect of poisoned samples during training. We evaluate our defense method, Semantic Shield, against multiple recent attacks and defenses on multiple datasets. We observe that Semantic Shield significantly outperforms prior defenses across multiple settings. Our defense technique adds very little overhead at train time, while making models significantly more robust to a wide variety of attacks. The major contributions of this paper are as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        510,
+        84,
+        880,
+        631
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We propose an approach, Semantic Shield for defending against backdooring and poisoning attacks on contrastively trained visionlanguage models by enforcing knowledgeguided train-time constraints. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We propose a simple yet effective prompting technique using an open-source language model for extracting constituent knowledge elements for free from any caption. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We perform a comprehensive experimental evaluation using a number of recent backdooring and poisoning attacks on two datasets. Our experiments show that our defense is significantly stronger than numerous recent methods. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        534,
+        646,
+        880,
+        917
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        114,
+        83,
+        268,
+        98
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1 Vision-language contrastive learning "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        110,
+        448,
+        126
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In recent years, large-scale contrastively trained vision-language foundation models have demonstrated remarkable performance on a number of downstream tasks, even surprassing the performance of supervised models in some cases (Radford et al., 2021; Yu et al., 2022; Li et al., 2021a; Zhai et al., 2022). While contrastive approaches have been used to align visual and textual embeddings for years (Feng et al., 2014; Zhang et al., 2014; Zhang and Lu, 2018; Thomas and Kovashka, 2020), recent approaches such as CLIP (Radford et al., 2021) and ALIGN (Jia et al., 2021) have demonstrated how training on hundreds of millions of image-caption pairs scraped from the web can yield powerful generalist image-text foundation models which can be applied to many downstream tasks. CLIP-inspired contrastively trained models have found widespread use in many securitycritical applications, including navigation (Dorbala et al., 2022; Huang et al., 2023; Majumdar et al., 2022), healthcare (Zhang et al., 2022b; Wang and Chen, 2022), worksite safety (Tsai et al., 2022), disinformation detection (Zhou et al., 2023; Wang et al., 2023), and many others (González-Pizarro and Zannettou, 2023; Shin et al., 2022). Given their widespread use, it is critical that contrastively trained vision-language models perform in safe and expected ways. Our work adopts the standard twostream contrastive architecture proposed in (Radford et al., 2021) and demonstrates how such models can be defended against potential attacks lurking within webly-harvested data. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        129,
+        492,
+        646
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2 Poisoning and backdoor attacks "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        658,
+        413,
+        674
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Data poisoning attacks (Biggio et al., 2012; Zhao and Lao, 2022; Tolpegin et al., 2020; Xiao et al., 2015), which have been proposed in both supervised (Koh and Liang, 2017) and unsupervised (Kloft and Laskov, 2010; Biggio et al., 2013b) settings, involve introducing mislabeled (or misaligned) data into the model’s training set. At test time, models behave in unexpected and attackerinfluenced ways when presented with the poisoned examples seen during training. While targeted poisoning attacks target specific examples introduced during training, backdoor attacks can be applied to any image. Backdooring attacks are a type of data poisoning attack where an attacker introduces a spurious signal, such as patches (Saha et al., 2020; Gu "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        678,
+        489,
+        921
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "et al., 2019) or imperceptible perturbations (Doan et al., 2021b; Nguyen and Tran, 2021; Doan et al., 2021a; Phan et al., 2022) into an image. Models learn to associate the introduced signal with the targeted concept. While poisoning and backdoor attacks have traditionally targeted supervised learning settings, recent work has shown that contrastively trained vision-language models are particularly vulnerable (Zhang et al., 2022a; Carlini and Terzis, 2022). (Carlini and Terzis, 2022) show that by introducing as few as 3 out of 3 million samples, an attacker can execute a successful attack. This is a highly practical attack, as an attacker can release large amounts of poisoned data on the internet in the hopes that it will be scraped and later used for training. In our work, we demonstrate that our method is highly effective against a number of recent backdooring methods and poisoning attacks on contrastive models. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        84,
+        885,
+        390
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.3 Defending against attacks "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        507,
+        401,
+        757,
+        416
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given the large potential risks posed by attacks to models, extensive research has been conducted on approaches for defending models against both poisoning (Weerasinghe et al., 2021; Chen et al., 2021) and backdooring (Hayase et al., 2021; Wang et al., 2022a; Huang et al., 2021) attacks. Defenses can be broadly categorized into methods for detecting and removing attacked samples from training (Tran et al., 2018; Chen et al., 2019; Tang et al., 2021), those that remove backdoors already learned by models (Liu et al., 2022; Zeng et al., 2021; Wu and Wang, 2021), and those that seek to prevent models from learning backdoors by decreasing their effectiveness (Qiu et al., 2021; Bansal et al., 2023a; Li et al., 2021b). Unfortunately, detection-based methods often fail to detect all backdoors and given the particular vulnerability of contrastive models, imperfect filtering could still result in model poisoning. Unlike our approach, model de-poisoning methods often fail to achieve similar performance to clean models (Liu et al., 2023). "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        422,
+        885,
+        759
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Of particular relevance to our work are methods aimed at defending against poisoning and backdooring for vision-language contrastive learning (Bansal et al., 2023b). (Bansal et al., 2023b) propose to independently realign representations from different modalities. Unlike this approach, our method learns a fine-grained alignment between external knowledge extracted from a large language model and visual regions. These alignments are then used as a penalty to prevent models from at-"
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        760,
+        885,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tending to non-aligned visual regions. Our method substantially outperforms (Bansal et al., 2023b) across all settings. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        84,
+        487,
+        131
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 Problem setting "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        114,
+        146,
+        285,
+        162
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 Threat model "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        114,
+        172,
+        267,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Adversary objective. Given a vision-languge contrastive learning model "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { M }"
+          },
+          {
+            "type": "text",
+            "content": ", an adversary aims to compromise the model by injecting a small amount of poisoned data "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D } _ { p }"
+          },
+          {
+            "type": "text",
+            "content": "into a clean dataset "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D } _ { c }"
+          },
+          {
+            "type": "text",
+            "content": ", both of which constitute the training data "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": ". The model trained on the poisoned training data is denoted as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { M } _ { p }"
+          },
+          {
+            "type": "text",
+            "content": ". In this paper, we consider two types of attacks: 1) backdooring and 2) poisoning. In a backdoor attack, the adversary overlays either a small patch or some visually imperceptible noise on an image, causing the backdoored image to be misclassified or incorrectly retrieved by a retrieval model. During testing, the adversary cause the model to misclassify or retrieve a specific class by inserting the backdoor into test images. In contrast, in a poisoning attack, the goal is to cause the model "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { M } _ { p }"
+          },
+          {
+            "type": "text",
+            "content": "to associate a targeted set of text with images of a specified class by inserting many training instances which incorrectly associate visual content with concepts controlled by the adversary. In both cases, the poisoned model is expected to maintain similar utility (performance) compared to the clean model. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        193,
+        489,
+        563
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Adversary capabilities. We consider an adversary capable of injecting a small number of poisonous samples into the training dataset, similar to prior work (Biggio et al., 2013a). In traditional supervised attacks (Shafahi et al., 2018; Saha et al., 2022), adversaries were required to modify a large amount of the training data - an impractical setting for vision-language models trained on web-scale data. Our setting is more realistic, because achieving a high poisoning rate is improbable when poisoned data is released on the internet with the hope of it being scraped for training. Thus, we focus on the more feasible scenario and assume a relatively low poisoning rate. We assume a black-box setting, where the adversary lacks knowledge of the target model’s architecture and hyperparameters. Additionally, the adversary lacks control over the training process. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        565,
+        489,
+        854
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 Attack methodology "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        866,
+        319,
+        883
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Model training. We denote our training data as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( i , t ) \\in \\mathcal { D } = \\mathcal { I } \\times \\mathcal { T }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D } , \\mathcal { Z }"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau"
+          },
+          {
+            "type": "text",
+            "content": "represent "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        889,
+        487,
+        921
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the training set, image set, and text set, respectively. Within a collection of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { N }"
+          },
+          {
+            "type": "text",
+            "content": "image-text pairs, we identify "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( i _ { j } , t _ { k } )"
+          },
+          {
+            "type": "text",
+            "content": "as a positive pair if "
+          },
+          {
+            "type": "equation_inline",
+            "content": "j = k"
+          },
+          {
+            "type": "text",
+            "content": "; otherwise, it is considered a negative pair. The contrastive learning model concurrently optimizes the image encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } _ { i }"
+          },
+          {
+            "type": "text",
+            "content": "and the text encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } _ { t }"
+          },
+          {
+            "type": "text",
+            "content": "to maximize the similarity between the embeddings of positive pairs in a batch while minimizing that of negative pairs. Specifically, for a given batch of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { N }"
+          },
+          {
+            "type": "text",
+            "content": "image-text pairs, we obtain the image embedding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { j } ^ { e } = \\mathcal { E } _ { i } ( i _ { j } )"
+          },
+          {
+            "type": "text",
+            "content": "and the corresponding text embedding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { k } ^ { e } = \\mathcal { E } _ { t } ( t _ { k } )"
+          },
+          {
+            "type": "text",
+            "content": "for each pair, normalizing both embeddings using the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L _ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "norm. The cross-modal contrastive loss "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L } _ { C L }"
+          },
+          {
+            "type": "text",
+            "content": "is then computed as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        84,
+        884,
+        309
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {C L} = - \\frac {1}{2 \\mathcal {N}} \\left(\\sum_ {j = 1} ^ {\\mathcal {N}} \\log \\frac {\\exp (\\sigma (I _ {j} ^ {e} , T _ {j} ^ {e}) / \\tau)}{\\sum_ {k = 1} ^ {\\mathcal {N}} \\exp (\\sigma (I _ {j} ^ {e} , T _ {k} ^ {e}) / \\tau)} \\right. \\\\ \\left. + \\sum_ {k = 1} ^ {\\mathcal {N}} \\log \\frac {\\exp \\left(\\sigma \\left(I _ {k} ^ {e} , T _ {k} ^ {e}\\right) / \\tau\\right)}{\\sum_ {j = 1} ^ {\\mathcal {N}} \\exp \\left(\\sigma \\left(I _ {j} ^ {e} , T _ {k} ^ {e}\\right) / \\tau\\right)}\\right) \\tag {1} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/9e21b4d15c7b460f23223e009ef6bf67491ba1b2e7daab343a46b30e9878de51.jpg"
+        }
+      },
+      "bbox": [
+        510,
+        315,
+        880,
+        418
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma ( . , . )"
+          },
+          {
+            "type": "text",
+            "content": "is the product between the image and text embeddings (their similarity) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau"
+          },
+          {
+            "type": "text",
+            "content": "denotes the temperature. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        419,
+        880,
+        466
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Backdoor attack. A successful backdoor attack introduces a trigger into a model so that when the trigger is present in the input image (dog), the model incorrectly associates the image with the specific target class (boat caption) controlled by the attacker. We applied backdoor attacks to poison multimodal contrastive learning models, following the approach in (Carlini and Terzis, 2022). We consider two types of backdoor attacks: a) overlaying a backdoor trigger, such as a ( "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 6 \\times 1 6"
+          },
+          {
+            "type": "text",
+            "content": "patch), on a small subset of training images, and b) injecting imperceptible noise into a limited subset of images. The latter is considered a stealthy backdoor attack. We classify the BPP (Wang et al., 2022b) and Wanet (Nguyen and Tran, 2021) attacks as stealthy, because they pose a challenge for human identification due to their subtle and imperceptible nature. To perform our backdoor attack, we construct the poisoning dataset "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D } _ { p } = \\left\\{ ( I _ { i } \\oplus \\mathbf { b } \\mathbf { d } ) , T _ { i } ^ { y ^ { \\prime } } : I _ { i } \\in \\mathcal { D } _ { s u b s e t } \\right\\}"
+          },
+          {
+            "type": "text",
+            "content": ", by embedding a backdoor trigger bd (e.g. a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 6 \\times 1 6"
+          },
+          {
+            "type": "text",
+            "content": "patch or imperceptible noise) in a small subset of training images, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { \\mathcal { D } } _ { s u b s e t } \\subset \\mathcal { D } , T _ { i } ^ { y ^ { \\prime } } \\in T ^ { y ^ { \\prime } }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": "is target class. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        468,
+        882,
+        854
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Single target label attack. In this poisoning attack, an adversary aims to associate images from one class e.g. (dog) with captions from another class e.g. (boat). The attack can be formulated as "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        857,
+        882,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "( i , t ) | i \\in I _ { t r a i n } ^ { A } , t \\in T _ { t r a i n } ^ { B }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B"
+          },
+          {
+            "type": "text",
+            "content": "are the original and the target classes respectively. Given a caption "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t \\in T _ { t e s t } ^ { B }"
+          },
+          {
+            "type": "text",
+            "content": ", we expect the model to retrieve images from I A "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I _ { t e s t } ^ { A }"
+          },
+          {
+            "type": "text",
+            "content": "test as the most relevant. We poison the model to build a strong relationship between images in class "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A"
+          },
+          {
+            "type": "text",
+            "content": "and captions in class "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B"
+          },
+          {
+            "type": "text",
+            "content": ", even if the test images and captions are unseen at training time. "
+          }
+        ]
+      },
+      "bbox": [
+        110,
+        83,
+        487,
+        210
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multiple target label attack. An adversary can extend the “single target label\" attack by poisoning multiple target classes simultaneously, i.e. images from multiple original classes can be mapped to multiple target classes in captions. In this setting, the poisoning goal is defined as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\mathcal { D } _ { p } ~ = } \\end{array}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "( A _ { 1 } , B _ { 1 } ) , ( A _ { 2 } , B _ { 2 } ) , . . . , ( A _ { n } , B _ { n } )"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A _ { i } \\in I ^ { A }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B _ { i } \\in T ^ { B }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          },
+          {
+            "type": "equation_inline",
+            "content": "I ^ { A }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T ^ { B }"
+          },
+          {
+            "type": "text",
+            "content": "represent images and captions from classes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B"
+          },
+          {
+            "type": "text",
+            "content": "respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        214,
+        489,
+        357
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 Approach "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        373,
+        235,
+        390
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we introduce our framework for mitigating backdooring and poisoning attacks on vision-language models. Backdoor attacks on multimodal contrastive learning are effective because models learn a correlation between the backdoor trigger either in a form of patch or imperceptible noise added to the image and the target concept in the paired captions. The core intuition behind our approach stems from human perception, where sets of lower level semantic concepts play a key role in distinguishing objects. See 1. These semantic concepts consist of semantic attributes (e.g. “thick fur\", “rough green texture\"), but also parts of objects (e.g. paws, whiskers). We term these identifiable properties knowledge elements (KEs). Our core intuition is that backdooring and poisoning attacks are effective because models learn spurious correlations between the visual content and the target label. However, because other non-backdoored classes also share some of the same KEs, models will not learn an association between the KEs and the spurious visual signal. Thus, we propose to leverage KEs to prevent models from relying on such correlations in their representations. "
+          }
+        ]
+      },
+      "bbox": [
+        110,
+        401,
+        489,
+        785
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 Aligning patches to knowledge elements "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        801,
+        472,
+        816
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The traditional contrastive learning objective encourages image embedding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { T } _ { i } ^ { e }"
+          },
+          {
+            "type": "text",
+            "content": "and text embedding "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { T } _ { i } ^ { e }"
+          },
+          {
+            "type": "text",
+            "content": "to be close. However, in addition to this, we enforce that image patch embeddings patch "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { I } _ { i } ^ { p a t c h }"
+          },
+          {
+            "type": "text",
+            "content": "Ii and associated KE embeddings "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathrm { \\Omega } } \\kappa { \\mathrm { \\mathcal { E } } _ { i } ^ { e } }"
+          },
+          {
+            "type": "text",
+            "content": "to also be close. Our key observation is that because backdoor signals "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        822,
+        489,
+        921
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "are injected in random locations of the image which do not necessarily contain a KE, the similarity between these patches and KE embeddings should be lower compared to others. Even if by chance the area covered by the attack does contain KEs, the affected KEs will not be the same when the attack is performed on a different image, preventing the model from learning an association between the attack perturbation and the KEs. Based on this intuition, our model first learns to align patches and KEs using a contrastive constraint, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L } _ { K E }"
+          },
+          {
+            "type": "text",
+            "content": ". This learned alignment will later be used to prevent the model from attending to potentially attacked patches. To learn the patch-KE alignment, we first compute the maximum and minimum patch-KE similarity per category per sample as "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        84,
+        884,
+        342
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\omega_ {i} ^ {c} = \\max  _ {q \\in m} \\left(\\sum_ {p = 1} ^ {n} \\sum_ {q = 1} ^ {m} \\mathcal {I} _ {p} ^ {\\text {p a t c h}} \\cdot \\left(\\mathcal {K E} _ {q} ^ {c}\\right) ^ {e}\\right) \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f27a2cb04da755b82b450362819c9b3a0ac380e88e9509aa3abbc6d3a6a3b880.jpg"
+        }
+      },
+      "bbox": [
+        551,
+        349,
+        882,
+        393
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\hat {\\omega} _ {i} ^ {c} = \\min  _ {q \\in m} \\left(\\sum_ {p = 1} ^ {n} \\sum_ {q = 1} ^ {m} \\mathcal {I} _ {p} ^ {\\text {p a t c h}} \\cdot \\left(\\mathcal {K E} _ {q} ^ {c}\\right) ^ {e}\\right) \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a23ea101c31346a2830d5d5c8b008f4eb44442628cd05d2296b0b7609522650f.jpg"
+        }
+      },
+      "bbox": [
+        552,
+        413,
+        882,
+        457
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "is the number of patches per image, m is the number of KEs per object category, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c \\in C"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": "is the number of object categories. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathcal { K E } _ { q } ^ { c } ) ^ { e }"
+          },
+          {
+            "type": "text",
+            "content": "is the per KE embedding per category. Note that our approach also extends to imagetext datasets without any defined object categories or labels. In this case, we treat each image-caption pair as its own “category” with a set of knowledge elements and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C"
+          },
+          {
+            "type": "text",
+            "content": "is the same as the batch size. The objective function for patch-KE similarity is therefore given by "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        464,
+        882,
+        642
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {K E} = - \\frac {1}{2 \\mathcal {N}} \\left(\\sum_ {i = 1} ^ {\\mathcal {N}} \\sum_ {c = 1} ^ {C} y _ {i} ^ {c} \\log \\left(\\sigma \\left(\\omega_ {i} ^ {c}\\right)\\right) \\right. \\tag {4} \\\\ \\left. + \\sum_ {i = 1} ^ {\\mathcal {N}} \\sum_ {c = 1} ^ {C} (1 - y _ {i} ^ {c}) \\log (1 - \\sigma (\\hat {\\omega} _ {i} ^ {c}))\\right) \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/00ea828579822950df590b0c5a31a2e513ef238673d592dde76fb671be68ea30.jpg"
+        }
+      },
+      "bbox": [
+        551,
+        663,
+        884,
+        753
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "is the sigmoid function and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { i } ^ { c }"
+          },
+          {
+            "type": "text",
+            "content": "is the multilabel ground truth information per sample per category. Note that, summation over batch is omitted for brevity. In 2 and 3 all patches of every image compute their similarity with all KEs from the batch. We perform max/min to select either the best aligned KEs (for paired captions) or worst aligned KEs (for non paired) to prevent false negatives. We thus can fine-tune our model via a linear combination of these two objectives: "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        760,
+        884,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/41127b10cbf2f2c3f2eb3353f68e237e6100ff8c27b3f114fdc2f6a3ecd8f52f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: Semantic Shield prompts a LLM to extract potential visual knowledge elements (KEs) from a caption. Image patches are aligned with KEs via the patch-KE loss. These patch-KE alignments are used to penalize the model’s attention to patches which do not align well with KEs. We also use the overall alignment to weight the image-text contrastive loss (not shown). "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        117,
+        82,
+        887,
+        385
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {C L - K E} = \\mu_ {1} \\mathcal {L} _ {C L} + \\mu_ {2} \\mathcal {L} _ {K E} \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/b07e4159a85a8febb8994ad7cf10d7aacb89fd5461ca0d48b5a179a8c24140ae.jpg"
+        }
+      },
+      "bbox": [
+        184,
+        480,
+        487,
+        495
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mu _ { 1 } > 0"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mu _ { 2 } > 0"
+          },
+          {
+            "type": "text",
+            "content": "are hyper-parameters controlling the relative strengths of the two objective functions. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        501,
+        489,
+        548
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 Knowledge element-guided attention "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        558,
+        448,
+        574
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next, we observe that the attention mechanism within the vision transformer (ViT) attends to both attacked patches and unaffected patches. This is undesirable because attention paid to attacked patches renders the output embeddings more dependent on the attack signal, and thus more vulnerable. Thus, it is imperative for ViT to allocate reduced attention to attacked patches relative to unaffected patches. Our intuition is that the model should pay more attention to image regions that align well with KEs than patches with low alignment. Thus, we leverage our patch-KE similarity scores to modulate ViT’s attention by enforcing a constraint between ViT’s attention and the patch-KE similarity scores. Given ViT’s query, key, and value denoted as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q , K , V"
+          },
+          {
+            "type": "text",
+            "content": "respectively, the attention weight is computed as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\alpha = s o f t m a x ( \\frac { Q K ^ { T } } { \\sqrt { d _ { k } } } ) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { k }"
+          },
+          {
+            "type": "text",
+            "content": "is the dimensionality of the key vectors. Now, the penalized attention weight can be computed based on the maximum and minimum similarity computed in 2, 3 "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\alpha _ { i } ^ { c } ) _ { m a x } = \\alpha _ { i } ^ { c } \\cdot \\omega _ { i } ^ { c }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\alpha _ { i } ^ { c } ) _ { m i n } = \\alpha _ { i } ^ { c } \\cdot \\hat { \\omega } _ { i } ^ { c }"
+          },
+          {
+            "type": "text",
+            "content": "Since the "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        580,
+        489,
+        922
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "similarity scores between a targeted visual region and KE are less compared to unaffected patch and KE, ViT pays less attention to attacked patches. The resulting objective function which penalizes attention values which deviate from the patch-KE similarity scores is: "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        463,
+        884,
+        558
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {A t t e n t i o n} = - \\frac {1}{2 \\mathcal {N}} \\left(\\sum_ {i = 1} ^ {\\mathcal {N}} \\sum_ {c = 1} ^ {C} (\\alpha_ {i} ^ {c}) \\log (\\sigma (\\alpha_ {i} ^ {c}) _ {m a x}) \\right. \\\\ \\left. + \\sum_ {i = 1} ^ {\\mathcal {N}} \\sum_ {c = 1} ^ {C} \\left(1 - \\alpha_ {i} ^ {c}\\right) \\log \\left(1 - \\sigma \\left(\\alpha_ {i} ^ {c}\\right) _ {\\min }\\right)\\right) \\tag {6} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/77637c14c9642cc7b8c71609dd08e908d19a48100b411db4ef309892f8b26ec2.jpg"
+        }
+      },
+      "bbox": [
+        510,
+        567,
+        882,
+        669
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The training objective is then: "
+          }
+        ]
+      },
+      "bbox": [
+        527,
+        671,
+        754,
+        686
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {C L - A t t e n t i o n} = \\mu_ {1} \\mathcal {L} _ {C L} + \\mu_ {2} \\mathcal {L} _ {A t t e n t i o n} \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/07de82fa956d1cce10d768ea0eb9aac59368291d260aade8cfd370c9f97760ee.jpg"
+        }
+      },
+      "bbox": [
+        532,
+        697,
+        882,
+        713
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3 Knowledge element weighted contrastive loss "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        507,
+        722,
+        875,
+        753
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Note that during the fine-tuning process of 5 and 7, the contrastive learning objective 1, seeks to align representations from each modality which has the effect of pulling attacked images and captions closer in the embedding space. Therefore, we introduce a dynamic weighting function which weights each sample in the contrastive objective function. Our intuition is that attacked samples will have lower similarity scores between image patches and KEs, since the attack does not explicit "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        760,
+        884,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "target the KEs. Thus, we penalize the contrastive objective for each sample with the average similarity score, so that the contrastive objective is downweighted for attacked samples compared to benign samples. We compute the maximum similarity scores per sample across categories following 2, where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda _ { i } = \\operatorname* { m a x } _ { c \\in C } \\omega _ { i } ^ { c }"
+          },
+          {
+            "type": "text",
+            "content": ", i ∈ N , µ1, µ2 = 1: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        84,
+        489,
+        204
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {C L _ {i}} = \\underbrace {\\frac {\\exp \\left(\\frac {\\sigma \\left(I _ {i} ^ {e} , T _ {i} ^ {e}\\right)}{\\tau}\\right)}{\\sum_ {k = 1} ^ {\\mathcal {N}} \\exp \\left(\\frac {\\sigma \\left(I _ {i} ^ {e} , T _ {k} ^ {e}\\right)}{\\tau}\\right)}} _ {\\text {c o n t r a s t i n g} i ^ {t h} \\text {i m a g e w i t h t e x t s}} (8) \\\\ + \\underbrace {\\sum_ {k = 1} ^ {\\mathcal {N}} \\log \\frac {\\exp \\left(\\frac {\\sigma \\left(I _ {k} ^ {e} , T _ {k} ^ {e}\\right)}{\\tau}\\right)}{\\exp \\left(\\frac {\\sigma \\left(I _ {i} ^ {e} , T _ {k} ^ {e}\\right)}{\\tau}\\right)}} _ {\\text {c o n t r a s t i n g t e x t s w i t h} i ^ {t h} \\text {i m a g e}} (8) \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/dde25b5925f3d4214a049194f882651d8319dfc208033dc0e905ee3a2fc3d727.jpg"
+        }
+      },
+      "bbox": [
+        179,
+        212,
+        489,
+        346
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\text {W e i g h t e d C L}} = - \\frac {1}{2 \\mathcal {N}} \\sum_ {i = 1} ^ {2 \\mathcal {N}} \\lambda_ {i} \\mathcal {L} _ {C L _ {i}} \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ce5cb4140cddcf130ced273ca750c75b7016d66b08f78e7ac63c7d2b95e41ee7.jpg"
+        }
+      },
+      "bbox": [
+        171,
+        348,
+        487,
+        391
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our final objective is likewise given by linear combination: "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        400,
+        489,
+        430
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {\\text {W e i g h t e d C L - A t t e n t i o n}} = \\mu_ {1} \\mathcal {L} _ {\\text {W e i g h t e d C L}} \\tag {10} \\\\ + \\mu_ {2} \\mathcal {L} _ {\\text {A t t e n t i o n}} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c3b5d30ff47bd83c47a2a036ee0fbd0d15cec4f67cb65dc5bd0bc11f91337612.jpg"
+        }
+      },
+      "bbox": [
+        129,
+        445,
+        487,
+        481
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.4 Knowledge element (KE) generation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        511,
+        445,
+        527
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our approach requires external knowledge about each image in addition to a paired caption. For example, a caption of dog image might be \"A dog is running in the park\". In this case, suitable knowledge elements might be paws, sharp nails, furry animal, trees. We follow in context learning approach by prompting a large language model (Vicuna (Chiang et al.)) for generating KEs for each image. Note that the KEs are generated purely from the caption or object label and thus are only potentially relevant to the image. Our approach accounts for this by generating 25 KEs per caption/category. Then, we take the top 5 KEs per caption based on the similarity scores between image and generated KEs. For COCO (Lin et al., 2014), we prompt Vicuna with What are useful visual features for distinguishing a category name in a photo?. Since COCO has 80 categories we choose this prompt following (Menon and Vondrick, 2023). For Flickr30k (Young et al., 2014), we design prompts that generate KEs for each caption, since we do not have any predefined object classes. Additional details are included in our supplementary. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        535,
+        489,
+        921
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        507,
+        83,
+        655,
+        99
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1 Experimental Setup "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        507,
+        110,
+        714,
+        126
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Models and datasets. We follow (Carlini and Terzis, 2022)’s setting by attacking CLIP-like models (Radford et al., 2021). We adopt ViT-B/16 as image encoder, pretrained on ImageNet-21k (Steiner et al., 2022) and fine-tuned on ImageNet-1k. As a text encoder, we adopt a BERT-style (Devlin et al., 2019) encoder following (Radford et al., 2021). "
+          }
+        ]
+      },
+      "bbox": [
+        505,
+        131,
+        884,
+        243
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We cap the max sequence length of text to 100. We use AdamW with weight decay using a cosine scheduler from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 0 ^ { - 4 }"
+          },
+          {
+            "type": "text",
+            "content": "with decay rate 0.2. We train for 30 epochs with a batch size of 128 on the COCO (Lin et al., 2014) and Fickr30k (Young et al., 2014) datasets. While COCO has 80 defined object categories, Flickr30k has no label information. Additional details are included in supplementary. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        244,
+        884,
+        372
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Backdoor settings. We tested out defense against three recent backdoor attacks. To do so, we couple backdoored samples with a caption mentioning the target class. Adversaries only require a very small amount of poisoned samples for poisoning contrastive models (e.g. , CLIP) (Carlini and Terzis, 2022). Following this, we inject a very small amount of poisoned samples "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of the train dataset for both COCO and Flickr30k). "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        373,
+        882,
+        517
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Poisoning settings. We performed two types of poisoning attacks following (Yang et al., 2023b). For single target label attack, the poisoning goal is dog2boat for both Flickr30k and COCO. We evaluate them on test samples that are unseen in the training process. For example, we take an clean image of dog and associate it with a proxy caption of boat. The poisoning rate for this attack is "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 6 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "for Flickr30k and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 2 4 \\%"
+          },
+          {
+            "type": "text",
+            "content": "for COCO. For the multitarget label attack, we take two classes. The poisoning goals are dog2boat and train2zebra for COCO. For Flickr30k, the poisoning goals are dog2boat and bird2sofa. The poisoning rate for COCO and Flickr30k are "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 5 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 3 4 \\%"
+          },
+          {
+            "type": "text",
+            "content": "respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        518,
+        882,
+        760
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2 Experimental Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        507,
+        771,
+        724,
+        785
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Backdoor Attack. In 1, we compared ablations of our method "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { C L + }"
+          },
+          {
+            "type": "text",
+            "content": "KE, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { C L } +"
+          },
+          {
+            "type": "text",
+            "content": "Attention) with other baselines e.g. Cleanlip (Bansal et al., 2023b), Anti-Backdoor Learning (ABL) (Li et al., 2021b). Finally, our model Semantic Shield (Weighted CL "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "Attention), outperforms all baselines with significant margins. Note that, at test time, we used 100 backdoor images (patch, BPP, Wanet) for the text "
+          }
+        ]
+      },
+      "bbox": [
+        505,
+        791,
+        884,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/07d0c6ccd68bb74753211ed1b226828eab00f0852cf0923391b58ce5ea6b17c7.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Dataset</td><td rowspan=\"2\">Models</td><td colspan=\"3\">Backdoor Patch</td><td colspan=\"3\">Backdoor BPP</td><td colspan=\"3\">Backdoor Wanet</td></tr><tr><td>Hit@1↓</td><td>Hit@5↓</td><td>Hit@10↓</td><td>Hit@1↓</td><td>Hit@5↓</td><td>Hit@10↓</td><td>Hit@1↓</td><td>Hit@5↓</td><td>Hit@10↓</td></tr><tr><td rowspan=\"6\">COCO</td><td>CL (No Defense)</td><td>90.66</td><td>94.60</td><td>95.43</td><td>100.0</td><td>100.0</td><td>100.0</td><td>100.0</td><td>100.0</td><td>100.0</td></tr><tr><td>CL+ ABL (Li et al., 2021b)</td><td>6.23</td><td>8.12</td><td>12.21</td><td>15.35</td><td>16.68</td><td>16.21</td><td>100.0</td><td>100.0</td><td>100.0</td></tr><tr><td>CL+ CleanClip (Bansal et al., 2023b)</td><td>5.35</td><td>12.68</td><td>17.89</td><td>36.12</td><td>50.09</td><td>55.19</td><td>8.23</td><td>16.32</td><td>23.73</td></tr><tr><td>CL + KE</td><td>9.0</td><td>15.31</td><td>21.90</td><td>25.39</td><td>47.98</td><td>50.12</td><td>12.21</td><td>56.79</td><td>88.38</td></tr><tr><td>CL + Attention</td><td>4.20</td><td>5.12</td><td>6.01</td><td>0.0</td><td>5.26</td><td>36.21</td><td>0.0</td><td>2.10</td><td>7.20</td></tr><tr><td>Weighted CL + Attention</td><td>0.9</td><td>1.22</td><td>1.57</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr><tr><td rowspan=\"6\">Flickr30k</td><td>CL (No Defense)</td><td>91.97</td><td>97.63</td><td>98.21</td><td>100.0</td><td>100.0</td><td>100.0</td><td>100.0</td><td>100.0</td><td>100.0</td></tr><tr><td>CL+ ABL (Li et al., 2021b)</td><td>4.67</td><td>2.21</td><td>4.06</td><td>10.34</td><td>17.98</td><td>21.13</td><td>98.21</td><td>99.23</td><td>100.0</td></tr><tr><td>CL+ CleanClip (Bansal et al., 2023b)</td><td>2.20</td><td>3.32</td><td>5.05</td><td>12.43</td><td>24.32</td><td>31.25</td><td>13.29</td><td>23.13</td><td>29.21</td></tr><tr><td>CL + KE</td><td>16.10</td><td>33.15</td><td>41.09</td><td>13.14</td><td>36.54</td><td>56.27</td><td>23.36</td><td>41.21</td><td>47.43</td></tr><tr><td>CL + Attention</td><td>1.20</td><td>3.12</td><td>3.01</td><td>0.0</td><td>7.24</td><td>23.17</td><td>0.0</td><td>12.01</td><td>14.07</td></tr><tr><td>Weighted CL + Attention</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        117,
+        80,
+        880,
+        253
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/9ed904cb5aa312be99848573581d835aa984ea17b0fb0d116c9cf181b284d990.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: Backdoor attack and defense performance with baselines. The first row of the table shows an undefended model while other rows are baselines or variants of our method. CL+ KE, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathrm { C L } } +"
+          },
+          {
+            "type": "text",
+            "content": "Attention are our baselines. The best results are shown in bold. "
+          },
+          {
+            "type": "text",
+            "content": "Table 2: Poisoning attack and defense performance with baselines. First row of the table shows how good the attack, and other rows are baselines along with our proposed models. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { C L } + \\mathrm { K E }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { C L } +"
+          },
+          {
+            "type": "text",
+            "content": "Attention are our baselines. The best results are highlighted. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"3\">Dataset</td><td rowspan=\"3\">Models</td><td colspan=\"3\">Single Target Label</td><td colspan=\"6\">Multiple Target Label</td></tr><tr><td colspan=\"3\">dog2boat</td><td colspan=\"3\">dog2boat</td><td colspan=\"3\">train2zebra</td></tr><tr><td>Hit@1 ↓</td><td>Hit@5↓</td><td>Hit@10↓</td><td>Hit@1 ↓</td><td>Hit@5↓</td><td>Hit@10↓</td><td>Hit@1 ↓</td><td>Hit@5↓</td><td>Hit@10↓</td></tr><tr><td rowspan=\"5\">COCO</td><td>CL (No Defense)</td><td>18.0</td><td>57.20</td><td>82.0</td><td>77.12</td><td>99.23</td><td>99.56</td><td>55.32</td><td>95.76</td><td>97.98</td></tr><tr><td>CL+ CleanClip (Bansal et al., 2023b)</td><td>3.39</td><td>3.95</td><td>5.65</td><td>57.69</td><td>63.0</td><td>89.17</td><td>69.49</td><td>71.75</td><td>89.17</td></tr><tr><td>CL + KE</td><td>4.56</td><td>5.32</td><td>5.95</td><td>54.45</td><td>64.21</td><td>85.52</td><td>65.12</td><td>70.92</td><td>86.12</td></tr><tr><td>CL + Attention</td><td>0.56</td><td>3.38</td><td>4.51</td><td>0.63</td><td>65.60</td><td>69.42</td><td>2.25</td><td>6.77</td><td>12.99</td></tr><tr><td>Weighted CL + Attention</td><td>0.04</td><td>1.12</td><td>2.54</td><td>2.23</td><td>5.21</td><td>6.45</td><td>0.0</td><td>0.0</td><td>0.0</td></tr><tr><td rowspan=\"7\">Flickr30k</td><td></td><td colspan=\"3\">dog2boat</td><td colspan=\"3\">dog2boat</td><td colspan=\"3\">bird2sofa</td></tr><tr><td></td><td>Hit@1 ↓</td><td>Hit@5↓</td><td>Hit@10↓</td><td>Hit@1 ↓</td><td>Hit@5↓</td><td>Hit@10↓</td><td>Hit@1 ↓</td><td>Hit@5↓</td><td>Hit@10↓</td></tr><tr><td>CL (No Defense)</td><td>29.0</td><td>57.20</td><td>82.23</td><td>28.12</td><td>82.39</td><td>93.76</td><td>55.32</td><td>90.62</td><td>100.0</td></tr><tr><td>CL+ CleanClip (Bansal et al., 2023b)</td><td>8.27</td><td>31.51</td><td>36.61</td><td>21.69</td><td>61.27</td><td>88.75</td><td>22.42</td><td>64.11</td><td>89.51</td></tr><tr><td>CL + KE</td><td>7.34</td><td>28.09</td><td>32.21</td><td>21.12</td><td>45.32</td><td>47.67</td><td>12.77</td><td>42.34</td><td>54.21</td></tr><tr><td>CL + Attention</td><td>4.56</td><td>21.81</td><td>34.11</td><td>1.63</td><td>16.70</td><td>29.21</td><td>3.25</td><td>18.43</td><td>32.22</td></tr><tr><td>Weighted CL + Attention</td><td>0.32</td><td>1.21</td><td>2.54</td><td>1.78</td><td>4.56</td><td>5.67</td><td>0.0</td><td>0.0</td><td>0.0</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        117,
+        313,
+        880,
+        507
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "retrieval task. At test time, our model retrieves no caption associated with poisoned categories for any backdoored image on Flickr30k. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        574,
+        487,
+        621
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Poisoning Attack. Similarly, to the above, at test time, we use 100 poisoned images for both single and multi-target settings for both datasets. Our model outperforms all existing work significantly with large margins, particularly on the multi-target label setting. We observe that the unweighted version of our approach slightly outperforms Semantic Shield for dog2boat at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { H i t } @ 1"
+          },
+          {
+            "type": "text",
+            "content": ", but Semantic Shield significantly outperforms for Hit@5 and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { H i t } @ 1 0"
+          },
+          {
+            "type": "text",
+            "content": "suggesting significantly reduced poisoning overall. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        627,
+        487,
+        788
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Utility evaluation. We evaluate model utility for image-caption retrieval. 4 shows the performance (Recall "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@ 1 0"
+          },
+          {
+            "type": "text",
+            "content": ") of the poisoned model on each attack type as well as the clean model on the test data. We observe that the utility of the poisoned model is at the same level or slightly less than the clean model e.g. BPP in COCO dataset. This implies that despite being trained on poisoned data, "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        791,
+        487,
+        921
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "models maintain their performance. We show the model utility after being defended with Semantic Shield and its variants "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { ( C L + K E }"
+          },
+          {
+            "type": "text",
+            "content": ", CL + Attention, weighted "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { C L } +"
+          },
+          {
+            "type": "text",
+            "content": "Attention) in 3. We largely observe a similar utility compared to the models from 4. On the Flickr30k dataset, single target or multiple target attack scenario, for TR task, the utility is slightly less than the clean model (4, 3). "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        574,
+        882,
+        702
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.3 Ablations "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        507,
+        719,
+        633,
+        733
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Poisoning rate. We compare the performance of poisoning attacks at different poisoning rates on three backdoor attacks. We conduct these attacks against the victim model with four different poisoning rates (0.001 to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": ") on the COCO dataset (3). We observe that attack performance significantly improves with increased poisoning rate, even though the rate is quite low, which demonstrates the vulnerability of contrastively trained VL models to attacks. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        741,
+        882,
+        901
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fine-tuning epoch. In 4 we use the max poi-"
+          }
+        ]
+      },
+      "bbox": [
+        527,
+        904,
+        882,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/d4c1a59eb5d833022914bc0b06de7c98aaac9ebedbc7e6ca9ce57c737b2e6a31.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Task</td><td>Models</td><td>Backdoor Patch</td><td>BPP</td><td>Wanet</td><td>Single Target Label</td><td>Multiple Target Label</td></tr><tr><td rowspan=\"4\">COCO</td><td rowspan=\"4\">IR</td><td>CL</td><td>74.99</td><td>73.94</td><td>74.54</td><td>74.68</td><td>74.72</td></tr><tr><td>CL + KE</td><td>74.15</td><td>70.7</td><td>74.0</td><td>74.24</td><td>73.28</td></tr><tr><td>CL + Attention</td><td>74.38</td><td>73.13</td><td>74.43</td><td>75.70</td><td>75.13</td></tr><tr><td>Weighted CL + Attention</td><td>74.22</td><td>74.56</td><td>74.23</td><td>73.46</td><td>73.51</td></tr><tr><td rowspan=\"4\">COCO</td><td rowspan=\"4\">TR</td><td>CL</td><td>81.58</td><td>77.44</td><td>78.74</td><td>80.16</td><td>81.12</td></tr><tr><td>CL + KE</td><td>78.40</td><td>75.54</td><td>77.86</td><td>79.08</td><td>81.20</td></tr><tr><td>CL + Attention</td><td>79.20</td><td>77.36</td><td>78.04</td><td>80.05</td><td>81.06</td></tr><tr><td>Weighted CL + Attention</td><td>79.46</td><td>77.78</td><td>78.45</td><td>79.67</td><td>80.0</td></tr><tr><td rowspan=\"4\">Flickr30k</td><td rowspan=\"4\">IR</td><td>CL</td><td>59.13</td><td>59.86</td><td>61.08</td><td>60.92</td><td>57.41</td></tr><tr><td>CL + KE</td><td>60.34</td><td>61.85</td><td>61.13</td><td>58.12</td><td>58.18</td></tr><tr><td>CL + Attention</td><td>61.32</td><td>55.96</td><td>59.14</td><td>58.97</td><td>58.16</td></tr><tr><td>Weighted CL + Attention</td><td>61.07</td><td>56.32</td><td>60.16</td><td>59.76</td><td>58.78</td></tr><tr><td rowspan=\"4\">Flickr30k</td><td rowspan=\"4\">TR</td><td>CL</td><td>68.07</td><td>68.79</td><td>69.86</td><td>71.06</td><td>68.14</td></tr><tr><td>CL + KE</td><td>69.67</td><td>70.65</td><td>69.62</td><td>66.98</td><td>62.20</td></tr><tr><td>CL + Attention</td><td>70.0</td><td>64.46</td><td>68.0</td><td>68.13</td><td>62.97</td></tr><tr><td>Weighted CL + Attention</td><td>70.23</td><td>65.66</td><td>68.87</td><td>68.45</td><td>62.12</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        117,
+        82,
+        878,
+        326
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/65a8bf11131869c405eea90dd7b02d39f282e613875313ba4d7393fb2349ecdd.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Model utility of defended models (Recal "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@ 1 0 _ { , }"
+          },
+          {
+            "type": "text",
+            "content": "). The model utilities are comparable to the performance in 4 "
+          },
+          {
+            "type": "text",
+            "content": "Table 4: Model utility between clean model and other backdoored/poisoned models (CL) (Recall "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@ 1 0"
+          },
+          {
+            "type": "text",
+            "content": "). Similar to 3. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Task</td><td>Clean</td><td>BackPat</td><td>BPP</td><td>Wanet</td><td>SingTL</td><td>MultTL</td></tr><tr><td rowspan=\"2\">COCO</td><td>IR</td><td>75.13</td><td>74.99</td><td>73.94</td><td>74.54</td><td>74.68</td><td>74.72</td></tr><tr><td>TR</td><td>80.62</td><td>81.58</td><td>77.44</td><td>78.74</td><td>80.16</td><td>81.12</td></tr><tr><td rowspan=\"2\">Flickr30k</td><td>IR</td><td>59.68</td><td>59.13</td><td>59.86</td><td>61.08</td><td>60.92</td><td>57.41</td></tr><tr><td>TR</td><td>68.37</td><td>68.07</td><td>68.79</td><td>69.86</td><td>71.06</td><td>68.14</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        117,
+        359,
+        485,
+        426
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/37890198f5400e2416c5ad5d7ecbb6cbee3e5d3502c51605ec33070c9d22b19b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) "
+          },
+          {
+            "type": "text",
+            "content": "patch "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        129,
+        483,
+        240,
+        546
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c3e73ba6c066f02177c69d636e651c099650b399147247f05dd40ddd6109b041.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) BPP "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        243,
+        483,
+        356,
+        546
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a94cedd76f70db1f754b600f7ecfd44201efcce6ce999dcff38d00d362d9acd8.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(c) Wanet "
+          },
+          {
+            "type": "text",
+            "content": "Figure 3: Hit@k vs. poisoning rate on backdoored images. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        359,
+        483,
+        470,
+        546
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "soning rate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( 0 . 0 1 \\% )"
+          },
+          {
+            "type": "text",
+            "content": "from 3 to illustrate Semantic Shield’s performance at different epochs on the same backdoored samples. We notice that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { H i t @ k }"
+          },
+          {
+            "type": "text",
+            "content": "gradually reduces for all three attacks, demonstrating the increasing effectiveness of Semantic Shield’s defense with increased training. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        619,
+        487,
+        715
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 Qualitative analysis "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        732,
+        317,
+        747
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In 5, we present the contrast between a model defended by Semantic Shield and an undefended model’s attention map. 5b shows that poisoned model pays attention to the patch (bottom right corner). In contrast, the defended model 5c does not pay any attention to the patch. Next, in 5d and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 \\mathrm { g }"
+          },
+          {
+            "type": "text",
+            "content": "two imperceptible noises are injected e.g. BPP, Wanet. We wanted to see what happens if we inject the noise randomly throughout the entire images. Poisoned models in 5e and 5h show spurious visual "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        760,
+        489,
+        921
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8f9a4bab423ef13f3f3295e9be1180f9bb050786e69ff8c3ca721449bc9c0ce3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) "
+          },
+          {
+            "type": "text",
+            "content": "Backdoor "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        526,
+        361,
+        636,
+        422
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7ffe4d593b407a5c51f892ef5f91832bca10bc1fb663f143a49e9648900b2379.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) BPP "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        640,
+        361,
+        749,
+        422
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/694b72110aba78b5c07bf4149d9ccb38f4790cb78d0574ba2eff24485e1853da.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(c) Wanet "
+          },
+          {
+            "type": "text",
+            "content": "Figure 4: Hit@k vs training epoch for Semantic Shield. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        754,
+        361,
+        863,
+        422
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "signals all over the image. However, our proposed models filters out the noisy signals and defends against poisoning. "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        493,
+        880,
+        542
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "7 Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        509,
+        556,
+        640,
+        570
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper, we introduced Semantic Shield, an approach for defending against attacks on contrastively trained VL models. Our approach works by leveraging external knowledge to guide the model’s attention to non-attacked visual regions and samples. We evaluated Semantic Shield against recent backdooring and poisoning attacks and defenses on two benchmarks. Our experiments show that Semantic Shield substantially outperforms existing defenses across all settings. In future work, we will explore a tighter integration of the LLM using prompting by dynamically producing KEs online based on the defended model’s current state. In addition, we will explore how multimodal large language models could be used to extract more relevant KEs. While Semantic Shield is successful at defending against attacks on natural images for which there is a meaningful visual-KE alignment, it may be less successful for images such as charts or more abstract text for which clear KEs cannot be extracted. Moreover, it does not preclude the "
+          }
+        ]
+      },
+      "bbox": [
+        507,
+        583,
+        882,
+        921
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/8eb5f60882b030c26d7b21cb24cb7302644978be26bf15552ae1a14f59d19c49.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        131,
+        68,
+        240,
+        122
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a1a629e40325e8d3acfcb707fb3c4e5fbf857256de38347fe10a390cd5b6399d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        245,
+        70,
+        356,
+        122
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/085825433ec9a62096780a6c6252f4aed9ef0f856c995aeeb6ff9f8c2f07b69e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        359,
+        70,
+        470,
+        122
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b86dc93278ece006c8104d2b49a077c804ffe05049c7af6bc5651962ab5e2173.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Backdoor im-(b) Attention (c) Attention map age with patch bot- map for poisoned for best model tom right corner model "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        129,
+        165,
+        240,
+        216
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/62341abc91dc173387d90fa1c27fea93b4e2f52c287fbef3bcafe88695181fd7.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        245,
+        164,
+        357,
+        217
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e04ea9353575d99b5acb04aca83234d671e8cdfb2393b2aa2fa3f7062590ff1e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        359,
+        164,
+        470,
+        217
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3624e4cd0a178a4e10e01b6ad3d36d2646c94e2e411a83348d62c33957e4ec81.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(d) Backdoor im-(e) Attention   (f) Attention map age with impercep- map for poisoned for best model tible noise: BPP model "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        129,
+        259,
+        242,
+        310
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9e8f737e1037ad462cceb8a1260ec9643a834c989edf4c466014223c65d690c1.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        245,
+        259,
+        357,
+        310
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/20aef989674926576a6e887913bae888ea5577bb6bb9552fcb447e9bb4fd4a52.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(g) Backdoor im-(h) Attention    (i) Attention map age with impercep- map for poisoned for best model tible noise: Wanet model "
+          },
+          {
+            "type": "text",
+            "content": "Head n: 4  Head n: 5 Figure 5: Attention map comparison between our model (weighted "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { C L } +"
+          },
+          {
+            "type": "text",
+            "content": "attention) and backdoored models for 100three backdoor attacks. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        359,
+        259,
+        470,
+        310
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "possibility of attacks against the language model via the caption. Future work should explore how the LLM can be jointly defended. "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        432,
+        485,
+        479
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "8 Acknowledgement "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        114,
+        491,
+        307,
+        508
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The authors acknowledge Advanced Research Computing at Virginia Tech for providing computational resources and technical support that have contributed to the results reported within this paper. URL: https://arc.vt.edu/ "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        516,
+        489,
+        595
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        115,
+        618,
+        213,
+        633
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hassan Akbari, Liangzhe Yuan, Rui Qian, Wei-Hong Chuang, Shih-Fu Chang, Yin Cui, and Boqing Gong. VATT: transformers for multimodal self-supervised learning from raw video, audio and text. In Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021, NeurIPS 2021, December 6-14, 2021, virtual, pages 24206–24221, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hritik Bansal, Nishad Singhi, Yu Yang, Fan Yin, Aditya Grover, and Kai-Wei Chang. Cleanclip: Mitigating data poisoning attacks in multimodal contrastive learning. In ICLR 2023 Workshop on Trustworthy and Reliable Large-Scale Machine Learning Models, 2023a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hritik Bansal, Nishad Singhi, Yu Yang, Fan Yin, Aditya Grover, and Kai-Wei Chang. Cleanclip: Mitigating data poisoning attacks in multimodal contrastive learning. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pages 112–123, 2023b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Battista Biggio, Blaine Nelson, and Pavel Laskov. Poisoning attacks against support vector machines. In Proceedings of the 29th International Coference on International Conference on Machine Learning, pages 1467–1474, 2012. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        639,
+        487,
+        920
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Battista Biggio, Ignazio Pillai, Samuel Rota Bulò, Davide 0 200 300  0 100 200 300 Ariu, Marcello Pelillo, and Fabio Roli. Is data clustering in adversarial settings secure? In Proceedings of the 2013 ACM Workshop on Artificial Intelligence and Security, page 87–98, New York, NY, USA, 2013a. Association for Computing Machinery. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "50 Battista Biggio, Ignazio Pillai, Samuel Rota Bulò, Davide Ariu, Marcello Pelillo, and Fabio Roli. Is data cluster-150ing in adversarial settings secure? In Proceedings of the 200 2013 ACM workshop on Artificial intelligence and security, 0 200 300  0 10pages 87–98, 2013b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Nicholas Carlini and Andreas Terzis. Poisoning and back-Head n: 3 dooring contrastive learning. In The Tenth International Conference on Learning Representations, ICLR 2022, Virtual Event, April 25-29, 2022. OpenReview.net, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bryant Chen, Wilka Carvalho, Nathalie Baracaldo, Heiko 0 200 300 Ludwig, Benjamin Edwards, Taesung Lee, Ian Molloy, and Biplav Srivastava. Detecting backdoor attacks on deep neural networks by activation clustering. In Workshop on Artificial Intelligence Safety. CEUR-WS, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Head n: 6 Jian Chen, Xuxin Zhang, Rui Zhang, Chen Wang, and Ling Liu. De-pois: An attack-agnostic defense against data poisoning attacks. IEEE Transactions on Information Forensics and Security, 16:3412–3425, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "100 200 300 Wei-Lin Chiang, Zhuohan Li, Zi Lin, Ying Sheng, Zhanghao Wu, Hao Zhang, Lianmin Zheng, Siyuan Zhuang, Yonghao Zhuang, Joseph E Gonzalez, et al. Vicuna: An open-source chatbot impressing gpt-4 with "
+              },
+              {
+                "type": "equation_inline",
+                "content": "9 0 \\% *"
+              },
+              {
+                "type": "text",
+                "content": "chatgpt quality. 2023. URL https://lmsys. org/blog/2023-03-30-vicuna, 1(2):3. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. BERT: pre-training of deep bidirectional transformers for language understanding. In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, NAACL-HLT 2019, Minneapolis, MN, USA, June 2-7, 2019, Volume 1 (Long and Short Papers), pages 4171–4186. Association for Computational Linguistics, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Khoa Doan, Yingjie Lao, and Ping Li. Backdoor attack with imperceptible input and latent modification. Advances in Neural Information Processing Systems, 34:18944–18957, 2021a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Khoa Doan, Yingjie Lao, Weijie Zhao, and Ping Li. Lira: Learnable, imperceptible and robust backdoor attacks. In Proceedings of the IEEE/CVF international conference on computer vision, pages 11966–11976, 2021b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Vishnu Sashank Dorbala, Gunnar A Sigurdsson, Jesse Thomason, Robinson Piramuthu, and Gaurav S Sukhatme. Clipnav: Using clip for zero-shot vision-and-language navigation. In Workshop on Language and Robotics at CoRL 2022, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Fangxiang Feng, Xiaojie Wang, and Ruifan Li. Cross-modal retrieval with correspondence autoencoder. In Proceedings of the 22nd ACM international conference on Multimedia, pages 7–16, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Felipe González-Pizarro and Savvas Zannettou. Understanding and detecting hateful content using contrastive learning. In Proceedings of the International AAAI Conference on Web and Social Media, pages 257–268, 2023. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        510,
+        86,
+        882,
+        920
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tianyu Gu, Kang Liu, Brendan Dolan-Gavitt, and Siddharth Garg. Badnets: Evaluating backdooring attacks on deep neural networks. IEEE Access, 7:47230–47244, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jonathan Hayase, Weihao Kong, Raghav Somani, and Sewoong Oh. Spectre: Defending against backdoor attacks using robust statistics. In International Conference on Machine Learning, pages 4129–4139. PMLR, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chenguang Huang, Oier Mees, Andy Zeng, and Wolfram Burgard. Visual language maps for robot navigation. In 2023 IEEE International Conference on Robotics and Automation (ICRA), pages 10608–10615. IEEE, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kunzhe Huang, Yiming Li, Baoyuan Wu, Zhan Qin, and Kui Ren. Backdoor defense via decoupling the training process. In International Conference on Learning Representations, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chao Jia, Yinfei Yang, Ye Xia, Yi-Ting Chen, Zarana Parekh, Hieu Pham, Quoc Le, Yun-Hsuan Sung, Zhen Li, and Tom Duerig. Scaling up visual and vision-language representation learning with noisy text supervision. In International conference on machine learning, pages 4904–4916. PMLR, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Marius Kloft and Pavel Laskov. Online anomaly detection under adversarial impact. In Proceedings of the thirteenth international conference on artificial intelligence and statistics, pages 405–412. JMLR Workshop and Conference Proceedings, 2010. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pang Wei Koh and Percy Liang. Understanding black-box predictions via influence functions. In International conference on machine learning, pages 1885–1894. PMLR, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Changjiang Li, Ren Pang, Zhaohan Xi, Tianyu Du, Shouling Ji, Yuan Yao, and Ting Wang. An embarrassingly simple backdoor attack on self-supervised learning. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 4367–4378, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Junnan Li, Ramprasaath Selvaraju, Akhilesh Gotmare, Shafiq Joty, Caiming Xiong, and Steven Chu Hong Hoi. Align before fuse: Vision and language representation learning with momentum distillation. Advances in neural information processing systems, 34:9694–9705, 2021a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Junnan Li, Dongxu Li, Caiming Xiong, and Steven C. H. Hoi. BLIP: bootstrapping language-image pre-training for unified vision-language understanding and generation. In International Conference on Machine Learning, ICML 2022, 17-23 July 2022, Baltimore, Maryland, USA, pages 12888–12900. PMLR, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yige Li, Xixiang Lyu, Nodens Koren, Lingjuan Lyu, Bo Li, and Xingjun Ma. Anti-backdoor learning: Training clean models on poisoned data. In Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021, NeurIPS 2021, December 6-14, 2021, virtual, pages 14900–14912, 2021b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays, Pietro Perona, Deva Ramanan, Piotr Dollár, and C Lawrence Zitnick. Microsoft coco: Common objects in context. In Computer Vision–ECCV 2014: 13th European Conference, Zurich, Switzerland, September 6-12, 2014, Proceedings, Part V 13, pages 740–755. Springer, 2014. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        86,
+        485,
+        919
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Min Liu, Alberto Sangiovanni-Vincentelli, and Xiangyu Yue. Beating backdoor attack at its own game. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 4620–4629, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yang Liu, Mingyuan Fan, Cen Chen, Ximeng Liu, Zhuo Ma, Li Wang, and Jianfeng Ma. Backdoor defense with machine unlearning. In IEEE INFOCOM 2022-IEEE Conference on Computer Communications, pages 280–289. IEEE, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arjun Majumdar, Gunjan Aggarwal, Bhavika Devnani, Judy Hoffman, and Dhruv Batra. Zson: Zero-shot objectgoal navigation using multimodal goal embeddings. Advances in Neural Information Processing Systems, 35: 32340–32352, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sachit Menon and Carl Vondrick. Visual classification via description from large language models. In The Eleventh International Conference on Learning Representations, ICLR 2023, Kigali, Rwanda, May 1-5, 2023. OpenReview.net, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tuan Anh Nguyen and Anh Tuan Tran. Wanet - imperceptible warping-based backdoor attack. In International Conference on Learning Representations, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Huy Phan, Cong Shi, Yi Xie, Tianfang Zhang, Zhuohang Li, Tianming Zhao, Jian Liu, Yan Wang, Yingying Chen, and Bo Yuan. Ribac: Towards r obust and i mperceptible b ackdoor a ttack against c ompact dnn. In European Conference on Computer Vision, pages 708–724. Springer, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Han Qiu, Yi Zeng, Shangwei Guo, Tianwei Zhang, Meikang Qiu, and Bhavani Thuraisingham. Deepsweep: An evaluation framework for mitigating dnn backdoor attacks using data augmentation. In Proceedings of the 2021 ACM Asia Conference on Computer and Communications Security, pages 363–377, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. Learning transferable visual models from natural language supervision. In International Conference on Machine Learning, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu, and Mark Chen. Hierarchical text-conditional image generation with CLIP latents. CoRR, abs/2204.06125, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Aniruddha Saha, Akshayvarun Subramanya, and Hamed Pirsiavash. Hidden trigger backdoor attacks. In Proceedings of the AAAI conference on artificial intelligence, pages 11957–11965, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Aniruddha Saha, Ajinkya Tejankar, Soroush Abbasi Koohpayegani, and Hamed Pirsiavash. Backdoor attacks on self-supervised learning. In IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2022, New Orleans, LA, USA, June 18-24, 2022, pages 13327– 13336. IEEE, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ali Shafahi, W. Ronny Huang, Mahyar Najibi, Octavian Suciu, Christoph Studer, Tudor Dumitras, and Tom Goldstein. Poison frogs! targeted clean-label poisoning attacks on neural networks. In Proceedings of the 32nd International Conference on Neural Information Processing Systems, page 6106–6116, Red Hook, NY, USA, 2018. Curran Associates Inc. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        510,
+        86,
+        880,
+        917
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Wonyoung Shin, Jonghun Park, Taekang Woo, Yongwoo Cho, Kwangjin Oh, and Hwanjun Song. e-clip: Large-scale vision-language representation learning in e-commerce. In Proceedings of the 31st ACM International Conference on Information & Knowledge Management, pages 3484–3494, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Andreas Steiner, Alexander Kolesnikov, Xiaohua Zhai, Ross Wightman, Jakob Uszkoreit, and Lucas Beyer. How to train your vit? data, augmentation, and regularization in vision transformers. Trans. Mach. Learn. Res., 2022, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Di Tang, XiaoFeng Wang, Haixu Tang, and Kehuan Zhang. Demon in the variant: Statistical analysis of "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\{ \\mathrm { D N N s } \\}"
+              },
+              {
+                "type": "text",
+                "content": "for robust backdoor contamination detection. In 30th USENIX Security Symposium (USENIX Security 21), pages 1541– 1558, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Christopher Thomas and Adriana Kovashka. Preserving semantic neighborhoods for robust cross-modal retrieval. In Computer Vision–ECCV 2020: 16th European Conference, Glasgow, UK, August 23–28, 2020, Proceedings, Part XVIII 16, pages 317–335. Springer, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Vale Tolpegin, Stacey Truex, Mehmet Emre Gursoy, and Ling Liu. Data poisoning attacks against federated learning systems. In Computer Security–ESORICS 2020: 25th European Symposium on Research in Computer Security, ESORICS 2020, Guildford, UK, September 14–18, 2020, Proceedings, Part I 25, pages 480–501. Springer, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Brandon Tran, Jerry Li, and Aleksander Madry. Spectral signatures in backdoor attacks. Advances in neural information processing systems, 31, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Wei Lun Tsai, Jacob J Lin, and Shang-Hsien Hsieh. Generating construction safety observations via clip-based imagelanguage embedding. In European Conference on Computer Vision, pages 366–381. Springer, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Haotao Wang, Junyuan Hong, Aston Zhang, Jiayu Zhou, and Zhangyang Wang. Trap and replace: Defending backdoor attacks by trapping them into an easy-to-replace subnetwork. Advances in neural information processing systems, 35:36026–36039, 2022a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lin Wang and Jie Chen. Improving radiology report generation with adaptive attention. In Multimodal AI in healthcare: A paradigm shift in health intelligence, pages 293– 305. Springer, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Longzheng Wang, Chuang Zhang, Hongbo Xu, Yongxiu Xu, Xiaohan Xu, and Siqi Wang. Cross-modal contrastive learning for multimodal fake news detection. In Proceedings of the 31st ACM International Conference on Multimedia, pages 5696–5704, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhenting Wang, Juan Zhai, and Shiqing Ma. Bppattack: Stealthy and efficient trojan attacks against deep neural networks via image quantization and contrastive adversarial learning. In IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2022, New Orleans, LA, USA, June 18-24, 2022, pages 15054–15063. IEEE, 2022b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sandamal Weerasinghe, Tansu Alpcan, Sarah M Erfani, and Christopher Leckie. Defending support vector machines against data poisoning attacks. IEEE Transactions on Information Forensics and Security, 16:2566–2578, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Dongxian Wu and Yisen Wang. Adversarial neuron pruning purifies backdoored deep models. Advances in Neural Information Processing Systems, 34:16913–16925, 2021. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        86,
+        485,
+        919
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Huang Xiao, Battista Biggio, Gavin Brown, Giorgio Fumera, Claudia Eckert, and Fabio Roli. Is feature selection secure against training data poisoning? In International conference on machine learning, pages 1689–1698. PMLR, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Wenhan Yang, Jingdong Gao, and Baharan Mirzasoleiman. Robust contrastive language-image pretraining against data poisoning and backdoor attacks. In Thirty-seventh Conference on Neural Information Processing Systems, 2023a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ziqing Yang, Xinlei He, Zheng Li, Michael Backes, Mathias Humbert, Pascal Berrang, and Yang Zhang. Data poisoning attacks against multimodal encoders. In International Conference on Machine Learning, ICML 2023, 23- 29 July 2023, Honolulu, Hawaii, USA, pages 39299–39313. PMLR, 2023b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ziqing Yang, Xinlei He, Zheng Li, Michael Backes, Mathias Humbert, Pascal Berrang, and Yang Zhang. Data poisoning attacks against multimodal encoders. In International Conference on Machine Learning, ICML 2023, 23- 29 July 2023, Honolulu, Hawaii, USA, pages 39299–39313. PMLR, 2023c. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Peter Young, Alice Lai, Micah Hodosh, and Julia Hockenmaier. From image descriptions to visual denotations: New similarity metrics for semantic inference over event descriptions. Trans. Assoc. Comput. Linguistics, 2:67–78, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jiahui Yu, Zirui Wang, Vijay Vasudevan, Legg Yeung, Mojtaba Seyedhosseini, and Yonghui Wu. Coca: Contrastive captioners are image-text foundation models. Transactions on Machine Learning Research, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yi Zeng, Si Chen, Won Park, Zhuoqing Mao, Ming Jin, and Ruoxi Jia. Adversarial unlearning of backdoors via implicit hypergradient. In International Conference on Learning Representations, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Xiaohua Zhai, Xiao Wang, Basil Mustafa, Andreas Steiner, Daniel Keysers, Alexander Kolesnikov, and Lucas Beyer. Lit: Zero-shot transfer with locked-image text tuning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages 18123–18133, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hanwang Zhang, Yang Yang, Huanbo Luan, Shuicheng Yang, and Tat-Seng Chua. Start from scratch: Towards automatically identifying, modeling, and naming visual attributes. In Proceedings of the 22nd ACM international conference on Multimedia, pages 187–196, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jinghuai Zhang, Hongbin Liu, Jinyuan Jia, and Neil Zhenqiang Gong. Corruptencoder: Data poisoning based backdoor attacks to contrastive learning. arXiv preprint arXiv:2211.08229, 2022a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ying Zhang and Huchuan Lu. Deep cross-modal projection learning for image-text matching. In Proceedings of the European conference on computer vision (ECCV), pages 686–701, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yuhao Zhang, Hang Jiang, Yasuhide Miura, Christopher D Manning, and Curtis P Langlotz. Contrastive learning of medical visual representations from paired images and text. In Machine Learning for Healthcare Conference, pages 2–25. PMLR, 2022b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bingyin Zhao and Yingjie Lao. Towards class-oriented poisoning attacks against neural networks. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision, pages 3741–3750, 2022. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        510,
+        86,
+        880,
+        920
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Yangming Zhou, Yuzhou Yang, Qichao Ying, Zhenxing Qian, and Xinpeng Zhang. Multimodal fake news detection via clip-guided learning. In 2023 IEEE International Conference on Multimedia and Expo (ICME), pages 2825–2830. IEEE, 2023. "
+          }
+        ]
+      },
+      "bbox": [
+        115,
+        86,
+        489,
+        146
+      ]
+    }
+  ]
+]

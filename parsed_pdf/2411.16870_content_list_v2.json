@@ -1,0 +1,5669 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "RECAST: REPARAMETERIZED, COMPACT WEIGHT ADAPTATION FOR SEQUENTIAL TASKS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        98,
+        823,
+        148
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Nazia Tasnim "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        172,
+        281,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Boston University "
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        186,
+        303,
+        200
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "nimzia@bu.edu "
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        202,
+        312,
+        214
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Bryan A. Plummer "
+          }
+        ]
+      },
+      "bbox": [
+        501,
+        172,
+        638,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Boston University "
+          }
+        ]
+      },
+      "bbox": [
+        504,
+        186,
+        625,
+        200
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "bplum@bu.edu "
+          }
+        ]
+      },
+      "bbox": [
+        504,
+        202,
+        622,
+        215
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        450,
+        252,
+        545,
+        266
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Incremental learning aims to adapt to new sets of categories over time with minimal computational overhead. Prior work often trains efficient task-specific adapters that modify frozen layer weights or features to capture relevant information without affecting predictions on any previously learned categories. While these adapters are generally more efficient than finetuning the entire network, they still can require tens or hundreds of thousands of task-specific trainable parameters, even for relatively small networks. This is can be problematic for resourceconstrained environments with high communication costs, such as edge devices or mobile phones. Thus, we propose Reparameterized, Compact weight Adaptation for Sequential Tasks (RECAST), a novel method that dramatically reduces the number of task-specific trainable parameters to fewer than 50 – several orders of magnitude less than competing methods like LoRA. RECAST accomplishes this efficiency by learning to decompose layer weights into a soft parameter-sharing framework consisting of a set of shared weight templates and very few modulespecific scaling factor coefficients. This soft parameter-sharing framework allows for effective task-wise reparameterization by tuning only these coefficients while keeping the templates frozen. A key innovation of RECAST is the novel weight reconstruction pipeline called Neural Mimicry, which eliminates the need for training in our framework from scratch. Extensive experiments across six diverse datasets demonstrate RECAST outperforms the state-of-the-art by up to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sim 1 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and improves baselines "
+          },
+          {
+            "type": "equation_inline",
+            "content": "> 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "across various scales, architectures, and parameter spaces. Moreover, we show that RECAST’s architecture-agnostic nature allows for seamless integration with existing methods, further boosting performance1. "
+          }
+        ]
+      },
+      "bbox": [
+        228,
+        282,
+        767,
+        603
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 INTRODUCTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        630,
+        336,
+        645
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Incremental Learning "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( I L )"
+          },
+          {
+            "type": "text",
+            "content": "aims to learn from a continuous stream of data or tasks over time. Generally speaking, the goal of IL methods is to avoid catastrophic forgetting (McCloskey & Cohen, 1989; French, 1999) while minimizing computational overhead. As summarized in Figure 1(a), prior work in IL can be separated into three themes. First, Rehearsal methods that learn what samples to retain to use on subsequent iterations to ensure their task-specific knowledge is retained (Caccia et al., 2020; Rebuffi et al., 2017; Chaudhry et al., 2019; 2021; Shin et al., 2017), but they can require large amounts of storage as the number of tasks grows. Second, Regularization methods that require no extra storage (Kirkpatrick et al., 2017; Kim et al., 2021; Aljundi et al., 2018; Nguyen et al., 2018; Zhang et al., 2020), but can result in network instability due, in part, to the plasticity-stability dilemma (Grossberg, 1982). Finally, third, Reconfiguration/Adaptation methods (Yoon et al., 2018; Rusu et al., 2006; Hung et al., 2019; Mallya et al., 2018; Singh et al., 2020; Verma et al., 2021; Jin & Kim, 2022; Ge et al., 2023; Douillard et al., 2022; Wang et al., 2022a) that learn task-specific parameters, but can result in large numbers of new parameters per-task that may not scale well. Even methods designed to be efficient, like those based on LoRA (Hu et al., 2022), still require tens or hundreds of thousands of task-specific trainable parameters for each task (e.g., (Wang et al., 2024; Zhang et al., 2024; Erkoc¸ et al., 2023)) making them ill-suited for some applications in resourceconstrained environments like mobile phones or edge devices. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        662,
+        826,
+        900
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2411.16870v2 [cs.CV] 14 Mar 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        258,
+        57,
+        705
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1Code: Repository "
+          }
+        ]
+      },
+      "bbox": [
+        192,
+        909,
+        307,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/af79b250a378b99cf3694339aa316fd82207a8a49341dde50fb1a1b2e53ced55.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: (a) Existing IL methods, i.e. Rehearsal, Regularization, Reconfiguration - exhibit various limitations in terms of model complexity, memory requirements, and training overheads. In comparison our proposed method, (b) RECAST can be uses as a frozen backbone, allowing efficient reparameterization of any target module with a negligible number of parameter updates (order of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 { \\bar { 0 ^ { - 6 } } } ."
+          },
+          {
+            "type": "text",
+            "content": ") and can accommodate any number of disjoint tasks. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        114,
+        816,
+        324
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To address this, we propose Reparameterized, Compact weight Adaptation for Sequential Tasks (RECAST), which provides an extremely parameter-efficient approach for IL via reparameterization of a model’s pretrained weights. As illustrated in Figure 1(b), RECAST achieves its compact task-specific representation by finetuning only the coefficients for a set of shared weight templates, enabling us to reconfigure an entire network’s weights using fewer than 50 trainable parameters. RECAST framework shares some principles with prior Template Mixing methods (e.g., (Plummer et al., 2022; Savarese & Maire, 2019)). However, these methods did not explore incremental learning or reparameterization, focusing instead on hierarchy discovery and parameter allocation. They also required training from scratch, preventing the use of existing pre-trained models. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        436,
+        823,
+        561
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In contrast, our proposed Neural Mimicry approach allows RECAST to utilize existing large pretrained weights without costly retraining. This weight reconstruction approach learns to decompose pretrained layers into our framework, effectively emulating the original network’s weights. This enables us to leverage any pretrained model with minimal processing (often just a few minutes). Thus, REACAST addresses a gap in reparameterization schemes and IL research where reconstruction methods remain underexplored where recent work has focused on generating weights for LoRA, typically through diffusion (Wang et al., 2024; Zhang et al., 2024; Erkoc¸ et al., 2023) or used pretrained weights to initialize their LoRA components (Liu et al., 2024a; Si et al., 2024). Some prior work also learned additional predictor networks from scratch to generate weights for a subset of modules (Salimans & Kingma, 2016). In contrast to these methods, our work directly changes the backbone weights rather than learning an adapter like LoRA-based methods, while also being several orders of magnitude more parameter efficient. Figure 2 provides an overview of our approach. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        568,
+        826,
+        736
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We evaluate RECAST’s effectiveness on diverse datasets in a Task-incremental IL setting. We compare against 16 baselines comprising state-of-the-art IL methods on both CNN and Transformer architectures, where RECAST reports "
+          },
+          {
+            "type": "equation_inline",
+            "content": "> 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "gain over prior work. When combined with adapter methods with higher parameter budgets, RECAST further increases performance by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sim 1 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        741,
+        823,
+        799
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our key contributions can thus be summarized as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        805,
+        553,
+        819
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We propose RECAST, A novel framework that dynamically generates module weights using shared basis matrices & module-specific coefficients. This weight-decomposed architecture enables task-specific adaptations optimizing only coefficients, leveraging cross-layer knowledge. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• We introduce Neural Mimicry, a novel weight-reconstruction pipeline, that reproduces network weights without resource-intensive pretraining. This scale and architecture-agnostic approach enables easy upgrades to existing architectures. We demonstrate that it builds stronger, more expressive backbones for transfer learning. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        825,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/33d63c2cd1a3e72ee83880f5beaa6a5fd848d42ebf74ea9c2c6d6e92799fe728.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: RECAST decomposes module weights into templates and coefficients, which are learned through reconstruction from pretrained weights (Section 3.2). These components are linearly combined to dynamically generate weights for a target layer (Section 3.1). During TIL training, the templates are kept frozen, and only task-specific coefficients learned to create new layer weights. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        103,
+        823,
+        191
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "• RECAST’s fine-tuned resource-performance control, suits efficient continual learning with bounded resource constraints. Its compact task-specific parameters enable easier distribution across large-scale systems and edge devices. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        279,
+        823,
+        321
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 RELATED WORK "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        340,
+        346,
+        357
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our work builds upon and extends several key areas in neural network adaptation, in particular the area of weight decomposition. These methods have previously shown that such modular networks are well suited for task adaptation (Mendez & Eaton, 2021; Ostapenko et al., 2021). Older works like Weight Normalization (Salimans & Kingma, 2016) decouples the length of target weight vectors from their direction to reparameterize the network weights. Decomposition has also been used to make DNNs more interpretable (Zhou et al., 2018) and to discover hierarchical structures (Patil et al., 2023). Savarese & Maire (2019) and Plummer et al. (2022) demonstrate the effectiveness of weight sharing through decomposition, similar to our approach. However, these methods either require training models from scratch in their decomposed form or learning additional task-driven priors to accommodate new tasks (Veniat et al., 2020). In terms of parameter-efficient tuning, LoRA is now popularly used to adapt to new tasks through low-rank updates (Chen et al., 2022; Liang & Li, 2024; Zhu et al., 2024; Nikdan et al., 2024), but adds thousands of tunable parameters. In contrast, our approach learns to decompose the weights of a pretrained network to enable quick adaptation to new tasks with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "< 0 . 0 0 0 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "task parameters. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        372,
+        826,
+        568
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our work is also similar to works that generate neural network weights. Earlier works like, HyperNetworks (Ha et al., 2017) uses a small subnetwork to predict the weights of a larger network. Unlike our reconstruction scheme, this requires end-to-end training on input vectors. NeRN (Ashkenazi et al., 2023) builds upon this idea of subnetworks by using positional embeddings of weight coordinates; however, it does not leverage pre-trained knowledge. A recent work, DoRA (Liu et al., 2024b) shares some similarities with our approach by decomposing pretrained weights into magnitude vectors and LoRA matrices. However, the weight is utilized only during initialization and requires significant parameter tuning. Another contemporary work, Wang et al. (2024) attempts novel weight generation through autoencoders and latent diffusion, which can be resource-heavy to train. In comparison, RECAST offers a direct, efficient approach to weight generation and reparameterization. We also show that RECAST can be combined with existing methods to boost performance. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        574,
+        826,
+        728
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 REPARAMETERIZED, COMPACT WEIGHT ADAPTATION FOR SEQUENTIAL TASKS (RECAST) "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        169,
+        747,
+        805,
+        782
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Task Incremental Learning (TIL) a model sequentially learns D tasks "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ d _ { 1 } , d _ { 2 } , d _ { 3 } , . . . d _ { D } \\}"
+          },
+          {
+            "type": "text",
+            "content": ", where each task "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { i } ~ = ~ ( X _ { i } , Y _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": "introduces new categories, domains, or output spaces. The objective is to maximize classification performance across all tasks while minimizing resource usage, i.e., max "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\textstyle \\sum _ { i = 1 } ^ { D } P ( d _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": "s.t. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R \\leq R _ { m a x }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P ( d _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": "is the performance on task "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { i }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R"
+          },
+          {
+            "type": "text",
+            "content": "is the total resource usage, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R _ { m a x }"
+          },
+          {
+            "type": "text",
+            "content": "is the resource constraint. This resource-awareness is crucial in practice, as it enables deployment on edge devices with limited memory, impacts cloud infrastructure costs and real-time processing, and ensures accessibility in resource-limited environments. Thus, TIL poses a complex optimization problem: how can we design a system that adapts to new tasks without significantly increasing its computational footprint or compromising performance on existing tasks? "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        796,
+        826,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 1 RECAST Framework "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "Require: L: Total number of layers in network G: Number of template bank groups n: Number of templates per bank K: Number of coefficient sets d: Dimension of weight matrices Ml: Number of target modules in layer l   \n1: procedure INITIALIZE(L,G,n,K,d,Ml)   \n2: for  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": " do   \n3:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau_{g} = T_{g,i}\\in \\mathbb{R}^{d\\times d}|i = 1,\\dots ,n"
+          },
+          {
+            "type": "text",
+            "content": " ▷ Template bank for group g   \n4: end for   \n5: for  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "text",
+            "content": " do   \n6: for  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M_l"
+          },
+          {
+            "type": "text",
+            "content": " do   \n7:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C_{l,m} = C_{l,m,i}^k\\in \\mathbb{R}|k = 1,\\ldots ,K;i = 1,\\ldots ,n"
+          },
+          {
+            "type": "text",
+            "content": " ▷ Module coefficients   \n8: OrthogonalInitialization(Cl,m)   \n9: end for   \n10: end for   \n11: end procedure   \n12: procedure FORWARDPASS(x,l,m)   \n13:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g = \\left[\\frac{l}{L / G}\\right]"
+          },
+          {
+            "type": "text",
+            "content": " ▷ Get group index   \n14:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W_{l,m} = \\frac{1}{K}\\sum_{k = 1}^{K}\\sum_{i = 1}^{n}C_{l,m,i}^{k}\\cdot T_{g,i}"
+          },
+          {
+            "type": "text",
+            "content": " ▷ Generate weights   \n15: y = ModuleOperation(x,Wl,m) ▷ Apply layer operation   \n16: return y   \n17: end procedure "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        122,
+        826,
+        468
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We address this multifaceted challenge with our novel framework Reparameterized, Compact weight Adaptation for Sequential Tasks (RECAST), that strategically balances model plasticity and stability while adhering to resource constraints. As illustrated in Figure 2, RECAST introduces a flexible way to adapt the layers of neural networks through the dynamic combination of sets of shared weight blueprints (i.e., template banks) and module-wise calibration factors or coefficients. In Section 3.1 we present our Weight Decomposition scheme. Section 3.2 introduces Neural Mimicry for direct reconstruction of pretrained weights into reusable templates and coefficients. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        494,
+        826,
+        593
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 WEIGHT DECOMPOSITION"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        609,
+        398,
+        625
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "At its core RECAST replaces pretrained layer weights with modules that can dynamically generate weights. A target module has access to a bank of templates which is shared with some other layers in the network (discussed in Section 4.2). Each module has its own set of coefficients which are used to generate the weights. Formally, let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "text",
+            "content": "be the total number of layers in the network organized into "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": "groups, where each group shares a template bank. For each group "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g \\in { 1 , \\ldots , G }"
+          },
+          {
+            "type": "text",
+            "content": ", we define a template bank "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tau _ { g } = T _ { g , 1 } , T _ { g , 2 } , \\ldots , T _ { g , n }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "is the number of templates per bank. Each template "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { g , i } \\in \\mathbb { R } ^ { d _ { o u t } \\times d _ { i n } \\times \\dots }"
+          },
+          {
+            "type": "text",
+            "content": "has the same dimensions as the layer being parameterized. For each target module "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m \\in { 1 , \\dots , M _ { l } }"
+          },
+          {
+            "type": "text",
+            "content": "in layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l \\in { 1 , \\ldots , L }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "is the number of target modules in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": "ayer l, we genis defined as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { l , m } ^ { k } = C _ { l , m , 1 } ^ { k } , C _ { l , m , 2 } ^ { k } , \\ldots , C _ { l , m , n } ^ { k }"
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "The , w "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { l , m , i } ^ { k } \\in \\mathbb { R }"
+          },
+          {
+            "type": "text",
+            "content": "ents for  the lear odule ed coe "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m"
+          },
+          {
+            "type": "text",
+            "content": "in layercient for template "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { g , i }"
+          },
+          {
+            "type": "text",
+            "content": "in group "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g = \\lceil l / ( L / G ) \\rceil"
+          },
+          {
+            "type": "text",
+            "content": ". The weight matrix for module "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m"
+          },
+          {
+            "type": "text",
+            "content": "in layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": "is computed via: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        636,
+        826,
+        794
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {l, m} ^ {k} = \\sum_ {i = 1} ^ {n} T _ {g, i} \\cdot C _ {l, m, i} ^ {k} \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7c3107a8c5e832b1fd3d26fe8920b43cadc9f6c42cd56aad555eeaa1ec194250.jpg"
+        }
+      },
+      "bbox": [
+        413,
+        801,
+        823,
+        840
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where · represents element-wise multiplication. The final weight matrix for module "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m"
+          },
+          {
+            "type": "text",
+            "content": "in layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": "is generated by averaging these "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "parameter matrices. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        849,
+        823,
+        878
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {l, m} = \\frac {1}{K} \\sum_ {k = 1} ^ {K} W _ {l, m} ^ {k} \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/013941d1b9f9b875bb9ad8681812e2534716ceee6ef5f509cfb4aa9466ccf79b.jpg"
+        }
+      },
+      "bbox": [
+        424,
+        886,
+        823,
+        926
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 2 Neural Mimicry "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "Require: M: Original pretrained model  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M^{*}"
+          },
+          {
+            "type": "text",
+            "content": " : Reconstructed Model L: Number of layers  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M_l"
+          },
+          {
+            "type": "text",
+            "content": " : Number of modules in layer  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "equation_inline",
+            "content": "T_{g(l)}"
+          },
+          {
+            "type": "text",
+            "content": " : Template bank for group  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "g"
+          },
+          {
+            "type": "text",
+            "content": " containing layer  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "equation_inline",
+            "content": "C_{l,m}"
+          },
+          {
+            "type": "text",
+            "content": " : Coefficients for module  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m"
+          },
+          {
+            "type": "text",
+            "content": " in layer  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": " 1: procedure NEURALMIMICRY  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(M,M^{*}"
+          },
+          {
+            "type": "text",
+            "content": " ,max_epochs)   \n2: for epoch  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "= 1"
+          },
+          {
+            "type": "text",
+            "content": " to max_epochs do   \n3: total_loss  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\leftarrow 0"
+          },
+          {
+            "type": "text",
+            "content": "   \n4: for  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "text",
+            "content": " do ▷Layer iteration   \n5: for  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M_l"
+          },
+          {
+            "type": "text",
+            "content": " do ▷Module iteration   \n6:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W_{l,m}^{*}\\gets"
+          },
+          {
+            "type": "text",
+            "content": " GenerateWeights  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(T_{g(l)},C_{l,m})"
+          },
+          {
+            "type": "text",
+            "content": " ▷Weight reconstruction   \n7:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L_{l,m}\\gets"
+          },
+          {
+            "type": "text",
+            "content": " LossFunction  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(W_{l,m}^{*},W_{l,m})"
+          },
+          {
+            "type": "text",
+            "content": "   \n8: total_loss  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\leftarrow"
+          },
+          {
+            "type": "text",
+            "content": " total_loss  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "+L_{l,m}"
+          },
+          {
+            "type": "text",
+            "content": "   \n9:  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T_{g(l)},C_{l,m}\\gets"
+          },
+          {
+            "type": "text",
+            "content": " Update  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(T_{g(l)},C_{l,m},L_{l,m})"
+          },
+          {
+            "type": "text",
+            "content": "   \n10: end for   \n11: end for   \n12: end for   \n13: return  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M^{*}"
+          },
+          {
+            "type": "text",
+            "content": " ▷Return reconstructed model   \n14: end procedure "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        122,
+        826,
+        422
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Algorithm 1 describes how template banks for each group are created and as well as the orthogonal initialization of coefficients for each module "
+          },
+          {
+            "type": "equation_inline",
+            "content": "m"
+          },
+          {
+            "type": "text",
+            "content": "in layer l. The forward pass computes the final weight matrix using these components before applying the module operation. The target module then generates the appropriate output (e.g., convolutional feature map for CNN, attention feature vectors for attention module). See Appendix A.4.1 for additional architecture-specific details. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        449,
+        823,
+        521
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 NEURAL MIMICRY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        537,
+        346,
+        551
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We introduce “Neural Mimicry” as a foundational technique for efficiently emulating complex pretrained neural networks. This end-to-end pipeline enables the recreation of a target model within our framework, bypassing resource-intensive pretraining. The input to this pipeline is a pretrained target model "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": ", whose module weights we aim to emulate. The output is a set of template banks and coefficients that, when combined, approximate the target module weights of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": ". The core of Neural Mimicry lies in its iterative refinement process, which progressively shapes the custom model "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M ^ { * }"
+          },
+          {
+            "type": "text",
+            "content": "to closely mirror the behavior of the target model "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": ". In our experiments the pretrained weights of M are obtained from official releases (see Appendix A.3). To generate weights for each module in each layer, we employ Equations 1 and 2 as described in Section 3.1, and then aim to reduce the difference between the original pretrained weight "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( W _ { l , m } )"
+          },
+          {
+            "type": "text",
+            "content": "and RECAST-generated weight "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( W _ { l , m } ^ { * } )"
+          },
+          {
+            "type": "text",
+            "content": ". (η is the learning rate): C kl,m,i ← C kl,m,i − η ∂L∂Ckl,m,i ; The main update step uses gradient descent (Algorithm 2 line 9) on the coefficients and templates "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\eta"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { { C _ { l , m , i } ^ { k } } \\gets { C _ { l , m , i } ^ { k } } - \\eta _ { \\frac { \\partial \\mathcal { L } } { \\partial C _ { l , m , i } ^ { k } } ; } { \\mathrm { T } _ { g ( l ) , i } } \\gets \\bar { T } _ { g ( l ) , i } - \\eta _ { \\frac { \\partial \\mathcal { L } } { \\partial T _ { g ( l ) , i } } } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "Tg(l),i ← Tg(l),i − η ∂L∂Tg(l),i . The process can be formulated as the following optimization problem: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        564,
+        826,
+        752
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\min  _ {C, T} \\mathbb {E} _ {\\epsilon \\sim \\mathcal {N} (0, \\sigma^ {2})} \\left[ \\sum_ {l = 1} ^ {L} \\sum_ {m = 1} ^ {M _ {l}} \\mathcal {L} \\left(W _ {l, m} ^ {*} (\\epsilon), W _ {l, m}\\right) \\right] \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c2a9230c072ff067f2eb9d948daedab82756d8e22021db73115486f1a1b17b71.jpg"
+        }
+      },
+      "bbox": [
+        341,
+        760,
+        823,
+        804
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\epsilon = ( \\epsilon _ { 1 } , \\dots , \\epsilon _ { K } )"
+          },
+          {
+            "type": "text",
+            "content": "is a set of K-noise vectors sampled from a Gaussian distribution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\mathcal { N } } ( 0 , \\sigma ^ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\epsilon _ { i } \\in \\mathbb { R } ^ { n \\times 1 \\times \\dots }"
+          },
+          {
+            "type": "text",
+            "content": ". The noise vectors are added with the coefficients only during the reconstruction training process. Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "text",
+            "content": "denotes total layers, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "target modules in layer "
+          },
+          {
+            "type": "equation_inline",
+            "content": "l"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "templates per bank, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": "the weight discrepancy loss. As discussed in Section 4.2, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { L }"
+          },
+          {
+            "type": "text",
+            "content": "should be chosen carefully, and we found Smooth L1 loss to be most effective for generating diversified template. It offers smooth gradients for small differences and stability for larger errors, crucial for stable reconstruction (Figures 5 & 4). This outperforms L2/MSE (sensitive to outliers) and KL divergence (computationally expensive) (See Figures 5 & 6). After reconstruction, we calculate the layerwise "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        811,
+        825,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        946,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "feature similarity between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M ^ { * }"
+          },
+          {
+            "type": "text",
+            "content": "using the cosine similarity metric to evaluate the quality (see Table 6). Overall, this process requires negligible overhead "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\AA < 5"
+          },
+          {
+            "type": "text",
+            "content": "minutes, see Table 5). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        133
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3 PARAMETRIC SCALING STRATEGY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        151,
+        455,
+        165
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RECAST’s design is governed by three parameters: the number of groups "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( G )"
+          },
+          {
+            "type": "text",
+            "content": ", templates per group "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( n )"
+          },
+          {
+            "type": "text",
+            "content": ", and coefficient sets "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( K )"
+          },
+          {
+            "type": "text",
+            "content": ", balancing model expressiveness and efficiency. Increasing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": "improves specialization, while increasing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "increases expressiveness within groups. The parameter-sharing scheme allows "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "to expand weight configurations without significantly increasing parameters. This design achieves substantial memory savings, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbb { S } = L \\times M _ { l } \\times \\bar { d } ^ { 2 } - ( G \\times n \\times d ^ { 2 } + \\bar { L } \\times M _ { l } \\times n \\times K )"
+          },
+          {
+            "type": "text",
+            "content": ". Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "refers to the number of target modules per layer, and we can approximate the savings as: "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbb { S } \\approx L \\times M _ { l } \\times d ^ { 2 } - G \\times n \\times d ^ { 2 } = d ^ { 2 } ( L \\times \\dot { M } _ { l } - \\dot { G } \\times n )"
+          },
+          {
+            "type": "text",
+            "content": ". The savings primarily stem from replacing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L \\times M _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "weight matrices with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G \\times n"
+          },
+          {
+            "type": "text",
+            "content": "templates. In our experiments "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "are calibrated to match the baseline model’s parameter count but can be adjusted for desired compression. Additionally, multiple coefficient sets enable a combinatorially large number of weight matrices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( n ^ { K } )"
+          },
+          {
+            "type": "text",
+            "content": "per module, covering extensive parameter spaces even with small "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": ". The total learnable coefficients are "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\sum _ { l = 1 } ^ { L } M _ { l } \\times n \\times K } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ", providing flexibility in controlling tunable parameters. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        178,
+        826,
+        349
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 EXPERIMENTS AND ANALYSIS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        369,
+        460,
+        386
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Baselines. To evaluate our proposed architecture, we have compared the performance against 16 baselines in total, representing the aforementioned categories of IL strategies. From Regularization approaches, we include EWC (Kirkpatrick et al., 2017), which penalizes changes to critical network parameters, and LwF (Li & Hoiem, 2016), which uses previous model outputs as soft labels. For Replay Methods, we implement GDumb (Prabhu et al., 2020) with a 4400-sample memory buffer, and ECR-ACE (Caccia et al., 2022) and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { D E R + + }"
+          },
+          {
+            "type": "text",
+            "content": "(Buzzega et al., 2020), both using 120 samples per class. Reconfiguration methods are our primary focus as they are most similar to our approach, particularly adapter-based schemes that learn extra task-specific components. Among them, PiggyBack (Mallya et al., 2018) uses binary masking schemes within a fixed architecture, while HAT Serra et al. (2018) learns a soft attention mask. CLR Ge et al. (2023) is a purely adapter-based method, that introduces depthwise separable Ghost modules (Han et al., 2020) after each convolutional layer. We also consider several LoRA-based approaches that apply LoRA to various ViT components (Attention (Zhu et al., 2024) or Fully-connected layers (Chen et al., 2022)). In addition, we compare with InfLoRA (Liang & Li, 2024), which has regularization and reconfiguration components, RoSA (Nikdan et al., 2024), which combines LoRA with sparse adaptation, DoRA (Liu et al., 2024b) that decomposes pretrained weight into magnitude and direction matrices, and a prompt-based adapter technique: L2P (Wang et al., 2022b). Finally, we include finetuned classifier layers as naive baselines. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        402,
+        826,
+        652
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Datasets. Following standard experiment setups in similar works by Aljundi et al. (2019); Ge et al. (2023) we employ six diverse benchmarking datasets covering fine-grained to coarse image classification tasks across various domain including flowers (Nilsback & Zisserman, 2008), scenes (Quattoni & Torralba, 2009), birds (Wah et al., 2011), animals (Krizhevsky & Hinton, 2009), vehicles (Maji et al., 2013), and other man-made objects (Krizhevsky & Hinton, 2009). These datasets capture the diversity and inter-task variance essential for evaluating IL tasks. Images are standardized to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 2 4 \\times 2 2 4"
+          },
+          {
+            "type": "text",
+            "content": "pixels, applying basic transformations and dataset-specific normalization. Additional details are in Appendix A.1 Table 3 . "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        659,
+        823,
+        772
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Metrics. We report Top-1 accuracy averaged over our six datasets. For RECAST, we report the mean and standard deviation averaged over 3 runs. See Appendix Table 4 for per-task performance. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        777,
+        823,
+        806
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Implementation Details. We use both ResNet (He et al., 2016) and Vision Transformer (ViT) (Dosovitskiy et al., 2020) backbones to demonstrate the versatility of our framework as they represent two different branches of image classification architectures (CNN and Transformer). Specifically, we use ResNet-34 and ViT-Small variants for all our methods, both of which have approximately 21 mil. parameters. However, average best performance across the six datasets for larger models is also presented in Figure 3. For fair evaluation, we compare the ResNet dependent baselines, against our RECAST-Resnet models and compare ViT-based baselines against RECAST-ViT model. We trained GDUMB (Prabhu et al., 2020), EWC (Lee et al., 2019), LWF (Li "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        811,
+        826,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/bdf7ebf526ea729815e16080caba7340afb6a9f36b299cec64a302b6e47e92fb.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: TIL accuracy averaged over six datasets using a ResNet-34 comparing non-adapter (top) and adapter methods (bottom). RECAST surpasses non-adapter methods and enhances adapterbased approaches when combined. Parameters: M: model size, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R"
+          },
+          {
+            "type": "text",
+            "content": ": buffer, P: total parameters, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "U"
+          },
+          {
+            "type": "text",
+            "content": ": unit attention mask, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": ": ghost modules Task Parameters and Storage metrics are reported Per Task "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>Task Params</td><td>Storage</td><td>Acc@top1(%)</td></tr><tr><td>ResNet-34 (He et al., 2016)</td><td>0.0</td><td>M</td><td>65.2</td></tr><tr><td>EWC (Lee et al., 2019)</td><td>P + FIM</td><td>M + FIM</td><td>22.1</td></tr><tr><td>LWF (Li &amp; Hoiem, 2016)</td><td>P</td><td>M</td><td>19.3</td></tr><tr><td>GDUMB (Prabhu et al., 2020)</td><td>P</td><td>M + R</td><td>34.8</td></tr><tr><td>ER-ACE (Caccia et al., 2022)</td><td>P</td><td>M + R</td><td>36.1</td></tr><tr><td>DER++ (Buzzega et al., 2020)</td><td>P</td><td>M + R</td><td>16.2</td></tr><tr><td>RECAST (ours)</td><td>3 × 10-6P</td><td>M</td><td>66.3±0.05</td></tr><tr><td>HAT (Serra et al., 2018)</td><td>P</td><td>U</td><td>40.0</td></tr><tr><td>Piggyback (Mallya et al., 2018)</td><td>P</td><td>M</td><td>82.9</td></tr><tr><td>CLR (Ge et al., 2023)</td><td>4 × 10-3P</td><td>M + G</td><td>79.9</td></tr><tr><td>RECAST (ours) + Piggyback</td><td>P</td><td>M</td><td>83.9±0.1</td></tr><tr><td>RECAST (ours) + CLR</td><td>4 × 10-3P</td><td>M + G</td><td>80.9±0.3</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        222,
+        162,
+        777,
+        367
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "& Hoiem, 2016), and L2P (Wang et al., 2022b) using the avalanche library (Carta et al., 2023). Official PyTorch implementations of other methods were modified for TIL settings. We evaluated two RoSA (Nikdan et al., 2024) variants: sparse MLP adaptation and full RoSA (LoRA-based attention). A sparsity of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 0 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "ensured active parameters remained under 150, matching RECAST’s efficiency. LoRA methods used rank "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathord { \\left. \\vert { \\begin{array} { r l } \\end{array} } \\right. } = 1"
+          },
+          {
+            "type": "text",
+            "content": "and task-specific configurations: DoRA (Liu et al., 2024b) (Q,K,V matrices), MeLo (Q,V matrices), and Adaptformer (MLP layers). RECAST, MeLo (Zhu et al., 2024), and AdaptFormer (Chen et al., 2022), RoSA (Nikdan et al., 2024), DoRA (Liu et al., 2024b) used AdamW (Loshchilov & Hutter, 2017) with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 e { - } 3 { - } 5 e { - } 3"
+          },
+          {
+            "type": "text",
+            "content": "learning rates, 1e−6 weight decay, and stepwise LR scheduling (decay by 0.1 every 33 epochs) for 100 epochs. Default hyperparameters were used for avalanche models and methods like HAT (Serra et al., 2018), Piggyback (Mallya et al., 2018), and CLR (Ge et al., 2023), trained for 100 epochs. InfLoRA (Liang & Li, 2024) used class increments of 90 and 10 epochs per task. For RECAST-ViT, we used a group size of 6, 2 templates per bank, and 2 coefficient sets. Integrated models used RECAST as the backbone, with adapter layers modifying features while RECAST generated core layer weights and coefficients adapted per task (See Appendix A.4.2). All experiments were run on a single RTX8000 GPU. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        395,
+        823,
+        604
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 RESULTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        625,
+        277,
+        638
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 1 showcases the performance of different methods using a ResNet-34 backbone. Traditional IL methods such as EWC (Lee et al., 2019) and LWF (Li & Hoiem, 2016) show significant catastrophic forgetting, with performance drops of approximately "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 6 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": "respectively, compared to the baseline ResNet-34. GDUMB (Prabhu et al., 2020), ER-ACE (Caccia et al., 2022), despite utilizing a large memory buffer, only perform slightly better than these traditional methods but still lag significantly behind simple finetuning. HAT (Serra et al., 2018), which learns unit-wise masks over the entire network, achieves further improvement over GDUMB but still lags "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "behind the baseline. This underperformance is likely because HAT was designed to allocate fixed network capacity to each task, struggling with our diverse task suite. In contrast, RECAST improves upon the baseline ResNet-34 by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sim 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", while fine-tuning only "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 0 0 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of the original parameters. This represents a significant efficiency advantage while still delivering performance gains. Among adapter methods, Piggyback (Mallya et al., 2018) and CLR (Ge et al., 2023) show strong performance, exceeding the baseline by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 7 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "respectively. Combined with these methods, RECAST further enhances their effectiveness. RECAST "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "Piggyback achieves "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sim 1 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "improvement over Piggyback alone. Similarly, RECAST "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "CLR also shows a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sim 1 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "gain over standalone CLR. These consistent improvements across different adapter-based approaches demonstrate the versatility and effectiveness of RECAST as a complementary technique. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        652,
+        823,
+        888
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 2 summarizes the results for methods using the ViT-Small (Dosovitskiy et al., 2020) backbone, further emphasizing RECAST’s strong performance. RECAST improves the baseline ViT-Small by "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/b4a74dca3e52374c2127b34ba677cbaa3008afaa7861718924c68948f91d14ed.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: TIL accuracy averaged over six datasets using a ViT-Small comparing non-adapter (top) and adapter methods (bottom). RECAST improves baseline accuracy by 3 points and enhances existing methods "
+          },
+          {
+            "type": "equation_inline",
+            "content": "> 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": ": model parameters, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P"
+          },
+          {
+            "type": "text",
+            "content": ": total parameters, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": ": LoRA rank, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P l"
+          },
+          {
+            "type": "text",
+            "content": ": prompt pool size, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T o"
+          },
+          {
+            "type": "text",
+            "content": ": tokens per prompt, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": ": embedding dimension, SpA : Sparse Adaptation. Task Parameters and Storage metric are reported in a Per Task manner (except L2P and InfLoRA) "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Method</td><td>Task Params</td><td>Storage</td><td>Acc@top1(%)</td></tr><tr><td>ViT-Small (Dosovitskiy et al., 2020)</td><td>0.0</td><td>M</td><td>82.4</td></tr><tr><td>RECAST (ours)</td><td>2 × 10-6P</td><td>M</td><td>85.0±0.1</td></tr><tr><td>L2P (Wang et al., 2022b)</td><td>To * D * Mpool</td><td>M + Pl</td><td>35.9</td></tr><tr><td>InfLoRA (Liang &amp; Li, 2024)</td><td>P + 2 × 10-3P(T-1)</td><td>M</td><td>88.5</td></tr><tr><td>AdaptFormer (Chen et al., 2022)</td><td>6 × 10-4Pr</td><td>M</td><td>89.0</td></tr><tr><td>MeLo (Zhu et al., 2024)</td><td>8 × 10-4Pr</td><td>M</td><td>88.7</td></tr><tr><td>DoRA (Liu et al., 2024b)</td><td>1.9 × 10-3Pr</td><td>M</td><td>89.3</td></tr><tr><td>RoSA (Nikdan et al., 2024)(Full - Att.)</td><td>7 × 10-3Pr</td><td>M</td><td>88.6</td></tr><tr><td>RoSA (Nikdan et al., 2024)(SpA MLP)</td><td>6 × 10-6P</td><td>M</td><td>84.5</td></tr><tr><td>RECAST (ours) + Adaptformer</td><td>6 × 10-4Pr</td><td>M</td><td>90.1±0.2</td></tr><tr><td>RECAST (ours) + MeLo</td><td>8 × 10-4Pr</td><td>M</td><td>89.6±0.2</td></tr><tr><td>RECAST (ours) + RoSA(Full - Att.)</td><td>7 × 10-3Pr</td><td>M</td><td>88.9 ±0.08</td></tr><tr><td>RECAST (ours) + RoSA(SpA MLP)</td><td>6 × 10-6P</td><td>M</td><td>85.4±0.05</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        173,
+        176,
+        826,
+        398
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5a5f1512342c072d91b9d3ee5812a2d341de576a349242ee9cccda7c40f7a8b3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: Averaged best Top-1 accuracy across six datasets for ViT models of varying scales, comparing Baseline, RECAST, and RECAST with Coefficient fine-tuning (FT) approaches. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        406,
+        431,
+        551
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/934ef437ca4d45bf739d82af364ecdd929dae3f72d974f0e38fe6cec4b6244aa.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: Comparing averaged best Top-1 accuracy across six datasets for ViT-Small across various model configurations. We find RECAST excels in ultra-low parameter ranges (24-96) where LoRA struggles. RECAST w/ LoRA improves performance across all parameter ranges, offering complementary advantages. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        450,
+        407,
+        815,
+        551
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "\\sim 3 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", adding only "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 0 0 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "task parameters. This represents a significant enhancement with minimal computational overhead. Adapter and reparameterization methods all show strong performance improvements over the baseline: RoSA (Nikdan et al., 2024) (with SpA MLP) improves by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", while InfLoRA (Liang & Li, 2024), MeLo (Zhu et al., 2024), AdaptFormer (Chen et al., 2022), DoRA (Liu et al., 2024b), and RoSA (Full - Att.) all deliver improvements in the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 . 5 - 8 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "range. However, combining RECAST with these methods yields additional gains. Both RECAST "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "RoSA (SpA MLP) and RECAST "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "AdaptFormer, show a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sim 1 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "gain over standalone RoSA and AdaptFormer alone, and RECAST "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "MeLo achieves a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 . 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": "improvement over MeLo. In contrast, prompting methods like L2P (Wang et al., 2022b), which rely on instance-level prompts, underperform the baseline by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 6 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", struggling to handle diverse domains effectively. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        672,
+        823,
+        813
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 3 reports the performance of using RECAST over a range of architecture sizes including ViT-Small, ViT-Base, and ViT-Large, demonstrating that our approach generalizes. In addition, we also show that our approach generalizes across pretraining datasets by demonstrating our approach an boost performance using a DINO backbone Caron et al. (2021). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        818,
+        823,
+        875
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Comparison of Resource Efficiency. Tables 1 and 2 compare various incremental learning methods for ResNet-34 and ViT-Small backbones, respectively. We see that parameter-free methods (EWC, LWF) maintain minimal storage (only the backbone model parameters) but suffer from per-"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b49381ad9ec1adc10f400d5f4f6edd7f8a0e9f97bac02b9d4230e141d24e81ad.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5: Plot showing average classification accuracy of models reconstructed in different ways. VAE-reconstructed models performed slightly worse than the rest, with Smooth L1 loss providing the best performance "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        114,
+        496,
+        262
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c5bedc7c193e23aafc92da79fe766e32259db9ed44f9def09fcbbde2269dc0ae.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6: Plot showing Diversity (Frobenius Norm) and adaptability measurements (Entropy) of models reconstructed in different ways. VAE models have shallow template diversity and low internal information content "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        517,
+        102,
+        821,
+        273
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "formance degradation as task diversity increases. Rehearsal-based methods (GDUMB, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { D E R + + }"
+          },
+          {
+            "type": "text",
+            "content": "& ER-ACE) and HAT offer improved performance at the cost of increased storage requirements, which may limit scalability for long-term learning. Recent parameter-efficient methods balance performance and resource usage. CLR learns "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 3 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of backbone parameters, requiring backbone storage plus task-specific depthwise modules. InfLoRA trains the full model for the first dataset and only "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "for subsequent tasks. Other LoRA variants train less than "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "per rank. While masking requires training a large number of parameters, both LoRA updates and binary masks (PiggyBack, RoSA Sparse updates) can be mathematically merged to prevent extra storage and communication costs during deployment. Our proposed RECAST method demonstrates unprecedented parameter efficiency, learning only "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 0 0 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of the total backbone parameters while maintaining only the backbone model in storage. When combined with other efficient methods like MeLo or Adaptformer, RECAST achieves state-of-the-art performance "
+          },
+          {
+            "type": "equation_inline",
+            "content": "9 0 . 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "Acc@top1 for ViT-Small) with the base storage requirement. This reveals that RECAST not only enhances existing adapter methods but does so in ways that are complementary to their strengths. The impact is delineated clearly in Figure 4, in a range of taskwise parameter counts. It compares three adaptation approaches using ViT-Small backbone "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 2 . 4 \\%"
+          },
+          {
+            "type": "text",
+            "content": "baseline). Traditional LoRA adaptation (blue) becomes effective only above 464 parameters/task. RECAST (orange) achieves consistent "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "accuracy with just 24-96 parameters, showing marginal improvement beyond this range. The combined RECAST+LoRA (red) peaks at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "91 \\%"
+          },
+          {
+            "type": "text",
+            "content": "accuracy, outperforming across all parameter ranges, including areas where LoRA alone falters. To scale traditional LoRA implementations to a negligibly small "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( < 1 5 0 )"
+          },
+          {
+            "type": "text",
+            "content": "parameters, we utilized three techniques: (1) lowering LoRA rank, (2) sharing LoRA matrices across layers, and (3) binary masking for pruning. The figure reveals that RECAST can be used effectively in parameter ranges where other reparameterization methods might struggle. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        382,
+        826,
+        702
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 MODEL ANALYSIS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        722,
+        344,
+        734
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "How does the number of coefficients impact performance? We analyze the effect of hyperparameters G, n, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "(Subsection 3.3) through two experiments. First, we vary "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "while keeping "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K = 1"
+          },
+          {
+            "type": "text",
+            "content": ", adjusting "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": "to maintain constant parameters "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { ( \\dot { G } \\propto \\frac { 1 } { n } ) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "), comparing three sharing schemes: Low (two-layer sharing), Balanced (four-layer sharing), and Extreme (all-layer sharing). Results are shown in Figure 7. Second, we fix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "G"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "while varying "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "(since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "| C | \\propto K )"
+          },
+          {
+            "type": "text",
+            "content": "as depicted in Figure 8. Both experiments use RECAST on MLP and Attention layers of a small ViT model, with marker sizes indicating relative coefficient sizes. Results reveal that adjusting template numbers and sharing schemes has a greater impact than linearly increasing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": ", emphasizing the importance of template diversity and specificity for task adaptation. Additional linear combinations show diminishing returns once sufficient coefficients are available (see the orange line in Figure 4). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        750,
+        823,
+        888
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Where do we apply RECAST? RECAST is applicable to various layers or modules (Appendix A.4.1), with notable insights highlighted in Figures 7 and 8. These figures illustrate the "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bc3ecbdd555d7ee65a35727e0cf94af570cef8a54fb2db447d458ba7e33d34e5.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7: Increasing template numbers (layers in a group) enhances coefficient count and template sharing across the architecture. Low sharing uses "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\scriptstyle \\mathrm { G } = 6"
+          },
+          {
+            "type": "text",
+            "content": ", Balanced "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { G } = 3"
+          },
+          {
+            "type": "text",
+            "content": ", and Extreme "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { G } { = } 1"
+          },
+          {
+            "type": "text",
+            "content": "(one template bank shared by all network layers). The last setting delivers significant performance improvements. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        104,
+        470,
+        275
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/02d0f58af584466c2a46df1dcc3a2cc3f28904d5cfc9b8e03340ae0df89f748e.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 8: Comparing the strategies of changing coefficients. The size of the markers corresponds to the relative number of coefficients. The impact of increasing coefficients by varying the number of coefficient sets "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": ", is much less prominent than changing it through grouping schemes. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        516,
+        104,
+        815,
+        275
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "differing performance boosts when applying the method to attention layers versus MLP layers. MLP layers, though simpler, have more parameters that may introduce redundancy, making them more amenable to sharing. In contrast, attention layers are complex, involving multiple computational steps to model relationships between input parts rather than directly transforming representations. This complexity leads to a challenging optimization space, hindering effective template sharing and reparameterization. Figure 4 confirms this pattern, showing performance spikes when smaller LoRA matrices target MLP layers (Chen et al., 2022) rather than attention mechanisms (Zhu et al., 2024). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        406,
+        826,
+        505
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "What is the best way to reconstruct weights? Section 3.2 described the weight reconstruction methodology for RECAST. Earlier we noted that model expressivity depends more on template bank diversity. To investigate this, we generated five models with the same configurations (6 groups, 2 layers each), varying the reconstruction objective: 1) SmoothL1 loss, 2) MSE loss, 3) SmoothL1 loss with coefficient noise, 4) VAE with MSE loss, and 5) VAE with SmoothL1 loss. All models achieved at least "
+          },
+          {
+            "type": "equation_inline",
+            "content": "9 8 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "reconstruction similarity (Appendix Table 6). Figure 5 shows that SmoothL1 loss (with or without perturbation) provides the most benefit during reparameterization & VAE models provide the least. To understand this, we calculated template diversity within groups using Frobenius Norm (diversity metric) and Entropy (versatility metric) (See Appendix A.3) Just like their classification performance, SmoothL1 loss shows roughly similar internal patterns with or without noise. The high Frobenius norm for Neural Mimicry (Algorithm 2) with SmoothL1 loss indicates greater template diversity than the rest of the approaches. MSE models showed slightly lower Frobenius norms but higher entropy, suggesting templates are versatile and not overly dependent on dominant components. In contrast, VAEs showed shallow template diversity, limiting adaptability, and lower entropy, indicating reduced versatility. Figure 10 (Appendix A.3) illustrates higher intra-group coefficient similarity in VAE-based models, suggesting multiple layers perform similar operations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        510,
+        826,
+        734
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 CONCLUSION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        753,
+        320,
+        768
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RECAST represents a significant advancement in neural network architecture design, addressing the challenge of optimizing parameter efficiency while maintaining model expressivity. By decomposing network layers into templates and coefficients, it facilitates dynamic, task-specific weight generation with a reduced parameter footprint. Our comprehensive evaluations demonstrate RE-CAST’s efficacy across diverse image classification tasks and vision architectures. Based on our model analysis, future research directions may include enhancing model diversity and coefficient versatility, exploring applications beyond computer vision, and investigating alternative approaches for reconstructing novel parameters to overcome the limitations of existing pretrained weights. Additionally, further research is necessary to elucidate the relationship between model complexity and performance, particularly in the context of model compression techniques. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        784,
+        826,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        509,
+        960
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Acknowledgments This material is based upon work supported, in part, by DARPA under agreement number HR00112020054. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the supporting agencies. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        161
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 ETHICS STATEMENT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        180,
+        375,
+        195
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "While our work on efficient reparameterization aims to improve model robustness and adaptability, we acknowledge the potential ethical implications of such advancements. First, the incremental learning capabilities enabled by our approach could be beneficial in scenarios like robotics, where systems need to constantly adapt to new categories or environments, as well as provide potential benefits in terms of environmental sustainability by reducing computational footprint. While we intend to democratize access to powerful AI models, we recognize that easier deployment of these models could also lower barriers to potential misuse, such as in surveillance applications that could infringe on privacy rights. Additionally, as with any machine learning model, there are inherent biases and limitations in the training data and model architecture that users should be aware of. As we reconstruct from existing weights, our reconstructed pretrained weights also likely inherits the implicit biases in those existing weights. Thus, we caution against over-reliance on model predictions without human oversight, especially in high-stakes decision-making processes. As researchers, we emphasize the importance of responsible development and deployment of AI technologies, and we encourage ongoing discussions about the ethical use of incremental learning and efficient deep learning models in various applications. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        210,
+        826,
+        420
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "7 REPRODUCIBILITY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        440,
+        362,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To ensure the reproducibility of our work, we have taken several key steps. The implementation details of our custom ResNet and Vision Transformer architectures are fully described in the main text, with complete code provided in the supplementary materials. We have also provided the full codes for our framework integrated with other adapter and reparameterization methods we have discussed in the main text. Our reconstruction scripts for both ResNet and ViT models, including the loss functions and training procedures, are also included in the supplementary material. We have specified all hyperparameters, including learning rates, scheduling, and template bank configurations. The base models used for comparison (ResNet34 and ViT-Small) are from widely available libraries (torchvision and timm), ensuring consistent baselines. All experiments were conducted using PyTorch, with specific versions and dependencies listed in the supplementary materials. We have also included our data preprocessing steps and evaluation metrics to facilitate accurate replication of our results. The supplementary material also includes descriptions of how to use the codebase to both reproduce our results, as well as to extend or use by users in a plug-and-play manner. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        470,
+        826,
+        652
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "REFERENCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        672,
+        287,
+        686
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Rahaf Aljundi, Francesca Babiloni, Mohamed Elhoseiny, Marcus Rohrbach, and Tinne Tuytelaars. Memory aware synapses: Learning what (not) to forget. In Computer Vision – ECCV 2018: 15th European Conference, Munich, Germany, September 8–14, 2018, Proceedings, Part III, pp. 144–161, Berlin, Heidelberg, 2018. Springer-Verlag. ISBN 978-3-030-01218-2. doi: 10.1007/ 978-3-030-01219-9 9. URL https://doi.org/10.1007/978-3-030-01219-9_9. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Rahaf Aljundi, Min Lin, Baptiste Goujaud, and Yoshua Bengio. Gradient based sample selection for online continual learning. In H. Wallach, H. Larochelle, A. Beygelzimer, F. d'Alche-Buc, E. Fox, ´ and R. Garnett (eds.), Advances in Neural Information Processing Systems, volume 32. Curran Associates, Inc., 2019. URL https://proceedings.neurips.cc/paper_files/ paper/2019/file/e562cd9c0768d5464b64cf61da7fc6bb-Paper.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Maor Ashkenazi, Zohar Rimon, Ron Vainshtein, Shir Levi, Elad Richardson, Pinchas Mintz, and Eran Treister. Nern - learning neural representations for neural networks. In -, January 2023. Publisher Copyright: "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\circledcirc"
+              },
+              {
+                "type": "text",
+                "content": "2023 11th International Conference on Learning Representations, ICLR 2023. All rights reserved.; 11th International Conference on Learning Representations, ICLR 2023 ; Conference date: 01-05-2023 Through 05-05-2023. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        695,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        490,
+        948,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pietro Buzzega, Matteo Boschini, Angelo Porrello, Davide Abati, and Simone Calderara. Dark experience for general continual learning: a strong, simple baseline. In Proceedings of the 34th International Conference on Neural Information Processing Systems, NIPS ’20, Red Hook, NY, USA, 2020. Curran Associates Inc. ISBN 9781713829546. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lucas Caccia, Eugene Belilovsky, Massimo Caccia, and Joelle Pineau. Online learned continual compression with adaptive quantization modules. Proceedings of the 37th International Conference on Machine Learning, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lucas Caccia, Rahaf Aljundi, Nader Asadi, Tinne Tuytelaars, Joelle Pineau, and Eugene Belilovsky. New insights on reducing abrupt representation change in online continual learning. In ICLR, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Mathilde Caron, Hugo Touvron, Ishan Misra, Herve J ´ egou, Julien Mairal, Piotr Bojanowski, and ´ Armand Joulin. Emerging properties in self-supervised vision transformers. In Proceedings of the International Conference on Computer Vision (ICCV), 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Antonio Carta, Lorenzo Pellegrini, Andrea Cossu, Hamed Hemati, and Vincenzo Lomonaco. Avalanche: A pytorch library for deep continual learning. Journal of Machine Learning Research, 24(363):1–6, 2023. URL http://jmlr.org/papers/v24/23-0130.html. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arslan Chaudhry, Marc’Aurelio Ranzato, Marcus Rohrbach, and Mohamed Elhoseiny. Efficient lifelong learning with a-gem. In ICLR, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arslan Chaudhry, Albert Gordo, Puneet K Dokania, Philip HS Torr, and David Lopez-Paz. Using hindsight to anchor past knowledge in continual learning. In AAAI, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Shoufa Chen, Chongjian Ge, Zhan Tong, Jiangliu Wang, Yibing Song, Jue Wang, and Ping Luo. Adaptformer: adapting vision transformers for scalable visual recognition. In Proceedings of the 36th International Conference on Neural Information Processing Systems, NIPS ’22, Red Hook, NY, USA, 2022. Curran Associates Inc. ISBN 9781713871088. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE Conference on Computer Vision and Pattern Recognition, pp. 248–255, 2009. doi: 10.1109/CVPR.2009.5206848. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby. An image is worth 16x16 words: Transformers for image recognition at scale. CoRR, abs/2010.11929, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arthur Douillard, Alexandre Rame, Guillaume Couairon, and Matthieu Cord. Dytox: Transformers ´ for continual learning with dynamic token expansion. In 2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 9275–9285, 2022. doi: 10.1109/CVPR52688. 2022.00907. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ziya Erkoc¸, Fangchang Ma, Qi Shan, Matthias Nießner, and Angela Dai. Hyperdiffusion: Generating implicit neural fields with weight-space diffusion. 2023 IEEE/CVF International Conference on Computer Vision (ICCV), pp. 14254–14264, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "R. M. French. Catastrophic forgetting in connectionist networks. Trends in Cognitive Sciences, 3: 128–135, 1999. doi: 10.1016/s1364-6613(99)01294-2. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yunhao Ge, Yuecheng Li, Shuo Ni, Jiaping Zhao, Ming-Hsuan Yang, and Laurent Itti. Clr: Channelwise lightweight reprogramming for continual learning. In 2023 IEEE/CVF International Conference on Computer Vision (ICCV), pp. 18752–18762, 2023. doi: 10.1109/ICCV51070.2023. 01723. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "S. Grossberg. Studies of mind and brain. Boston Studies in the Philosophy of Science, 1982. doi: 10.1007/978-94-009-7758-7. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "David Ha, Andrew M. Dai, and Quoc V. Le. Hypernetworks. In 5th International Conference on Learning Representations, ICLR 2017, Toulon, France, April 24-26, 2017, Conference Track Proceedings, 2017. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        826,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kai Han, Yunhe Wang, Qi Tian, Jianyuan Guo, Chunjing Xu, and Chang Xu. Ghostnet: More features from cheap operations. In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 1577–1586, 2020. doi: 10.1109/CVPR42600.2020.00165. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 770–778, 2016. doi: 10.1109/CVPR.2016.90. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. LoRA: Low-rank adaptation of large language models. In International Conference on Learning Representations, 2022. URL https://openreview.net/forum? id=nZeVKeeFYf9. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Steven C. Y. Hung, Cheng-Hao Tu, Cheng-En Wu, Chien-Hung Chen, Yi-Ming Chan, and Chu-Song Chen. Compacting, picking and growing for unforgetting continual learning, pp. 11. Curran Associates Inc., Red Hook, NY, USA, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hyundong Jin and Eunwoo Kim. Helpful or harmful: Inter-task association in continual learning. In European Conference on Computer Vision, pp. 519–535. Springer, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chris Dongjoo Kim, Jinseo Jeong, Sangwoo Moon, and Gunhee Kim. Continual learning on noisy data streams via self-purified replay. In 2021 IEEE/CVF International Conference on Computer Vision (ICCV), pp. 517–527, 2021. doi: 10.1109/ICCV48922.2021.00058. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Kirkpatrick, R. Pascanu, N. C. Rabinowitz, J. Veness, G. Desjardins, A. Rusu, K. Milan, J. Quan, T. Ramalho, A. Grabska-Barwinska, D. Hassabis, C. Clopath, D. Kumaran, and R. Hadsell. Over- ´ coming catastrophic forgetting in neural networks. Proceedings of the National Academy of Sciences, 114:3521–3526, 2017. doi: 10.1073/pnas.1611835114. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "A. Krizhevsky and G. Hinton. Learning multiple layers of features from tiny images. Master’s thesis, Department of Computer Science, University of Toronto, 2009. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "K. Lee, K. Lee, J. Shin, and H. Lee. Overcoming catastrophic forgetting with unlabeled data in the wild. 2019 IEEE/CVF International Conference on Computer Vision (ICCV), 2019. doi: 10.1109/iccv.2019.00040. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Z. Li and D. Hoiem. Learning without forgetting. Lecture Notes in Computer Science, pp. 614–629, 2016. doi: 10.1007/978-3-319-46493-0 37. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yan-Shuo Liang and Wu-Jun Li. Inflora: Interference-free low-rank adaptation for continual learning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 23638–23647, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Shih-Yang Liu, Chien-Yi Wang, Hongxu Yin, Pavlo Molchanov, Yu-Chiang Frank Wang, Kwang-Ting Cheng, and Min-Hung Chen. Dora: weight-decomposed low-rank adaptation. In Proceedings of the 41st International Conference on Machine Learning, ICML’24. JMLR.org, 2024a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Shih-Yang Liu, Chien-Yi Wang, Hongxu Yin, Pavlo Molchanov, Yu-Chiang Frank Wang, Kwang-Ting Cheng, and Min-Hung Chen. DoRA: Weight-decomposed low-rank adaptation. In Ruslan Salakhutdinov, Zico Kolter, Katherine Heller, Adrian Weller, Nuria Oliver, Jonathan Scarlett, and Felix Berkenkamp (eds.), Proceedings of the 41st International Conference on Machine Learning, volume 235 of Proceedings of Machine Learning Research, pp. 32100–32121. PMLR, 21–27 Jul 2024b. URL https://proceedings.mlr.press/v235/liu24bn.html. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ilya Loshchilov and Frank Hutter. Fixing weight decay regularization in adam. CoRR, abs/1711.05101, 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "S. Maji, J. Kannala, E. Rahtu, M. Blaschko, and A. Vedaldi. Fine-grained visual classification of aircraft. -, 2013. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arun Mallya, Dillon Davis, and Svetlana Lazebnik. Piggyback: Adapting a single network to multiple tasks by learning to mask weights. In Computer Vision – ECCV 2018: 15th European Conference, Munich, Germany, September 8-14, 2018, Proceedings, Part IV, pp. 72–88, Berlin, Heidelberg, 2018. Springer-Verlag. ISBN 978-3-030-01224-3. doi: 10.1007/978-3-030-01225-0 5. URL https://doi.org/10.1007/978-3-030-01225-0_5. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Michael McCloskey and Neal J. Cohen. Catastrophic interference in connectionist networks: The sequential learning problem. In Gordon H. Bower (ed.), -, volume 24 of Psychology of Learning and Motivation, pp. 109–165. Academic Press, 1989. doi: https://doi.org/10. 1016/S0079-7421(08)60536-8. URL https://www.sciencedirect.com/science/ article/pii/S0079742108605368. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jorge A Mendez and Eric Eaton. Lifelong learning of compositional structures. In International Conference on Learning Representations, 2021. URL https://openreview.net/forum? id=ADWd4TJO13G. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Cuong V. Nguyen, Yingzhen Li, Thang D. Bui, and Richard E. Turner. Variational continual learning. In International Conference on Learning Representations, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Mahdi Nikdan, Soroush Tabesh, Elvir Crncevi ˇ c, and Dan Alistarh. RoSA: Accurate parameter- ´ efficient fine-tuning via robust adaptation. In Ruslan Salakhutdinov, Zico Kolter, Katherine Heller, Adrian Weller, Nuria Oliver, Jonathan Scarlett, and Felix Berkenkamp (eds.), Proceedings of the 41st International Conference on Machine Learning, volume 235 of Proceedings of Machine Learning Research, pp. 38187–38206. PMLR, 21–27 Jul 2024. URL https: //proceedings.mlr.press/v235/nikdan24a.html. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Maria-Elena Nilsback and Andrew Zisserman. Automated flower classification over a large number of classes. In Indian Conference on Computer Vision, Graphics and Image Processing, Dec 2008. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Oleksiy Ostapenko, Pau Rodr´ıguez, Massimo Caccia, and Laurent Charlin. Continual learning via local module composition. In Proceedings of the 35th International Conference on Neural Information Processing Systems, NIPS ’21, Red Hook, NY, USA, 2021. Curran Associates Inc. ISBN 9781713845393. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Shreyas Malakarjun Patil, Loizos Michael, and Constantine Dovrolis. Neural sculpting: uncovering hierarchically modular task structure in neural networks through pruning and network analysis. In Proceedings of the 37th International Conference on Neural Information Processing Systems, NIPS ’23, Red Hook, NY, USA, 2023. Curran Associates Inc. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bryan A. Plummer, Nikoli Dryden, Julius Frost, Torsten Hoefler, and Kate Saenko. Neural parameter allocation search. In International Conference on Learning Representations, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "A. Prabhu, P. H. S. Torr, and P. K. Dokania. Gdumb: a simple approach that questions our progress in continual learning. Computer Vision – ECCV 2020, pp. 524–540, 2020. doi: 10.1007/978-3-030-58536-5 31. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ariadna Quattoni and Antonio Torralba. Recognizing indoor scenes. In 2009 IEEE Conference on Computer Vision and Pattern Recognition, pp. 413–420, 2009. doi: 10.1109/CVPR.2009. 5206537. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sylvestre-Alvise Rebuffi, Alexander Kolesnikov, Georg Sperl, and Christoph H. Lampert. icarl: Incremental classifier and representation learning. In 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5533–5542, 2017. doi: 10.1109/CVPR.2017.587. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "E. Rusu, O. Makarynskyy, A. Gavrilov, and D. Makarynska. Filling gaps in wave records with artificial neural networks. Maritime Transportation and Exploitation of Ocean and Coastal Resources, pp. 1085–1091, 2006. doi: 10.1201/9781439833728.ch131. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tim Salimans and Diederik P. Kingma. Weight normalization: a simple reparameterization to accelerate training of deep neural networks. In Proceedings of the 30th International Conference on Neural Information Processing Systems, NIPS’16, pp. 901–909, Red Hook, NY, USA, 2016. Curran Associates Inc. ISBN 9781510838819. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pedro Savarese and Michael Maire. Learning implicitly recurrent CNNs through parameter sharing. In International Conference on Learning Representations, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Joan Serra, Didac Suris, Marius Miron, and Alexandros Karatzoglou. Overcoming catastrophic forgetting with hard attention to the task. In Jennifer Dy and Andreas Krause (eds.), Proceedings of the 35th International Conference on Machine Learning, volume 80 of Proceedings of Machine Learning Research, pp. 4548–4557. PMLR, 10–15 Jul 2018. URL https://proceedings. mlr.press/v80/serra18a.html. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        826,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hanul Shin, Jung Kwon Lee, Jaehong Kim, and Jiwon Kim. Continual learning with deep generative replay. In Proceedings of the 31st International Conference on Neural Information Processing Systems, NIPS’17, pp. 2994–3003, Red Hook, NY, USA, 2017. Curran Associates Inc. ISBN 9781510860964. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chongjie Si, Xiaokang Yang, and Wei Shen. See further for parameter efficient fine-tuning by standing on the shoulders of decomposition. arXiv preprint arXiv:2407.05417, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pravendra Singh, Vinay Kumar Verma, Pratik Mazumder, Lawrence Carin, and Piyush Rai. Calibrating cnns for lifelong learning. In H. Larochelle, M. Ranzato, R. Hadsell, M.F. Balcan, and H. Lin (eds.), Advances in Neural Information Processing Systems, volume 33, pp. 15579–15590. Curran Associates, Inc., 2020. URL https://proceedings.neurips.cc/paper_files/ paper/2020/file/b3b43aeeacb258365cc69cdaf42a68af-Paper.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tom Veniat, Ludovic Denoyer, and Marc’Aurelio Ranzato. Efficient continual learning with modular networks and task-driven priors. CoRR, abs/2012.12631, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "V. K. Verma, K. J. Liang, N. Mehta, P. Rai, and L. Carin. Efficient feature transformations for discriminative and generative continual learning. 2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2021. doi: 10.1109/cvpr46437.2021.01365. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "C. Wah, S. Branson, P. Welinder, P. Perona, and S. Belongie. The caltech-ucsd birds-200-2011 dataset. Technical Report CNS-TR-2011-001, California Institute of Technology, 2011. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kaili Wang, Zhaopan Xu, Yukun Zhou, Zelin Zang, Trevor Darrell, Zhuang Liu, and Yang You. Neural network parameter diffusion. In -, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yabin Wang, Zhiwu Huang, and Xiaopeng Hong. S-prompts learning with pre-trained transformers: An occam’s razor for domain incremental learning. In Conference on Neural Information Processing Systems (NeurIPS), 2022a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zifeng Wang, Zizhao Zhang, Chen-Yu Lee, Han Zhang, Ruoxi Sun, Xiaoqi Ren, Guolong Su, Vincent Perot, Jennifer Dy, and Tomas Pfister. Learning to prompt for continual learning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 139–149, 2022b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ross Wightman. Pytorch image models. https://github.com/rwightman/ pytorch-image-models, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jaehong Yoon, Eunho Yang, Jeongtae Lee, and Sung Ju Hwang. Lifelong learning with dynamically expandable networks. In -. ICLR, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Baoquan Zhang, Chuyao Luo, Demin Yu, Xutao Li, Huiwei Lin, Yunming Ye, and Bowen Zhang. Metadiff: Meta-learning with conditional diffusion for few-shot learning. Proceedings of the AAAI Conference on Artificial Intelligence, 38(15):16687–16695, Mar. 2024. doi: 10.1609/aaai. v38i15.29608. URL https://ojs.aaai.org/index.php/AAAI/article/view/ 29608. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Zhang, J. Zhang, S. Ghosh, D. Li, S. Tasci, L. Heck, H. Zhang, and C. J. Kuo. Class-incremental learning via deep model consolidation. 2020 IEEE Winter Conference on Applications of Computer Vision (WACV), 2020. doi: 10.1109/wacv45572.2020.9093365. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bolei Zhou, Yiyou Sun, David Bau, and Antonio Torralba. Interpretable basis decomposition for visual explanation. In Proceedings of the European Conference on Computer Vision (ECCV), September 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yitao Zhu, Zhenrong Shen, Zihao Zhao, Sheng Wang, Xin Wang, Xiangyu Zhao, Dinggang Shen, and Qian Wang. Melo: Low-rank adaptation is better than fine-tuning for medical image diagnosis. In 2024 IEEE International Symposium on Biomedical Imaging (ISBI), pp. 1–5, 2024. doi: 10.1109/ISBI56570.2024.10635615. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        102,
+        826,
+        917
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        948,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A APPENDIX "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        102,
+        299,
+        118
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1 DATASET "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        133,
+        284,
+        148
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Table 3 we have summarized the class variations and number of samples for the six datasets we have used in our TIL experiments. All the datasets were split with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 5 \\% - 1 5 \\% - 1 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "train-validationtest split. Simple augmentations like resizing, centercropping, horizontal flips, and normalization have been applied for each. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        162,
+        826,
+        219
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/bc6448cb2cc37158665d2377680b271044f86c36fe862969959d184800e345aa.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Details on the Benchmarking Datasets "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Classes</td><td>#Sample</td></tr><tr><td>Oxford Flowers (Nilsback &amp; Zisserman, 2008)</td><td>102</td><td>6553</td></tr><tr><td>FGVC Aircracts (Maji et al., 2013)</td><td>55</td><td>10001</td></tr><tr><td>MIT Scenes (Quattoni &amp; Torralba, 2009)</td><td>67</td><td>15614</td></tr><tr><td>CIFAR100 (Krizhevsky &amp; Hinton, 2009)</td><td>100</td><td>60000</td></tr><tr><td>CIFAR10 (Krizhevsky &amp; Hinton, 2009)</td><td>10</td><td>60000</td></tr><tr><td>CUBs (Wah et al., 2011)</td><td>200</td><td>11789</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        261,
+        258,
+        736,
+        375
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2 TASKWISE PERFORMANCE BREAKDOWN "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        410,
+        501,
+        424
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Impact of Task-order The sensitivity to task ordering varies significantly across different incremental learning approaches. Methods that rely on knowledge distillation or parameter importance estimation, such as LwF and EWC, exhibit cumulative degradation as knowledge gets diluted across sequential tasks. In particular, LwF’s distillation-based approach becomes less effective for later tasks as the knowledge transfer chain grows longer. EWC’s reliance on Fisher Information Matrix to protect earlier tasks’ parameters can lead to representation bias, where earlier tasks disproportionately influence the learned feature space. Rehearsal-based methods like GDUMB and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { D E R + + }"
+          },
+          {
+            "type": "text",
+            "content": "face challenges in maintaining balanced representative memory buffers across tasks, though sample selection strategies help mitigate but don’t eliminate these order effects. Even masked-based approaches like HAT, despite maintaining unit-wise masks over the entire model, show order sensitivity due to the constrained mask allocation being influenced by earlier tasks. In contrast, both RECAST and several adapter-based baselines (AdaptFormer, MeLo, RoSA, DoRA) maintain absolute parameter inference through strict parameter isolation. As shown in Table 4, these methods achieve consistent performance across tasks, with no significant degradation in earlier task performance as new tasks are learned. For instance, RECAST "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ +"
+          },
+          {
+            "type": "text",
+            "content": "AdaptFormer maintains high accuracy across all domains "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( 9 9 . 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on Flowers, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 4 . 7 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on Aircraft, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 7 . 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "on Scene), demonstrating that task-specific parameters can effectively adapt while the shared feature space remains stable. This architectural design choice effectively eliminates task interference, as each task’s performance remains stable once learned, regardless of the order in which subsequent tasks are introduced. The empirical results suggest that methods employing strict parameter isolation are inherently robust to task ordering effects compared to approaches that modify shared parameters or rely on knowledge transfer between tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        436,
+        826,
+        743
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3 RECONSTRUCTION ANALYSIS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        762,
+        426,
+        776
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Pre-trained Model Details We obtained the ViT and DiNO pretrained weights from the official timm repository Wightman (2019). Resnet weights are obtained from Pytorch Hub. The specific models and their corresponding weight URLs are: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        787,
+        825,
+        832
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• ResNet-34: https://download.pytorch.org/models/ resnet34-b627a593.pth "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• ViT-Small: https://storage.googleapis.com/vit_models/augreg/ S_16-i21k-300ep-lr_0.001-aug_light1-wd_0.03-do_0.0-sd_0. 0--imagenet2012-steps_20k-lr_0.03-res_224.npz "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        845,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        948,
+        509,
+        960
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• ViT-Base: https://storage.googleapis.com/vit_models/augreg/ B_16-i21k-300ep-lr_0.001-aug_medium1-wd_0.1-do_0.0-sd_0. 0--imagenet2012-steps_20k-lr_0.01-res_224.npz "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• ViT-Large: https://storage.googleapis.com/vit_models/augreg/ L_16-i21k-300ep-lr_0.001-aug_medium1-wd_0.1-do_0.1-sd_0. 1--imagenet2012-steps_20k-lr_0.01-res_224.npz "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• DiNO-Small Caron et al. (2021): https://dl.fbaipublicfiles.com/dino/ dino_deitsmall16_pretrain/dino_deitsmall16_pretrain.pth "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        103,
+        823,
+        233
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/33fba2928764cd8ca1c4efd0167858a2a43331864f32dce3679603772f38affe.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Model Performance Comparison Across Different Datasets. For InfLoRA the 6 tasks are generated by taking a chunk of 90 classes from the combined dataset - so, the classification result doesn’t exactly correspond to each dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model Type</td><td>Flowers</td><td>Aircraft</td><td>Scene</td><td>CIFAR100</td><td>CIFAR10</td><td>Birds</td></tr><tr><td>Small ViT</td><td>97.4</td><td>66.6</td><td>82.6</td><td>72.5</td><td>94.9</td><td>81.1</td></tr><tr><td>L2P</td><td>0.4</td><td>5.7</td><td>0.8</td><td>56.4</td><td>75.0</td><td>77.6</td></tr><tr><td>InfLoRA</td><td>99.8</td><td>89.0</td><td>88.2</td><td>84.8</td><td>84.6</td><td>84.5</td></tr><tr><td>AdaptFormer</td><td>99.2</td><td>79.6</td><td>85.7</td><td>87.6</td><td>98.1</td><td>84.3</td></tr><tr><td>MeLO</td><td>99.0</td><td>84.2</td><td>84.0</td><td>87.3</td><td>98.1</td><td>80.0</td></tr><tr><td>Rosa (Sparse MLP 0.001%)</td><td>97.6</td><td>69.1</td><td>84.1</td><td>78.9</td><td>96.2</td><td>81.6</td></tr><tr><td>RoSA Full</td><td>99.4</td><td>79.1</td><td>85.2</td><td>87.4</td><td>97.9</td><td>82.6</td></tr><tr><td>DoRA</td><td>99.02</td><td>86.4</td><td>84.7</td><td>87.6</td><td>98.2</td><td>80.0</td></tr><tr><td>RECAST (Small ViT)</td><td>98.6</td><td>72.5</td><td>84.3</td><td>79.1</td><td>95.7</td><td>80.5</td></tr><tr><td>RECAST + AdaptFormer</td><td>99.2</td><td>84.7</td><td>87.1</td><td>88.8</td><td>98.3</td><td>84.4</td></tr><tr><td>RECAST + MeLO</td><td>99.4</td><td>86.3</td><td>84.3</td><td>87.1</td><td>97.9</td><td>81.0</td></tr><tr><td>RECAST (Sparse MLP 0.001%)</td><td>98.4</td><td>72.9</td><td>83.9</td><td>80.0</td><td>96.3</td><td>81.0</td></tr><tr><td>RECAST + RoSA Full</td><td>99.2</td><td>81.9</td><td>84.7</td><td>87.5</td><td>97.9</td><td>82.4</td></tr><tr><td>Resnet34</td><td>87.6</td><td>51.9</td><td>66.9</td><td>59.8</td><td>83.0</td><td>42.0</td></tr><tr><td>EWC</td><td>2.6</td><td>12.1</td><td>9.0</td><td>1.7</td><td>42.2</td><td>65.4</td></tr><tr><td>LWF</td><td>1.4</td><td>23.1</td><td>5.6</td><td>1.7</td><td>41.1</td><td>42.9</td></tr><tr><td>GDUMB</td><td>38.9</td><td>25.6</td><td>33.2</td><td>4.5</td><td>69.7</td><td>36.9</td></tr><tr><td>DER++</td><td>1.3</td><td>12.5</td><td>26.1</td><td>53.9</td><td>0.7</td><td>2.5</td></tr><tr><td>HAT</td><td>49.1</td><td>71.9</td><td>46.5</td><td>9.9</td><td>30.6</td><td>39.8</td></tr><tr><td>PiggyBack</td><td>93.9</td><td>85.4</td><td>74.4</td><td>82.6</td><td>96.6</td><td>65.0</td></tr><tr><td>CLR</td><td>93.9</td><td>83.3</td><td>73.3</td><td>75.9</td><td>94.3</td><td>59.0</td></tr><tr><td>RECAST (Resnet34)</td><td>89.8</td><td>52.7</td><td>65.8</td><td>61.4</td><td>83.8</td><td>44.2</td></tr><tr><td>RECAST + PiggyBack</td><td>95.7</td><td>87.3</td><td>77.0</td><td>81.7</td><td>96.3</td><td>66.3</td></tr><tr><td>RECAST + CLR</td><td>94.7</td><td>83.7</td><td>72.1</td><td>77.4</td><td>95.6</td><td>62.1</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        173,
+        311,
+        839,
+        676
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/2558f1496279490ddb3d89df2c4ba4e3a259ac40e2ae923e731673172c64bf37.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5: Required runtime and hardware utilization to run Neural Mimicry (Section 3.2) "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model Scale</td><td>Peak GPU Memory (GB)</td><td>Average CPU Utilization</td><td>Per Epoch Processing (ms)</td><td>Total Epochs</td><td>Wall Clock Time (seconds)</td></tr><tr><td>ViT Small (≈ 21M)</td><td>0.3</td><td>3.7%</td><td>36.2</td><td>1000</td><td>37.4</td></tr><tr><td>ViT Base (≈ 86M)</td><td>1.2</td><td>3.7%</td><td>112</td><td>1000</td><td>102.3</td></tr><tr><td>ViT Large (≈ 304M)</td><td>4.5</td><td>3.7%</td><td>340</td><td>1000</td><td>245.0</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        173,
+        738,
+        870,
+        825
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Resource Requirements The results in Table 5 demonstrate that Neural Mimicry has a modest memory footprint (0.33-4.5GB GPU memory) with minimal CPU overhead "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( 3 . 7 \\% )"
+          },
+          {
+            "type": "text",
+            "content": ". It also linearly scales with model size. Furthermore, the complete reconstruction is completed in minutes even for large models. Notably, this step achieves "
+          },
+          {
+            "type": "equation_inline",
+            "content": "9 8 \\substack { - } 1 0 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": "reconstruction accuracy (Table 6) and requires significantly less resources than model pretraining. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RECAST is architecture and scale agnostic RECAST can reconstruct models across various architecture and scales. In Table 6, we present the results of reconstructed models and the official performance of these models on the Imagenet-1K (Deng et al., 2009) dataset. All reconstructed models in the table have the same configuration - 6 groups, 2 layers in each group and 2 sets of coefficients for each target module (except ViT-Large has 12 groups). The inference comparison on Imagenet tells us that, RECAST can completely emulate the feature generation of any pretrained weight. We also report the averaged best accuracy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "@"
+          },
+          {
+            "type": "text",
+            "content": "top1 across the datasets in figure 3, for the varying scales of the ViT models. In all cases, RECAST perfermos slightly better than baseline without coefficient-tuning, and significantly better with coefficient-tuning. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        826,
+        229
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/583b4bcae89a6a69032bceb3a49c2ce50b0a6ade6017ba27cf7ff85129382b85.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6: Accuracy comparison of reconstructed RECAST models over the ImageNet1k dataset, against the original pretrained models from timm (Wightman, 2019) demonstrates that both backbones are empirically the same. Despite this similarity, RECAST provides reparameterization facilities with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "< \\bar { 0 . 0 0 0 2 \\% }"
+          },
+          {
+            "type": "text",
+            "content": "coefficients "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>Imagenet Acc@top1</td><td>Reconstruction Similarity</td></tr><tr><td>Resnet-34</td><td>73.3</td><td>-</td></tr><tr><td>Recon. Resnet-34</td><td>73.0</td><td>99%</td></tr><tr><td>ViT-Small</td><td>74.6</td><td>-</td></tr><tr><td>Recon. ViT-Small (MLP)</td><td>74.6</td><td>100%</td></tr><tr><td>Recon. ViT-Small (Attention)</td><td>74.6</td><td>100%</td></tr><tr><td>Recon. ViT-Small (MLP &amp; Attention)</td><td>74.6</td><td>100%</td></tr><tr><td>Recon. ViT-Small (VAE + MSE)</td><td>73.8</td><td>98.5%</td></tr><tr><td>Recon. ViT-Small (VAE + SmoothL1)</td><td>73.0</td><td>98.6%</td></tr><tr><td>ViT-Base</td><td>81.1</td><td>-</td></tr><tr><td>Recon. ViT-Base</td><td>81.0</td><td>100%</td></tr><tr><td>ViT-Large</td><td>84.4</td><td>-</td></tr><tr><td>Recon. ViT-Large</td><td>84.4</td><td>100%</td></tr><tr><td>DINO Small</td><td>77.0</td><td>-</td></tr><tr><td>Recon. DiNO Small</td><td>76.9</td><td>99%</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        256,
+        239,
+        741,
+        478
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Template diversity is important for better reparameterization In Section A.3, we empirically showed that models with higher Frobenius norm value and higher entropy provides better taskadaptable model. We further breakdown this analysis by first defining the metrics, and then analyzing their layerwise trends for various reconstruction methods. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        571,
+        823,
+        630
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• Frobenius Norm: Calculates the square root of the sum of the absolute squares of its elements. In the context of RECAST, the Frobenius norm is used to measure the diversity among templates within a template bank for each group. For a template bank "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\tau _ { g } = \\{ T _ { g , 1 } , \\bar { T _ { g , 2 } } , \\ldots , \\bar { T _ { g , n } } \\}"
+              },
+              {
+                "type": "text",
+                "content": "in group "
+              },
+              {
+                "type": "equation_inline",
+                "content": "g"
+              },
+              {
+                "type": "text",
+                "content": ", the average Frobenius norm can be calculated as: avg frobeniu "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\begin{array} { r } { \\mathfrak { s } _ { g } = \\frac { 1 } { n ( n - 1 ) } \\sum _ { i = 1 } ^ { n } \\sum _ { j = i + 1 } ^ { n } \\Vert T _ { g , i } - T _ { g , j } \\Vert _ { F } } \\end{array}"
+              },
+              {
+                "type": "text",
+                "content": ". Squaring the differences makes the metric more sensitive to large deviations between templates. This property helps identify when templates are significantly different, not just slightly varied. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• Entropy Quantifies the average amount of information contained in a set of values. For each template bank "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\tau _ { g }"
+              },
+              {
+                "type": "text",
+                "content": ", we calculate the entropy of singular values to measure the balance of importance among the components of the templates. The average entropy for the template bank in group "
+              },
+              {
+                "type": "equation_inline",
+                "content": "g"
+              },
+              {
+                "type": "text",
+                "content": "is calculated as: avg entrop "
+              },
+              {
+                "type": "equation_inline",
+                "content": "\\begin{array} { r } { \\mathbf { \\chi } _ { g } ^ { \\bullet } = \\frac { 1 } { n } \\sum _ { i = 1 } ^ { n } H ( T _ { g ( l ) , i } ^ { \\bullet } ) } \\end{array}"
+              },
+              {
+                "type": "text",
+                "content": "Pn , where "
+              },
+              {
+                "type": "equation_inline",
+                "content": "H ( T _ { g , i } )"
+              },
+              {
+                "type": "text",
+                "content": "is the entropy for a single template "
+              },
+              {
+                "type": "equation_inline",
+                "content": "T _ { g , i }"
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        640,
+        826,
+        816
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The Frobenius norm helps ensure diversity among "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { g , i }"
+          },
+          {
+            "type": "text",
+            "content": ", allowing for a wide range of possible "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { l , m }"
+          },
+          {
+            "type": "text",
+            "content": ". A higher score means more difference among the template. The entropy ensures that each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { g , i }"
+          },
+          {
+            "type": "text",
+            "content": "is itself balanced and flexible, contributing to the adaptability of the reconstructed weights. A higher entropy corresponds to better information quality within each group. Together, these metrics provide a comprehensive view of the template characteristics in RECAST, helping to optimize both the diversity of the template bank and the flexibility of individual templates for efficient and effective weight reconstruction. In Figure 9a and 9b, we show the change of Frobenius norm and "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        825,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "18 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Entropy. The VAE models perform very low in terms of the Frobenius metric, although their pattern varies depending on the loss function. This is also true for the models generated through Neural Mimicry 3.2,i.e. models reconstructed with MSE loss and SmoothL1 loss performance almost similar on classification task but differs in entropy pattern and Frobenius norm. Another observation is that noise perturbations don’t seem to impact these two metrics at all. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        176
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f45da098dab0418262b6b4d6f6f5ccc8929b06f3e9903887bee3c9e54afa7db1.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Change of Frobenius norm across the groups "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        173,
+        188,
+        493,
+        369
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/eb48b254fb8bc5c2e8c83050314be7d1bc422c42460bd3ae7922f1cf8e976827.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) Change of Entropy across the groups "
+          },
+          {
+            "type": "text",
+            "content": "Figure 9: Analyzing the strategies of changing reconstruction schemes by quantifying their respective Frobenius Norm and Entropy metrics (as defined in A.3) across 6 groups of layers of a ViT. It can be observed that the VAE-reconstructed models generally demonstrate significantly low Groupwise Frobenius score and comparatively lower Entropy. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        504,
+        188,
+        821,
+        369
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We define another metric the intra-group coefficient similarity to measure how similar the coefficient vectors are between different layers within the same group of RECAST model. For layers l1 and l2 in the same group: "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s i m ( l 1 , l 2 ) \\stackrel { \\cdot } { = } c o s i n e \\_ s i m i l a r i t \\bar { y } ( C _ { l 1 } , C _ { l 2 } )"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\left( C _ { l 1 } , C _ { l 2 } \\right)"
+          },
+          {
+            "type": "text",
+            "content": "Where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "is the flattened and concatenated vector of all coefficients for layer l. If similarities are generally low within a group, it means each coefficient is using the shared templates in unique ways. This could indicate that each layer is capturing different features or transformations. The Figure 10, shows that the later groups in the VAE models share very high intra-group coefficient similarity indicating that layers within each group are using templates very similarly or there are redundancies in the network. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        481,
+        823,
+        595
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4 RECAST ADAPTATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        609,
+        382,
+        625
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4.1 RECAST-ADAPTED COMPONENTS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        637,
+        472,
+        651
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our framework can be adapted to various neural network components. Below we provide the details of how they may be implemented in Neural Networks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        660,
+        823,
+        690
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Fully-connected Layers We use RECAST here to generate the weights for the full-connected layers of a network. Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { i } \\in \\mathbb { R } ^ { d _ { o u t } \\times d _ { i n } }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { o u t }"
+          },
+          {
+            "type": "text",
+            "content": "is the number of output features and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { i n }"
+          },
+          {
+            "type": "text",
+            "content": "is the number of input features. Coefficient shape, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { i } ^ { j } \\in \\mathbb { R } ^ { 1 \\times 1 }"
+          },
+          {
+            "type": "text",
+            "content": ", represents a scalar value for each template with additional broadcasting dimensions. After generating final weight using Eq. 2, it’s used as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Y = f ( X \\cdot W _ { f i n a l } + b )"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X \\in \\mathbb { R } ^ { b a t c h \\_ s i z e \\times \\breve { d } . i n }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\breve { Y } \\in \\mathbb { R } ^ { b a t c h - s i z e \\times d \\lrcorner o u t }"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        704,
+        823,
+        779
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Attention QKV Matrices In attention mechanisms, RECAST generates a single matrix for the combined query, key, and value projections. This uses a template shape "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { i } ~ \\in ~ \\tilde { \\mathbb { R } } ^ { 3 d \\times d }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "is the embedding dimension and coefficient shape, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { i } ^ { j } \\in \\mathbb { R } ^ { 1 \\times 1 \\times \\bar { 1 } }"
+          },
+          {
+            "type": "text",
+            "content": ". The weight generation process is similar to the FC layer case. The resulting "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { f i n a l }"
+          },
+          {
+            "type": "text",
+            "content": "is then used to compute "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "V"
+          },
+          {
+            "type": "text",
+            "content": ". For input shape "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X \\in \\mathbb { R } ^ { b a t c h \\_ s i z e \\times s e q \\_ l e n g t h \\times d }"
+          },
+          {
+            "type": "text",
+            "content": "we can obtain "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Q , K , V \\in \\mathbb { R } ^ { b a t c h . s i z e \\times s e q . l e n g t h \\times d }"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        792,
+        823,
+        867
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Convolution Kernels For convolutional layers, RECAST generates filter kernels that are applied across the input feature maps. Here, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { i } \\in \\mathbb { R } ^ { \\bar { c } _ { o u t } \\times c _ { i n } \\times K \\times K }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c _ { o u t }"
+          },
+          {
+            "type": "text",
+            "content": "is the number of output channels, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "c _ { i n }"
+          },
+          {
+            "type": "text",
+            "content": "is the number of input channels, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "is the kernel size. The weight generation process follows "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        926
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "19 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d7c35c6857d706f982811ec2d232a85d04bc152985b2460221c51db033a9e56a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 10: Intra-group Coefficient Similarity across the groups of similar configuration models, that have been reconstructed in different ways. The later groups in the VAE/Encoder models share very high intra-group coefficient similarity and that layers within each group are using templates very similarly or there are redundancies in the network. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        99,
+        825,
+        521
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the same pattern as before. The resulting "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { f i n a l }"
+          },
+          {
+            "type": "text",
+            "content": "is then used as the convolution kernel: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        612,
+        746,
+        626
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r l r } { Y } & { { } = } & { c o n v 2 d ( X , W _ { f i n a l } ) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "conv2d(X, Wf inal), where X ∈ Rbatch size×c in×h in×w in and Y ∈ Rbatch size×c out×h out×w out "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbb { R } ^ { b a t c h \\_ s i z e \\times c \\_ o u t \\times h \\_ o u t \\times w \\_ o u t }"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        626,
+        823,
+        654
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4.2 RECAST INTEGRATION WITH EXISTING METHODS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        672,
+        589,
+        686
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RECAST complements existing incremental learning methods as a task-adaptable weight generation backbone. For CNN architectures, RECAST generates base weights that PiggyBack’s (Mallya et al., 2018) binary masks can modulate and provides primary convolution weights that CLR’s Ge et al. (2023) Ghost modules can refine. In transformer architectures, RECAST produces core weight matrices that methods like MeLO, AdaptFormer (for query/value and MLP components), DoRA (for magnitude-direction decomposition), and RoSA (for sparse adaptations) can then modify. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        696,
+        823,
+        781
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For example, in standard LoRA, a weight matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W \\in \\mathbb { R } ^ { d _ { o u t } \\times d _ { i n } }"
+          },
+          {
+            "type": "text",
+            "content": "is modified by adding a low-rank update: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        786,
+        823,
+        815
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\mathrm {L o R A}} = W _ {0} + B A \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/c81895a8a40cb18916253a4b0b1508c08633d7073722275ddfa8518d40610352.jpg"
+        }
+      },
+      "bbox": [
+        426,
+        815,
+        823,
+        830
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B \\in \\mathbb { R } ^ { d _ { o u t } \\times r }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "A \\in \\mathbb { R } ^ { r \\times d _ { i n } }"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": "is the rank. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        830,
+        516,
+        845
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When integrating with RECAST, instead of using a fixed "
+          },
+          {
+            "type": "equation_inline",
+            "content": "W _ { 0 }"
+          },
+          {
+            "type": "text",
+            "content": ", we use the dynamically generated weight matrix from RECAST. From Equation 1 "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        853,
+        823,
+        882
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\text {R E C A S T}} = \\frac {1}{K} \\sum_ {k = 1} ^ {K} \\sum_ {i = 1} ^ {n} T _ {g, i} \\cdot C _ {l, m, i} ^ {k} \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/36be25906453ef5530ea36dc68f9e48165aeb92233e80518f091f945f40570d3.jpg"
+        }
+      },
+      "bbox": [
+        377,
+        886,
+        823,
+        926
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "20 "
+          }
+        ]
+      },
+      "bbox": [
+        488,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T _ { g , i }"
+          },
+          {
+            "type": "text",
+            "content": "are the templates and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C _ { l , m , i } ^ { k }"
+          },
+          {
+            "type": "text",
+            "content": "are the coefficients. The final integrated approach combines both methods: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        131
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\text {c o m b i n e d}} = W _ {\\text {R E C A S T}} + B A \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/24b1834c7165c02ab32da42f02da1df8370a6c00ea8046e920d04774eca931af.jpg"
+        }
+      },
+      "bbox": [
+        401,
+        133,
+        823,
+        148
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The total trainable parameters for the combined approach are: "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        151,
+        580,
+        167
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• RECAST: "
+              },
+              {
+                "type": "equation_inline",
+                "content": "O ( n K )"
+              },
+              {
+                "type": "text",
+                "content": "coefficients per module "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "• LoRA: "
+              },
+              {
+                "type": "equation_inline",
+                "content": "O ( r ( d _ { i n } + d _ { o u t } ) )"
+              },
+              {
+                "type": "text",
+                "content": "parameters per module "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        176,
+        553,
+        212
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "is the number of templates, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "is the number of coefficient sets, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r"
+          },
+          {
+            "type": "text",
+            "content": "is the LoRA rank. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        223,
+        805,
+        238
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Similar principles apply when integrating with other methods: "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        244,
+        581,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "CLR (Channel-wise Lightweight Reprogramming) Ge et al. (2023): "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        266,
+        642,
+        281
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "Y = \\operatorname {G h o s t} \\left(\\operatorname {C o n v} \\left(X, W _ {\\text {R E C A S T}}\\right)\\right) \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/3f298a980affefcc6ea3a7793ade071d89305116366a9d492b67a5d169e4b637.jpg"
+        }
+      },
+      "bbox": [
+        385,
+        287,
+        823,
+        305
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where Ghost(·) represents the lightweight channel-wise transformations through depthwiseseparable convolutions. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        311,
+        823,
+        339
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "PiggyBack (Mallya et al., 2018): "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        345,
+        398,
+        361
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\text {c o m b i n e d}} = W _ {\\text {R E C A S T}} \\odot M \\tag {8}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7d2151c677236039596fd4954078ef3b192ad94c94e47de1370ee15701147977.jpg"
+        }
+      },
+      "bbox": [
+        403,
+        368,
+        823,
+        385
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "text",
+            "content": "is a binary mask matrix. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        392,
+        398,
+        406
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "DoRA (Liu et al., 2024b): "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        412,
+        352,
+        428
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\text {c o m b i n e d}} = \\left\\| W _ {\\text {R E C A S T}} \\right\\| \\cdot \\frac {W _ {\\text {R E C A S T}} + B A}{\\left\\| W _ {\\text {R E C A S T}} + B A \\right\\|} \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/61172fe23f42a1d6a7407ff5a3005416f0a21cae314502ab485bcf4ffd050ffc.jpg"
+        }
+      },
+      "bbox": [
+        346,
+        434,
+        823,
+        467
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\| \\cdot \\|"
+          },
+          {
+            "type": "text",
+            "content": "denotes the magnitude and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B A"
+          },
+          {
+            "type": "text",
+            "content": "is the LoRA update. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        473,
+        591,
+        489
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "RoSA (Nikdan et al., 2024): "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        494,
+        367,
+        508
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "W _ {\\text {c o m b i n e d}} = W _ {\\text {R E C A S T}} + S \\odot W _ {\\text {R E C A S T}} + (B A) \\tag {10}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/1c8dbeb9083244ec5b96b18dbc20c18068128d42bc7e60255a2d75e9e3c140c1.jpg"
+        }
+      },
+      "bbox": [
+        339,
+        517,
+        823,
+        534
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "S"
+          },
+          {
+            "type": "text",
+            "content": "is a sparse binary mask applied to the LoRA update. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        540,
+        576,
+        556
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Published as a conference paper at ICLR 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        32,
+        478,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "21 "
+          }
+        ]
+      },
+      "bbox": [
+        488,
+        946,
+        506,
+        959
+      ]
+    }
+  ]
+]

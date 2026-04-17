@@ -1,0 +1,3648 @@
+[
+    {
+        "type": "text",
+        "text": "A new similarity measure for covariate shift with applications to nonparametric regression ",
+        "text_level": 1,
+        "bbox": [
+            191,
+            85,
+            803,
+            131
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Reese Pathak†, ?, Cong Ma $\\circ , \\star$ , and Martin J. Wainwright†, ‡ ",
+        "bbox": [
+            259,
+            146,
+            730,
+            165
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "\u0005 Department of Statistics, University of Chicago ",
+        "bbox": [
+            300,
+            174,
+            687,
+            191
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "† Department of Electrical Engineering and Computer Sciences, UC Berkeley ",
+        "bbox": [
+            194,
+            191,
+            795,
+            208
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "‡ Department of Statistics, UC Berkeley ",
+        "bbox": [
+            336,
+            208,
+            651,
+            224
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "congm@uchicago.edu, {pathakr,wainwrig}@berkeley.edu ",
+        "bbox": [
+            259,
+            227,
+            730,
+            242
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            460,
+            266,
+            535,
+            277
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "We study covariate shift in the context of nonparametric regression. We introduce a new measure of distribution mismatch between the source and target distributions that is based on the integrated ratio of probabilities of balls at a given radius. We use the scaling of this measure with respect to the radius to characterize the minimax rate of estimation over a family of Hölder continuous functions under covariate shift. In comparison to the recently proposed notion of transfer exponent, this measure leads to a sharper rate of convergence and is more fine-grained. We accompany our theory with concrete instances of covariate shift that illustrate this sharp difference. ",
+        "bbox": [
+            155,
+            279,
+            839,
+            398
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 Introduction ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            422,
+            297,
+            441
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "In the standard formulation of prediction or classification, future data (as represented by a test set) is assumed to be drawn from the same distribution as the training data. This assumption, while theoretically convenient, may fail to hold in many real-world scenarios. For instance, training data might be collected only from a sub-group within a broader population (such as in medical trials), or the environment might change over time as data are collected. Such scenarios result in a distribution mismatch between the training and test data. ",
+        "bbox": [
+            109,
+            455,
+            883,
+            558
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we study an important case of such distribution mismatch—namely, the covariate shift problem (e.g., [21, 19]). Suppose that a statistician observes covariate-response pairs $( X , Y )$ , and wishes to build a prediction rule. In the problem of covariate shift, the distribution of the covariates $X$ is allowed to change between the training and test data, while the posterior distribution of the responses (namely, $Y \\mid X )$ remains fixed. Compared to the usual i.i.d. setting, this serves as a more accurate model for a variety of real-world applications, including image classification [20], biomedical engineering [13], sentiment analysis [3], and audio processing [8], among many others. ",
+        "bbox": [
+            109,
+            560,
+            883,
+            679
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "tribution also obse More formally, suppose that the statistician observes $P$ , and es a r $n _ { Q }$ covaonse ates dra $\\left\\{ X _ { i } \\right\\} _ { i = n _ { P } + 1 } ^ { n _ { Q } + n _ { P } }$ from a target e same conditio $n _ { P }$ covariates tribution l distribu $Q$ . For each observed on. The regression f $\\{ X _ { i } \\} _ { i = 1 } ^ { n _ { P } }$ from a source dis- $X _ { i }$ , shection $Y _ { i }$ $f ^ { \\star } ( x ) = \\mathbf { E } [ Y \\mid x ]$ defined by this conditional distribution is assumed to lie in some function class $\\mathcal { F }$ The statistician uses these samples to produce an estimate $\\hat { \\boldsymbol f }$ , which will be evaluated on the target distribution, with a fresh sample $X \\sim Q$ , yielding the mean-squared error ",
+        "bbox": [
+            111,
+            679,
+            880,
+            784
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} := \\mathbf {E} \\left[ \\left(\\widehat {f} (X) - f ^ {\\star} (X)\\right) ^ {2} \\right].\n$$",
+        "text_format": "latex",
+        "bbox": [
+            339,
+            787,
+            653,
+            816
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "When there is no covariate shift, the fundamental (minimax) risks for this problem are wellunderstood [7, 9, 22]. The goal of this paper is to understand how, for nonparametric function classes $\\mathcal { F }$ , this minimax risk changes as a function of the “amount” of covariate shift between $P$ and $Q$ . ",
+        "bbox": [
+            109,
+            821,
+            883,
+            888
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2202.02837v1 [math.ST] 6 Feb 2022 ",
+        "bbox": [
+            22,
+            258,
+            57,
+            713
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_footnote",
+        "text": "? RP and CM contributed equally to this paper. ",
+        "bbox": [
+            138,
+            897,
+            462,
+            912
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_number",
+        "text": "1 ",
+        "bbox": [
+            493,
+            934,
+            503,
+            946
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1.1 Our contributions and related work ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            90,
+            511,
+            107
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Let us summarize the main contributions of this paper, and put them in the context of related work. ",
+        "bbox": [
+            111,
+            117,
+            883,
+            133
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Our contributions. We introduce a similarity measure1 $\\rho _ { h }$ between two probability measures $P , Q$ on a common metric space $( \\mathcal { X } , d )$ . For any level $h > 0$ , it is defined as ",
+        "bbox": [
+            111,
+            152,
+            883,
+            188
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho_ {h} (P, Q) := \\int_ {\\mathcal {X}} \\frac {1}{P (\\mathsf {B} (x , h))} \\mathrm {d} Q (x), \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            364,
+            198,
+            883,
+            234
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathsf { B } ( x , h ) : = \\{ x ^ { \\prime } \\in \\mathcal { X } \\mid d ( x , x ^ { \\prime } ) \\leqslant h \\}$ is the closed ball of radius $h$ centered around $x$ . We substantiate the significance of this similarity measure via the following contributions: ",
+        "bbox": [
+            109,
+            243,
+            883,
+            277
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(i) For regression functions that are Hölder continuous, we demonstrate a performance guarantee for the Nadaraya-Watson kernel estimator under covariate shift that is fully determined by the scaling of the similarity measure $\\rho _ { h } ( P , Q )$ with respect to the radius $h$ . ",
+            "(ii) We complement these upper bounds with matching lower bounds—in a minimax sense— demonstrating that the best achievable rate of estimation in Hölder classes is also determined by the scaling of this similarity measure. ",
+            "(iii) We show how the similarity measure $\\rho _ { h }$ can be controlled based on the metric properties of the space $\\mathcal { X }$ . In addition, we compare $\\rho _ { h }$ with existing notions for covariate shift (e.g., bounded likelihood ratios, transfer exponents), thereby showcasing some of its advantages. "
+        ],
+        "bbox": [
+            120,
+            287,
+            883,
+            462
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Related work. The problem of covariate shift was studied in the seminal work by Shimodaira [21], who provided asymptotic guarantees for a weighted maximum likelihood estimator under covariate shift. Since then, a plethora of work has analyzed covariate shift, or the general distribution mismatch problem (also referred to as domain adaptation or transfer learning). ",
+        "bbox": [
+            109,
+            479,
+            883,
+            549
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "For general distribution mismatch, one line of work provides rates that depend on distance metrics between the source-target pair (e.g., [1, 2, 6, 14, 5, 16]). These results hold under fairly general conditions, but do not necessarily guarantee consistency as the sample size $n$ increases. In contrast, our guarantees for covariate shift do guarantee consistency, and moreover, we provide explicit nonasymptotic, optimal nonparametric rates. As pointed out in the paper [11], the distribution mismatch problem is asymmetric in the sense that it may be easier to estimate accurately when dealing with covariate shift from $P$ to $Q$ than from $Q$ to $P$ . Our results also corroborate this intuition. It is worth noting that these prior distance metrics fall short of capturing the inherent asymmetry between $P$ and $Q$ . ",
+        "bbox": [
+            109,
+            550,
+            883,
+            703
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Another line of work addresses covariate shift under conditions on the likelihood ratio $\\mathrm { d } Q / \\mathrm { d } P$ . For instance, some authors have obtained results for bounded likelihood ratios [24, 10] or in terms of information-theoretic divergences between the source-target pair [23, 15]. Our work is inspired in part by the work of Kpotufe and Martinet [11], who introduced the notion of the transfer exponent. It is a condition that bounds the mass placed by the pair $( P , Q )$ on balls of varying radii; using this notion, they analyzed various problems of nonparametric classification. Our work, focusing instead on nonparametric regression problems and using the measure $\\rho _ { h }$ , provides sharper rates than those obtainable by considering the transfer exponent; see Section 3.2 for details. Thus, the similarity measure $\\rho _ { h }$ provides a more fine-grained control on the effect of covariate shift on nonparametric regression. ",
+        "bbox": [
+            109,
+            704,
+            883,
+            875
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_footnote",
+        "text": "1To be clear, this quantity actually serves as a dis-similarity measure: as shown in the sequel, source-target pairs $( P , Q )$ with larger values $\\rho _ { h } ( P , Q )$ lead to “harder” estimation problems in terms of covariate shift. ",
+        "bbox": [
+            112,
+            883,
+            883,
+            912
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "2 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Finally, it is worth mentioning other recent works that give risk bounds for covariate shift problems, including on linear models [12], as well as linear models and one-layer neural networks [17]. Although these results deal with covariate shift, the rates obtained are parametric ones, and hence not directly comparable to the nonparametric rates that are the focus of our inquiry. ",
+        "bbox": [
+            109,
+            90,
+            887,
+            161
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "1.2 Notation ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            179,
+            254,
+            195
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Here we collect notation used throughout the paper. We use $\\mathbf { R }$ to denote the real numbers. We use $( \\mathcal { X } , d )$ to denote a metric space, and we equip it with the usual Borel $\\sigma$ -algebra. We let $\\mathsf { B } ( x , r ) : = \\{ x ^ { \\prime } \\in \\mathcal { X } \\mid d ( x , x ^ { \\prime } ) \\leqslant r \\}$ be the closed ball of radius $r$ centered at $x$ . We reserve the capital letters $X , Y$ , possibly with subscripts, for a pair of random variables arising from a regression model. Similarly, we reserve $P , Q$ for a pair of two probability measures on $( \\mathcal { X } , d )$ . For $h > 0$ , we denote by $N ( h )$ the covering number of $\\mathcal { X }$ at resolution $h$ in the metric $d$ . This is the minimal number of balls of radius at most $h > 0$ required to cover the space $\\mathcal { X }$ . ",
+        "bbox": [
+            109,
+            205,
+            887,
+            325
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "The remainder of this paper is organized as follows. We begin in Section 2 by setting up the problem more precisely, and stating and discussing our main results on covariate shift: namely, upper bounds in Theorem 1, accompanied by matching lower bounds in Theorem 2. These results establish that the similarity measure (1) provides a useful measure of the “difficulty” of sourcetarget pairs in covariate shift; accordingly, Section 3 is devoted to a comparison and discussion of this measure relevant to concepts from past work, including likelihood ratio bounds and transfer exponents. The proofs of all our results are given in Section 4, and we conclude with a discussion in Section 5. ",
+        "bbox": [
+            109,
+            342,
+            883,
+            479
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "2 How covariate shift affects nonparametric regression ",
+        "text_level": 1,
+        "bbox": [
+            109,
+            502,
+            750,
+            523
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In this section, we use the similarity measure introduced in equation (1) to characterize how covariate shift can change the minimax risks of estimation for certain classes of nonparametric regression models. We begin in Section 2.1 by setting up the observation model to be considered, along with some associated assumptions on the regression function $f ^ { \\star }$ , the conditional distribution of $Y \\ \\mid \\ X$ , and the covariate shift. In Section 2.2, we derive an achievable result (Theorem 1) for nonparametric regression in the presence of covariate shift, in particular via a careful analysis of the classical Nadaraya-Watson estimator. Our upper bound in this section is general, and illustrates the key role of the similarity measure $\\rho _ { h }$ . In Section 2.3, we introduce the $\\alpha$ -families of source-target pairs $( P , Q )$ , and use Theorem 1 to derive achievable results for these families. In Section 2.4, we state some complementary lower bounds for $\\alpha$ -families (Theorem 2), showing that our achievable results are, in fact, unimprovable. ",
+        "bbox": [
+            109,
+            536,
+            883,
+            724
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "2.1 Observation model and assumptions ",
+        "text_level": 1,
+        "bbox": [
+            109,
+            742,
+            517,
+            761
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Suppose that we observe covariate-response pairs $\\{ ( X _ { i } , Y _ { i } ) \\} _ { i = 1 } ^ { n } \\subset \\mathcal { X } \\times \\mathbf { R }$ that are drawn from nonparametric regression model of the following type. The conditional distribution of $Y \\mid X$ is the same for all $i = 1 , \\ldots , n$ , and our goal is to estimate the regression function $f ^ { \\star } ( x ) : = \\mathbf { E } [ Y \\mid X = x ]$ . In terms of the “noise” variables, $\\xi _ { i } : = Y _ { i } - f ^ { \\star } ( X _ { i } )$ , the observations can be written in the form ",
+        "bbox": [
+            109,
+            768,
+            883,
+            839
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\nY _ {i} = f ^ {\\star} (X _ {i}) + \\xi_ {i}, \\quad i = 1, \\ldots , n. \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            375,
+            849,
+            885,
+            869
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In our analysis, we impose three types of regularity conditions: (i) Hölder continuity of the regression function; (ii) the type of covariate shift allowed; and (iii) tail conditions on the noise variables $\\{ \\xi _ { i } \\} _ { i = 1 } ^ { n }$ . ",
+        "bbox": [
+            109,
+            878,
+            883,
+            915
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            491,
+            934,
+            504,
+            946
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Assumption 1 (Hölder continuity). For some $L > 0$ and $\\beta \\in ( 0 , 1 ]$ , the function $f ^ { \\star } \\colon \\mathcal { X }  \\mathbf { R }$ is $( \\beta , L )$ -Hölder continuous, meaning that ",
+        "bbox": [
+            112,
+            90,
+            887,
+            126
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left| f ^ {\\star} (z) - f ^ {\\star} (z ^ {\\prime}) \\right| \\leqslant L [ d (z, z ^ {\\prime}) ] ^ {\\beta}, \\quad \\mathrm {f o r a n y} z, z ^ {\\prime} \\in \\mathcal {X}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            299,
+            137,
+            699,
+            159
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "We note that in the special case $\\beta = 1$ , the function $f ^ { \\star }$ is $L$ -Lipschitz. ",
+        "bbox": [
+            112,
+            170,
+            663,
+            186
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Assumption 2 (Covariate shift). The covariates $X _ { 1 } , \\ldots , X _ { n }$ are independent, and drawn as ",
+        "bbox": [
+            112,
+            199,
+            841,
+            215
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\nX _ {1}, \\ldots , X _ {n _ {P}} \\stackrel {\\mathrm {i . i . d .}} {\\sim} P \\quad \\mathrm {a n d} \\quad X _ {n _ {P} + 1}, \\ldots X _ {n _ {P} + n _ {Q}} \\stackrel {\\mathrm {i . i . d .}} {\\sim} Q \\qquad \\mathrm {w h e r e} n = n _ {P} + n _ {Q}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            194,
+            228,
+            803,
+            253
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Assumption 3 (Noise assumption). The variables $\\{ \\xi _ { i } \\} _ { i = 1 } ^ { n }$ satisfy the second moment bound ",
+        "bbox": [
+            112,
+            263,
+            844,
+            282
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sup _ {x} \\mathbf {E} \\left[ \\xi_ {i} ^ {2} \\mid X _ {i} = x \\right] \\leqslant \\sigma^ {2} \\qquad \\mathrm {f o r} i = 1, \\ldots , n.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            323,
+            292,
+            676,
+            321
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Note that by construction, the variables $\\xi _ { i }$ are (conditionally) centered. Assumption 3 also allows $\\xi _ { i }$ to depend on $X _ { i }$ , as long as the variance is uniformly bounded above. ",
+        "bbox": [
+            111,
+            333,
+            883,
+            368
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "2.2 Achievable performance via the Nadaraya-Watson estimator ",
+        "text_level": 1,
+        "bbox": [
+            111,
+            386,
+            748,
+            404
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "We first exhibit an achievable result for the problem of nonparametric regression in the presence of covariate shift. We do so by analyzing a classical and simple method for nonparametric estimation, namely the Nadaraya-Watson estimator [18, 27], or NW for short. The main result of this section is to show that the mean-squared error (MSE) of the NW estimator is upper bounded by a biasvariance decomposition that also involves the similarity measure $\\rho _ { h }$ . ",
+        "bbox": [
+            111,
+            412,
+            883,
+            497
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "We begin by recalling the definition of the NW estimator, focusing here on the version in which the underlying kernel is uniform over a ball of a given bandwidth $h _ { n } > 0$ . In particular, define the set ",
+        "bbox": [
+            111,
+            500,
+            883,
+            546
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {G} _ {n} := \\bigcup_ {i = 1} ^ {n} \\mathsf {B} (X _ {i}, h _ {n}),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            419,
+            547,
+            578,
+            588
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "corresponding to the set of points in $\\mathcal { X }$ within distance $h _ { n }$ of the observed covariates. In terms of this set, the Nadaraya-Watson estimator $\\widehat { f }$ takes the form ",
+        "bbox": [
+            111,
+            594,
+            885,
+            628
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\widehat {f} (x) := \\left\\{ \\begin{array}{l l} \\frac {\\sum_ {i = 1} ^ {n} Y _ {i} \\mathbf {1} \\left\\{X _ {i} \\in \\mathsf {B} \\left(x , h _ {n}\\right) \\right\\}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\left\\{X _ {i} \\in \\mathsf {B} \\left(x , h _ {n}\\right) \\right\\}} & \\text {f o r} x \\in \\mathcal {G} _ {n} \\\\ 0 & \\text {o t h e r w i s e .} \\end{array} \\right. \\tag {3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            308,
+            638,
+            883,
+            696
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Our first main result provides an upper bound on the MSE of the NW estimator under covariate shift; this bound exhibits the significance of the similarity measure (1). It involves the distribution $\\begin{array} { r } { \\mu _ { n } : = { \\frac { n _ { P } } { n } } P + { \\frac { n _ { Q } } { n } } Q } \\end{array}$ , which is a convex combination of the source and target distributions weighted by their respective fractions of samples. ",
+        "bbox": [
+            111,
+            707,
+            883,
+            776
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Theorem 1. Suppose that Assumptions 1, 2, and 3 hold. For any $h _ { n } > 0$ , the Nadaraya-Watson estimator $\\hat { \\boldsymbol f }$ with bandwidth $h _ { n }$ has MSE bounded as ",
+        "bbox": [
+            112,
+            787,
+            885,
+            821
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} \\leqslant c _ {u} \\left\\{L ^ {2} h _ {n} ^ {2 \\beta} + \\frac {\\| f ^ {\\star} \\| _ {\\infty} ^ {2} + \\sigma^ {2}}{n} \\rho_ {h _ {n}} (\\mu_ {n}, Q) \\right\\}, \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            277,
+            833,
+            883,
+            867
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $c _ { u } > 0$ is a numerical constant. ",
+        "bbox": [
+            112,
+            877,
+            411,
+            893
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "See Section 4.1 for a proof of this result. ",
+        "bbox": [
+            109,
+            90,
+            429,
+            107
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Note that the bound (4) exhibits a type of bias-variance trade-off, one that controls the optimal choice of bandwidth $h _ { n }$ . The quantity $h _ { n } ^ { 2 \\beta }$ in the first term is familiar from the classical analysis of the NW estimator; it corresponds to the bias induced by smoothing over balls of radius $h _ { n }$ , and hence is an increasing function of bandwidth. In the second term, the bandwidth appears in the similarity measure $\\rho _ { h _ { n } } ( \\mu _ { n } , Q )$ , which is a non-increasing function of the bandwidth. The optimal choice of bandwidth arises from optimizing this tradeoff; note that it depends on the pair $( P , Q )$ , as well as the sample sizes $( n _ { P } , n _ { Q } )$ , via the similarity measure applied to the convex combination $\\mu _ { n }$ and $Q$ . ",
+        "bbox": [
+            109,
+            108,
+            883,
+            247
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "No covariate shift: As a sanity check, it is worth checking that the bound (4) recovers known results in the case of no covariate shift ( $P = Q$ and hence $\\mu _ { n } = Q$ ). As a concrete example, if $Q$ is uniform on the hypercube $[ 0 , 1 ] ^ { k }$ , it can be verified that $\\rho _ { h } ( Q , Q ) \\asymp h ^ { - k }$ as $h \\to 0 ^ { + }$ . (See Example 2 in the sequel for a more general calculation that implies this fact.) Thus, if we track only the sample size, the optimal bandwidth is given by $h _ { n } ^ { * } = n ^ { - \\frac { 1 } { 2 \\beta + k } }$ , and with this choice, the bound (4) implies that the NW estimator has MSE bounded as $n ^ { - \\frac { 2 \\beta } { 2 \\beta + k } }$ 2β . Thus, we recover the classical and known results in this special case. As we will see, more interesting tradeoffs arise in the presence of covariate shift, so that $\\mu _ { n } \\neq Q$ . ",
+        "bbox": [
+            109,
+            265,
+            883,
+            411
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "2.3 Consequences for $\\alpha$ -families of source-target pairs ",
+        "text_level": 1,
+        "bbox": [
+            109,
+            428,
+            645,
+            446
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "In order to better understand the bias-variance tradeoff in the bound (4) in the presence of covariate shift, it is helpful to derive some explicit consequences of Theorem 1 for a particular function class $\\mathcal { F }$ , along with certain families of source-target pairs $( P , Q )$ . The latter families are indexed by a parameter $\\alpha > 0$ that controls the amount of covariate shift; accordingly, we refer to them as $\\alpha$ -families. ",
+        "bbox": [
+            109,
+            454,
+            883,
+            537
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "So as to simplify our presentation, we assume that $\\mathcal { X }$ is the unit interval $[ 0 , 1 ]$ . For a given pair $\\beta \\in ( 0 , 1 ]$ and $L > 0$ , consider the class of regression functions ",
+        "bbox": [
+            109,
+            540,
+            883,
+            575
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {F} (\\beta , L) = \\left\\{f \\colon [ 0, 1 ] \\to \\mathbf {R} \\mid | f (x) - f (x ^ {\\prime}) | \\leqslant L | x - x ^ {\\prime} | ^ {\\beta}, \\text {f o r a l l} x, x ^ {\\prime} \\in \\mathcal {X}, f (0) = 0 \\right\\}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            171,
+            580,
+            826,
+            609
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "This is a special case of $\\beta$ -Hölder continuous functions when the underlying metric space is the unit interval $\\lfloor 0 , 1 \\rfloor$ equipped with the absolute value norm. The additional constraint $f ( 0 ) = 0$ ensures that this class has finite metric entropy. ",
+        "bbox": [
+            109,
+            614,
+            883,
+            667
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Next we introduce some interesting families of source-target pairs. ",
+        "bbox": [
+            109,
+            683,
+            630,
+            700
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "$\\alpha$ -families of $( P , Q )$ pairs: For a given parameter $\\alpha \\geqslant 1$ and radius $C \\geqslant 1$ , we define the set of source-target pairs2 ",
+        "bbox": [
+            109,
+            719,
+            883,
+            752
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {D} (\\alpha , C) := \\left\\{\\left(P, Q\\right) \\mid \\sup  _ {0 <   h \\leqslant 1} h ^ {\\alpha} \\rho_ {h} (P, Q) \\leqslant C \\right\\}. \\tag {5a}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            318,
+            760,
+            880,
+            792
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "In words, these are source target pairs for which the growth of the similarity as $h \\to 0 ^ { + }$ is at most ${ h ^ { - } } ^ { \\alpha }$ . In the case $\\alpha \\in ( 0 , 1 ]$ , we define the related set ",
+        "bbox": [
+            109,
+            800,
+            883,
+            835
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {D} ^ {\\prime} (\\alpha , C) := \\left\\{(P, Q) \\mid \\sup  _ {0 <   h \\leqslant \\Delta} h ^ {\\alpha} \\rho_ {h} (P, Q) \\leqslant C, \\sup  _ {0 <   h \\leqslant 1} \\rho_ {h} (Q, Q) \\leqslant C \\right\\}, \\tag {5b}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            236,
+            842,
+            880,
+            875
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_footnote",
+        "text": "2Note that the restriction of the supremum to $h \\in [ 0 , 1 ]$ is necessary, as $\\rho _ { h } ( P , Q ) = 1$ for all $h \\geqslant 1$ . Note also that since $\\rho _ { 1 } ( P , Q ) = 1$ , one necessarily has $C \\geqslant 1$ . ",
+        "bbox": [
+            109,
+            882,
+            883,
+            912
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            934,
+            504,
+            946
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where the additional condition is added to address the fact that even without covariate shift, the rate $n ^ { - 2 \\beta / ( 2 \\beta + 1 ) }$ is unimprovable for some distributions [22]. Taking into account the first part of the next corollary, it is necessary to impose some condition on the target distribution in order to obtain significantly faster rates such as $n ^ { - \\frac { 2 \\beta } { 2 \\beta + \\alpha } }$ 2β , when $\\alpha < 1$ . ",
+        "bbox": [
+            111,
+            90,
+            887,
+            169
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Corollary 1. Suppose that $\\sigma \\geqslant L$ , and that Assumptions $\\mathcal { Z }$ and 3 hold. Then there exists a constant $c _ { u } ^ { \\prime } > 0$ , independent of $n , n _ { P } , n _ { Q } , \\sigma ^ { 2 }$ , and an integer $n _ { u } : = n _ { u } ( \\sigma , \\beta , L , \\alpha , C )$ such that, provided that $\\operatorname* { m a x } \\{ n _ { P } , n _ { Q } \\} \\geqslant n _ { u }$ : ",
+        "bbox": [
+            111,
+            179,
+            888,
+            231
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "(a) For $\\alpha \\geqslant 1$ and $C \\geqslant 1$ , we have ",
+        "bbox": [
+            125,
+            242,
+            403,
+            260
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf  _ {\\widehat {f}} \\sup  _ {f ^ {\\star} \\in \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} \\leqslant c _ {u} ^ {\\prime} \\left\\{\\left(\\frac {n _ {P}}{\\sigma^ {2}}\\right) ^ {\\frac {2 \\beta + 1}{2 \\beta + \\alpha}} + \\left(\\frac {n _ {Q}}{\\sigma^ {2}}\\right) \\right\\} ^ {- \\frac {2 \\beta}{2 \\beta + 1}} \\text {f o r a n y} (P, Q) \\in \\mathcal {D} (\\alpha , C). (6 \\mathrm {a})\n$$",
+        "text_format": "latex",
+        "bbox": [
+            166,
+            271,
+            883,
+            311
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "(b) For $\\alpha \\in ( 0 , 1 ]$ and $C \\geqslant 1$ , we have ",
+        "bbox": [
+            125,
+            340,
+            429,
+            359
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf _ {\\widehat {f}} \\sup _ {f ^ {\\star} \\in \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} \\leqslant c _ {u} ^ {\\prime} \\left\\{\\left(\\frac {n _ {P}}{\\sigma^ {2}}\\right) ^ {\\frac {2 \\beta}{2 \\beta + \\alpha}} + \\left(\\frac {n _ {Q}}{\\sigma^ {2}}\\right) \\right\\} ^ {- 1} \\quad f o r a n y (P, Q) \\in \\mathcal {D} ^ {\\prime} (\\alpha , C). (6 \\mathrm {b})\n$$",
+        "text_format": "latex",
+        "bbox": [
+            166,
+            371,
+            883,
+            411
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "See Section 4.2 for a proof of this corollary. ",
+        "bbox": [
+            112,
+            441,
+            455,
+            458
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Let us discuss the bound (6a) to gain some intuition. The special case of no covariate shift can be captured by setting $n _ { P } = 0$ and $n _ { Q } > 0$ , and we recover the familiar $n ^ { - \\frac { 2 \\beta } { 2 \\beta + k } }$ 2β rate previously discussed. At the other extreme, suppose that $n _ { Q } = 0$ so that all of our samples are from the shifted distribution (i.e., $ { n } =  { n }  { P }$ ); in this case, the MSE is bounded as $\\left( \\sigma ^ { 2 } / n \\right) ^ { - \\frac { 2 \\beta } { 2 \\beta + \\alpha } }$ 2β . As $\\alpha$ increases, our set-up allows for more severe form of covariate shift, and its deleterious effect is witnessed by the exponent $\\frac { 2 \\beta } { 2 \\beta + \\alpha }$ shrinking towards zero. Thus, the NW estimator—with an appropriate choice of bandwidth—remains consistent but with an arbitrarily slow rate as $\\alpha$ diverges to $+ \\infty$ . ",
+        "bbox": [
+            111,
+            474,
+            887,
+            604
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "There are many papers in the literature (e.g., [24, 10]) that discuss the covariate shift problem when the likelihood ratio is bounded—that is, when $Q$ is absolutely continuous with respect to $P$ and $\\begin{array} { r } { \\operatorname* { s u p } _ { x \\in \\mathcal { X } } \\frac { \\mathrm { d } Q } { \\mathrm { d } P } ( x ) \\leqslant b } \\end{array}$ for some $b \\geqslant 1$ . We say that the pair $( P , Q )$ are $b$ -bounded in this case. ",
+        "bbox": [
+            111,
+            612,
+            885,
+            666
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Example 1 (Bounded likelihood ratio). Suppose that $\\mathcal { X } = [ 0 , 1 ] ^ { k }$ with the Euclidean metric, and consider a pair $( P , Q )$ with $b$ -bounded likelihood ratio. In this special case, our general theory yields bounds in terms of the $b$ -weighted effective sample size ",
+        "bbox": [
+            111,
+            674,
+            887,
+            727
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\nn _ {\\text {e f f}} (b) := \\frac {n _ {P}}{b} + n _ {Q}. \\tag {7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            421,
+            737,
+            882,
+            763
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "In particular, it follows from the proof of Corollary 1 that in the regime $\\sigma ^ { 2 } \\geqslant L ^ { 2 }$ , we have the upper bound ",
+        "bbox": [
+            111,
+            777,
+            883,
+            808
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} \\leqslant c _ {u} ^ {\\prime} \\Big (\\frac {\\sigma^ {2}}{n _ {\\mathrm {e f f}} (b)} \\Big) ^ {\\frac {2 \\beta}{2 \\beta + k}},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            357,
+            808,
+            640,
+            845
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "provided that $n _ { \\mathrm { e f f } } ( b )$ is large enough. Consequently, the effect of covariate shift with $b$ -bounded pairs is to reduce $n _ { P }$ to $n _ { P } / b$ . Again, we recover the standard rate $\\Big ( \\frac { \\sigma ^ { 2 } } { n } \\Big ) ^ { \\frac { 2 \\beta } { 2 \\beta + k } }$ 2β in the case of no covariate shift (or equivalently, when $b = 1$ ). This recovers a known result and is minimax optimal. ",
+        "bbox": [
+            111,
+            849,
+            885,
+            912
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "2.4 Matching lower bounds for $\\alpha$ -families ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            90,
+            527,
+            107
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Thus far, we have seen that the similarity measure $\\rho _ { h }$ plays a central role in determining the estimation error of the NW estimator under covariate shift. However, this is just one of many possible estimators in nonparametric regression. Does this similarity measure play a more fundamental role? In this section, we answer this question in the affirmative by proving minimax lower bounds for covariate shift problems parameterized in terms of bounds on $\\rho _ { h }$ . In order to do so, we consider the metric space $\\mathcal { X } = \\lfloor 0 , 1 \\rfloor$ equipped with the absolute value as the metric. ",
+        "bbox": [
+            109,
+            117,
+            883,
+            219
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "The main result of this section provides lower bounds on the mean-squared error of any estimator, when measured uniformly over functions in the Hölder class $\\mathcal { F } ( \\beta , L )$ , along with target-source pairs $( P , Q )$ belonging to the class $\\mathcal { D } ( \\alpha , C )$ when $\\alpha \\geqslant 1$ and the class $\\mathcal { D } ^ { \\prime } ( \\alpha , C )$ when $\\alpha < 1$ . ",
+        "bbox": [
+            111,
+            220,
+            883,
+            272
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Theorem 2. Suppose that Assumptions $\\mathcal { Q }$ and $\\mathcal { J }$ hold. Then there is a constant $c _ { \\ell } > 0$ , independent of $n , n _ { P } , n _ { Q } , \\sigma ^ { 2 }$ , and an integer $n _ { \\ell } : = n _ { \\ell } ( \\sigma , L , C , \\alpha , \\beta )$ such that for all sample sizes m $\\mathrm { a x } \\{ n _ { P } , n _ { Q } \\} \\geqslant$ $n \\ell$ : ",
+        "bbox": [
+            111,
+            277,
+            883,
+            330
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "(a) For $\\alpha > 1$ and $C \\geqslant 1$ , there is a pair of distributions $( P , Q ) \\in { \\mathcal { D } } ( \\alpha , C )$ such that ",
+        "bbox": [
+            125,
+            335,
+            787,
+            354
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf  _ {\\widehat {f}} \\sup  _ {f ^ {\\star} \\in \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} \\geqslant c _ {\\ell} \\left\\{\\left(\\frac {n _ {P}}{\\sigma^ {2}}\\right) ^ {\\frac {2 \\beta + 1}{2 \\beta + \\alpha}} + \\left(\\frac {n _ {Q}}{\\sigma^ {2}}\\right) \\right\\} ^ {- \\frac {2 \\beta}{2 \\beta + 1}}. \\tag {8a}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            281,
+            362,
+            883,
+            402
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "(b) For $\\alpha \\leqslant 1$ and $C \\geqslant 1$ , there is a pair of distributions $( P , Q ) \\in { \\mathcal { D } } ^ { \\prime } ( \\alpha , C )$ such that ",
+        "bbox": [
+            124,
+            414,
+            792,
+            431
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf  _ {\\widehat {f}} \\sup  _ {f ^ {\\star} \\in \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {(Q)} ^ {2} \\geqslant c _ {\\ell} \\Bigl \\{\\left(\\frac {n _ {P}}{\\sigma^ {2}}\\right) ^ {\\frac {2 \\beta}{2 \\beta + \\alpha}} + \\left(\\frac {n _ {Q}}{\\sigma^ {2}}\\right) \\Bigr \\} ^ {- 1}. \\tag {8b}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            300,
+            439,
+            883,
+            479
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "See Sections 4.3 and 4.4 for the proof of this result. ",
+        "bbox": [
+            112,
+            491,
+            516,
+            507
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "These lower bounds should be compared to Corollary 1. This comparison shows that the MSE bounds achieved by the NW estimator are actually optimal in the minimax sense over families defined by the similarity measure $\\rho _ { h }$ . ",
+        "bbox": [
+            109,
+            525,
+            883,
+            575
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "3 Properties of the similarity measure ",
+        "text_level": 1,
+        "bbox": [
+            111,
+            599,
+            566,
+            619
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "In the previous sections, we have seen that the similarity measure $\\rho _ { h }$ controls both the behavior of the NW estimator, as well as fundamental (minimax) risks applicable to any estimator. Thus, it is natural to explore the similarity measure in some more detail, and in particular to draw some connections to existing notions in the literature. ",
+        "bbox": [
+            109,
+            632,
+            883,
+            700
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "3.1 Controlling $\\rho _ { h }$ via covering numbers ",
+        "text_level": 1,
+        "bbox": [
+            111,
+            719,
+            516,
+            737
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We start with a general way of controlling the similarity measure $\\rho _ { h }$ , which is based on the covering number of the metric space $( \\mathcal { X } , d )$ . In particular, for any $h > 0$ , the covering number $N ( h )$ is defined to be the smallest number of balls of radius $h$ needed to cover the space $\\mathcal { X }$ . See Chapter 5 in the book [26] for more background. ",
+        "bbox": [
+            109,
+            746,
+            883,
+            814
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Proposition 1 (Covering number bounds for the similarity measure). Suppose that $P , Q$ are two probability measures on the same metric space $( \\mathcal { X } , d )$ . Suppose that for some $h > 0$ , there is a $\\lambda > 0$ such that ",
+        "bbox": [
+            111,
+            821,
+            883,
+            871
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP (\\mathsf {B} (x, h)) \\geqslant \\lambda Q (\\mathsf {B} (x, h)) \\quad f o r a l l x \\in \\mathcal {X}. \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            334,
+            873,
+            880,
+            890
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Then the similarity at scale h is upper bounded as $\\rho _ { h } ( P , Q ) \\leqslant N ( { \\frac { h } { 2 } } ) / \\lambda$ . ",
+        "bbox": [
+            114,
+            895,
+            666,
+            914
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "See Section 4.5 for the proof of this claim. ",
+        "bbox": [
+            111,
+            90,
+            444,
+            107
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "It is worth emphasizing that—due to the order of quantifiers above—the quantity $\\lambda > 0$ is allowed to depend on $h > 0$ . We exploit this fact in subsequent uses of the bound (9). ",
+        "bbox": [
+            111,
+            114,
+            883,
+            151
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "One straightforward application of Proposition 1 is in bounding the similarity measure when there is no covariate shift, as we now discuss. ",
+        "bbox": [
+            111,
+            167,
+            882,
+            200
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Example 2 (No covariate shift). Suppose that we compute the similarity measure in the case $P = Q$ ; intuitively, this models a scenario where there is no covariate shift. In this case, we clearly may apply Proposition 1 with $\\lambda = 1$ , which reveals that $\\rho _ { h } ( P , P ) \\leqslant N ( h / 2 )$ . To give one concrete bound, suppose that $\\mathcal { X } \\subset \\mathbf { R } ^ { k }$ is a compact set, with diameter $D$ . Then—owing to standard bounds on covering number [26, chap. 5]—we obtain $\\begin{array} { r } { \\rho _ { h } ( P , P ) \\leqslant ( 1 + \\frac { 2 D } { h } ) ^ { k } } \\end{array}$ . Note that this bound holds for any metric, so long as the diameter $D$ is computed with the same metric as the balls in the definition of the similarity measure. ",
+        "bbox": [
+            111,
+            212,
+            883,
+            330
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We give another application of Proposition 1 in the following subsection. ",
+        "bbox": [
+            112,
+            343,
+            681,
+            359
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "3.2 Comparison to previous notions of distribution mismatch ",
+        "text_level": 1,
+        "bbox": [
+            111,
+            378,
+            718,
+            396
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Next, we show how the mapping $h \\mapsto \\rho _ { h } ( P , Q )$ can be bounded naturally using previously proposed notions of distribution mismatch for covariate shift. Again, Proposition 1 plays a central role. ",
+        "bbox": [
+            111,
+            406,
+            883,
+            439
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Example 3 (Bounded likelihood ratio). Suppose that $P , Q$ are such that $Q \\ll P$ and the likelihood ratio $\\begin{array} { r } { \\frac { \\mathrm { d } Q } { \\mathrm { d } P } ( x ) \\leqslant b } \\end{array}$ , for all $x \\in \\mathcal { X }$ . Then note that by a simple integration argument $P ( \\mathsf { B } ( x , h ) ) \\geqslant$ ${ \\frac { 1 } { b } } Q ( \\mathbf { B } ( x , h ) )$ . Therefore, we conclude $\\rho _ { h } ( P , Q ) \\leqslant b N ( h / 2 )$ . ",
+        "bbox": [
+            111,
+            450,
+            883,
+            503
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "As noted previously, our work was inspired by the transfer exponent introduced by Kpotufe and Martinet [11] in the context of covariate shift for nonparametric regression. It is worth comparing these notions so as to understand in what sense the similarity measure $\\rho _ { h }$ is a refinement of the transfer exponent. In order to simplify this discussion, we focus here on the special case $\\mathcal { X } = \\lfloor 0 , 1 \\rfloor$ . We begin by providing the definition of transfer exponent: ",
+        "bbox": [
+            111,
+            513,
+            883,
+            598
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Definition 1 (Transfer exponent [11]). The distributions $( P , Q )$ have transfer exponent $\\gamma \\geqslant 0$ with constant $K \\in ( 0 , 1 ]$ if ",
+        "bbox": [
+            111,
+            609,
+            883,
+            643
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP (\\mathsf {B} (x, h)) \\geqslant K h ^ {\\gamma} Q (\\mathsf {B} (x, h)) \\quad f o r a l l x i n t h e s u p p o r t o f Q.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            256,
+            656,
+            740,
+            672
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We denote by $\\mathcal { T } ( \\gamma , K )$ the set of all pairs $( P , Q )$ with this property. ",
+        "bbox": [
+            111,
+            686,
+            643,
+            704
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "It is natural to ask how the set $\\mathcal { T } ( \\gamma , K )$ is related to the $\\alpha$ -family previously defined in equation (5a). The following result establishes an inclusion: ",
+        "bbox": [
+            111,
+            705,
+            882,
+            738
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Lemma 1. For $\\mathcal { X } = \\lfloor 0 , 1 \\rfloor$ and any $\\gamma \\geqslant 0$ and $K \\in ( 0 , 1 ]$ , we have the inclusion ",
+        "bbox": [
+            111,
+            750,
+            735,
+            766
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {T} (\\gamma , K) \\subset \\mathcal {D} (\\gamma + 1, \\frac {2}{K}). \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            779,
+            880,
+            797
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The proof of this inclusion is given in Section 4.6. At a high level, it exploits Proposition 1 to show that for any $( P , Q ) \\in \\mathcal { T } ( \\gamma , K )$ , we have the bound $\\begin{array} { r } { \\rho _ { h } ( P , Q ) \\leqslant \\frac { 1 } { K h ^ { \\gamma } } N ( h / 2 ) } \\end{array}$ . ",
+        "bbox": [
+            111,
+            810,
+            882,
+            845
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "From the inclusion (10), it follows that any covariate shift instance $( P , Q )$ with finite transfer exponent $\\gamma \\geqslant 0$ belongs to an $\\alpha$ -similarity family with $\\alpha = \\gamma + 1$ . In fact, following a proof similar to that of Theorem 2, we can show that for $\\gamma \\geqslant 0$ , there is pair $( P , Q )$ in the class $\\mathcal { T } ( \\gamma , K )$ such that ",
+        "bbox": [
+            111,
+            861,
+            883,
+            912
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/8268eb611b59b6e9768add96e3c5b92de35af5fcf5fd7012186512e80387926e.jpg",
+        "image_caption": [
+            "Figure 1. The yellow circle depicts the contour for the class $\\textstyle { \\mathcal { D } } ( \\gamma + 1 , { \\frac { 2 } { K } } )$ , while the blue square plots the contour for the class $\\mathcal { T } ( \\gamma , K )$ . It can be seen from Lemma 1 and Example 5 that $\\mathcal { T } ( \\gamma , K )$ is strict subset of $\\textstyle { \\mathcal { D } } ( \\gamma + 1 , { \\frac { 2 } { K } } )$ . In addition, our lower bound shows that under covariate shift, the worst-case instances for both classes coincide with each other. However, there exist instances $( P , Q )$ where the characterization using transfer exponent is intrinsically loose. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            253,
+            88,
+            743,
+            364
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "the minimax risk for β-Hölder-continous functions scales as n− 2P $\\beta$ $n _ { P } ^ { - \\frac { 2 \\beta } { 2 \\beta + \\gamma + 1 } }$ 2β . Note that this risk bound coincides with the minimax risk associated with the class $\\textstyle { \\mathcal { D } } ( \\gamma + 1 , { \\frac { 2 } { K } } )$ . In other words, from a worst case point of view, the source-target class $\\mathcal { T } ( \\gamma , K )$ is equally as hard as the class $\\textstyle { \\mathcal { D } } ( \\gamma + 1 , { \\frac { \\gamma } { K } } )$ for nonparametric regression under covariate shift. However, this worst case equivalence does not capture the full picture: there are many covariate shift families for which the transfer exponent provides an overly conservative prediction, and so does not capture the fundamental difficulty of the problem. Let us consider a concrete example to illustrate. ",
+        "bbox": [
+            109,
+            468,
+            883,
+            597
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Example 4 (Separation between transfer exponent and $\\rho _ { h }$ ). Let the target distribution $Q$ b e a uniform distribution on the interval $[ 0 , 1 ]$ , and for some $\\kappa \\geqslant 1$ , suppose that the source distribution $P$ has density $p ( x ) \\ = \\ ( \\kappa + 1 ) x ^ { \\kappa }$ for $x \\in [ 0 , 1 ]$ . With these definitions, it can be verified that $( P , Q ) \\in \\mathcal { T } ( \\kappa , K )$ for some constant $K \\in ( 0 , 1 ]$ , and moreover, that the quantity $\\kappa$ is the smallest possible transfer exponent for this pair. In contrast, another direct computation shows that the pair $( P , Q )$ belongs to the class $\\mathcal { D } ( \\kappa , C ^ { \\prime } )$ for some constant $C ^ { \\prime } > 0$ . These two inclusions establish a separation between the rates predicted by the transfer exponent and the similarity $\\rho _ { h }$ . Indeed, as shown by our theory, the difficulty of estimation over $\\mathcal { D } ( \\kappa , C ^ { \\prime } )$ is smaller than that prescribed by ${ \\mathcal { T } } ( \\kappa , K )$ . Indeed, if one observe $n$ samples from the source distribution, the worst-case rate indicated by the computation from the transfer exponent is $n ^ { - } \\frac { 2 \\beta } { 2 \\beta + \\kappa + 1 }$ 2β , whereas the rate guaranteed by the similarity measure $\\rho _ { h }$ is $n ^ { - \\frac { 2 \\beta } { 2 \\beta + \\kappa } }$ 2β . As an explicit example, Lipschitz functions ( $\\beta = 1$ ) and $\\kappa = 1$ , we obtain the slower rate $n ^ { - 1 / 2 }$ versus the faster rate $n ^ { - 2 / 3 }$ , so that the ratio between the two rates diverges as $n ^ { 1 / 6 }$ as the sample size grows. ",
+        "bbox": [
+            109,
+            608,
+            883,
+            839
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "See also Figure 1 for an illustration of the connections and differences between the similarity measure and the transfer exponent. ",
+        "bbox": [
+            109,
+            849,
+            883,
+            883
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            491,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "4 Proofs ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            88,
+            230,
+            104
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "We now turn to the proofs of the results stated in the previous section. ",
+        "bbox": [
+            112,
+            122,
+            669,
+            138
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "4.1 Proof of Theorem 1 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            157,
+            356,
+            174
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Recall that the estimate $\\hat { \\boldsymbol f }$ depends on the observations $\\{ ( X _ { i } , Y _ { i } ) \\} _ { i = 1 } ^ { n }$ , and so should be understood as a random function. The core of the proof involves proving that, for each $x \\in \\mathcal { X }$ , we have ",
+        "bbox": [
+            111,
+            184,
+            883,
+            219
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ \\left(\\widehat {f} (x) - f ^ {\\star} (x)\\right) ^ {2} \\right] \\leqslant L ^ {2} h _ {n} ^ {2 \\beta} + \\frac {4 \\sigma^ {2} + \\| f ^ {\\star} \\| _ {\\infty} ^ {2}}{n} \\frac {1}{\\mu_ {n} (\\mathrm {B} (x , h _ {n}))}, \\tag {11}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            267,
+            231,
+            880,
+            267
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "where the expectation is taking over the observations $\\{ ( X _ { i } , Y _ { i } ) \\} _ { i = 1 } ^ { n }$ . Given this inequality, the claim (4) of Theorem 1 follows, since by Fubini’s theorem, we can write ",
+        "bbox": [
+            111,
+            277,
+            883,
+            313
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ \\left\\| \\widehat {f} - f ^ {\\star} \\right\\| _ {L ^ {2} (Q)} ^ {2} \\right] = \\int_ {\\mathcal {X}} \\mathbf {E} \\left[ \\left(\\widehat {f} (x) - f ^ {\\star} (x)\\right) ^ {2} \\right] \\mathrm {d} Q (x).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            294,
+            325,
+            704,
+            359
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Applying inequality (11) and recalling the definition of the similarity measure yields the claim (4). ",
+        "bbox": [
+            112,
+            371,
+            880,
+            388
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "We now focus on establishing the bound (11). Our proof makes use of the conditional expectation of $\\widehat { f }$ given the covariates ",
+        "bbox": [
+            111,
+            388,
+            880,
+            422
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\overline {{f}} (x) := \\mathbf {E} [ \\widehat {f} (x) \\mid X _ {1}, \\dots , X _ {n} ], \\quad \\text {f o r a n y} x \\in \\mathcal {X}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            316,
+            434,
+            679,
+            454
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "To be explicit, the expectation is taken over $Y _ { i } \\ \\mid \\ X _ { i }$ , $i = 1 , \\ldots , n$ . With this definition, our first result provides a bound on the conditional bias and variance. ",
+        "bbox": [
+            111,
+            467,
+            883,
+            501
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Lemma 2. For each $x \\in \\mathcal { X }$ almost surely, the Nadaraya-Watson estimator $\\hat { \\boldsymbol f }$ satisfies the bounds ",
+        "bbox": [
+            112,
+            511,
+            870,
+            530
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left(\\bar {f} (x) - f ^ {\\star} (x)\\right) ^ {2} \\leqslant \\| f ^ {\\star} \\| _ {\\infty} ^ {2} \\mathbf {1} \\{x \\notin \\mathcal {G} _ {n} \\} + L ^ {2} h _ {n} ^ {2 \\beta} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} \\quad a n d \\tag {12a}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            292,
+            541,
+            880,
+            560
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ \\left(\\bar {f} (x) - \\widehat {f} (x)\\right) ^ {2} \\mid X _ {1}, \\dots , X _ {n} \\right] \\leqslant \\frac {\\sigma^ {2}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathcal {B} (x , h _ {n}) \\}} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\}. \\tag {12b}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            176,
+            565,
+            880,
+            589
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "We prove this auxiliary claim at the end of this section. ",
+        "bbox": [
+            112,
+            601,
+            549,
+            616
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Taking the results of Lemma 2 as given, we continue our proof of the bound (11). For any fixed $x \\in \\mathcal { X }$ , a conditioning argument yields ",
+        "bbox": [
+            111,
+            635,
+            883,
+            669
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ (\\widehat {f} (x) - f ^ {\\star} (x)) ^ {2} \\right] = \\mathbf {E} \\left[ (\\overline {{f}} (x) - f ^ {\\star} (x)) ^ {2} \\right] + \\mathbf {E} \\left[ \\mathbf {E} [ (\\overline {{f}} (x) - \\widehat {f} (x)) ^ {2} \\mid X _ {1}, \\ldots , X _ {n} ] \\right].\n$$",
+        "text_format": "latex",
+        "bbox": [
+            183,
+            680,
+            815,
+            709
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "By applying the bounds (12a) and (12b) to the two terms above, respectively, we arrive at the upper bound ${ \\bf E } \\left[ ( \\widehat { f } ( x ) - f ^ { \\star } ( x ) ) ^ { 2 } \\right] \\leqslant T _ { 1 } + T _ { 2 }$ , where ",
+        "bbox": [
+            111,
+            720,
+            880,
+            755
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\nT _ {1} := \\| f ^ {\\star} \\| _ {\\infty} ^ {2} \\mathbf {E} [ \\mathbf {1} \\{x \\notin \\mathcal {G} _ {n} \\} ] + L ^ {2} h _ {n} ^ {2 \\beta}, \\quad \\mathrm {a n d} \\quad T _ {2} := \\mathbf {E} \\left[ \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} \\frac {\\sigma^ {2}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathcal {B} (x , h _ {n}) \\}} \\right].\n$$",
+        "text_format": "latex",
+        "bbox": [
+            174,
+            768,
+            823,
+            796
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "We bound each of these terms in turn. ",
+        "bbox": [
+            112,
+            806,
+            416,
+            821
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            946
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Bounding $T _ { 1 }$ : By definition, the set ${ \\mathcal { G } } _ { n }$ involves $n$ independent random variables, so that for any $x \\in \\mathcal { X }$ , we have ",
+        "bbox": [
+            111,
+            90,
+            880,
+            125
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ \\mathbf {1} \\{x \\notin \\mathcal {G} _ {n} \\} \\right] = \\left(1 - P \\left(\\mathrm {B} \\left(x, h _ {n}\\right)\\right)\\right) ^ {n _ {P}} \\left(1 - Q \\left(\\mathrm {B} \\left(x, h _ {n}\\right)\\right)\\right) ^ {n _ {Q}} \\leqslant \\frac {1}{n \\mu_ {n} (\\mathrm {B} \\left(x , h _ {n}\\right))}, \\tag {13}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            192,
+            140,
+            880,
+            174
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "where step (i) follows from the elementary inequality (1 − p)n(1 − q)m 6 exp(−(np + mq)) 6 1np+mq , $\\begin{array} { r } { ( 1 - p ) ^ { n } ( 1 - q ) ^ { m } \\leqslant \\exp ( - ( n p + m q ) ) \\leqslant \\frac { 1 } { n p + m q } } \\end{array}$ valid for $p , q \\in ( 0 , 1 )$ and nonnegative integers $n , m$ . Consequently, the first term is upper bounded as ",
+        "bbox": [
+            111,
+            186,
+            880,
+            236
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nT _ {1} \\leqslant \\| f ^ {\\star} \\| _ {\\infty} ^ {2} \\frac {1}{n \\mu_ {n} (\\mathrm {B} (x , h _ {n}))} + L ^ {2} h _ {n} ^ {2 \\beta}. \\tag {14a}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            357,
+            250,
+            880,
+            281
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Bounding $T _ { 2 }$ : For a fixed $x \\in \\mathcal { X }$ , and for each $i = 1 , \\ldots , n$ , define the Bernoulli random variable $\\begin{array} { r } { V = \\sum _ { i = n _ { P } + 1 } ^ { n } Z _ { i } } \\end{array}$ $Z _ { i } ~ = ~ \\mathbf { 1 } [ X _ { i } ~ \\in ~ \\mathsf { B } ( x , h _ { n } ) ] ~ \\in ~ \\{ 0 , 1 \\}$ ∈ { }. With these definitions, we can write , along with the binomial random variables $\\begin{array} { r } { U \\ = \\ \\sum _ { i = 1 } ^ { n _ { P } } Z _ { i } } \\end{array}$ and ",
+        "bbox": [
+            112,
+            297,
+            880,
+            351
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x, h _ {n}) \\} = U + V, \\quad \\text {a n d} \\quad \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} = \\mathbf {1} \\{U + V > 0 \\}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            232,
+            366,
+            761,
+            406
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Consequently, by an elementary bound for binomial random variables (see Lemma 5), it follows that ",
+        "bbox": [
+            112,
+            420,
+            880,
+            436
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nT _ {2} = \\mathbf {E} \\left[ \\mathbf {1} \\{U + V > 0 \\} \\frac {1}{U + V} \\right] \\leqslant \\frac {4}{n \\mu_ {n} (\\mathsf {B} (x , h _ {n}))}. \\tag {14b}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            305,
+            450,
+            880,
+            483
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Combining inequalities (14a) and (14b) yields the claim (11). ",
+        "bbox": [
+            112,
+            488,
+            589,
+            505
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "The only remaining detail is to prove the auxiliary lemma used in the proof. ",
+        "bbox": [
+            112,
+            523,
+            707,
+            539
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Proof of Lemma 2. Recall that by definition, we have ",
+        "bbox": [
+            112,
+            551,
+            532,
+            566
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\overline {{f}} (x) = \\left\\{ \\begin{array}{l l} \\frac {\\sum_ {i = 1} ^ {n} f ^ {\\star} (X _ {i}) \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}} & x \\in \\mathcal {G} _ {n} \\\\ 0 & x \\notin \\mathcal {G} _ {n} \\end{array} \\right.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            307,
+            580,
+            687,
+            633
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Proof of the bound (12a): By a direct expansion, we have ",
+        "bbox": [
+            112,
+            654,
+            599,
+            670
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left(\\overline {{f}} (x) - f ^ {\\star} (x)\\right) ^ {2} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} = \\left(\\frac {\\sum_ {i = 1} ^ {n} \\left(f ^ {\\star} (x) - f ^ {\\star} \\left(X _ {i}\\right)\\right) \\mathbf {1} \\left\\{X _ {i} \\in \\mathsf {B} \\left(x , h _ {n}\\right) \\right\\}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\left\\{X _ {i} \\in \\mathsf {B} \\left(x , h _ {n}\\right) \\right\\}}\\right) ^ {2} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} \\\\ \\stackrel {(i)} {\\leqslant} \\frac {\\sum_ {i = 1} ^ {n} (f ^ {\\star} (x) - f ^ {\\star} (X _ {i})) ^ {2} \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} \\\\ \\stackrel {(\\mathrm {i i})} {\\leqslant} L ^ {2} h _ {n} ^ {2 \\beta} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\}, \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            176,
+            684,
+            818,
+            790
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "where step (i) follows from Jensen’s inequality; and step (ii) makes use of Assumption 1. The bound (12a) is an immediate consequence. ",
+        "bbox": [
+            111,
+            804,
+            880,
+            838
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "11 ",
+        "bbox": [
+            488,
+            934,
+            506,
+            946
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Proof of the bound (12b): In order to prove this claim, note that by independence among $\\{ ( X _ { i } , \\xi _ { i } ) \\} _ { i = 1 } ^ { n }$ , ",
+        "bbox": [
+            112,
+            90,
+            880,
+            126
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathbf {E} [ (\\overline {{f}} (x) - \\widehat {f} (x)) ^ {2} \\mid X _ {1}, \\dots , X _ {n} ] = \\sum_ {i = 1} ^ {n} \\mathbf {E} [ \\xi_ {i} ^ {2} \\mid X _ {i} ] \\left(\\frac {\\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}}\\right) ^ {2} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} \\\\ \\stackrel {\\text {(i i i)}} {\\leqslant} \\sigma^ {2} \\sum_ {i = 1} ^ {n} \\left(\\frac {\\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\{X _ {i} \\in \\mathsf {B} (x , h _ {n}) \\}}\\right) ^ {2} \\mathbf {1} \\{x \\in \\mathcal {G} _ {n} \\} \\\\ = \\frac {\\sigma^ {2}}{\\sum_ {i = 1} ^ {n} \\mathbf {1} \\left\\{X _ {i} \\in \\mathrm {B} (x , h _ {n}) \\right\\}} \\mathbf {1} \\left\\{x \\in \\mathcal {G} _ {n} \\right\\}, \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            194,
+            140,
+            800,
+            266
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "which proves the claim. Here step (iii) is a consequence of Assumption 3. ",
+        "bbox": [
+            112,
+            279,
+            684,
+            295
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "image",
+        "img_path": "images/09d6fee4cab47826de0aa1df1863f3fa2bb5619eecfcec87d5a72a09e1097ec5.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            864,
+            279,
+            880,
+            292
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "4.2 Proof of Corollary 1 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            314,
+            359,
+            330
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Fix some $h \\in ( 0 , 1 ]$ , and introduce the indicator variable $\\eta = \\mathbf { 1 } \\{ \\alpha \\geqslant 1 \\}$ . We then have ",
+        "bbox": [
+            111,
+            340,
+            782,
+            358
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\int_ {\\mathcal {X}} \\frac {1}{n _ {P} P (\\mathsf {B} (x , h)) + n _ {Q} Q (\\mathsf {B} (x , h))} \\mathrm {d} Q (x) \\leqslant \\min  \\left\\{\\frac {1}{n _ {P}} \\rho_ {h} (P, Q), \\frac {1}{n _ {Q}} \\rho_ {h} (Q, Q) \\right\\} \\\\ \\leqslant 3 ^ {\\eta} C \\min  \\left\\{\\frac {1}{n _ {P} h ^ {\\alpha}}, \\frac {1}{n _ {Q} h ^ {\\eta}} \\right\\} \\\\ \\leqslant 2 \\cdot 3 ^ {\\eta} C \\frac {1}{n _ {P} h ^ {\\alpha} + n _ {Q} h ^ {\\eta}}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            205,
+            372,
+            790,
+            479
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "The last inequality follows from (1) and standard covering number bounds (note $h \\leqslant 1$ ). Thus the final performance bound is ",
+        "bbox": [
+            111,
+            491,
+            880,
+            523
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\n2 \\cdot 3 ^ {\\eta} C L ^ {2} \\Bigl \\{h ^ {2 \\beta} + \\frac {L ^ {2} + \\sigma^ {2}}{n _ {P} h ^ {\\alpha} + n _ {Q} h ^ {\\eta}} \\Bigr \\}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            367,
+            523,
+            627,
+            560
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "We choose the bandwidth $h ^ { \\star }$ so as to trade off between two terms in this risk bound; more precisely, we set ",
+        "bbox": [
+            111,
+            566,
+            880,
+            595
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\nh ^ {\\star} = \\left(\\left(\\frac {n _ {Q}}{L ^ {2} + \\sigma^ {2}}\\right) + \\left(\\frac {n _ {P}}{L ^ {2} + \\sigma^ {2}}\\right) ^ {\\frac {2 \\beta + \\eta}{2 \\beta + \\alpha}}\\right) ^ {- \\frac {1}{2 \\beta + \\eta}}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            333,
+            595,
+            661,
+            632
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "This choice is valid, since $\\sigma ^ { 2 } \\geqslant L ^ { 2 }$ and $\\operatorname* { m a x } \\{ n _ { P } , n _ { Q } \\} \\geqslant 4 \\sigma ^ { 2 }$ by assumption. Substituting this choice of bandwidth into the risk bound (4) yields the claim. ",
+        "bbox": [
+            111,
+            638,
+            880,
+            672
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "4.3 Proof of Theorem 2(a) ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            691,
+            383,
+            710
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Before giving the complete proof, we outline the main steps involved. ",
+        "bbox": [
+            111,
+            720,
+            653,
+            736
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1. We first construct a hard instance $( P , Q ) \\in { \\mathcal { D } } ( \\alpha , C )$ . This instance is designed such that the integral quantity $\\rho _ { h } ( P , Q )$ must scale as $C h ^ { - \\alpha }$ . ",
+            "2. Then we select a family of hard regression functions contained within ${ \\mathcal { F } } ( \\beta , L )$ that guarantees the worst-case expected error for our pair of distributions, $( P , Q )$ . ",
+            "3. Finally, we apply Fano’s method over this set of regression functions to show that the expected error must scale as the righthand side of inequality (8a). "
+        ],
+        "bbox": [
+            133,
+            747,
+            880,
+            871
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            488,
+            934,
+            508,
+            946
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "image",
+        "img_path": "images/da8d064c41218a4f1032f767d4e397d87b1a7f279da600da0f7300dddc7a3ed8.jpg",
+        "image_caption": [
+            "We will take Many choices       proposition verifies that (P, Figure 2. An illustration of the distributions $( P , Q )$ are possible above [22, see chap. 2]; we require      j    in D(↵, C) for proper choices of the \" and S. constructed as a hard pair in our lower bound. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            323,
+            85,
+            681,
+            396
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Above, is a packing set of the discrete cube 0, 1 M , originally constructed by Gilbert [7] andM8nterval Ij as follows: RP — would be nice to put a picture here.It is worth commenting on our proof strategy in relation to past work. On one hand, in the case $\\alpha \\geqslant 1$ shamov [23]. The following result records, our construction of the distributions $( P , Q )$ ain property of this set.(x) · = X b \u0000 (x), where \u0000 (x) · = Lr\u0000 ⇣x  is adapted from the lower bound argument j=1    j   introduced by Kpotufe and Martinet [11]. The technical work involves constructing pairs of densities r cterof $P , Q$ Lemma 2 (Gilbert-Varshamov [22, Lemma 2.9]). Let ices of the \" and S. density of P density of Q, and establishing their membership in the class $\\mathcal { D } ( \\alpha , C )$ There is a subset B . As for the case $\\alpha \\in ( 0 , 1 )$ such, as that kb \u0000 b0 k1 > M/8 for all distinct b, b0 2 B, and |B| > 2 .We will take n3r, z r] 1 (1 \" ( r )↵\u00001) 0stated in Theorem 2(b), we use a different construction of the distribution pair $( P , Q )$ , one that The next result summarizes the important properties of the hard set of regression functions, .H ··= fb | b 2 B . \u0000 4Mr \u0000 3 S is new (to the best of our knowledge). We combine these constructions of “hard” source-target Above, is a packing set of the discrete cube 0, 1 M , originally conr, zj + r] \" ( r )↵\u00001 1pairs, in particular by packing the interval [0, 1] with a variable number of small intervals (e.g., [28, Lemma 3. The set H has the following properties:Varshamov [23]. The following result records the main property of this25, 26]). By adapting the number of intervals (and constructing a packing set of the function r, zj class $\\mathcal { F } ( \\beta , L )$ 4Mr (1 \u0000 3 ( S ) \u0000 ) 0 appropriately over these intervals), one can adapt the hardness of the lower bound H ⇢ F Lemma 2 (Gilbert-Varshamov [22, Lemma 2.9]). Let M > 8. There iinstance to change with the number of samples. In this case, we are able to do this such that (b) it has the following separation: for each distinct f, g , f g 2 > C2  L2r2\u0000;that kb \u0000 b0 k1 > M/8 for all distinct b, b0 2 B, and |B| > 2 . the hardness scales appropriately with the critical parameters that govern the final minimax lower bound: $n _ { P } , n _ { Q } , \\sigma , \\alpha , \\beta$ The next result summarizes the important properties of the hard se. With this high-level overview in place, we now proceed to the technical (c) it satisifeand Q assign procontent of the proof. ",
+        "bbox": [
+            109,
+            446,
+            883,
+            667
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "kfk2L2(Q) 6 C2 M2S L2r2\u0000+1 and k(a) it is contained within tDConstructing “hard” source-target pairs: For scalars $S , r \\in ( 0 , 1 ]$ 2 MS↵ L2rss, H ⇢ , define $\\begin{array} { r } { M = \\frac { S } { 6 r } } \\end{array}$ along with ",
+        "bbox": [
+            109,
+            686,
+            883,
+            720
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\nI _ {j} := \\left(z _ {j} - 3 r, z _ {j} + 3 r \\right], \\quad \\text {w h e r e} \\quad z _ {j} := 6 j r - 3 r, \\qquad j = 1, \\dots , M.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            235,
+            731,
+            756,
+            750
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "We specify $P$ and $Q$ (c)  on each interval $I _ { j }$ t satisifes thas follows: ",
+        "bbox": [
+            111,
+            758,
+            509,
+            777
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "table",
+        "img_path": "images/bf8f5196eb6a5490181ddae8e8e24fb114d5f60126a59bd97ab02f36d0ac89b6.jpg",
+        "table_caption": [
+            "Table 1. Specification of densities for lower bound pair of distributions $( P , Q )$ on the interval $I _ { j }$ "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>subinterval</td><td>density of P</td><td>density of Q</td></tr><tr><td>(zj-3r, zj-r]</td><td>1/4Mr(1 - ε/3(r/S)α-1)</td><td>0</td></tr><tr><td>(zj-r, zj+r]</td><td>ε/6Mr(r/S)α-1</td><td>1/2Mr</td></tr><tr><td>(zj+r, zj+3r]</td><td>1/4Mr(1 - ε/3(r/S)α-1)</td><td>0</td></tr></table>",
+        "bbox": [
+            277,
+            789,
+            718,
+            890
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            946
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "By construction, both $P$ and $Q$ assign probability $1 / M$ to the entire interval $I _ { j }$ . The following proposition verifies that $( P , Q )$ lies in $\\mathcal { D } ( \\alpha , C )$ for proper choices of the $\\varepsilon$ and $S$ . ",
+        "bbox": [
+            111,
+            90,
+            887,
+            125
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Proposition 2. Let $\\alpha \\geqslant 1$ and $C \\geqslant 1$ . Define $P$ and $Q$ as in Table 1, with the following choice of parameters $\\varepsilon , S$ : ",
+        "bbox": [
+            111,
+            133,
+            887,
+            167
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) if $C > 6$ , set $\\varepsilon = 6 / C$ , and $S = 1 / 4$ ",
+            "(b) if $1 \\leqslant C \\leqslant 6$ , set $\\varepsilon = 1$ , and $S = { \\textstyle \\frac { 1 } { 4 } } ( C / 6 ) ^ { 1 / \\alpha }$ . "
+        ],
+        "bbox": [
+            125,
+            176,
+            504,
+            223
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Then for any choice of $M , r > 0$ satisfying $S = 6 M r$ , the pair $( P , Q )$ lies in $\\mathcal { D } ( \\alpha , C )$ . ",
+        "bbox": [
+            114,
+            232,
+            777,
+            250
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "See Section 4.3.1 for the proof of this claim. ",
+        "bbox": [
+            112,
+            258,
+            459,
+            275
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Construction of “hard” regression functions. Next we construct a packing of the function class of $\\mathcal { F } ( \\beta , L )$ . We do so by summing together scaled and shifted copies of base function $\\Psi \\colon [ - 1 , 1 ]  \\mathbf { R }$ that satisfies the boundary conditions $\\Psi ( - 1 ) = \\Psi ( 1 ) = 0$ , along with ",
+        "bbox": [
+            111,
+            294,
+            883,
+            347
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left| \\Psi (x) - \\Psi (y) \\right| \\leqslant | x - y | ^ {\\beta}, \\quad \\text {f o r a l l} x, y \\in [ - 1, 1 ], \\quad \\text {a n d}, \\tag {15a}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            279,
+            354,
+            880,
+            376
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {- 1} ^ {1} \\Psi^ {2} (x) d x =: C _ {\\Psi} ^ {2} > 0. \\tag {15b}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            285,
+            378,
+            880,
+            415
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "There are many possible choices of $\\Psi$ ; see Chapter 2 in the book [25] for details. For our proof, we also require the bound $C _ { \\Psi } ^ { 2 } \\leqslant 1 / 6$ , so that we make the explicit choice ",
+        "bbox": [
+            111,
+            425,
+            883,
+            460
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\Psi (x) := e ^ {- 1 / \\left(1 - x ^ {2}\\right)} \\mathbf {1} \\{| x | \\leqslant 1 \\}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            380,
+            469,
+            614,
+            491
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "We now form a class of functions using sums of the form ",
+        "bbox": [
+            112,
+            501,
+            558,
+            518
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {b} (x) := \\sum_ {j = 1} ^ {M} b _ {j} \\phi_ {j} (x), \\quad \\text {w h e r e} \\quad \\phi_ {j} (x) := L r ^ {\\beta} \\Psi \\left(\\frac {x - z _ {j}}{r}\\right),\n$$",
+        "text_format": "latex",
+        "bbox": [
+            277,
+            527,
+            718,
+            574
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "and $b = ( b _ { 1 } , \\dots , b _ { M } ) \\in \\{ 0 , 1 \\} ^ { M }$ is a Boolean sequence. Our construction makes use of the Gilbert-Varshamov lemma (e.g. [25, Lemma 2.9]), which for $M \\geqslant 8$ , guarantees the existence of a subset $B \\subset \\{ 0 , 1 \\} ^ { M }$ of cardinality at least $2 ^ { M / 8 }$ such that ",
+        "bbox": [
+            111,
+            585,
+            883,
+            637
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| b - b ^ {\\prime} \\right\\| _ {1} \\geqslant M / 8 \\quad \\text {f o r a l l d i s t i n c t} b, b ^ {\\prime} \\in \\mathcal {B}. \\tag {16}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            321,
+            648,
+            880,
+            667
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Lemma 3. The function class ${ \\mathcal { H } } : = \\left\\{ f _ { b } \\mid b \\in B \\right\\}$ has the following properties: ",
+        "bbox": [
+            111,
+            676,
+            733,
+            704
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "(a) It is contained within the Hölder class— ${ \\mathcal { H } } \\subset { \\mathcal { F } } ( { \\boldsymbol { \\beta } } , L )$ . ",
+            "(b) Pairs of functions are well-separated: for each distinct $f , g \\in { \\mathcal { H } }$ , we have "
+        ],
+        "bbox": [
+            124,
+            710,
+            725,
+            756
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| f - g \\right\\| _ {L ^ {2} (Q)} ^ {2} \\geqslant \\frac {C _ {\\Psi} ^ {2}}{1 6} L ^ {2} r ^ {2 \\beta}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            419,
+            765,
+            620,
+            792
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "(c) Its elements satisfy the following $L ^ { 2 } ( P )$ and $L ^ { 2 } ( Q )$ bounds: ",
+        "bbox": [
+            125,
+            825,
+            622,
+            844
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\| f \\| _ {L ^ {2} (Q)} ^ {2} \\leqslant \\frac {C _ {\\Psi} ^ {2} M}{2 S} L ^ {2} r ^ {2 \\beta + 1} \\quad a n d \\quad \\| f \\| _ {L ^ {2} (P)} ^ {2} \\leqslant \\frac {\\varepsilon C _ {\\Psi} ^ {2} M}{6 S ^ {\\alpha}} L ^ {2} r ^ {2 \\beta + \\alpha},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            277,
+            853,
+            764,
+            888
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "for all $f \\in \\mathcal H$ . ",
+        "bbox": [
+            156,
+            895,
+            267,
+            912
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            946
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Applying Fano’s method. We now combine the preceding constructions with a Fano argument to complete the proof of the lower bound. For any function $f \\in \\mathcal H$ , let $\\nu _ { f }$ be the distribution $\\{ ( X _ { i } , Y _ { i } ) \\} _ { i = 1 } ^ { n }$ where $( X , Y )$ pairs are related by our nonparametric regression model (2) with $f = f ^ { \\star }$ . For proving our lower bound, it suffices to consider Gaussian noise: in particular, $\\xi _ { i } \\stackrel { \\scriptscriptstyle 1 . 1 . 4 . } { \\sim } \\mathsf { N } ( 0 , \\sigma ^ { 2 } )$ for $i = 1 , \\ldots , n$ . These variables satisfy Assumption 3. ",
+        "bbox": [
+            111,
+            90,
+            885,
+            180
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "With these choices, Kullback-Leibler divergence between any given pair $( \\nu _ { f } , \\nu _ { g } )$ can be bounded as ",
+        "bbox": [
+            111,
+            181,
+            885,
+            214
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\nD _ {\\mathrm {k l}} (\\nu_ {f} \\parallel \\nu_ {g}) = \\frac {1}{2 \\sigma^ {2}} \\Big (n _ {P} \\| f - g \\| _ {L ^ {2} (P)} ^ {2} + n _ {Q} \\| f - g \\| _ {L ^ {2} (Q)} ^ {2} \\Big) \\leqslant \\frac {2}{\\sigma^ {2}} \\Big (n _ {P} \\max _ {f \\in \\mathcal {H}} \\| f \\| _ {L ^ {2} (P)} ^ {2} + n _ {Q} \\max _ {f \\in \\mathcal {H}} \\| f \\| _ {L ^ {2} (Q)} ^ {2} \\Big).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            116,
+            223,
+            901,
+            257
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Now applying part (c) of Lemma 3 yields ",
+        "bbox": [
+            112,
+            268,
+            442,
+            287
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} D _ {\\mathrm {k l}} \\left(\\nu_ {f} \\parallel \\nu_ {g}\\right) \\leqslant M C _ {\\Psi} ^ {2} \\left\\{n _ {P} \\frac {L ^ {2}}{3 \\sigma^ {2}} \\frac {\\varepsilon}{S ^ {\\alpha}} r ^ {2 \\beta + \\alpha} + n _ {Q} \\frac {L ^ {2}}{\\sigma^ {2}} \\frac {1}{S} r ^ {2 \\beta + 1} \\right\\} \\\\ \\leqslant M \\left\\{\\frac {4 ^ {\\alpha}}{C} \\frac {L ^ {2}}{\\sigma^ {2}} n _ {P} r ^ {2 \\beta + \\alpha} + \\frac {4 ^ {\\alpha}}{C} \\frac {L ^ {2}}{\\sigma^ {2}} n _ {Q} r ^ {2 \\beta + 1} \\right\\} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            281,
+            299,
+            717,
+            367
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "The final inequality arises by using $C _ { \\Psi } ^ { 2 } \\leqslant 1 / 6$ . Suppose we take ",
+        "bbox": [
+            112,
+            378,
+            614,
+            397
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\nr = \\left(\\left(6 4 \\frac {4 ^ {\\alpha}}{C} \\frac {L ^ {2} n _ {P}}{\\sigma^ {2}}\\right) ^ {\\frac {2 \\beta + 1}{2 \\beta + \\alpha}} + \\left(6 4 \\frac {4 ^ {\\alpha}}{C} \\frac {L ^ {2} n _ {Q}}{\\sigma^ {2}}\\right)\\right) ^ {- \\frac {1}{2 \\beta + 1}}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            316,
+            407,
+            679,
+            444
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Then for any distinct $f , g \\in { \\mathcal { H } }$ , we obtain ",
+        "bbox": [
+            112,
+            453,
+            439,
+            469
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\nD _ {\\mathrm {k l}} \\left(\\nu_ {f} \\| \\nu_ {g}\\right) \\leqslant M / 3 2. \\tag {17}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            415,
+            484,
+            880,
+            501
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "By a standard reduction to hypothesis testing [26, chap. 15] along with part (a), ",
+        "bbox": [
+            111,
+            513,
+            745,
+            531
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf _ {\\widehat {f}} \\sup _ {f ^ {\\star} \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left[ \\| \\widehat {f} - f ^ {\\star} \\| _ {L ^ {2} (Q)} ^ {2} \\right] \\geqslant \\frac {\\min _ {(f , g) \\in \\binom {\\mathcal {H}} {2}} \\| f - g \\| _ {L ^ {2} (Q)} ^ {2}}{4} \\Bigl \\{1 - \\frac {\\log 2 + \\max _ {(f , g) \\in \\binom {\\mathcal {H}} {2}} D _ {\\mathrm {k l}} (\\nu_ {f} \\| \\nu_ {g})}{\\log | \\mathcal {H} |} \\Bigr \\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            117,
+            542,
+            877,
+            588
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Thus, after applying part (b) of Lemma 3, we obtain ",
+        "bbox": [
+            112,
+            601,
+            529,
+            618
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf _ {\\widehat {f}} \\sup _ {f ^ {\\star} \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left[ \\| \\widehat {f} - f ^ {\\star} \\| _ {L ^ {2} (Q)} ^ {2} \\right] \\geqslant \\frac {C _ {\\Psi} ^ {2}}{6 4} L ^ {2} r ^ {2 \\beta} \\Big (1 - \\frac {8}{M} - \\frac {1}{4} \\Big) \\geqslant \\frac {C _ {\\Psi} ^ {2} L ^ {2}}{2 5 6} \\Big (\\big (6 4 \\frac {4 ^ {\\alpha}}{C} \\frac {L ^ {2} n _ {P}}{\\sigma^ {2}} \\big) ^ {\\frac {2 \\beta + 1}{2 \\beta + \\alpha}} + \\big (6 4 \\frac {4 ^ {\\alpha}}{C} \\frac {L ^ {2} n _ {Q}}{6 4 \\sigma^ {2}} \\big) \\Big) ^ {- \\frac {2 \\beta}{2 \\beta + 1}},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            114,
+            628,
+            924,
+            671
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "provided that $M \\geqslant 3 2$ . Equivalently, $r \\leqslant S / 1 9 2$ . It suffices that $\\begin{array} { r } { r \\leqslant \\frac { 1 } { 4 6 0 8 } } \\end{array}$ , this is ensured by having ",
+        "bbox": [
+            111,
+            683,
+            883,
+            703
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\max \\{n _ {P}, n _ {Q} \\} \\geqslant \\left(7 2 \\frac {\\sigma^ {2}}{L ^ {2}} \\frac {C}{4 ^ {\\alpha}}\\right) ^ {2 \\beta + \\alpha}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            370,
+            714,
+            627,
+            750
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "4.3.1 Proof of Proposition 2 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            763,
+            382,
+            780
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "We will show that for a general choice of $\\varepsilon , S \\in ( 0 , 1 ]$ , the following holds: ",
+        "bbox": [
+            112,
+            789,
+            689,
+            806
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP \\left(\\mathrm {B} (x, h)\\right) \\geqslant \\frac {\\varepsilon}{3} \\left(\\frac {h}{4 S}\\right) ^ {\\alpha - 1} Q \\left(\\mathrm {B} (x, h)\\right), \\quad \\text {f o r a l l} x \\in \\operatorname {s u p p} (Q), \\text {a n d a n y} h > 0. \\tag {18}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            209,
+            819,
+            883,
+            851
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "For the moment let us take this bound as given. By Lemma 1, note that bound (18) implies that $( P , Q ) \\in { \\mathcal { D } } ( \\alpha , { \\mathcal { C } } ( \\varepsilon , S ) )$ , with ${ \\mathcal C } ( \\varepsilon , S ) = { \\textstyle { \\frac { 6 } { \\varepsilon } } } ( 4 S ) ^ { \\alpha - 1 }$ , for any $\\varepsilon , S \\in ( 0 , 1 ]$ . Note that the parameter choices given in the statement of the result ensure that $\\varepsilon , S \\in ( 0 , 1 ]$ . When $C \\geqslant 6$ , we have ",
+        "bbox": [
+            111,
+            861,
+            885,
+            912
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "15 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            948
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "$\\mathcal { C } ( \\varepsilon , S ) = 6 ( C / 6 ) ^ { 1 - 1 / \\alpha } = C ( 6 / C ) ^ { 1 / \\alpha } \\leqslant 6 \\leqslant C$ . Otherwise $C \\leqslant 6$ and ${ \\mathcal { C } } ( \\varepsilon , S ) = C$ . Therefore, checking the two cases $C > 6$ and $C \\leqslant 6$ verifies ${ \\mathcal { C } } ( \\varepsilon , S ) = C$ in both regimes, which furnishes the claim. ",
+        "bbox": [
+            109,
+            89,
+            883,
+            141
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "We now turn to establish bound (18). Let $h > 0$ . First observe that the support of $Q$ is the disjoint union of intervals $\\cup _ { j = 1 } ^ { M } ( z _ { j } - r , z _ { j } + r ]$ . Thus, fix $x$ in the support of $Q$ , and let $z _ { j }$ denote the center of the interval to which $x$ belongs. Suppose that $h \\in [ 0 , 4 r ]$ , in which case, we have the inclusion $\\mathsf { B } ( x , h ) \\subset I _ { j }$ , whence the lower bound ",
+        "bbox": [
+            109,
+            142,
+            883,
+            210
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} P (\\mathsf {B} (x, h)) \\geqslant P \\left(\\mathsf {B} (x, h) \\cap \\mathsf {B} (z _ {j}, r)\\right) \\\\ \\stackrel {\\mathrm {(i)}} {=} \\frac {\\varepsilon}{3} \\left(\\frac {r}{S}\\right) ^ {\\alpha - 1} Q \\big (\\mathsf {B} (x, h) \\cap \\mathsf {B} (z _ {j}, r) \\big) \\\\ \\stackrel {\\text {(i i)}} {\\geqslant} \\frac {\\varepsilon}{3} \\left(\\frac {h}{4 S}\\right) ^ {\\alpha - 1} Q \\big (\\mathsf {B} (x, h) \\cap \\mathsf {B} (z _ {j}, r) \\big) \\\\ \\stackrel {\\text {(i i i)}} {=} \\frac {\\varepsilon}{3} \\left(\\frac {h}{4 S}\\right) ^ {\\alpha - 1} Q (\\mathrm {B} (x, h)) \\tag {19} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            318,
+            224,
+            880,
+            347
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Above, step (i) follows from the construction of $P , Q$ ; step (ii) follows from $h \\leqslant 4 r$ , whereas step (iii) follows since $\\mathsf { B } ( x , h ) \\subset I _ { j }$ and $Q$ assigns no mass to the set $I _ { j } \\setminus \\mathsf { \\nabla } B ( z _ { j } , r )$ . ",
+        "bbox": [
+            112,
+            357,
+            883,
+            391
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Otherwise, we may assume that $h \\in [ 4 r , S ]$ , in which case we have the inclusion $\\mathsf { B } ( x , h ) \\supset I _ { j }$ . Denote by $N \\geqslant 1$ the number of intervals of the form $I _ { j }$ that are included within $\\mathsf { B } ( x , h )$ . Note that since $\\mathsf { B } ( x , h )$ is connected, it is always contained in at most $N + 2$ intervals (by considering partial intervals on the left and right). Thus, ",
+        "bbox": [
+            109,
+            392,
+            883,
+            460
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\frac {P (\\mathsf {B} (x , h))}{Q (\\mathsf {B} (x , h))} \\stackrel {\\text {(i i i)}} {\\geqslant} \\frac {N \\cdot P \\left(I _ {j}\\right)}{(N + 2) \\cdot Q \\left(I _ {j}\\right)} \\stackrel {\\text {(i v)}} {\\geqslant} \\frac {1}{3}. \\tag {20}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            354,
+            473,
+            880,
+            511
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Here step (iii) follows since $\\mathsf { B } ( x , h )$ is contained in a collection of at most $( N + 2 )$ intervals and contains at least $N$ intervals, and the intervals are disjoint and have the same mass under both $P$ and $Q$ . On the other hand, step (iv) uses the equivalence $P ( I _ { j } ) = Q ( I _ { j } )$ , along with the fact that the function $x \\mapsto { \\frac { x } { x + 2 } }$ is increasing on the set $\\{ x \\geqslant 1 \\}$ . ",
+        "bbox": [
+            109,
+            522,
+            883,
+            590
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Therefore, combining inequalities (19) and (20), we conclude that ",
+        "bbox": [
+            140,
+            590,
+            656,
+            608
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP (\\mathsf {B} (x, h)) \\geqslant \\frac {1}{3} \\left[ \\varepsilon \\left(\\frac {h}{4 S}\\right) ^ {\\alpha - 1} \\wedge 1 \\right] Q (\\mathsf {B} (x, h)) \\geqslant \\frac {\\varepsilon}{3} \\left(\\frac {h}{4 S}\\right) ^ {\\alpha - 1} Q (\\mathsf {B} (x, h))\n$$",
+        "text_format": "latex",
+        "bbox": [
+            238,
+            619,
+            756,
+            652
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "for every $x$ in the support of $Q$ , the final inequality follows since $\\alpha \\geqslant 1$ . Since $h > 0$ was arbitrary, this establishes bound (18) and completes the proof. ",
+        "bbox": [
+            109,
+            662,
+            883,
+            696
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "4.3.2 Proof of Lemma 3 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            715,
+            344,
+            732
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "We prove each of the three parts in turn. ",
+        "bbox": [
+            112,
+            742,
+            437,
+            758
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Proof of part (a): Fix a Boolean vector $b \\in \\{ 0 , 1 \\} ^ { M }$ . Note that the function $\\phi _ { j }$ is supported on the interval $I _ { j }$ , which is disjoint from any other interval $I _ { k } , k \\neq j$ . Since $\\Psi$ satisfies the continuity condition (15a), it follows that $\\phi _ { j }$ is $( \\beta , L )$ -Hölder. Finally, we have $f _ { \\varepsilon } ( 0 ) = 0$ by definition. Taking these properties together, we have shown that $f _ { \\varepsilon } \\in \\mathcal { F } ( \\beta , L )$ , as required. ",
+        "bbox": [
+            109,
+            777,
+            883,
+            848
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            948
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Proof of part (b): For any distinct pair $b , b ^ { \\prime } \\in B$ , we have ",
+        "bbox": [
+            112,
+            90,
+            591,
+            107
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\int_ {0} ^ {1} \\left(f _ {b} (x) - f _ {b ^ {\\prime}} (x)\\right) ^ {2} \\mathrm {d} Q (x) = \\int_ {0} ^ {1} \\left(\\sum_ {j = 1} ^ {M} \\left(b _ {j} - b _ {j} ^ {\\prime}\\right) \\phi_ {j} (x)\\right) ^ {2} \\mathrm {d} Q (x) \\\\ \\stackrel {\\text {(i)}} {=} \\frac {1}{2 M r} \\sum_ {j = 1} ^ {M} \\left(b _ {j} - b _ {j} ^ {\\prime}\\right) ^ {2} \\int_ {z _ {j} - 3 r} ^ {z _ {j} + 3 r} \\phi_ {j} ^ {2} (x) d x \\\\ \\stackrel {\\mathrm {(i i)}} {=} \\frac {C _ {\\Psi} ^ {2}}{2 M} L ^ {2} r ^ {2 \\beta} \\| b - b ^ {\\prime} \\| _ {1} \\\\ \\stackrel {\\mathrm {(i i i)}} {\\geqslant} \\frac {C _ {\\Psi} ^ {2}}{1 6} L ^ {2} r ^ {2 \\beta}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            246,
+            122,
+            751,
+            290
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Here step (i) follows from the definition of $Q$ along with the disjointedness of the supports of $\\phi _ { j }$ . Step (ii) follows from equation (15b) and the fact that $b , b ^ { \\prime } \\in B \\subset \\{ 0 , 1 \\} ^ { M }$ . Finally, step (iii) follows from the Gilbert-Varshamov separation (16). ",
+        "bbox": [
+            111,
+            301,
+            883,
+            354
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Proof of part (c): For any $b \\in B$ , by following the calculations above, for $\\mu \\in \\{ P , Q \\}$ , we have by symmetry ",
+        "bbox": [
+            111,
+            372,
+            883,
+            406
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {0} ^ {1} f _ {b} ^ {2} (x) \\mathrm {d} \\mu (x) = \\sum_ {j = 1} ^ {M} b _ {j} ^ {2} \\int_ {I _ {j}} \\phi_ {j} ^ {2} (x) \\mathrm {d} \\mu (x) \\leqslant M \\int_ {I _ {1}} \\phi_ {1} ^ {2} (x) \\mathrm {d} \\mu (x).\n$$",
+        "text_format": "latex",
+        "bbox": [
+            256,
+            407,
+            740,
+            450
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Now observe that $\\begin{array} { r } { \\int _ { 0 } ^ { 6 r } \\phi _ { 1 } ^ { 2 } ( x ) \\ \\mathrm { d } Q ( x ) = \\frac { C _ { \\Psi } ^ { 2 } } { 2 M } L ^ { 2 } r ^ { 2 \\beta } } \\end{array}$ , and consequently, $\\lVert f _ { b } \\rVert _ { L ^ { 2 } ( Q ) } ^ { 2 } \\leqslant L ^ { 2 } r ^ { 2 \\beta } C _ { \\Psi } ^ { 2 } / 2$ . Additionally, we can compute ",
+        "bbox": [
+            111,
+            460,
+            880,
+            498
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {0} ^ {6 r} \\phi_ {1} ^ {2} (x) \\mathrm {d} P (x) = \\frac {\\varepsilon}{6 r M ^ {\\alpha}} \\int_ {2 r} ^ {4 r} \\phi_ {1} ^ {2} (x) \\mathrm {d} x = \\frac {\\varepsilon}{6 S ^ {\\alpha}} L ^ {2} r ^ {2 \\beta + \\alpha} C _ {\\Psi} ^ {2}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            264,
+            511,
+            730,
+            547
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Thus, we have established the upper bound $\\| f _ { b } \\| _ { L ^ { 2 } ( P ) } ^ { 2 } \\leqslant \\varepsilon L ^ { 2 } r ^ { 2 \\beta + \\alpha - 1 } / ( 6 S ^ { \\alpha - 1 } ) .$ ",
+        "bbox": [
+            112,
+            559,
+            720,
+            580
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "4.4 Proof of Theorem 2(b) ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            599,
+            385,
+            617
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Given the inclusion ${ \\mathcal { D } } ^ { \\prime } ( \\alpha , 1 ) \\subset { \\mathcal { D } } ^ { \\prime } ( \\alpha , C )$ , it suffices to prove a lower bound for $C = 1$ ",
+        "bbox": [
+            111,
+            625,
+            774,
+            643
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Construction of “hard” distributions. Let $Q = \\delta _ { 1 }$ , and let $P _ { \\alpha }$ be the distribution supported on $\\lfloor 0 , 1 \\rfloor$ with density $p _ { \\alpha } ( x ) : = \\alpha ( 1 - x ) ^ { \\alpha - 1 } \\mathbf { 1 } \\{ x \\in [ 0 , 1 ] \\}$ . By construction, we then have ",
+        "bbox": [
+            111,
+            662,
+            883,
+            696
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho_ {h} (P _ {\\alpha}, Q) = \\frac {1}{P _ {\\alpha} (B (1 , h))} = h ^ {- \\alpha} \\quad \\mathrm {f o r a l l} h \\in (0, 1 ],\n$$",
+        "text_format": "latex",
+        "bbox": [
+            300,
+            709,
+            694,
+            743
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "which implies that $( P _ { \\alpha } , Q ) \\in \\mathcal { D } ^ { \\prime } ( \\alpha , 1 )$ . From herein, we adopt the shorthand $P : = P _ { \\alpha }$ so as to lighten notation. ",
+        "bbox": [
+            111,
+            753,
+            883,
+            789
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Construction of two point alternative. If the regression function is $f$ , we denote the resulting joint distribution of $\\{ ( X _ { i } , Y _ { i } ) \\} _ { i = 1 } ^ { n }$ by $\\nu _ { f }$ . We consider the two point alternatives $\\{ f _ { t } , g \\}$ with $g \\equiv 0$ and $f _ { t } ( x ) : = L ( x - t ) _ { + } ^ { \\beta }$ . The next result demonstrates the validity of this choice: ",
+        "bbox": [
+            111,
+            808,
+            883,
+            862
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Lemma 4. For any $t \\in [ 0 , 1 ]$ , the function $f _ { t }$ belongs to $\\mathcal { F } ( \\beta , L )$ ",
+        "bbox": [
+            112,
+            872,
+            620,
+            890
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            488,
+            934,
+            508,
+            946
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "See Section 4.4.1 for the proof. ",
+        "bbox": [
+            112,
+            90,
+            356,
+            107
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Moreover, by straightforward calculations, we find that $\\Vert f _ { t } \\Vert _ { L ^ { 2 } ( Q ) } ^ { 2 } = L ^ { 2 } ( 1 - t ) ^ { 2 \\beta }$ , and ",
+        "bbox": [
+            138,
+            125,
+            800,
+            147
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\| f _ {t} \\| _ {L ^ {2} (P)} ^ {2} = L ^ {2} \\int_ {t} ^ {1} \\alpha (1 - x) ^ {\\alpha - 1} (x - t) ^ {2 \\beta} \\mathrm {d} x \\\\ \\leqslant L ^ {2} (1 - t) ^ {2 \\beta} \\int_ {0} ^ {1 - t} \\alpha s ^ {\\alpha - 1} \\mathrm {d} s = L ^ {2} (1 - t) ^ {2 \\beta + \\alpha}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            281,
+            154,
+            718,
+            231
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Applying Le Cam’s method. We are now equipped to apply Le Cam’s two point bound. In particular, we have ",
+        "bbox": [
+            111,
+            244,
+            883,
+            277
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\inf _ {\\widehat {f}} \\sup _ {f ^ {\\star} \\in \\mathcal {F} (\\beta , L)} \\mathbf {E} \\left[ \\| \\widehat {f} - f ^ {\\star} \\| _ {L ^ {2} (Q)} ^ {2} \\right] \\geqslant \\frac {L ^ {2} (1 - t) ^ {2 \\beta}}{1 6} \\exp \\big (- D _ {\\mathrm {k l}} (\\nu_ {f _ {t}} \\| \\nu_ {g}) \\big)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            233,
+            285,
+            759,
+            325
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "By standard KL calculations (using ${ \\mathsf { N } } ( 0 , \\sigma ^ { 2 } )$ noises) ",
+        "bbox": [
+            112,
+            333,
+            522,
+            351
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\nD _ {\\mathrm {k l}} (\\nu_ {f _ {t}} \\parallel \\nu_ {g}) = \\frac {L ^ {2}}{2 \\sigma^ {2}} \\Bigl \\{n _ {P} (1 - t) ^ {2 \\beta + \\alpha} + n _ {Q} (1 - t) ^ {2 \\beta} \\Bigr \\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            297,
+            358,
+            699,
+            391
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Finally, we make the ",
+        "bbox": [
+            112,
+            397,
+            279,
+            412
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n1 - t = \\left(\\left(\\frac {L ^ {2} n _ {P}}{2 \\sigma^ {2}}\\right) ^ {\\frac {1}{2 \\beta + \\alpha}} + \\left(\\frac {L ^ {2} n _ {Q}}{2 \\sigma^ {2}}\\right) ^ {\\frac {1}{2 \\beta}}\\right) ^ {- 1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            336,
+            412,
+            658,
+            450
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "A little bit of algebra shows that this choice guarantees that $D _ { \\mathrm { k l } } ( \\nu _ { f _ { t } } \\parallel \\nu _ { g } ) \\leqslant 2$ , which completes the proof. ",
+        "bbox": [
+            111,
+            454,
+            883,
+            488
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "4.4.1 Proof of Lemma 4 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            507,
+            343,
+            522
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "We begin by observing that $f _ { t } ( 0 ) = 0$ . Thus, in order to prove the claim, it suffices to show that ",
+        "bbox": [
+            112,
+            532,
+            866,
+            550
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {t} (y) - f _ {t} (x) \\leqslant L (y - x) ^ {\\beta} \\quad \\text {f o r a n y p a i r} x, y \\text {s u c h t h a t} 0 \\leqslant t <   x <   y \\leqslant 1.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            210,
+            558,
+            784,
+            575
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "In order to prove this bound, consider an arbitrary point $x \\in ( t , 1 )$ , and define the function ",
+        "bbox": [
+            111,
+            585,
+            825,
+            602
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\phi_ {x} (y) := L (y ^ {\\beta} - x ^ {\\beta}) - L (y - x) ^ {\\beta} \\qquad \\mathrm {f o r} y \\in [ x, 1 ].\n$$",
+        "text_format": "latex",
+        "bbox": [
+            299,
+            609,
+            696,
+            628
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "We can compute the derivative $\\phi _ { x } ^ { \\prime } ( y ) = L \\beta ( y ^ { \\beta - 1 } - ( y - x ) ^ { \\beta - 1 } )$ . Since $y \\geqslant y - x > 0$ and $\\beta \\leqslant 1$ , we have $y ^ { \\beta - 1 } \\leqslant ( y - x ) ^ { \\beta - 1 }$ , and hence $\\phi _ { x } ^ { \\prime } ( y ) \\leqslant 0$ . Consequently, the function $\\phi _ { x }$ is non-increasing, and since $y > x$ , it follows that $\\phi _ { x } ( y ) \\leqslant \\phi _ { x } ( x ) = 0$ . Putting together the pieces completes the proof. ",
+        "bbox": [
+            111,
+            636,
+            883,
+            688
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "4.5 Proof of Proposition 1 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            705,
+            382,
+            724
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Starting with the assumed bound (9), we have ",
+        "bbox": [
+            111,
+            733,
+            480,
+            750
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {\\chi} \\frac {1}{P (\\mathsf {B} (x , h))} \\mathrm {d} Q (x) \\leqslant \\frac {1}{\\lambda} \\int_ {\\chi} \\frac {1}{Q (\\mathsf {B} (x , h))} \\mathrm {d} Q (x). \\tag {21}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            307,
+            757,
+            883,
+            792
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "By definition of the covering number $N : = N ( h / 2 )$ , there is a collection $\\{ z ^ { j } \\} _ { j = 1 } ^ { N }$ such that the set $\\mathcal { X }$ is contained within the union $\\textstyle \\bigcup _ { j = 1 } ^ { N } \\mathsf { B } ( z ^ { j } , \\frac { h } { 2 } )$ . This fact, combined with our previous bound (21), implies that ",
+        "bbox": [
+            111,
+            799,
+            883,
+            853
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {\\mathcal {X}} \\frac {1}{P (\\mathrm {B} (x , h))} \\mathrm {d} Q (x) \\leqslant \\frac {1}{\\lambda} \\sum_ {j = 1} ^ {N} \\int_ {\\mathrm {B} \\left(z _ {j}, h / 2\\right)} \\frac {1}{Q (\\mathrm {B} (x , h))} \\mathrm {d} Q (x). \\tag {22}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            269,
+            862,
+            883,
+            907
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "page_number",
+        "text": "18 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            946
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Note by the triangle inequality, for each $j \\in \\lfloor N \\rfloor$ and $x \\in \\mathsf { B } ( z _ { j } , h / 2 )$ , we have $\\mathsf { B } ( z _ { j } , h / 2 ) \\subset \\mathsf { B } ( x , h )$ This inclusion implies that ",
+        "bbox": [
+            111,
+            90,
+            880,
+            125
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {\\mathsf {B} (z _ {j}, h / 2)} \\frac {1}{Q (\\mathsf {B} (x , h))} \\mathrm {d} Q (x) \\leqslant \\int_ {\\mathsf {B} (z _ {j}, h / 2)} \\frac {1}{Q (\\mathsf {B} (z _ {j} , h / 2))} \\mathrm {d} Q (x) = 1,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            243,
+            137,
+            754,
+            175
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "for each $j \\in \\lfloor N \\rfloor$ . Combining this inequality with the bound (22) yields the claim. ",
+        "bbox": [
+            111,
+            184,
+            750,
+            202
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "4.6 Proof of Lemma 1 ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            220,
+            341,
+            237
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "By assumption, we have the upper bound ",
+        "bbox": [
+            112,
+            247,
+            442,
+            263
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {0} ^ {1} \\frac {1}{P (\\mathsf {B} (x , h))} \\mathrm {d} Q (x) \\leqslant \\frac {1}{K h ^ {\\gamma}} \\int_ {0} ^ {1} \\frac {1}{Q (\\mathsf {B} (x , h))} \\mathrm {d} Q (x)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            297,
+            276,
+            704,
+            313
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Moreover, we can find a collection of $N : = \\lceil 1 / h \\rceil$ balls with centers $\\{ z _ { j } \\} _ { j = 1 } ^ { N }$ of radius $h / 2$ that cover the interval [0, 1], whence ",
+        "bbox": [
+            111,
+            325,
+            883,
+            359
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\int_ {0} ^ {1} \\frac {1}{Q (\\mathsf {B} (x , h))} \\mathrm {d} Q (x) \\leqslant \\sum_ {j = 1} ^ {N} \\int_ {x \\in \\mathsf {B} (z _ {j}, h / 2)} \\frac {1}{Q (\\mathsf {B} (x , h))} \\mathrm {d} Q (x) \\leqslant N.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            251,
+            373,
+            746,
+            419
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "The final inequality follows from the inclusion $\\mathsf { B } ( x , h ) \\supset \\mathsf { B } ( z _ { j } , h / 2 )$ . ",
+        "bbox": [
+            112,
+            431,
+            640,
+            448
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Now define the function $g ( t ) : = \\lceil t \\rceil / t$ , and observe that $g ( t ) \\leqslant 2$ whenever $t \\geqslant 1$ . Consequently, we can write ",
+        "bbox": [
+            111,
+            448,
+            882,
+            478
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\nh ^ {\\gamma + 1} \\rho_ {h} (P, Q) \\leqslant \\frac {1}{K} g (1 / h) \\leqslant \\frac {2}{K}, \\quad \\text {f o r a n y} h \\leqslant 1.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            310,
+            478,
+            687,
+            508
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Passing to the supremum over $h \\in ( 0 , 1 ]$ yields the claim. ",
+        "bbox": [
+            112,
+            513,
+            558,
+            531
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "5 Discussion ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            554,
+            274,
+            571
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we have studied the problem of covariate shift in the context of nonparametric regression. We have shown that a measure of (dis)-similarity $\\rho _ { h }$ between the source and target distributions, as defined in equation (1), can be used to characterize how minimax risks change as the source-target pair are varied. In particular, we proved upper bounds on the Nadaraya-Watson estimator over Hölder classes that are an explicit function of the similarity $\\rho _ { h }$ , and also established matching lower bounds over classes constrained in terms of the similarity. We also discussed how the measure $\\rho _ { h }$ is related to other characterizations of covariate shift from past work, including likelihood ratio bounds and transfer exponents. Our work shows that similarity measure $\\rho _ { h }$ provides a more fine-grained characterization of how covariate shift changes the difficulty of non-parametric regression. ",
+        "bbox": [
+            111,
+            588,
+            883,
+            756
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Our work leaves open a number of open questions. First, our lower bounds for covariate shift (cf. Theorem 2) are obtained within a global minimax framework, which involves worst-case assessments over a certain function class. These lower bounds match our upper bound on the NW estimator (cf. Theorem 1) for certain source-target pairs $( P , Q )$ . But the upper bound actually depends explicitly on the source-target pair. Is this upper bound always optimal? Or are there instances of covariate shift for which Nadaraya-Watson is suboptimal for some Hölder continuous function? In general, this question appears non-trivial: even without the (interesting) complication of covariate shift, there are few results that give distribution-dependent results for nonparametric regression outside of the uniform distribution and fixed-design problems. ",
+        "bbox": [
+            111,
+            758,
+            883,
+            912
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "page_number",
+        "text": "19 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            946
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgements ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            90,
+            302,
+            107
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "We would like to thank Samory Kpotufe for helpful email exchanges. This work was partially supported by NSF-DMS grant 2015454, NSF-IIS grant 1909365, NSF-FODSI grant 202350, and DOD-ONR Office of Naval Research N00014-21-1-2842 to MJW. ",
+        "bbox": [
+            109,
+            117,
+            883,
+            167
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "A Elementary bound for binomial variables ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            191,
+            627,
+            212
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "In this section, we state and prove an elementary bound for binomial random variables, used in the proof of Theorem 1. ",
+        "bbox": [
+            109,
+            224,
+            883,
+            260
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Lemma 5. Let $n , m$ be positive integers and $p , q \\in ( 0 , 1 )$ . Suppose that $U \\sim \\mathsf { B i n } ( n , p )$ and $V \\sim$ Bin $( m , q )$ . Then ",
+        "bbox": [
+            109,
+            270,
+            883,
+            303
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ \\frac {1}{U + V} \\mathbf {1} \\{U + V > 0 \\} \\right] \\leqslant \\frac {4}{n p + m q}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            346,
+            304,
+            650,
+            338
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Proof. We begin by observing that conditionally on the event $\\{ U + V > 0 \\}$ , we have the lower bound ",
+        "bbox": [
+            109,
+            345,
+            883,
+            377
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\nU + V \\geqslant \\frac {U + V + 1}{2} \\geqslant \\frac {U + 1}{2} \\lor \\frac {V + 1}{2}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            341,
+            375,
+            653,
+            407
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "These lower bounds allow us to write ",
+        "bbox": [
+            112,
+            411,
+            410,
+            426
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {E} \\left[ \\frac {1}{U + V} \\mathbf {1} \\{U + V > 0 \\} \\right] \\leqslant \\mathbf {E} \\frac {2}{U + 1} \\wedge \\mathbf {E} \\frac {2}{V + 1} \\leqslant \\frac {2}{(n p \\vee m q)} \\leqslant \\frac {4}{n p + m q}.\n$$",
+        "text_format": "latex",
+        "bbox": [
+            205,
+            436,
+            790,
+            472
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Here the penultimate inequality is a consequence of known results for binomial random variables [4, equation (3.4)]. ",
+        "bbox": [
+            109,
+            483,
+            883,
+            518
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            112,
+            541,
+            240,
+            559
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] S. Ben-David, J. Blitzer, K. Crammer, A. Kulesza, F. Pereira, and J. W. Vaughan. A theory of learning from different domains. Machine learning, 79(1-2):151–175, 2010. ",
+            "[2] S. Ben-David, T. Lu, T. Luu, and D. Pál. Impossibility theorems for domain adaptation. In Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics, pages 129–136, 2010. ",
+            "[3] J. Blitzer, M. Dredze, and F. Pereira. Biographies, Bollywood, boom-boxes and blenders: Domain adaptation for sentiment classification. In Proceedings of the 45th Annual Meeting of the Association of Computational Linguistics, pages 440–447, Prague, Czech Republic, June 2007. Association for Computational Linguistics. ",
+            "[4] M. T. Chao and W. E. Strawderman. Negative moments of positive random variables. J. Amer. Statist. Assoc., 67(338):429–431, 1972. ",
+            "[5] C. Cortes, M. Mohri, and A. M. Medina. Adaptation based on generalized discrepancy. J. Mach. Learn. Res., 20(1):1–30, 2019. ",
+            "[6] P. Germain, A. Habrard, F. Laviolette, and E. Morvant. A pac-bayesian approach for domain adaptation with specialization to linear classifiers. In International Conference on Machine Learning, pages 738–746, 2013. "
+        ],
+        "bbox": [
+            120,
+            573,
+            885,
+            905
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "page_number",
+        "text": "20 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            948
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[7] G. Halász. Statistical interpolation. Mat. Lapok, 23:71–87 (1973), 1972. ",
+            "[8] A. Hassan, R. Damper, and M. Niranjan. On acoustic emotion recognition: Compensating for covariate shift. IEEE Trans. Audio Speech Lang. Process., 21(7):1458–1468, 2013. ",
+            "[9] I. A. Ibragimov and R. Z. Khas0 minski˘ı. Nonparametric regression estimation. Dokl. Akad. Nauk SSSR, 252(4):780–784, 1980. ",
+            "[10] S. Kpotufe. Lipschitz density-ratios, structured data, and data-driven tuning. In Artificial Intelligence and Statistics, pages 1320–1328, 2017. ",
+            "[11] S. Kpotufe and G. Martinet. Marginal singularity and the benefits of labels in covariate-shift. Ann. Statist., 49(6):3299–3323, 2021. ",
+            "[12] Q. Lei, W. Hu, and J. Lee. Near-optimal linear regression under distribution shift. In Marina Meila and Tong Zhang, editors, Proceedings of the 38th International Conference on Machine Learning, volume 139 of Proc. Mach. Learn. Res., pages 6164–6174. PMLR, 18–24 Jul 2021. ",
+            "[13] Y. Li, H. Kambara, Y. Koike, and M. Sugiyama. Application of covariate shift adaptation techniques in brain–computer interfaces. IEEE Trans. Biomed. Eng., 57(6):1318–1324, 2010. ",
+            "[14] Y. Mansour, M. Mohri, and A. Rostamizadeh. Domain adaptation: Learning bounds and algorithms. arXiv preprint arXiv:0902.3430, 2009. ",
+            "[15] Y. Mansour, M. Mohri, and A. Rostamizadeh. Multiple source adaptation and the rényi divergence. In Proceedings of the Twenty-Fifth Conference on Uncertainty in Artificial Intelligence, pages 367–374. AUAI Press, 2009. ",
+            "[16] M. Mohri and A. M. Medina. New analysis and algorithm for learning with drifting distributions. In International Conference on Algorithmic Learning Theory, pages 124–138. Springer, 2012. ",
+            "[17] M. Mousavi Kalan, Z. Fabian, S. Avestimehr, and M. Soltanolkotabi. Minimax lower bounds for transfer learning with linear and one-hidden layer neural networks. In H. Larochelle, M. Ranzato, R. Hadsell, M. F. Balcan, and H. Lin, editors, Advances in Neural Information Processing Systems, volume 33, pages 1959–1969. Curran Associates, Inc., 2020. ",
+            "[18] E. A. Nadaraya. On estimating regression. Theory Probab. Appl., 9(1):141–142, 1964. ",
+            "[19] J. Quionero-Candela, M. Sugiyama, A. Schwaighofer, and N. D. Lawrence. Dataset Shift in Machine Learning. The MIT Press, 2009. ",
+            "[20] K. Saenko, B. Kulis, M. Fritz, and T. Darrell. Adapting visual category models to new domains. In K. Daniilidis, P. Maragos, and N. Paragios, editors, Computer Vision – ECCV 2010, pages 213–226, Berlin, Heidelberg, 2010. Springer Berlin Heidelberg. ",
+            "[21] H. Shimodaira. Improving predictive inference under covariate shift by weighting the loglikelihood function. J. Statist. Plann. Inference, 90(2):227–244, 2000. ",
+            "[22] C. J. Stone. Optimal global rates of convergence for nonparametric regression. Ann. Statist., 10(4):1040–1053, 1982. "
+        ],
+        "bbox": [
+            114,
+            89,
+            883,
+            876
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "page_number",
+        "text": "21 ",
+        "bbox": [
+            488,
+            934,
+            506,
+            946
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[23] M. Sugiyama, S. Nakajima, H. Kashima, P. V. Buenau, and M. Kawanabe. Direct importance estimation with model selection and its application to covariate shift adaptation. In Advances in Neural Information Processing Systems, pages 1433–1440, 2008. ",
+            "[24] M. Sugiyama, T. Suzuki, and T. Kanamori. Density ratio estimation in machine learning. Cambridge University Press, 2012. ",
+            "[25] A. B. Tsybakov. Introduction to nonparametric estimation. Springer Series in Statistics. Springer, New York, 2009. Revised and extended from the 2004 French original, Translated by Vladimir Zaiats. ",
+            "[26] M. J. Wainwright. High-dimensional statistics: A non-asymptotic viewpoint. Cambridge University Press, Cambridge, UK, 2019. ",
+            "[27] G. S. Watson. Smooth regression analysis. Sankhy¯a: The Indian Journal of Statistics, Series A, pages 359–372, 1964. ",
+            "[28] B. Yu. Assouad, Fano and Le Cam. In Festschrift in Honor of L. Le Cam on his 70th Birthday. 1993. "
+        ],
+        "bbox": [
+            112,
+            89,
+            883,
+            386
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "page_number",
+        "text": "22 ",
+        "bbox": [
+            488,
+            934,
+            509,
+            946
+        ],
+        "page_idx": 21
+    }
+]

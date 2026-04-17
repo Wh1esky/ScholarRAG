@@ -1,0 +1,2753 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "MCTBENCH: MULTIMODAL COGNITION TOWARDS TEXT-RICH VISUAL SCENES BENCHMARK "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        117,
+        119,
+        879,
+        165
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Bin Shan1∗, Xiang Fei1∗, Wei "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { S h i ^ { 1 * } }"
+          },
+          {
+            "type": "text",
+            "content": ", An-Lan Wang1∗, Guozhi Tang1, Lei Liao1, "
+          }
+        ]
+      },
+      "bbox": [
+        238,
+        227,
+        761,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Jingqun Tang 1,Xiang Bai2,Can Huang1 "
+          }
+        ]
+      },
+      "bbox": [
+        367,
+        244,
+        629,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "1ByteDance 2Huazhong University of Science and Technology "
+          }
+        ]
+      },
+      "bbox": [
+        313,
+        258,
+        683,
+        273
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "{shanbin, feixiang.77, shiwei.11, wanganlan, can.huang}@bytedance.com "
+          }
+        ]
+      },
+      "bbox": [
+        279,
+        273,
+        717,
+        286
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        447,
+        335,
+        547,
+        351
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The comprehension of text-rich visual scenes has become a focal point for evaluating Multi-modal Large Language Models (MLLMs) due to their widespread applications. Current benchmarks tailored to the scenario emphasize perceptual capabilities, while overlooking the assessment of cognitive abilities. To address this limitation, we introduce a Multimodal benchmark towards Text-rich visual scenes, to evaluate the Cognitive capabilities of MLLMs through visual reasoning and content-creation tasks (MCTBench). To mitigate potential evaluation bias from the varying distributions of datasets, MCTBench incorporates several perception tasks (e.g., scene text recognition) to ensure a consistent comparison of both the cognitive and perceptual capabilities of MLLMs. To improve the efficiency and fairness of content-creation evaluation, we conduct an automatic evaluation pipeline. Evaluations of various MLLMs on MCTBench reveal that, despite their impressive perceptual capabilities, their cognition abilities require enhancement. We hope MCTBench will offer the community an efficient resource to explore and enhance cognitive capabilities towards text-rich visual scenes. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        357,
+        826,
+        523
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        542,
+        254,
+        558
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multimodal Large Language Models (MLLMs) [1, 2, 3, 4] have exhibited promising performance across various cross-modal tasks, and revealed potential for widespread real-world applications. In practical applications, many images contain crucial textual elements that are essential for addressing specific challenges, such as key information extraction from receipts. Consequently, the ability to comprehend text-rich visual scenes can significantly enhance the practicality of MLLMs and drive innovative applications across multiple domains. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        571,
+        883,
+        643
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent benchmarks [5, 6, 7] have increasingly focused on evaluating MLLMs towards text-rich visual scenes. Nonetheless, the benchmarks are centered around evaluating perceptual capabilities yet overlook the assessment of cognitive abilities, which are a significant strength of MLLMs (as illustrated in Figure 1). "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        648,
+        883,
+        691
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper, we propose a Multimodal benchmark to evaluate the Cognitive capabilities of MLLMs in Text-rich visual scenes (MCTBench). To assess the cognitive abilities of MLLMs thoroughly, we design two types of tasks in the MCTBench: reasoning tasks for comprehension of the in put scenes, and open-ended content-creation tasks for generating output responses. Besides, MCTBench integrates various perception tasks to study the differences with cognition tasks, while avoiding evaluation biases from varying dataset distributions. Fundamentally, MCTBench curates approximately "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 . 2 \\mathrm { k }"
+          },
+          {
+            "type": "text",
+            "content": "text-rich images from a wide range of public datasets, along with 8.5k rigorously annotated question-answer pairs categorized into three tasks: perception, reasoning and content-creation. The perception and reasoning tasks are formatted as multiple-choice questions for convenient evaluation, following common practices in [8, 9, 10]. Due to the subjectivity and high cost of human evaluation in open-ended content creation, we establish an automated evaluation pipeline by leveraging sophisticated MLLMs (e.g., GPT-4V) as the evaluator, to compare the predictions of models against the provided references. Our experimental results demonstrate that MLLMs exhibit notably lower performance of cognition capabilities compared to perception in text-rich visual scenes, particularly for text-enhanced models. Furthermore, performances in cognition tasks (reasoning and content-creation) are improved with larger parameter scales. Our main contributions are summarized as follows: "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        696,
+        883,
+        891
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2410.11538v1 [cs.CV] 15 Oct 2024 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        263,
+        57,
+        707
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "∗Equal contribution. "
+          }
+        ]
+      },
+      "bbox": [
+        135,
+        897,
+        256,
+        911
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/91b5dd03abd3e2c16e83475246af594470fe0a233db728e8a5c39e312b6de083.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(a) Q: What brand is on the plane? "
+          },
+          {
+            "type": "text",
+            "content": "GT: G-ATCO "
+          },
+          {
+            "type": "text",
+            "content": "Brand recognition "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        137,
+        95,
+        285,
+        172
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/350ae1b248ad63cafcc3505af08db20ba84253531ca9d914295903ee4cc12d1a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(b) Q: What is written on the blue t-shirt? "
+          },
+          {
+            "type": "text",
+            "content": "GT: Bradley "
+          },
+          {
+            "type": "text",
+            "content": "Text recognition "
+          },
+          {
+            "type": "text",
+            "content": "Previous works: Perception "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        401,
+        95,
+        501,
+        172
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2637b347d6ad3af3791322a9f577324268b0037ffeb80f7ae902f284ce75a06d.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "(c) Q: Which special day is associated with this poster? "
+          },
+          {
+            "type": "text",
+            "content": "A.Earth Day. B.National Reading Day. C.Water Day. D.Mother's Day GT: C "
+          },
+          {
+            "type": "text",
+            "content": "Title recognition "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        697,
+        98,
+        782,
+        174
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d7f5d7937059c6b3eb8926f6d0a20ae15d25db4ac29f7a5851e83bd2322411d3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Q: What is the brand name of this "
+          },
+          {
+            "type": "text",
+            "content": "product? "
+          },
+          {
+            "type": "text",
+            "content": "A.Barbecue "
+          },
+          {
+            "type": "text",
+            "content": "B.BRAND "
+          },
+          {
+            "type": "text",
+            "content": "C.All NAT "
+          },
+          {
+            "type": "text",
+            "content": "D.Lays "
+          },
+          {
+            "type": "text",
+            "content": "GT: D "
+          },
+          {
+            "type": "text",
+            "content": "Brand recognition "
+          },
+          {
+            "type": "text",
+            "content": "Perception "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        171,
+        239,
+        251,
+        323
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/29e13dcbb7085090cbbdc64da83adf2be1a171face21f9fe2e94ba22faac1fdd.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Q: What kind of place do you think this picture was taken "
+          },
+          {
+            "type": "text",
+            "content": "based on the given text? "
+          },
+          {
+            "type": "text",
+            "content": "A. Busy city center "
+          },
+          {
+            "type": "text",
+            "content": "B. Suburban residential area "
+          },
+          {
+            "type": "text",
+            "content": "D. Countryside "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        359,
+        239,
+        544,
+        325
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "GT: C "
+          }
+        ]
+      },
+      "bbox": [
+        320,
+        386,
+        348,
+        395
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Reasoning: infer the place "
+          }
+        ]
+      },
+      "bbox": [
+        372,
+        405,
+        483,
+        416
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9974c2e007ee703c7deea8c001c386303694662588c79f39cdc2e5f1cc5a9a87.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: The Comparison between previous Benchmarks [11, 5, 6], and our proposed MCTBench. Q and GT stand for question and ground truth. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        638,
+        239,
+        803,
+        325
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Q: Imagine you are the owner of the '1 Hour Cleaning' service, "
+          }
+        ]
+      },
+      "bbox": [
+        591,
+        332,
+        849,
+        342
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "write an appealing tagline to attract customers. "
+          }
+        ]
+      },
+      "bbox": [
+        593,
+        345,
+        790,
+        354
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "GT: '1 Hour Cleaning' – Efficient Cleaning, Swift Results. "
+          }
+        ]
+      },
+      "bbox": [
+        593,
+        358,
+        826,
+        369
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Experience a Spotless Space in No Time! "
+          }
+        ]
+      },
+      "bbox": [
+        594,
+        371,
+        761,
+        382
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": []
+      },
+      "bbox": [
+        622,
+        405,
+        766,
+        415
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Cognition "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        537,
+        429,
+        596,
+        441
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Cognition ( Reasoning, Content-Creation) + Perception "
+          }
+        ]
+      },
+      "bbox": [
+        289,
+        452,
+        689,
+        465
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. We propose a brand-new and large-scale benchmark for evaluating the cognitive capability of MLLMs towards text-rich visual scenes. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. The evaluation on MCTBench highlights that MLLMs necessitate enhancements in their cognitive capabilities in text-rich visual scenes. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. We develop an automated evaluation pipeline for the content-creation task, offering researchers an efficient What is the humorous twist in this advertisemetool for further investigation of cognitive capabilities. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        150,
+        540,
+        883,
+        648
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        674,
+        264,
+        690
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1 Multimodal Large Language Models "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        709,
+        410,
+        724
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The significant advancements in Large Language Models (LLMs) [1, 12, 13] have paved the way for recent research [2, 14, 3, 15, 16] into developing Multimodal Large Language Models (MLLMs) that integrate visual capabilities. Early works in this field [17, 18, 3, 15] have introduced various vision-language projectors such as Q-former[16], Multi-Layer Perceptron (MLP) [3], and Perceiver[17], which act as intermediaries between LLMs and visual encoders. Furthermore, these efforts have also established robust training paradigms for MLLMs. Building upon these foundational paradigms, recent initiatives [19, 20, 21, 22] have focused on scaling the quality of training data, to enhance general visual capabilities effectively. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        738,
+        885,
+        837
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A primary challenge in the recent development of MLLMs is attaining fine-grained comprehension, exemplified by tasks such as Visual Question Answering (VQA) on text-rich images. To address this issue, increasing the resolution and integrating fine-grained visual features have been proven effective across various studies [23, 24, 25, 26, 27, 28, 29, 30]. Additionally, works such as [23, 26, 31, 29, 32] have incorporated high-quality, text-rich visual tuning data to refine these models further. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        842,
+        885,
+        911
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        935,
+        504,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/4a0b011d657ff143f08ef7ae627f99a4c00509a023c5229ac1ec0d164525ab68.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: The comparison between MCTBench and previous benchmarks. Open and MC respectively present openended and multiple choice format for answer type. QAs stands for question-answer pairs. Text-Rich Oriented indicates whether the benchmark focuses on text-rich visual scenes. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Benchmark</td><td>Text-Rich Oriented</td><td>#Image</td><td>#QAs</td><td>Percetion</td><td>Reasoning</td><td>Content Creation</td><td>Answer Type</td></tr><tr><td>MME [8]</td><td>X</td><td>1137</td><td>2.2K</td><td>✓</td><td>✓</td><td></td><td>Yes/No</td></tr><tr><td>MMBench [9]</td><td>X</td><td>-</td><td>3K</td><td>✓</td><td>✓</td><td></td><td>MC</td></tr><tr><td>OCRbench [5]</td><td>✓</td><td>450</td><td>1K</td><td>✓</td><td></td><td></td><td>Open</td></tr><tr><td>SEED-bench-2-plus [6]</td><td>✓</td><td>-</td><td>2.3K</td><td>✓</td><td></td><td></td><td>MC</td></tr><tr><td>Contextual [40]</td><td>✓</td><td>506</td><td>506</td><td>✓</td><td>✓</td><td></td><td>Open</td></tr><tr><td>MMMU [7]</td><td>✓</td><td>-</td><td>11.5K</td><td>✓</td><td>✓</td><td></td><td>MC/Open</td></tr><tr><td>MCTBench</td><td>✓</td><td>5.2K</td><td>8.5K</td><td>✓</td><td>✓</td><td>✓</td><td>MC/Open</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        207,
+        88,
+        787,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f49b93050b9147207759135e71689d7c4def5cfacdaf722d4ab59dd7d6585554.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: The pipeline of constructing MCTBench. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        117,
+        292,
+        883,
+        441
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2 MLLM Benchmarks "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        494,
+        299,
+        508
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As multimodal large language models (MLLMs) continue to exhibit cross-task generality, single-task evaluations (e.g., [33, 11, 34, 35]) are inadequate for a comprehensive performance assessment. Recent works [9, 10, 8, 36] present general MLLM benchmarks comprising multiple tasks. Furthermore, to explore the performance of MLLMs on more complex tasks, MathVista [37] evaluates their mathematical abilities, and MMMU [7] integrates multiple-discipline questions to benchmark MLLMs in expert domains. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        521,
+        883,
+        590
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Conversely, text-rich visual scenes are attracting growing attention due to their potential applications. Early works [38, 39, 11] focused on single tasks, while OCRBench [5] integrates multiple single-task datasets into five representative OCR(Optical Character Recognition)-based tasks. In contrast, our work evaluates MLLMs on complex tasks beyond OCR-based ones in text-rich visual scenes. A similar work is presented in [40], which demonstrates the model’s performance on reasoning tasks but only on a limited set of test datasets. Our study provides a broader evaluation of cognition in text-rich visual scenes, pushing the boundaries of what MLLMs can achieve in more diverse scenarios such as content-creation. Table 1 demonstrates the detailed comparison between ours and previous benchmarks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        598,
+        883,
+        696
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 MCTBench "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        718,
+        245,
+        734
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we outline the process of constructing the MCTBench. Section 3.1 provides an overview of MCTBench and compares it with previous benchmarks. Section 3.2 describes the procedure of collecting text-rich image sources from publicly accessible datasets. Finally, Section 3.2 explains the annotation process applied to the collected images. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        752,
+        883,
+        795
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 Overview "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        814,
+        220,
+        828
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The MCTBench is designed to evaluate the cognitive capabilities of Multimodal Large Language Models (MLLMs) towards text-rich visual scenes. To construct the comprehensive and diverse benchmark, we collected 5,194 images from a variety of public datasets, encompassing a wide array of text-rich scenes such as natural environments, books, scientific contexts, advertisements, e-commerce, and video shots. We meticulously annotate these images with a total of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 . 5 \\mathrm { k }"
+          },
+          {
+            "type": "text",
+            "content": "question-answer pairs categorized into three tasks: perception, reasoning, and content creation. Specifically, "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        840,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        935,
+        503,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "MCTBench consists of 2,734 perception multiple-choice samples, 2,602 reasoning multiple-choice samples, and 3,130 content-creation samples. Figure 2 illustrates the overall construction pipeline of MCTBench. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        90,
+        883,
+        119
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 Text-rich Images Collection "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        137,
+        346,
+        152
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Image Source The images of MCTBench are collected from 10 different publicly available datasets, aiming to incorporate comprehensive visual scenes to evaluate the cognition of Multimodal Large Language Models (MLLMs). We begin with sampling common general natural scenes (e.g., street views, competitions, road signs) from the COCO [41], Flickr30k [42], GQA [43], SeedBench [10] and Visual Genome [44] datasets. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        162,
+        883,
+        219
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Furthermore, we select conventional text-rich multimodal datasets: OCR-VQA [45], and VizWiz [46] taken by blind photographers. To further diversify MCTBench, we incorporate three domain-specific scenes with broad potential applications: advertising (AutoUnderAds [47]), e-commerce (FoodLogoDet-1500 [48]), and science (ScienceQA [49]). We randomly extract one frame from each video in the AutoUnderAds dataset. All data sources are specifically selected from the testsets. We adhere to the original licenses stated by all datasets. OCR-based image filtering. We select the text-rich images from the sourced images, which are guided by the following guidelines. To maintain the clarity and substantive textual content, we only retain images with valid OCR-recognized characters (with recognition probabilities higher than 0.2) of at least 10 characters. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        224,
+        883,
+        335
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To ensure text contributes to overall visual semantics, we select images where text regions occupy more than "
+          },
+          {
+            "type": "equation_inline",
+            "content": "10 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of the image area, after validating the impact of valid text lines on semantic expression. These meticulous selection criteria resulted in a curated collection of high-quality and crystal-clear text-rich images, designed to challenge and inspire advancements in perceptual and cognitive understanding within textual domains. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        342,
+        883,
+        398
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Annotation Considering the bias and efficiency of the manual annotation, we employ a GPT-aided approach to generate at least 10 pseudo-questions for each image, and ask annotators to remove low-quality ones. All answers are human-annotated with two rounds: (1) Each image with at least 10 GPT-aided pseudo-questions, is randomly assigned to three annotators. Each annotator independently annotates the questions and provides answers. (2) Quality checkers will review the annotation in the first round. If any question or image quality does not meet our annotation guidelines, the set is re-annotated by the corresponding annotators, who also revise their answers. Annotators in the second round are required to have at least 2 years of experience in text-rich multimodal scene annotation. To reach an agreement, we use majority voting to determine the final answer. If majority voting does not reach an agreement (i.e., all three answers are inconsistent), we check if the discrepancy originated in the second round. If so, the question is re-annotated; if inconsistencies persist, it is discarded. The question is discarded if the discrepancy does not arise in the second round. In addition to content-creation tasks, due to the inherent diversity of responses, we do not provide unified answers. Instead, we offer standard references generated by powerful MLLMs (e.g., GPT-4V) and meticulously reviewed by humans. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        412,
+        883,
+        592
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quality control During the image quality assessment, annotators remove low-quality images (e.g., blurry, unclear text, inappropriate, solely tables/documents, and only watermark). For the QA quality assessment, annotators eliminate low-quality questions (e.g., ambiguous, overly generalized, too simplistic) and check the correctness of annotated answers (e.g., logical errors). On the other hand, We filter out multiple-choice options with more than "
+          },
+          {
+            "type": "equation_inline",
+            "content": "30 \\%"
+          },
+          {
+            "type": "text",
+            "content": "word count disparity and remove the questions that GPT-4 refuses to answer due to ethical concerns. To detail the specific issues addressed by each type, we assigned a label to each question and visualized the terms in Figure 3. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        609,
+        883,
+        694
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3 Data Construction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        710,
+        284,
+        724
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        738,
+        254,
+        756
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we conduct comprehensive experiments to evaluate current MLLMs. Firstly, we outline experimental settings for the evaluated models and metrics used on MCTBench in Section 4.1 and 4.2. The results obtained from these experiments allow us to perform analysis of the selected models across three categories of tasks in Section 4.3. Furthermore, we conduct a case study to investigate performance variations among diverse models in Section 4.5. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        770,
+        883,
+        825
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 Models "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        844,
+        205,
+        857
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To evaluate the performance of various MLLMs on MCTBench, we select a diverse range of models categorized into two primary types: general MLLMs and text-enhanced MLLMs (specifically optimized for text recognition in images). We establish two naive baselines (random choice and frequency choice) as reference points to ensure "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        869,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        647,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        935,
+        504,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e8d40e7ced50121d280e4dd1b27e0462821df7486a3a69556e320985c5183d3d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        117,
+        88,
+        356,
+        296
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/804a37ef74e85951c30aea7cc385b37d9d45ce50abb7a671afcc6fec70b7dd75.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        377,
+        88,
+        620,
+        296
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e282b5d40977c74d12bc52b0edbd8cc3371b459389487fc1c96296fbd8987327.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: Visualization of the question for three different tasks using word clouds. In the word cloud, the size of a word indicates how frequently it appears. Best viewed in color. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        643,
+        88,
+        883,
+        296
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the robustness and validity of the dataset in Table 2. Random choice involves selecting an option at random as the prediction result, while frequency choice involves selecting the prediction result based on the option with the highest proportion in the ground truth. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        359,
+        883,
+        405
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "General MLLMs The experiment initially evaluates popular closed-source models, specifically Gemini-Pro [2] and GPT-4V(ision) [1]. For open-source models, we select several notable general-purpose MLLMs, including Sharegpt4V [19], Honeybee [50], LLaVA [25, 3], Otter [51], Yi-VL [52], Qwen-VL-chat [14] and Deepseek-VL [20] as competitive baselines. Additionally, we incorporate CogVLM [53] and SPHINX-v2 [54], which are enhanced for fine-grained understanding. To assess differentiated performance, we also integrate a larger open-source model, Mini-Gemini [4]. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        417,
+        883,
+        491
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Text-enhanced MLLMs Recent researchers propose remarkable works to tackle the understanding of text-rich images via enhancing the textual capabilities. Consequently, we select models mPLUG-DocOwl [27], Monkey [24, 29], InternLM-XComposer2-VL [55], CogAgent [56] and LLaVA-NeXT [25] which have demonstrated strong OCR capabilities in previous evaluations. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        503,
+        883,
+        559
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 Metrics "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        575,
+        209,
+        590
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "MCTBench is constructed with three categories of tasks: perception, reasoning, and content-creation. Due to the standard answer provided in perception and reasoning tasks, each QA pair is designed in a multiple-choice format. In contrast, the content-creation task is considered as an open-ended generation problem due to the diversity of responses. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        602,
+        883,
+        645
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Perception and reasoning Perception and reasoning tasks entail the acquisition of information from input data, comprehension of images and text, and derivation of conclusions. Consequently, employing multiple-choice questionanswering can effectively validate the corresponding capabilities of MLLMs, following [9, 10]. In practice, we prioritize original prompts employed by MLLMs and, if not specified, use those prompts which yield optimal results. For lengthy responses, we use regular expressions and supplementary rules to extract the option answers. We use mean accuracy to evaluate MLLMs’ perception and reasoning capability. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        660,
+        883,
+        744
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Content-creation To ensure consistency and efficiency in evaluation, we implement automatic evaluation for contentcreation tasks. However, due to the diversity of answers in content creation, standard responses are not feasible, leading us to establish competitive references. These references are generated through manually crafted responses from text-only GPT-4, based on inputs from OCR recognition and detailed descriptions. The evaluation is grounded on four principal aspects: relevance, faithfulness, creativity, and instruction following. Subsequently, we employ machines (e.g., GPT-4V) to compare other MLLMs against our references with the mentioned principal, and categorize their performance as Good, Same, or Bad (i.e., the GSB metric). We measure each model’s performance by calculating the percentage of ’Good’ and ’Same’ ratings relative to all questions, indicating how many outperform or match the constructed reference (i.e., "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( G + S ) / ( G + \\bar { S } + B ) )"
+          },
+          {
+            "type": "text",
+            "content": ". To assess correlations and validate the reliability of machine evaluation, we also conduct a manual evaluation on subsets of the data using the mentioned metrics (GSB) and compare them with machine evaluation. We integrate three powerful MLLMs (GPT-4V [1], Gemini-Pro [2] and LLaVA-NeXT "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        758,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        935,
+        503,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/713f51f294a6661b6050600cea3d1582c1c815b76c60cee2b116e7ad0d58f228.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Evaluation results for MLLMs on MCTBench. MC means the average score of the two tasks (perception and reasoning) in multiple-choice format. Cog means the average scores of the two cognitive tasks (reasoning and content-creation). All means the overall average scores of all tasks. ∗The content-creation task is scored using the percentage of ’Good’ and ’Same’ ratings by the GSB metric except for accuracy used in Perception and reasoning tasks. Numbers in Bold and underline represent the top-2 results in each task. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Model</td><td rowspan=\"2\">Params</td><td rowspan=\"2\">Perception</td><td colspan=\"2\">Cognition</td><td colspan=\"3\">Average Scores</td></tr><tr><td>Reasoning</td><td>Content-Creation*</td><td>MC</td><td>Cog</td><td>All</td></tr><tr><td colspan=\"8\">Naive Baseline</td></tr><tr><td>Random choice</td><td>-</td><td>25.00</td><td>25.00</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>Frequency choice</td><td>-</td><td>25.16</td><td>25.52</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td colspan=\"8\">General MLLMs</td></tr><tr><td>GPT-4V [1]</td><td>-</td><td>83.58</td><td>74.21</td><td>87.35</td><td>78.90</td><td>83.12</td><td>81.71</td></tr><tr><td>Gemini-Pro [2]</td><td>-</td><td>78.79</td><td>70.18</td><td>56.78</td><td>74.49</td><td>65.63</td><td>68.58</td></tr><tr><td>Yi-VL [52]</td><td>6B</td><td>77.25</td><td>72.33</td><td>41.45</td><td>74.79</td><td>58.12</td><td>63.68</td></tr><tr><td>Deepseek-VL [20]</td><td>7B</td><td>76.74</td><td>68.79</td><td>57.25</td><td>72.77</td><td>65.01</td><td>67.59</td></tr><tr><td>Honeybee [50]</td><td>7B</td><td>72.60</td><td>67.22</td><td>73.64</td><td>69.91</td><td>71.78</td><td>71.15</td></tr><tr><td>Otter [51]</td><td>7B</td><td>58.12</td><td>54.42</td><td>31.70</td><td>56.27</td><td>43.99</td><td>48.08</td></tr><tr><td>Qwen-VL-chat [14]</td><td>7B</td><td>77.98</td><td>70.68</td><td>67.53</td><td>74.33</td><td>70.93</td><td>72.06</td></tr><tr><td>Sharegpt4V [19]</td><td>13B</td><td>74.54</td><td>69.49</td><td>66.19</td><td>72.02</td><td>69.10</td><td>70.07</td></tr><tr><td>LLaVA-1.5 [3]</td><td>13B</td><td>78.09</td><td>72.56</td><td>66.47</td><td>75.33</td><td>70.90</td><td>72.37</td></tr><tr><td>SPHINX-v2 [54]</td><td>13B</td><td>78.02</td><td>71.94</td><td>62.30</td><td>74.98</td><td>68.64</td><td>70.75</td></tr><tr><td>CogVLM [53]</td><td>17B</td><td>71.40</td><td>69.52</td><td>65.61</td><td>70.46</td><td>68.04</td><td>68.84</td></tr><tr><td>Mini-Gemini [4]</td><td>34B</td><td>83.83</td><td>73.33</td><td>86.76</td><td>78.58</td><td>82.67</td><td>81.31</td></tr><tr><td colspan=\"8\">Text-enhanced MLLMs</td></tr><tr><td>IXC 2 [55]</td><td>7B</td><td>78.05</td><td>72.10</td><td>74.45</td><td>75.08</td><td>74.76</td><td>74.87</td></tr><tr><td>Monkey [29]</td><td>7B</td><td>79.22</td><td>72.64</td><td>59.56</td><td>75.93</td><td>67.75</td><td>70.47</td></tr><tr><td>TextMonkey [24]</td><td>7B</td><td>71.80</td><td>69.45</td><td>22.81</td><td>70.63</td><td>46.72</td><td>54.69</td></tr><tr><td>mPLUG-DocOwl [28]</td><td>10B</td><td>75.05</td><td>70.06</td><td>60.87</td><td>72.56</td><td>66.71</td><td>68.66</td></tr><tr><td>CogAgent [56]</td><td>34B</td><td>58.56</td><td>56.46</td><td>56.86</td><td>57.51</td><td>57.19</td><td>57.29</td></tr><tr><td>LLaVA-NeXT [25]</td><td>34B</td><td>83.87</td><td>71.64</td><td>85.30</td><td>77.76</td><td>81.53</td><td>80.27</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        210,
+        88,
+        787,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "[25]) as evaluators. We measure the evaluation correlation between humans and machines using accuracy and Pearson correlation [57] on GSB scores. Table 3 illustrates the results between three machine evaluators and human evaluations, indicating that GPT-4V achieves a top correlation score. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        560,
+        883,
+        603
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3 Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        619,
+        205,
+        633
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Perception Firstly, experiments are conducted to verify the perceptual performances of each model as baselines. As shown in Table 2, most models achieved satisfying scores on the perception task. Closed-source models (e.g., GPT-4V [1]) demonstrated excellent accuracy, while some open-source models (e.g., Mini-Gemini [4]) demonstrated superior perception capabilities, surpassing the their performance. Models with higher resolutions and more parameters (e.g., LLaVA-NeXT [25] and Mini-Gemini [4]), typically performed better. Among similarly-sized models, text-enhanced MLLMs generally outperformed others by effectively extracting text from images and generating precise responses. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        646,
+        883,
+        729
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Reasoning The reasoning task is more challenging than perception. It requires not only effective extraction and fusion of visual and textual features, but also involves comprehensive inference to generate accurate responses. As shown in Table 2, most models exhibited a significant drop in scores due to the increased difficulty of reasoning tasks compared to perception tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        744,
+        883,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Notably, GPT-4V demonstrates exceptional performance among MLLMs, surpassing most models by a significant margin. Besides, there still exists a positive correlation between a model’s performance and the number of its parameters. This phenomenon arises from larger models’ enhanced ability, to comprehend text and integrate image information for reasoning more effectively. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        806,
+        883,
+        864
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Nevertheless, text-enhanced MLLMs have not substantially outperformed general models on reasoning tasks. Given that text-enhanced models have achieved superior results in perception tasks, we posit their effectiveness in recognizing text within images. However, achieving higher scores in reasoning tasks necessitates the ability to analyse and summarise "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        869,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        936,
+        504,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "effectively. TextMonkey [24] shows the least performance gap and achieves results comparable to the perception task. However, most text-enhanced models are not explicitly trained in this aspect, and consequently do not outperform general MLLMs. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        90,
+        887,
+        133
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/fb73c6d72ef6a85d1071b7a67f4b046cbf7c5e79118896a67eab6b12e1ff7679.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Correlation analysis between automatic machine and human evaluation on content-creation using the accuracy and Pearson correlation coefficient. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>GPT-4V</td><td>Gemini-Pro</td><td>Best open-source (LLaVA-NeXT)</td></tr><tr><td>Accuracy</td><td>79.38</td><td>70.71</td><td>65.22</td></tr><tr><td>Pearson Correlation</td><td>0.558</td><td>0.380</td><td>0.304</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        269,
+        148,
+        727,
+        210
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Content-creation The open-ended creation task differs from the aforementioned tasks, leading to the observation of a broader array of perspectives. As mentioned in Section 4.2, the evaluation is based on four principal aspects: relevance, faithfulness, creativity, and instruction following. Therefore, as the content-creation task emphasizes the generation of suitable text for images, we also notice significantly enhancement on performances by employing larger language models. However, the performance of text-enhanced MLLMs exhibits considerable variation due to differences in training objectives. Some models are specifically trained to extract structured text information or comprehend lengthy text inputs. Consequently, they may underperform relative to general models when tasked with creative endeavours. We also found that the closed-source model Gemini-Pro [2] is unable to achieve good results. A notable discrepancy in its scores of template following demonstrates that Gemini struggles to create corresponding formats for task specifications. For instance, in the task of generating a slogan, Gemini may tend to produce lengthy paragraphs instead of concise phrases. Some text-enhanced MLLMs, such as TextMonkey, also have similar phenomena. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        273,
+        883,
+        428
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Summary MLLMs have shown certain multi-modal capabilities in perception tasks, with mainstream models achieving commendable performances. However, in reasoning tasks, existing models still have room for improvement. Performance on content-creation tasks indicates that text-enhanced MLLMs trained for different types of tasks may lose some creative capabilities. We suggest that reasoning and creation tasks serve as distinct dimensions for evaluation, offering insights into the model’s comprehension of input and its proficiency in generating output responses. While existing models excel in basic perception tasks, achieving comparable competence in reasoning and creation tasks remains challenging. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        444,
+        883,
+        542
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.4 Ablation Study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        561,
+        261,
+        575
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The effect of visual and textual information. In Table 4, we conduct several experiments to reveal the effect of visual and textual information in images of our benchmark. We use the LLaVA-1.5 as the baseline. Firstly, we conduct an experiment that adds OCR texts as input. As shown in the table, even if the OCR texts are contained as input, the model cannot gain explicit improvement. This demonstrates that the MCTBench does not rely solely on texts to get answers. Furthermore, we conduct an experiment that removes all texts from images to check the importance of texts in our benchmark. Specifically, we detected and blurred all the texts in images. We noticed that the performance dropped significantly. This also demonstrates that it is difficult for a model to correctly answer the question without text in the image. Additionally, if we only keep the text region, and delete other background parts in the image. The performance is between the above two experiments, indicating that MCTBench relies both on textual and visual information, to get the final result. To conclude, explicitly adding OCR texts, or removing text/image parts does not help, or even lead to worse performance on MCTBench. MLLMs are required to jointly recognize related textual and visual patterns, to answer the questions correctly. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        587,
+        883,
+        755
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.5 Case Study "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        773,
+        233,
+        787
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For the perception and reasoning tasks, we select representative cases shown in Figure 4. Specifically, we select GPT-4V as a strong reference along with several open-source representative MLLMs, split into three groups: large model size and resolution MLLMs (Mini-Gemini [4] and LLaVA-NeXT [25]), text-enhanced MLLMs (Monkey [29] and mPLUG-DocOwl [28]), and general MLLMs (LLaVA-1.5 [21] and ShareGPT4V [19]). For the selected perception question, both high-resolution MLLMs and text-enhanced MLLMs perform well, while general MLLMs fail in fine-grained understanding. On the contrary, text-enhanced MLLMs excelled in perception but performed poorly in reasoning tasks. Larger models like Mini-Gemini [4], LLaVA-NeXT [25], and GPT-4V [1] handle reasoning better by effectively integrating textual and visual elements. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        800,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        935,
+        504,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/60799d47615d84a6f330c5f5406c1013132f7f622d46d47154d8e0bc074aacf9.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: The effect of visual and textual information. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Input</td><td>Perception</td><td>Reasoning</td><td>Creation</td></tr><tr><td>Image + OCR texts</td><td>75.60</td><td>71.68</td><td>65.45</td></tr><tr><td>Image (text regions removed)</td><td>62.22</td><td>62.22</td><td>46.89</td></tr><tr><td>Image (text regions only)</td><td>74.69</td><td>68.01</td><td>58.78</td></tr><tr><td>Image (baseline)</td><td>78.09</td><td>72.56</td><td>66.47</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        264,
+        87,
+        733,
+        160
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/a84868b539a0fdfbcb77d7afdbf63ad32c5413f67a9a30851013990bb9f93888.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: The cases of predication from different MLLMs divided into four groups: GPT-4V [1], Mini-Gemini [4](MGM) and LLaVA-NeXT [25] for larger model size, Monkey [29] and mPLUG-DocOwl [28] for text-enhanced MLLMs, LLaVA-1.5 [21] and ShareGPT4V [19] for the general MLLMs "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Image</td><td colspan=\"2\">Identification</td><td colspan=\"3\">Reasoning</td></tr><tr><td>Sign Recognition</td><td>Brand identification</td><td>Key information Understanding</td><td>Target audience predication</td><td>Emotion analysis</td></tr><tr><td rowspan=\"5\">Question</td><td>What is the estimated distance to Roebourne?</td><td>What is the name of the product represented in the image?</td><td>Does this juice product cater to the needs of vegetarians?</td><td>Who is most likely the target audience for this advertisement?</td><td>What emotion is the billboard trying to invoke in drivers?</td></tr><tr><td>A. 287 kilometers</td><td>A. Dare</td><td>A. Yes</td><td>A. Children</td><td>A. Fear</td></tr><tr><td>B. 189 kilometers</td><td>B. Male smoke</td><td>B. No</td><td>B. Parents</td><td>B. Joy</td></tr><tr><td>C. 382 kilometers</td><td>C. 3 hours of heat</td><td></td><td>C. Teenagers</td><td>C. Guilt</td></tr><tr><td>D. 131 kilometers</td><td>D. Craving relief</td><td></td><td>D. Elderly</td><td>D. Caution</td></tr><tr><td>Groud Truth</td><td>A. 287 kilometers</td><td>A. Dare</td><td>A. Yes</td><td>B. Parents</td><td>D. Caution</td></tr><tr><td>GPT-4V</td><td>C. 382 kilometers ×</td><td>C. 3 hours of heat ×</td><td>A. Yes</td><td>B. Parents</td><td>D. Caution</td></tr><tr><td>MGM</td><td>A. 287 kilometers</td><td>A. Dare</td><td>A. Yes</td><td>B. Parents</td><td>D. Caution</td></tr><tr><td>LLaVA-NeXT</td><td>A. 287 kilometers</td><td>A. Dare</td><td>A. Yes</td><td>B. Parents</td><td>C. Guilt ×</td></tr><tr><td>Monkey</td><td>A. 287 kilometers</td><td>A. Dare</td><td>A. Yes</td><td>A. Children ×</td><td>A. Fear ×</td></tr><tr><td>mPLUG-doc</td><td>A. 287 kilometers</td><td>A. Dare</td><td>A. Yes</td><td>A. Children ×</td><td>A. Fear ×</td></tr><tr><td>LLaVA-1.5</td><td>D. 131 kilometers ×</td><td>C. 3 hours of heat ×</td><td>B. No ×</td><td>A. Children ×</td><td>C. Guilt ×</td></tr><tr><td>ShareGPT4v</td><td>D. 131 kilometers ×</td><td>C. 3 hours of heat ×</td><td>B. No ×</td><td>A. Children ×</td><td>C. Guilt ×</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        120,
+        196,
+        875,
+        534
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A. 287 kilometers ✔  A. 287 kilometers ✔  A. 287 kilGPT-4V(ision): For the content-creation task, using GPT-4V [1] as a robust reference, we select general and text-enhanced models advertisement? 'A. Children  A. 287 kilometers ✔ A. 287 kilometers ✔ A. 287 kilometers ✔  A. 287 kilometers ✔  A. 287 kilMiniGemini-34B -HD: that performed well on MCTBench, and conduct case studies in three scenarios. As shown in Figure 5, GPT-4V [1] B. Parents C. Teenagers A. 287 kilometers ✔ A. 287 kilometers ✔ A. 287 kilometers  A. 287 kilometers  A. 287 kilsignificantly surpassed other models in content creation quality. Mini-Gemini [4] also showed consistent performance D. Elderly  A. 287 kilometers  A. 287 kilometers  A. 287 kilacross cognitive tasks, while text-enhanced models like Monkey [29] were limited to text recognition and basic GT:Bdescriptions, resulting in less attractive content. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        614,
+        883,
+        686
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Gemini-Pro: B InternLM-Xcomposer-vl:5 Limitations "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        705,
+        243,
+        720
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "LLaVA-1.6-34b: B Monkey-chat: A Our dataset primarily focuses on English, which may limit the generalization of our findings to multilingual scenes. mplug_owl2: A Although we believe that the cognitive capacities of MLLMs should theoretically extend to other languages, we have not empirically substantiated this assertion in the present study. Additionally, we have only selected a subset of representative models for evaluation due to space constraints. This selection may not cover the full spectrum of currently available MLLMs. Our future work aims to provide evaluation results for a more extensive range of models. "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        734,
+        883,
+        806
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 Conclusion "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        112,
+        824,
+        240,
+        840
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this work, we introduce MCTBench, a comprehensive benchmark designed to evaluate the cognitive capabilities of MLLMs in text-rich visual scenes. The MCTBench comprises "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 . 2 \\mathrm { k }"
+          },
+          {
+            "type": "text",
+            "content": "images and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 . 5 \\mathrm { k }"
+          },
+          {
+            "type": "text",
+            "content": "question-answer pairs, covering a range of tasks including reasoning, content creation for cognitive assessment, and conventional perception. Evaluations of MLLMs on MCTBench reveal that current MLLMs still need further advancements in cognitive capabilities, despite "
+          }
+        ]
+      },
+      "bbox": [
+        109,
+        854,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        935,
+        503,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/5ace51c382e4fb26e82a4f2870fe3529cfb6e8c92e21bbf7919ca09339bcdcea.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [],
+        "html": "<table><tr><td>Image</td><td>WINDMILLS\nIN MY OVEN\nA Book of Dutch Baking</td><td rowspan=\"2\">Book reviews</td><td rowspan=\"2\">Social media posts</td></tr><tr><td>Scene</td><td>Adversitment Solgon</td></tr><tr><td>Question</td><td>Create a brief marketing slogan for the Subway sandwich shown in the image, using the text displayed</td><td>Write a short review for the book &#x27;Windmills in My Oven&#x27; based on the image.</td><td>If this image is designed as a social media post, what call to action sentence would you include to encourage viewer engagement?</td></tr><tr><td>GPT-4V</td><td>Bite into freshness with our Turkey &amp; Bacon Avocado Sandwich - A delectable delight for your taste buds! ★★★★</td><td>Windmills in My Oven is a delightful collection of Dutch baking recipes that will transport you to the Netherlands with each bite. The author, Gaitri Pagrach-Chandra has compiled an impressive array of traditional Dutch treats, from the famous strooewafels to the lesser-known but equally delicious boterkoek. The book is well-organized, with clear instructions and beautiful photographs. Whether you&#x27;re an experienced baker or just starting out, Windmills in My Oven is sure to become a staple in your cookbook collection. Highly recommended for anyone with a sweet tooth and a love for Dutch culture. ★★★★</td><td>Join the Scion community by watching Franco and Franco&#x27;s adventures and share your thoughts with us! Don&#x27;t forget to follow us on our social media channels for more exciting content. ★★★★</td></tr><tr><td>Mini-Gemini</td><td>Subway&#x27;s Twist on the Classic: Turkey, Bacon, and Avocado Ohhh! ★★★</td><td>The book &#x27;Windmills in My Oven: A Book of Dutch Baking&#x27; by Gaitri Pagrach-Chandra appears to be a comprehensive guide to Dutch baking traditions. The title suggests a personal connection or fondness for Dutch baking, implying that the recipes might be family favorites or have a personal significance to the author. The cover design, featuring black and white historical images, indicates that the book may not only provide recipes but also offer insights into the cultural and historical context of Dutch baking. The use of monochromatic images on the cover could be an artistic choice to reflect the simplicity and authenticity of traditional Dutch baking. The book seems to be a blend of culinary history and practical recipes, likely appealing to both those interested in cultural heritage and those seeking to learn about Dutch baking techniques. ★★★</td><td>Discover the latest in style and tech with the new SCION iM. Watch Franco and Franco&#x27;s review, find your local dealer, and join the excitement at SCION.com! #SCION #iM #SocialMediaEngagement ★★★★</td></tr><tr><td>Monkey</td><td>Turkey &amp; Bacon Avocado Ohh ★</td><td>The image is a book cover for \\ &quot;Windmills in My Oven: A Book of Dutch Baking&quot; by Gaitri Pagrach-Chandra. The cover features a collage of black and white photos of various objects, including windmills, which are the central theme of the book. The title and author&#x27;s name are written in black on a pink background, and the publisher&#x27;s name is also visible. The overall design is simple yet eye-catching, with the collage of photos providing a unique visual representation of the book&#x27;s content. ★</td><td>&quot;Like&quot; and &quot;Share&quot; ★</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        120,
+        89,
+        875,
+        542
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 5: The cases of predication on content-creation tasks from three representative MLLMs: GPT-4V [1], Mini-Gemini [4] and Monkey [29]. We mark high-quality sentences in red, words hit the text in the image with underlining, and rate the quality of the generation with stars. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        556,
+        888,
+        599
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "their superior perception performance. We hope that MCTBench will motivate researchers to further improve the cognitive capabilities of MLLMs in text-rich visual scenes, thereby enhancing the practical utility of AI in real-world applications. "
+          }
+        ]
+      },
+      "bbox": [
+        111,
+        626,
+        887,
+        672
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        114,
+        690,
+        210,
+        707
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[1] OpenAI. Gpt-4 technical report. 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[2] Gemini Team, Rohan Anil, Sebastian Borgeaud, Yonghui Wu, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M Dai, Anja Hauth, et al. Gemini: a family of highly capable multimodal models. arXiv preprint arXiv:2312.11805, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[3] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[4] Yanwei Li, Yuechen Zhang, Chengyao Wang, Zhisheng Zhong, Yixin Chen, Ruihang Chu, Shaoteng Liu, and Jiaya Jia. Mini-gemini: Mining the potential of multi-modality vision language models, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[5] Yuliang Liu, Zhang Li, Biao Yang, Chunyuan Li, Xucheng Yin, Cheng lin Liu, Lianwen Jin, and Xiang Bai. On the hidden mystery of ocr in large multimodal models, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[6] Bohao Li, Yuying Ge, Yi Chen, Yixiao Ge, Ruimao Zhang, and Ying Shan. Seed-bench-2-plus: Benchmarking multimodal large language models with text-rich visual comprehension, 2024. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        120,
+        722,
+        887,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        935,
+        504,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[7] iang Yue, Yuansheng Ni, Kai Zhang, Tianyu Zheng, Ruoqi Liu, Ge Zhang, Samuel Stevens, Dongfu Jiang, Weiming Ren, Yuxuan Sun, Cong Wei, Botao Yu, Ruibin Yuan, Renliang Sun, Ming Yin, Boyuan Zheng, Zhenzhu Yang, Yibo Liu, Wenhao Huang, Huan Sun, Yu Su, and Wenhu Chen. Mmmu: A massive multi-discipline multimodal understanding and reasoning benchmark for expert agi, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[8] Chaoyou Fu, Peixian Chen, Yunhang Shen, Yulei Qin, Mengdan Zhang, Xu Lin, Jinrui Yang, Xiawu Zheng, Ke Li, Xing Sun, Yunsheng Wu, and Rongrong Ji. Mme: A comprehensive evaluation benchmark for multimodal large language models, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[9] Yuan Liu, Haodong Duan, Yuanhan Zhang, Bo Li, Songyang Zhang, Wangbo Zhao, Yike Yuan, Jiaqi Wang, Conghui He, Ziwei Liu, Kai Chen, and Dahua Lin. Mmbench: Is your multi-modal model an all-around player?, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[10] Bohao Li, Rui Wang, Guangzhi Wang, Yuying Ge, Yixiao Ge, and Ying Shan. Seed-bench: Benchmarking multimodal llms with generative comprehension, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[11] Amanpreet Singh, Vivek Natarajan, Meet Shah, Yu Jiang, Xinlei Chen, Dhruv Batra, Devi Parikh, and Marcus Rohrbach. Towards vqa models that can read. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[12] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal Azhar, Aurelien Rodriguez, Armand Joulin, Edouard Grave, and Guillaume Lample. Llama: Open and efficient foundation language models. ArXiv, abs/2302.13971, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[13] Wei-Lin Chiang, Zhuohan Li, Zi Lin, Ying Sheng, Zhanghao Wu, Hao Zhang, Lianmin Zheng, Siyuan Zhuang, Yonghao Zhuang, Joseph E. Gonzalez, Ion Stoica, and Eric P. Xing. Vicuna: An open-source chatbot impressing gpt-4 with "
+              },
+              {
+                "type": "equation_inline",
+                "content": "9 0 \\% \\ast"
+              },
+              {
+                "type": "text",
+                "content": "chatgpt quality, March 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[14] Jinze Bai, Shuai Bai, Shusheng Yang, Shijie Wang, Sinan Tan, Peng Wang, Junyang Lin, Chang Zhou, and Jingren Zhou. Qwen-vl: A frontier large vision-language model with versatile abilities. arXiv preprint arXiv:2308.12966, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[15] Jun Chen, Deyao Zhu, Xiaoqian Shen, Xiang Li, Zechun Liu, Pengchuan Zhang, Raghuraman Krishnamoorthi, Vikas Chandra, Yunyang Xiong, and Mohamed Elhoseiny. Minigpt-v2: large language model as a unified interface for vision-language multi-task learning. arXiv preprint arXiv:2310.09478, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[16] Wenliang Dai, Junnan Li, Dongxu Li, Anthony Meng Huat Tiong, Junqi Zhao, Weisheng Wang, Boyang Li, Pascale Fung, and Steven Hoi. Instructblip: Towards general-purpose vision-language models with instruction tuning, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[17] Jean-Baptiste Alayrac, Jeff Donahue, Pauline Luc, Antoine Miech, Iain Barr, Yana Hasson, Karel Lenc, Arthur Mensch, Katie Millican, Malcolm Reynolds, Roman Ring, Eliza Rutherford, Serkan Cabi, Tengda Han, Zhitao Gong, Sina Samangooei, Marianne Monteiro, Jacob Menick, Sebastian Borgeaud, Andrew Brock, Aida Nematzadeh, Sahand Sharifzadeh, Mikolaj Binkowski, Ricardo Barreira, Oriol Vinyals, Andrew Zisserman, and Karen Simonyan. Flamingo: a visual language model for few-shot learning, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[18] Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi. Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[19] Lin Chen, Jisong Li, Xiaoyi Dong, Pan Zhang, Conghui He, Jiaqi Wang, Feng Zhao, and Dahua Lin. Sharegpt4v: Improving large multi-modal models with better captions. arXiv preprint arXiv:2311.12793, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[20] Haoyu Lu, Wen Liu, Bo Zhang, Bingxuan Wang, Kai Dong, Bo Liu, Jingxiang Sun, Tongzheng Ren, Zhuoshu Li, Hao Yang, Yaofeng Sun, Chengqi Deng, Hanwei Xu, Zhenda Xie, and Chong Ruan. Deepseek-vl: Towards real-world vision-language understanding, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[21] Haotian Liu, Chunyuan Li, Yuheng Li, and Yong Jae Lee. Improved baselines with visual instruction tuning, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[22] Brandon McKinzie, Zhe Gan, Jean-Philippe Fauconnier, Sam Dodge, Bowen Zhang, Philipp Dufter, Dhruti Shah, Xianzhi Du, Futang Peng, Floris Weers, et al. Mm1: Methods, analysis & insights from multimodal llm pre-training. arXiv preprint arXiv:2403.09611, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[23] Hao Feng, Zijian Wang, Jingqun Tang, Jinghui Lu, Wengang Zhou, Houqiang Li, and Can Huang. Unidoc: A universal large multimodal model for simultaneous text detection, recognition, spotting and understanding, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[24] Yuliang Liu, Biao Yang, Qiang Liu, Zhang Li, Zhiyin Ma, Shuo Zhang, and Xiang Bai. Textmonkey: An ocr-free large multimodal model for understanding document. arXiv preprint arXiv:2403.04473, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[25] Haotian Liu, Chunyuan Li, Yuheng Li, Bo Li, Yuanhan Zhang, Sheng Shen, and Yong Jae Lee. Llava-next: Improved reasoning, ocr, and world knowledge, January 2024. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        90,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        488,
+        935,
+        506,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[26] Wenbo Hu, Y. Xu, Y. Li, W. Li, Z. Chen, and Z. Tu. Bliva: A simple multimodal llm for better handling of text-rich visual questions. In AAAI Conference on Artificial Intelligence, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[27] Qinghao Ye, Haiyang Xu, Jiabo Ye, Ming Yan, Anwen Hu, Haowei Liu, Qi Qian, Ji Zhang, Fei Huang, and Jingren Zhou. mplug-owl2: Revolutionizing multi-modal large language model with modality collaboration, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[28] Jiabo Ye, Anwen Hu, Haiyang Xu, Qinghao Ye, Ming Yan, Yuhao Dan, Chenlin Zhao, Guohai Xu, Chenliang Li, Junfeng Tian, Qian Qi, Ji Zhang, and Fei Huang. mplug-docowl: Modularized multimodal large language model for document understanding, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[29] Zhang Li, Biao Yang, Qiang Liu, Zhiyin Ma, Shuo Zhang, Jingxu Yang, Yabo Sun, Yuliang Liu, and Xiang Bai. Monkey: Image resolution and text label are important things for large multi-modal models. In proceedings of the IEEE/CVF conference on computer vision and pattern recognition, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[30] Haoran Wei, Lingyu Kong, Jinyue Chen, Liang Zhao, Zheng Ge, Jinrong Yang, Jianjian Sun, Chunrui Han, and Xiangyu Zhang. Vary: Scaling up the vision vocabulary for large vision-language models, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[31] Yanzhe Zhang, Ruiyi Zhang, Jiuxiang Gu, Yufan Zhou, Nedim Lipka, Diyi Yang, and Tong Sun. Llavar: Enhanced visual instruction tuning for text-rich image understanding, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[32] Jingqun Tang, Chunhui Lin, Zhen Zhao, Shu Wei, Binghong Wu, Qi Liu, Hao Feng, Yang Li, Siqi Wang, Lei Liao, et al. Textsquare: Scaling up text-centric visual instruction tuning. arXiv preprint arXiv:2404.12803, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[33] Yash Goyal, Tejas Khot, Douglas Summers-Stay, Dhruv Batra, and Devi Parikh. Making the V in VQA matter: Elevating the role of image understanding in Visual Question Answering. In Conference on Computer Vision and Pattern Recognition (CVPR), 2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[34] Xinlei Chen, Hao Fang, Tsung-Yi Lin, Ramakrishna Vedantam, Saurabh Gupta, Piotr Dollar, and C. Lawrence Zitnick. Microsoft coco captions: Data collection and evaluation server, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[35] Kun-Yu Lin, Henghui Ding, Jiaming Zhou, Yi-Xing Peng, Zhilin Zhao, Chen Change Loy, and Wei-Shi Zheng. Rethinking clip-based video learners in cross-domain open-vocabulary action recognition. arXiv preprint arXiv:2403.01560, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[36] Weihao Yu, Zhengyuan Yang, Linjie Li, Jianfeng Wang, Kevin Lin, Zicheng Liu, Xinchao Wang, and Lijuan Wang. Mm-vet: Evaluating large multimodal models for integrated capabilities, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[37] Pan Lu, Hritik Bansal, Tony Xia, Jiacheng Liu, Chunyuan Li, Hannaneh Hajishirzi, Hao Cheng, Kai-Wei Chang, Michel Galley, and Jianfeng Gao. Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[38] Minesh Mathew, Dimosthenis Karatzas, and CV Jawahar. Docvqa: A dataset for vqa on document images. In Proceedings of the IEEE/CVF winter conference on applications of computer vision, pages 2200–2209, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[39] Anand Mishra, Shashank Shekhar, Ajeet Kumar Singh, and Anirban Chakraborty. Ocr-vqa: Visual question answering by reading text in images. In 2019 international conference on document analysis and recognition (ICDAR), pages 947–952. IEEE, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[40] Rohan Wadhawan, Hritik Bansal, Kai-Wei Chang, and Nanyun Peng. Contextual: Evaluating context-sensitive text-rich visual reasoning in large multimodal models, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[41] Tsung-Yi Lin, Michael Maire, Serge Belongie, Lubomir Bourdev, Ross Girshick, James Hays, Pietro Perona, Deva Ramanan, C. Lawrence Zitnick, and Piotr Dollár. Microsoft coco: Common objects in context, 2015. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[42] Peter Young, Alice Lai, Micah Hodosh, and Julia Hockenmaier. From image descriptions to visual denotations: New similarity metrics for semantic inference over event descriptions. TACL, 2:67–78, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[43] Drew A. Hudson and Christopher D. Manning. Gqa: A new dataset for real-world visual reasoning and compositional question answering, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[44] Ranjay Krishna, Yuke Zhu, Oliver Groth, Justin Johnson, Kenji Hata, Joshua Kravitz, Stephanie Chen, Yannis Kalantidis, Li-Jia Li, David A. Shamma, Michael S. Bernstein, and Fei-Fei Li. Visual genome: Connecting language and vision using crowdsourced dense image annotations, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[45] Anand Mishra, Shashank Shekhar, Ajeet Kumar Singh, and Anirban Chakraborty. Ocr-vqa: Visual question answering by reading text in images. In ICDAR, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[46] Danna Gurari, Qing Li, Abigale J. Stangl, Anhong Guo, Chi Lin, Kristen Grauman, Jiebo Luo, and Jeffrey P. Bigham. Vizwiz grand challenge: Answering visual questions from blind people, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[47] Zaeem Hussain, Mingda Zhang, Xiaozhong Zhang, Keren Ye, Christopher Thomas, Zuha Agha, Nathan Ong, and Adriana Kovashka. Automatic understanding of image and video advertisements. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pages 1100–1110, 2017. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        90,
+        883,
+        912
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "11 "
+          }
+        ]
+      },
+      "bbox": [
+        488,
+        935,
+        506,
+        946
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[48] Qiang Hou, Weiqing Min, Jing Wang, Sujuan Hou, Yuanjie Zheng, and Shuqiang Jiang. Foodlogodet-1500: A dataset for large-scale food logo detection via multi-scale feature decoupling network. In Proceedings of the 29th ACM International Conference on Multimedia, MM ’21. ACM, October 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[49] Pan Lu, Swaroop Mishra, Tony Xia, Liang Qiu, Kai-Wei Chang, Song-Chun Zhu, Oyvind Tafjord, Peter Clark, and Ashwin Kalyan. Learn to explain: Multimodal reasoning via thought chains for science question answering. In The 36th Conference on Neural Information Processing Systems (NeurIPS), 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[50] Junbum Cha, Wooyoung Kang, Jonghwan Mun, and Byungseok Roh. Honeybee: Locality-enhanced projector for multimodal llm. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[51] Bo Li, Yuanhan Zhang, Liangyu Chen, Jinghao Wang, Jingkang Yang, and Ziwei Liu. Otter: A multi-modal model with in-context instruction tuning. ArXiv, abs/2305.03726, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[52] 01. AI, :, Alex Young, Bei Chen, Chao Li, Chengen Huang, Ge Zhang, Guanwei Zhang, Heng Li, Jiangcheng Zhu, Jianqun Chen, Jing Chang, Kaidong Yu, Peng Liu, Qiang Liu, Shawn Yue, Senbin Yang, Shiming Yang, Tao Yu, Wen Xie, Wenhao Huang, Xiaohui Hu, Xiaoyi Ren, Xinyao Niu, Pengcheng Nie, Yuchi Xu, Yudong Liu, Yue Wang, Yuxuan Cai, Zhenyu Gu, Zhiyuan Liu, and Zonghong Dai. Yi: Open foundation models by 01.ai, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[53] Weihan Wang, Qingsong Lv, Wenmeng Yu, Wenyi Hong, Ji Qi, Yan Wang, Junhui Ji, Zhuoyi Yang, Lei Zhao, Xixuan Song, et al. Cogvlm: Visual expert for pretrained language models. arXiv preprint arXiv:2311.03079, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[54] Ziyi Lin, Chris Liu, Renrui Zhang, Peng Gao, Longtian Qiu, Han Xiao, Han Qiu, Chen Lin, Wenqi Shao, Keqin Chen, Jiaming Han, Siyuan Huang, Yichi Zhang, Xuming He, Hongsheng Li, and Yu Qiao. Sphinx: The joint mixing of weights, tasks, and visual embeddings for multi-modal large language models, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[55] Xiaoyi Dong, Pan Zhang, Yuhang Zang, Yuhang Cao, Bin Wang, Linke Ouyang, Xilin Wei, Songyang Zhang, Haodong Duan, Maosong Cao, Wenwei Zhang, Yining Li, Hang Yan, Yang Gao, Xinyue Zhang, Wei Li, Jingwen Li, Kai Chen, Conghui He, Xingcheng Zhang, Yu Qiao, Dahua Lin, and Jiaqi Wang. Internlm-xcomposer2: Mastering free-form text-image composition and comprehension in vision-language large model. arXiv preprint arXiv:2401.16420, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[56] Wenyi Hong, Weihan Wang, Qingsong Lv, Jiazheng Xu, Wenmeng Yu, Junhui Ji, Yan Wang, Zihan Wang, Yuxiao Dong, Ming Ding, et al. Cogagent: A visual language model for gui agents. arXiv preprint arXiv:2312.08914, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "[57] Jacob Benesty, Jingdong Chen, Yiteng Huang, and Israel Cohen. Pearson correlation coefficient. In Noise reduction in speech processing, pages 37–40. Springer, 2009. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        114,
+        90,
+        883,
+        565
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "MCTBench: Multimodal Cognition towards Text-Rich Visual Scenes Benchmark "
+          }
+        ]
+      },
+      "bbox": [
+        112,
+        42,
+        648,
+        56
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        488,
+        934,
+        508,
+        946
+      ]
+    }
+  ]
+]

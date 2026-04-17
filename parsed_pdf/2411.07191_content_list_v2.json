@@ -1,0 +1,3270 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "THE SUPER WEIGHT IN LARGE LANGUAGE MODELS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        99,
+        807,
+        119
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Mengxia "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { Y } \\mathbf { u } ^ { 1 \\ast }"
+          },
+          {
+            "type": "text",
+            "content": "∗, De Wang2, Qi Shan2, Colorado J Reed2†, Alvin Wan2 1University of Notre Dame 2Apple "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        143,
+        658,
+        174
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        450,
+        210,
+        545,
+        224
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent works have shown a surprising result: a small fraction of Large Language Model (LLM) parameter outliers are disproportionately important to the quality of the model. LLMs contain billions of parameters, so these small fractions, such as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", translate into hundreds of thousands of parameters. In this work, we present an even more surprising finding: Pruning as few as a single parameter can destroy an LLM’s ability to generate text – increasing perplexity by 3 orders of magnitude and reducing zero-shot accuracy to guessing. We propose a datafree method for identifying such parameters, termed super weights, using a single forward pass through the model. We additionally find that these super weights induce correspondingly rare and large activation outliers, termed super activations. When preserved with high precision, super activations can improve simple roundto-nearest quantization to become competitive with state-of-the-art methods. For weight quantization, we similarly find that by preserving the super weight while clipping other weight outliers, round-to-nearest quantization can scale to much larger block sizes than previously considered. To facilitate further research into super weights, we provide an index of super weight coordinates for common, openly available LLMs. "
+          }
+        ]
+      },
+      "bbox": [
+        228,
+        241,
+        766,
+        477
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 INTRODUCTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        502,
+        336,
+        517
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Large Language Models (LLMs) have been growing in size and capability at an unprecedented rate, enabling them to capture increasingly complex linguistic patterns across a wide range of tasks. However, with this increase in model scale, new and unexpected behaviors have emerged. Dettmers et al. (2022) discovered that once LLMs reach a certain scale, a small set of hidden state features contains outliers of exceptionally large magnitude. These outliers account for a small percentage of all activations but are crucial for preserving the compressed model’s quality (Dettmers et al., 2022; Xiao et al., 2023; Wei et al., 2023; Shao et al., 2024). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        532,
+        823,
+        630
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "However, not all outliers are equally important. In this paper, we study a tiny yet important set of outliers in LLMs, termed super weights. In Llama-7B, pruning the super weight, a single scalar, completely destroys the model’s ability to generate text; the average accuracy of zero-shot downstream tasks effectively plummets to zero. Conversely, pruning the other top 7,000 outliers, including outliers that are larger than the super weight, affects no more than a few percentage points. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        637,
+        823,
+        708
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Intriguingly, super weights behave similarly across model families and sizes. For one, the super weight is always found in the mlp.down proj weight, always in an early layer. We also find that the super weight amplifies input activation inliers to ultimately produce the exceptionally large magnitude activation observed by Sun et al. (2024) – we term this the super activation. This super activation persists throughout the model at exactly the same magnitude and position regardless of the prompt, and we find this is uniquely enabled by skip connections. Finally, super weights suppress stopword likelihood. Taken together, pruning the super weight destroys quality by dampening the super activation and shifting almost all logit probability mass to stopwords. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        714,
+        823,
+        827
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Both super weights and super activations, which we collectively refer to as super outliers, are critical to model quality. Fortunately, there are no more than a handful of scalar super outliers per tensor; in light of this, we revisit round-to-nearest quantization, equipped only with the ability to hold out and restore super outliers. This yields a data-free, hardware-friendly method. For activation "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        832,
+        823,
+        888
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2411.07191v2 [cs.CL] 7 Jul 2025 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        287,
+        57,
+        708
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "∗Work done while interning at Apple. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        896,
+        416,
+        910
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "†Corresponding author. cj reed@apple.com "
+          }
+        ]
+      },
+      "bbox": [
+        192,
+        910,
+        485,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/7066c1b07580fca06970119e5f0712dc44c3ce33a083ac4f3afb967950e569fb.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: Super Weight Phenomenon. We discover that pruning a single, special scalar, which we call the super weight, can completely destroy a Large Language Model’s ability to generate text. On the left, the original Llama-7B, which contains a super weight, produces a reasonable completion. On the right, after pruning the super weight, Llama-7B generates complete gibberish. As we show below, this qualitative observation has quantitative impact too: zero-shot accuracy drops to guessing and perplexity increases by orders of magnitude. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        103,
+        816,
+        199
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "quantization, we find this technique competitive with SmoothQuant; for weight quantization, we can scale round-to-nearest to much larger block sizes with higher quality. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        299,
+        823,
+        329
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our contributions are summarized as follows. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        334,
+        472,
+        348
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Super Weights: We discover a tiny subset of outliers in LLMs, at most six scalars, that are disproportionately important; pruning these super weights destroys model quality. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Identifying Super Weights: We present a data-free way to identify super weights using only a single forward pass and provide an index of super weights for existing, open LLMs. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. Super Activations: We analyze how super weights influence inference and relate them to the activation outliers observed in prior work. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "4. Compression: By preserving super outliers, we show that round-to-nearest quantization increases effectiveness noticeably; preserving super outliers improves compression quality. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        207,
+        359,
+        823,
+        484
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 RELATED WORK "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        510,
+        344,
+        523
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1 OUTLIERS IN LLMS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        541,
+        354,
+        554
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "LLM outliers are widely observed in existing literature. Kovaleva et al. (2021) notes weight outliers, which emerge gradually, beginning early in pre-training, and cause abnormal spikes at select dimensions in the output embedding vectors. Disabling those outliers significantly degrades both the training loss and the downstream task performance. Bondarenko et al. (2021) notes activation outliers, which encourage specific attention patterns, such as attending to the special separator token. However, Sun et al. (2024) first observes an exceptionally extraordinary outlier; in particular, they discover massive activations in LLMs that persist across layers in a fixed position, which Yang et al. (2024) hypothesizes is caused by gated linear units (GLU) and its variants, such as GEGLU and SwiGLU. To mitigate these massive activations, Sun et al. (2024) proposes a learnable attention bias, and (Son et al., 2024; Yang et al., 2024) inserts certain prefixes. To complement these mitigation studies, our focus is instead to leverage, rather than mitigate, these super activations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        566,
+        823,
+        720
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2 OUTLIER-AWARE QUANTIZATION METHODS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        737,
+        516,
+        751
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quantization is one of the most popular techniques for reducing LLM resource consumption. However, quantizing LLMs is non-trivial, due to outliers that increase the range of values. Existing works typically study two settings for LLM quantization: (1) Weight-only quantization, where only weights are quantized into low-bit integers; (2) Weight-activation quantization, where both activation and weights are quantized. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        763,
+        823,
+        833
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For weight-only quantization, several common solutions including using smaller block sizes, to limit the number of values any single outlier can impact (Dettmers et al., 2024; Shao et al., 2024; Dettmers & Zettlemoyer, 2023; Frantar et al., 2022; Dettmers et al., 2023); scaling sensitive weights, via a grid-searched channel-wise scaling, Lin et al. (2024); or clipping outliers via learned optimal thresholds (Shao et al., 2024; Lin et al., 2024). The most common approach is to extract and store sensitive weight outliers in higher-precision (Dettmers et al., 2024; Kim et al., 2024; Dettmers et al., "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        840,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/06bb4d9b6a60c133ae96d9d04c62d9dafb0443db408fc59b5afaa6b99fd57957.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: Super Weight Importance. (Section 3) Prune SW: Pruning the single, scalar-valued super weight significantly impairs quality – reducing accuracy on zero-shot datasets and increasing perplexity by orders of magnitude. Prune Non-SW By contrast, retaining the super weight and instead pruning the other 7,000 largestmagnitude weights marginally affects quality. In other words, a single super weight is more important than even the top 7,000 largest weights combined. (Section 3.2) Prune SW, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "+ S A"
+          },
+          {
+            "type": "text",
+            "content": ": Pruning the super weight but restoring the super activation partially recovers quality. Note that quality is still drastically impaired however, so we conclude that super activations only partially explain how super weights operate. This also shows that super weights and super activations both need special handling, to preserve quality. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Llama-7B</td><td>Arc-c</td><td>Arc-e</td><td>Hella.</td><td>Lamb.</td><td>PIQA</td><td>SciQ</td><td>Wino.</td><td>AVG</td><td>C4</td><td>Wiki-2</td></tr><tr><td>Original</td><td>41.81</td><td>75.29</td><td>56.93</td><td>73.51</td><td>78.67</td><td>94.60</td><td>70.01</td><td>70.11</td><td>7.08</td><td>5.67</td></tr><tr><td>Prune SW</td><td>19.80</td><td>39.60</td><td>30.68</td><td>0.52</td><td>59.90</td><td>39.40</td><td>56.12</td><td>35.14</td><td>763.65</td><td>1211.11</td></tr><tr><td>Prune Non-SW</td><td>41.47</td><td>74.83</td><td>56.35</td><td>69.88</td><td>78.51</td><td>94.40</td><td>69.14</td><td>69.22</td><td>7.57</td><td>6.08</td></tr><tr><td>Prune SW, +SA</td><td>26.60</td><td>54.63</td><td>56.93</td><td>12.79</td><td>67.95</td><td>61.70</td><td>70.01</td><td>50.09</td><td>476.23</td><td>720.57</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        173,
+        101,
+        823,
+        186
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "2022). However, decomposed, mixed-precision arithmetic for hundreds of thousands of weights is unfriendly for hardware and incurs significant latency penalties. We take a different approach, handling at most a half dozen scalars to maintain hardware friendliness. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        327,
+        823,
+        369
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For activation quantization, there are an increased number of even more aggressive outlier values, making activation quantization more challenging. To tackle this, previous work rotates (Liu et al., 2024; Ashkboos et al., 2024; Chee et al., 2023), clips (Wei et al., 2022) or shifts (Wei et al., 2023; Shao et al., 2024) activations to mitigate activation outliers. One effective approach scales activations (Xiao et al., 2023), migrating the difficulty of quantization from activations to weights with a mathematically equivalent transformation. However, this method – SmoothQuant – requires calibration data to find the optimal hyperparameters. We show a competitive alternative that is alternatively data-free, with a small change to a naive round-to-nearest method. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        376,
+        823,
+        488
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent studies have discovered that activation outliers are associated with weight outliers. The hidden dimensions where activation outliers emerge have a high correlation to sensitive weight channels (Heo et al., 2024; Lee et al., 2024). Along these lines, activation magnitudes have been used as an indicator to find salient weight channels to preserve in weight quantization (Lin et al., 2024). We find the relationship between activations and weights is even more striking: Rather than channel-wise pairs, we find relationships between two individual scalars – up to six weights and one activation. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        494,
+        823,
+        579
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 SUPER WEIGHTS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        599,
+        346,
+        616
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Many studies corroborate the importance of weight outliers, showing that a small percentage of the largest magnitude outliers are essential to model quality. This percentage can be as small as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", but for these billion-parameter models, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "can still include hundreds of thousands of weights. Our investigation reveals a surprising fact about even this group of weight outliers: There exists a single, scalar weight that, despite not being the largest, holds more importance than thousands of other outlier weights combined. We call this single scalar weight a super weight. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        633,
+        826,
+        718
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In our analysis, we find that the super weight is necessary for quality, having an outsized influence on quality if removed. Without the super weight, LLMs fail to generate text, resulting in qualitatively (Figure 1) and quantitatively (Table 1) gibberish responses. In particular, zero-shot dataset accuracy is reduced to guessing, and perplexity increases by several orders of magnitude (Prune SW). To quantify this influence, we prune all other outlier weights (Prune Non-SW), comparing the impact of a single super weight against 7,000 other outliers. Remarkably, the accuracy drop associated with pruning this single weight is much greater than the effect of all other outliers combined. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        724,
+        823,
+        823
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 IDENTIFICATION OF SUPER WEIGHTS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        840,
+        472,
+        854
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Super weights create super activations. Sun et al. (2024) first discover a handful of exceptionally massive activations, which are crucial to model quality. Massive activations persist across many layers, feature constant magnitude, and always exist at the same position, regardless of input. We find a further intriguing property: The activation’s channel aligns with our super weight’s, and "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        867,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/b3370b4b2a2faaccc3c05e70d6a9c301539b492070858b27e70c8ddbe78e15ab.jpg"
+        },
+        "table_caption": [],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>No.</td><td>Type</td><td>Weight</td><td>Coordinates</td></tr><tr><td>Llama 7B</td><td>2</td><td>mlp</td><td>down_prog</td><td>[3968, 7003]</td></tr><tr><td rowspan=\"2\">Llama 13B</td><td>2</td><td>mlp</td><td>down_prog</td><td>[2231, 2278]</td></tr><tr><td>2</td><td>mlp</td><td>down_prog</td><td>[2231, 6939]</td></tr><tr><td rowspan=\"3\">Llama 30B</td><td>3</td><td>mlp</td><td>down_prog</td><td>[5633, 12817]</td></tr><tr><td>3</td><td>mlp</td><td>down_prog</td><td>[5633, 17439]</td></tr><tr><td>10</td><td>mlp</td><td>down_prog</td><td>[5633, 14386]</td></tr><tr><td>Llama2 7B</td><td>1</td><td>mlp</td><td>down_prog</td><td>[2533, 7890]</td></tr><tr><td>Llama2 13B</td><td>3</td><td>mlp</td><td>down_prog</td><td>[4743, 7678]</td></tr><tr><td>Mistral-7BV0.1</td><td>1</td><td>mlp</td><td>down_prog</td><td>[2070, 7310]</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        173,
+        101,
+        485,
+        260
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/c8b0becde71e9258036d8081942d673e2d5a352e396fe7c69ee0d89edcf0e16f.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Super Weight Directory. The above layer numbers, layer types, and weight types can be directly applied to Huggingface models. For example, for Llama-7B on Huggingface, access the super weight using layers[2].mlp.down proj.weight[3968, 7003]. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Model</td><td>No.</td><td>Type</td><td>Weight</td><td>Coordinates</td></tr><tr><td>OLMo-1B</td><td>1</td><td>mlp</td><td>down-proj</td><td>[1764, 1710]</td></tr><tr><td>0724-hf</td><td>1</td><td>mlp</td><td>down-proj</td><td>[1764, 8041]</td></tr><tr><td rowspan=\"2\">OLMo-7B</td><td>1</td><td>mlp</td><td>down-proj</td><td>[269, 7467]</td></tr><tr><td>2</td><td>mlp</td><td>down-proj</td><td>[269, 8275]</td></tr><tr><td rowspan=\"2\">0724-hf</td><td>7</td><td>mlp</td><td>down-proj</td><td>[269, 453]</td></tr><tr><td>24</td><td>mlp</td><td>down-proj</td><td>[269, 2300]</td></tr><tr><td rowspan=\"2\">Phi-3</td><td>2</td><td>mlp</td><td>down-proj</td><td>[525, 808]</td></tr><tr><td>2</td><td>mlp</td><td>down-proj</td><td>[1693, 808]</td></tr><tr><td rowspan=\"4\">mini-4k-instruct</td><td>2</td><td>mlp</td><td>down-proj</td><td>[1113, 808]</td></tr><tr><td>4</td><td>mlp</td><td>down-proj</td><td>[525, 2723]</td></tr><tr><td>4</td><td>mlp</td><td>down-proj</td><td>[1113, 2723]</td></tr><tr><td>4</td><td>mlp</td><td>down-proj</td><td>[1693, 2723]</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        504,
+        101,
+        820,
+        260
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the activation first appears right after our super weight. To confirm whether this is correlation or causation, we prune the super weight and check the massive activation’s magnitude. Per Figure 4, we discover that pruning the super weight drastically reduces the massive activation’s magnitude. This suggests that the massive activations are created by super weights. For consistency, we dub these massive activations “super activations”. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        339,
+        823,
+        411
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "With further investigation, we reveal the mechanism of super weights and super activations. Sun et al. (2024) explained super activations as bias terms, but they did not explain how super activations are created and why they are always in the same positions. Through empirical analysis, we find that before down projection, the Hadamard product of the gate and up projection creates a relatively large activation, which aligns with the findings of Yang et al. (2024). More importantly, the super weights further amplify it and create super activations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        416,
+        823,
+        501
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Identifying super weight by activation spikes. Based on the above analysis, we present an efficient way to locate super weights: SWs can be located by detecting the spikes in the down proj inputs and outputs distributions across the layers. This detection only requires a single input prompt, rather than a set of validation data or use-case examples. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        518,
+        823,
+        575
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Suppose that we have a down proj weight matrix "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { W } \\in \\mathbb { R } ^ { D \\times H }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": "is the dimension of the activation feature and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "H"
+          },
+          {
+            "type": "text",
+            "content": "is the intermediate hidden dimension. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { X } \\in \\mathbb { R } ^ { L \\times H }"
+          },
+          {
+            "type": "text",
+            "content": "be the input matrix, where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "text",
+            "content": "is the sequence length. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { Y } = \\mathbf { X } \\mathbf { W } ^ { T }"
+          },
+          {
+            "type": "text",
+            "content": ", where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\mathbf { Y } _ { i j } = \\sum _ { k = 1 } ^ { d } \\mathbf { X } _ { i k } \\mathbf { W } _ { j k } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ". Suppose "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { Y } _ { i j }"
+          },
+          {
+            "type": "text",
+            "content": "is a super activation. If "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf X } _ { i k }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { W } _ { j k }"
+          },
+          {
+            "type": "text",
+            "content": "are both outliers that are much larger than other values, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { Y } _ { \\mathit { i j } }"
+          },
+          {
+            "type": "text",
+            "content": "will be dominated by their product. That is, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf Y _ { i j } \\approx \\mathbf X _ { i k } \\mathbf W _ { j k }"
+          },
+          {
+            "type": "text",
+            "content": ". In this case, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "j"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "k"
+          },
+          {
+            "type": "text",
+            "content": "are determined by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\bf X } _ { i k }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { Y } _ { i j }"
+          },
+          {
+            "type": "text",
+            "content": ". Therefore, we start by plotting extreme outliers in the input and output activations of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathtt { m l p }"
+          },
+          {
+            "type": "text",
+            "content": ".down proj. Then, we determine the layer and coordinates of the super weight, as illustrated in Figure 3. Once we have detected one super weight, we remove it from the model and repeat the above process, until the magnitudes of large maximum activations are greatly suppressed. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        580,
+        823,
+        710
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We have identified super weights for commonly available LLMs across different LLM families and model sizes, presented in Table 2. Most of the models we have examined have no more than three super weights. The model with the most super weights, i.e., Phi-3-mini-4k-instruct, contains six. We have also examined the instruction-finetuned models, such as Mistral-7B-Instruct-v0.1 and Llama-2-7B-chat. We find that their super weights are located at the same coordinates as the pre-trained models, which suggests that instruct fine-tuning does not change the position of super weights. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        715,
+        823,
+        801
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 MECHANISMS OF SUPER WEIGHTS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        821,
+        452,
+        834
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We find that super weights (1) induce super activations, which have lasting effects throughout the entire model, and (2) suppress stopword likelihood (Figure 2). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        848,
+        823,
+        878
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Super weights (partially) operate via super activations. To assess whether the super weight’s impact on model quality is solely mediated by the super activations or also by activations of other "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        825,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e83a6055e9acbdeef0bb4fbcb09bcf32ab899783447cb7f99f0bb8e57bc5a909.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: How Super Weights behave. I: Super weights are often found in an early layer’s down projection, indicated with a blue-purple box. The super weight immediately creates an incredibly large-magnitude super activation. II: Super activations are propagated through skip connections, indicated with blue-purple lines. III: This has a net effect of suppressing stopword likelihoods in the final logits. Removing the super weight causes stopword likelihood to increase, indicated with the blue-purple stacked bars. See Appendix A.3. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        104,
+        823,
+        181
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/d82b5ff2e1eea899a838379182723f04d934d581cb043ca71979a4db869b52b2.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        276,
+        374,
+        396
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1edb300cfd07a818a9d2876069c6a5ad0d6b42f4311e7fa3e76bfe3af2f9ca45.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        388,
+        276,
+        589,
+        396
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3964a4f8694729c179805b53816c581555b01f1db8e907aedbc816a016c8c663.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: How to identify the Super Weight for Llama-7B. down proj input features a large maximum-magnitude activation only in Layer 2, where the super activation first appeared. The value’s channel index, e.g., 7003, tells the row of SW. down proj output likewise features a large maximum-magnitude activation at Layer 2. This value’s channel index, e.g., 3968, gives us the column of the SW. "
+          },
+          {
+            "type": "text",
+            "content": "Figure 4: The super activation persists throughout the entire model, at exactly the same magnitude, starting after Layer 2. Pruning the super weight decreases the super activation’s magnitude by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        614,
+        271,
+        821,
+        396
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tokens, we conducted an experiment involving the removal of super weights (SW) and restoration of super activations (SA). Note that a super weight should influence the same channel for all tokens. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        516,
+        823,
+        544
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We conduct an ablation experiment under three conditions: (1) the original model, (2) remove the super weight (Prune SW), i.e., setting the weight scalar as zero, (3) remove the super weight and restore the super activation at the layer where it first appears (Prune "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { S W } { , } { + } \\mathrm { S A }"
+          },
+          {
+            "type": "text",
+            "content": "). The third condition allows us to isolate the impact of super weights on super activations only. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        551,
+        823,
+        607
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Results are shown in Table 1. Specifically, when we restore the super activations, the average accuracy recovers to 49.94 from 35.14, indicating that the restoration of super activations salvaged approximately "
+          },
+          {
+            "type": "equation_inline",
+            "content": "42 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of the quality loss. These findings suggest that while the super activations contribute substantially to the model’s performance, they do not fully account for the super weight’s overall influence on quality. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        614,
+        823,
+        684
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Super weights affect output token probability distributions. We studied the impact of super weights with respect to the output token probability distribution, averaged over 500 prompts from Lambaba validation set. We find that when super weights are removed, the stopword probabilities are amplified, e.g., with Llama-7B, the probability of “the” is amplified by around "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 \\times"
+          },
+          {
+            "type": "text",
+            "content": ", “.” by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 \\times"
+          },
+          {
+            "type": "text",
+            "content": ", and “,” by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 0 \\times"
+          },
+          {
+            "type": "text",
+            "content": "(Figure 5, Appendix Figure 11). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        702,
+        823,
+        772
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To dive deeper on how SW impact the output token distribution, we conduct a case study with a prompt “Summer is hot. Winter is ”. The correct next token should be “cold”, which is a word that has strong semantic meaning. With the original model with SW, it correctly predicts the next token “cold” with a high probability "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 1 . 4 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". However, when the SW is removed, the model’s top prediction is a stopword “the” with a non-confident low probability of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "9 . 0 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". This indicates that the SW is essential for the model to make a correct and confident prediction of meaningful words. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        779,
+        825,
+        863
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Sensitivity of super weights. We aim to illustrate how variations in the magnitude of super weights impact the model’s quality, especially, how does increasing the magnitude affect model quality. We multiply the super weights by a scaling factor ranging from 0.0 to 3.0. Results in Fig-"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        825,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/46c527f9ce99970e61a99d88f6236d90bd94d6b270ab59409a915c5892194018.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        102,
+        380,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3876708682657bf2a5ff92bc129acf0c5428fc3a8735275494dfb4ea67373e7f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        388,
+        102,
+        591,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a72688aca0ecb150ad72b141ca91fcd219e73a2a97a084920be026c04e4ca5d6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5: Super weights suppress stopwords. Above, we consistently observe that removing super weights results in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 { - } 5 \\times"
+          },
+          {
+            "type": "text",
+            "content": "larger stopword probabilities, across a variety of LLMs. At the same time, we observe nonstopwords decrease sharply in probability, reducing by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 \\cdot 3 \\times"
+          },
+          {
+            "type": "text",
+            "content": "to as little as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 1 \\%"
+          },
+          {
+            "type": "text",
+            "content": "probability. Overall, this results in stopwords dominating the highest likelihood tokens. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        596,
+        102,
+        805,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f3fd23f2774dcf8b269248ec25b6727b22859fb1d56b3f31c88c14f1acbf12e5.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        309,
+        385,
+        431
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2f98a3bb01d96aae3dc8e902b728f727c2a3a6cc46ab4fd0c2d24f6e81356d33.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        392,
+        309,
+        602,
+        431
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/402d0d521c9c52af69a2c75347cb1917feeac5fdf4d874a57b559321007f0ddf.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6: Amplifying super weight improves quality. Across model sizes, we consistently observe that there exists some scaling where quality is improved. Although the quality improvement is miniscule, a consistent and noticeable trend is surprising, given we’re changing only one scalar out of billions. The purple line is the original model’s zero-shot average accuracy. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        609,
+        309,
+        820,
+        431
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ure 6 show that amplifying super weights can improve model accuracy, to some extent. See full versions of these plots, for more models and all datasets, in Appendix A.1. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        539,
+        823,
+        569
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 SUPER-OUTLIER AWARE QUANTIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        590,
+        542,
+        607
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quantization is a powerful technique for compressing models and reducing memory requirements. However, the presence of outliers can significantly degrade quantization quality, for both weight quantization and activation quantization. As we mentioned before, we refer to these problematic outliers, both super weights and super activations, as super outliers. As we have shown above, these super outliers carry disproportionate importance for model quality, making their preservation during quantization critical. Quantization generally maps continuous values to a finite set of values; we consider one of the simplest forms – namely, asymmetric round-to-nearest quantization: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        623,
+        823,
+        720
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "Q (\\mathbf {X}) = \\operatorname {R o u n d} \\left(\\frac {\\mathbf {X} - \\operatorname {M I N} (\\mathbf {X})}{\\Delta}\\right), Q ^ {- 1} (\\hat {\\mathbf {X}}) = \\Delta \\cdot \\hat {\\mathbf {X}} + \\operatorname {M I N} (\\mathbf {X})",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/8f7317d1953fdaddacfa1668c4c456a7624223fb465d7f6f965ed3df6b221030.jpg"
+        }
+      },
+      "bbox": [
+        279,
+        729,
+        712,
+        763
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\Delta \\ = \\ \\frac { \\mathrm { { M A X } } ( \\mathbf { X } ) - \\mathrm { { M I N } } ( \\mathbf { X } ) } { 2 ^ { N - 1 } - 1 } } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": "MAX(X)−MIN(X)2N−1−1 is the quantization step and N is the number of bits. Note that the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "maximum value is used to calculate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Delta"
+          },
+          {
+            "type": "text",
+            "content": ", so super outliers in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "drastically increase the step size. With larger step sizes, inliers are rounded to more distant values on average, increasing the quantization error. With increasingly super outliers, inliers are rounded to fewer discrete values, and more quantization bins remain unused. In this way, super outliers cause poor quantization fidelity. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        773,
+        823,
+        848
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We specifically consider the case where hardware performs arithmetic in half precision, meaning the tensor "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X"
+          },
+          {
+            "type": "text",
+            "content": "is quantized and dequantized before usage; in this setting, we can leverage prior knowledge of super outliers in two ways. First, hold out the super outlier to prevent adverse effects on inlier quantization. Second, restore the super outlier’s value after dequantization, to ensure the super outlier’s effects are preserved. We adopt this insight in two forms below, for weights and activations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/75a889a4e80ad6fe8aee2afc9fd269638fda779c7d0270ba213c5b23912e3fe5.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Round-to-nearest with super-activation handling is competitive. W8A8 is the baseline 8-bit weight and activation quantization, and the small italicized, parenthesized percentages denote what percentage of SmoothQuant’s quality improvement is retained. We observe that a naive round-to-nearest, while handling a single scalar super activation per tensor, is competitive with SmoothQuant. Note that SmoothQuant uses calibration data to compute scales, whereas our method does not require data. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">PPL (↓)</td><td colspan=\"2\">Llama-7B</td><td colspan=\"2\">Llama-13B</td><td colspan=\"2\">Llama-30B</td></tr><tr><td>Wiki-2</td><td>C4</td><td>Wiki-2</td><td>C4</td><td>Wiki-2</td><td>C4</td></tr><tr><td>FP16</td><td>5.68</td><td>7.08</td><td>5.09</td><td>6.61</td><td>4.10</td><td>5.98</td></tr><tr><td>Naive W8A8</td><td>5.83 (0%)</td><td>7.23 (0%)</td><td>5.20 (0%)</td><td>6.71 (0%)</td><td>4.32 (0%)</td><td>6.14 (0%)</td></tr><tr><td>SmoothQuant</td><td>5.71 (100%)</td><td>7.12 (100%)</td><td>5.13 (100%)</td><td>6.64 (100%)</td><td>4.20 (100%)</td><td>6.06 (100%)</td></tr><tr><td>Ours</td><td>5.74 (75%)</td><td>7.14 (82%)</td><td>5.15 (71%)</td><td>6.66 (71%)</td><td>4.22 (83%)</td><td>6.08 (75%)</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        200,
+        101,
+        795,
+        205
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 ACTIVATION QUANTIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        306,
+        413,
+        321
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We conduct experiments using round-to-nearest quantization, with a small modification – replace the super activation with the median value (REPLACE), quantize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( Q )"
+          },
+          {
+            "type": "text",
+            "content": "and dequantize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( Q ^ { - 1 } )"
+          },
+          {
+            "type": "text",
+            "content": "activations, then restore the super activation in FP16 (RESTORE). This can be expressed as the following, "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        333,
+        823,
+        376
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\hat {A} = \\operatorname {R E S T O R E} \\left(Q ^ {- 1} \\left(Q (\\operatorname {R E P L A C E} (A))\\right)\\right) \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/5aa4d68ea13adec1ed725eed4355c011937e37aaa941a92211cb92090b6f448f.jpg"
+        }
+      },
+      "bbox": [
+        362,
+        393,
+        823,
+        412
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Since the super activation is a single scalar, the bitrate and kernel complexity are not significantly impacted. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        424,
+        823,
+        454
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 WEIGHT QUANTIZATION"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        470,
+        387,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Prior art uses (Dettmers et al., 2023; Lin et al., 2024) small group sizes of 64 or 128, as Dettmers & Zettlemoyer (2023) finds that small group sizes are required for precise low-bit quantization. However, the small group sizes come with computational and bitrate overhead, requiring other techniques to handle a high number of half precision scales and biases. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        496,
+        823,
+        553
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To address this challenge, we propose a simple method to improve INT4 quantization with large blocksizes. First, we identify super weights using Section 3.1. Second, to improve inlier fit, we clip (CLIP) the outlier weights; in this step, the super weight is clipped as well. Quantize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( Q )"
+          },
+          {
+            "type": "text",
+            "content": "and dequantize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( Q ^ { - 1 } )"
+          },
+          {
+            "type": "text",
+            "content": "the clipped weights. Then, to ensure the effect of the super weight is preserved, we restore the half-precision super weight after dequantization (RESTORE). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        559,
+        823,
+        630
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\hat {W} = \\operatorname {R E S T O R E} \\left(Q ^ {- 1} \\left(Q \\left(\\operatorname {C L I P} _ {z} (W)\\right)\\right)\\right) \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/9c489282dd41c02d58f24c84b4c1e59686f2f442d2882a693535c392e2200121.jpg"
+        }
+      },
+      "bbox": [
+        369,
+        648,
+        823,
+        667
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As described in the equation above, we parameterize clipping using a z-score. Assuming all weights fit a Gaussian, we consider all values with a z-score beyond a certain threshold "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z"
+          },
+          {
+            "type": "text",
+            "content": "to be an outlier. To tune this hyperparameter "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z"
+          },
+          {
+            "type": "text",
+            "content": ", we find the minimum reconstruction error z-score using 500 examples from the Wikitext-2 train set. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        678,
+        823,
+        734
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 EXPERIMENTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        755,
+        328,
+        770
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To comprehensively demonstrate the effects of super weights, we conduct experiments across LLaMA 7B to 30B, (Touvron et al., 2023), Mistral 7B (Jiang et al., 2023), and OLMo (Groeneveld et al., 2024) 1 To assess the practical application capabilities of LLMs, we evaluate their accuracy on zero-shot benchmarks, including PIQA (Bisk et al., 2020), ARC (Clark et al., 2018), HellaSwag (Zellers et al., 2019), Lambada (Paperno et al., 2016), and Winogrande (Sakaguchi et al., 2021). We use the lm-evaluation-harness (Gao et al., 2024) library to evaluate the above tasks. We also calculate the perplexity for Wikitext-2 (Merity et al., 2017) and C4 (Raffel et al., 2020), following the widely accepted setting from (Frantar et al., 2022). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        787,
+        823,
+        898
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1For OLMo, we use their latest Huggingface checkpoints, e.g., allenai/OLMo-7B-0724-hf. "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        909,
+        772,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/16ff8c13f1990ab85f78d666b56cdd2806e92a0da851a1175190423d31ef58c7.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Handling the super activation improves activation quantization. Perplexity "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\downarrow"
+          },
+          {
+            "type": "text",
+            "content": "on Wikitext-2 and C4 for OLMo models and various quantization methods. We can see that simply restoring the scalar-valued super activation after quantizing and dequantizing successfully improves quantization’s effectiveness at preserving quality. Notably, note that SmoothQuant does not work on OLMo, as its LayerNorms do not have adjustable parameters. See more results in Appendix A.4 "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">PPL (↓)</td><td colspan=\"2\">OLMo-1B</td><td colspan=\"2\">OLMo-7B</td><td colspan=\"2\">Mistral-7B</td></tr><tr><td>Wiki-2</td><td>C4</td><td>Wiki-2</td><td>C4</td><td>Wiki-2</td><td>C4</td></tr><tr><td>FP16</td><td>10.12 (100%)</td><td>12.31 (100%)</td><td>7.51 (100%)</td><td>9.52 (100%)</td><td>5.25 (100%)</td><td>7.75 (100%)</td></tr><tr><td>Naive W8A8</td><td>10.79 (0%)</td><td>12.84 (0%)</td><td>8.70 (0%)</td><td>10.41 (0%)</td><td>5.32 (0%)</td><td>7.83 (0%)</td></tr><tr><td>Ours</td><td>10.23 (84%)</td><td>12.52 (60%)</td><td>7.80 (76%)</td><td>9.72 (78%)</td><td>5.31 (14%)</td><td>7.81 (25%)</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        212,
+        99,
+        782,
+        186
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1 ACTIVATION QUANTIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        297,
+        413,
+        311
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Following SmoothQuant’s setting, we simulate W8A8 quantization with FP16 arithmetic. Specifically, we perform 8-bit per-tensor quantization for weights, and 8-bit per-token quantization for activations. We quantize the inputs and weights for linear layers (including q, k, v, gate, up, down projections), and BMM (i.e., batched matmul) in attention layers. For SmoothQuant, we use the default "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "as 0.85. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        321,
+        823,
+        391
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We compare our method with SmoothQuant in Table 3. For three Llama models on both datasets, we achieve over "
+          },
+          {
+            "type": "equation_inline",
+            "content": "70 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of SmoothQuant’s improvement over naive quantization. On C4 with Llama-7B and on Wikitext with Llama-30B, we attain above "
+          },
+          {
+            "type": "equation_inline",
+            "content": "80 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of SmoothQuant’s improvement. Our method demonstrates that a significantly simplified approach to quantization can achieve competitive results compared to more complex methods. Unlike SmoothQuant, which applies scales to every activation channel, our method focuses solely on addressing one critical activation outlier. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        398,
+        823,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We extended our evaluation to include additional LLMs: OLMo (1B and 7B), Mistral-7B, and Llama-2-7B. Results are shown in Table 4 and Appendix Table 7. These models represent a diverse set of architectures and training paradigms, allowing us to assess the generalizability of our quantization method. Since SmoothQuant does not report on this set of models, we compare our results with naive W8A8 quantization. Across all models and datasets, our method consistently outperforms naive W8A8 quantization. Our method demonstrates remarkable performance on OLMo models. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        489,
+        823,
+        587
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Notably, OLMo models use non-parametric LayerNorm, making them incompatible with the SmoothQuant method, which relies on LayerNorm weights to apply the per-channel scales. On Mistral-7B, the improvements are smaller. We hypothesize that this is because the LayerNorm of these models may have learned weights that aggressively suppress the super activation, resulting in a more uniform distribution of activation magnitudes. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        594,
+        823,
+        665
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "These results underscore the critical importance of the super activation in maintaining model performance during quantization. By addressing this single activation with minimal computational overhead, our method captures a significant portion of the benefits achieved by more complex quantization schemes. This finding suggests that the super activation plays a disproportionately large role in preserving model quality during the quantization process. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        671,
+        823,
+        742
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2 WEIGHT QUANTIZATION"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        758,
+        387,
+        773
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Recent advancements in LLM quantization techniques have inadvertently highlighted the importance of super weights. Two notable methods, AWQ (Lin et al., 2024) and SqueezeLLM (Kim et al., 2024), demonstrate the significance of preserving these super weights, albeit through different approaches. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        785,
+        823,
+        842
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2.1 EXISTING WORKAROUNDS FOR THE SUPER WEIGHT"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        857,
+        594,
+        871
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "AWQ, recognizing the need to minimize quantization errors for important weights, introduced a per-channel scaling method. This technique automatically searches for optimal scaling factors, effectively amplifying crucial weight channels. Our analysis of Llama-7B revealed that AWQ scales "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        882,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/186e73d4c747c972ffe043b8d7ebaae4c1eee416776c493e86d53ef080b4d8a4.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        181,
+        108,
+        483,
+        258
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/23938e0d7299089c8256aa0e987bf5b61d9dc5ea58af55bd617418e8f408dda3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7: Restoring super weight improves block scaling. Smaller block sizes are often used to handle outliers implicitly. We note that block sizes can scale slightly more gracefully by just handling the single scalar-valued super weight. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        509,
+        107,
+        812,
+        258
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "up the super weight by a factor of 12, corroborating our assessment of the super weight’s importance. Similarly, SqueezeLLM proposes a sparse matrix approach that retains the top "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 0 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of outlier values in FP16 precision. Our investigation confirmed that this sparse matrix consistently includes the super weights, further validating their importance. Both AWQ and SqueezeLLM, despite employing different strategies, converge on the same principle: protecting super weights is crucial for effective weight quantization in LLMs. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        354,
+        823,
+        439
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2.2 SCALING UP BLOCK SIZES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        465,
+        413,
+        479
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To evaluate the effectiveness of the proposed super weight-aware quantization method, we compare it with the traditional round-to-near quantization approach. We assess the models on a suite of zero-shot downstream tasks, with results illustrated in Figure 7. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        494,
+        823,
+        537
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the traditional round-to-near quantization, we observe a clear trend: as the block size increases, model quality significantly degrades. This decline likely results from the increased quantization error introduced when larger blocks of weights are quantized together, which allows outliers to impact more weights. In contrast, our super weight-aware quantization method demonstrates much greater robustness to larger block sizes. As the block size increases, the degradation in model quality is noticeably smaller compared to the round-to-near method. This robustness stems from our method’s ability to preserve the most critical weight (the super weight) while minimizing the influence of outlier weights on the overall quantization process. By clipping outliers and focusing on inlier weights, our method maintains higher fidelity in representing the model’s parameters. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        544,
+        823,
+        671
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A key advantage of our method is its ability to support larger block sizes with less loss in model quality. This capability leads to a lower average bitrate and smaller file sizes, which are essential for deploying models in resource-constrained environments, such as mobile devices or edge computing scenarios. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        676,
+        823,
+        734
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 CONCLUSION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        766,
+        318,
+        780
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our study of Large Language Models has revealed the critical role of super outliers – specifically, the super weight and its induced super activation. Although these super outliers are small in number, identifying and preserving them is essential for model quality; pruning the super weight completely destroys the model’s ability to generate text, and retaining the super weight can significantly improve the quantized model’s quality. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        805,
+        823,
+        876
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our findings shed light on how these outliers influence model behavior and provide practical strategies for their detection and management. By sharing a directory of super weights, we furthermore hope to inspire further research into their properties and implications. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "REFERENCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        102,
+        287,
+        116
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Saleh Ashkboos, Amirkeivan Mohtashami, Maximilian L Croci, Bo Li, Martin Jaggi, Dan Alistarh, Torsten Hoefler, and James Hensman. Quarot: Outlier-free 4-bit inference in rotated llms. arXiv preprint arXiv:2404.00456, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yonatan Bisk, Rowan Zellers, Jianfeng Gao, Yejin Choi, et al. Piqa: Reasoning about physical commonsense in natural language. In Proceedings of the AAAI conference on artificial intelligence, volume 34, pp. 7432–7439, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yelysei Bondarenko, Markus Nagel, and Tijmen Blankevoort. Understanding and overcoming the challenges of efficient transformer quantization. In Marie-Francine Moens, Xuanjing Huang, Lucia Specia, and Scott Wen-tau Yih (eds.), Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing, pp. 7947–7969, Online and Punta Cana, Dominican Republic, November 2021. Association for Computational Linguistics. doi: 10.18653/v1/2021. emnlp-main.627. URL https://aclanthology.org/2021.emnlp-main.627. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jerry Chee, Yaohui Cai, Volodymyr Kuleshov, and Christopher M De Sa. Quip: 2- bit quantization of large language models with guarantees. In A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine (eds.), Advances in Neural Information Processing Systems, volume 36, pp. 4396–4429. Curran Associates, Inc., 2023. URL https://proceedings.neurips.cc/paper_files/paper/2023/ file/0df38cd13520747e1e64e5b123a78ef8-Paper-Conference.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Peter Clark, Isaac Cowhey, Oren Etzioni, Tushar Khot, Ashish Sabharwal, Carissa Schoenick, and Oyvind Tafjord. Think you have solved question answering? try arc, the ai2 reasoning challenge, 2018. URL https://arxiv.org/abs/1803.05457. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tim Dettmers and Luke Zettlemoyer. The case for 4-bit precision: k-bit inference scaling laws. In International Conference on Machine Learning, pp. 7750–7774. PMLR, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tim Dettmers, Mike Lewis, Younes Belkada, and Luke Zettlemoyer. Gpt3.int8(): 8- bit matrix multiplication for transformers at scale. In S. Koyejo, S. Mohamed, A. Agarwal, D. Belgrave, K. Cho, and A. Oh (eds.), Advances in Neural Information Processing Systems, volume 35, pp. 30318–30332. Curran Associates, Inc., 2022. URL https://proceedings.neurips.cc/paper_files/paper/2022/ file/c3ba4962c05c49636d4c6206a97e9c8a-Paper-Conference.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer. QLoRA: Efficient finetuning of quantized LLMs. In Thirty-seventh Conference on Neural Information Processing Systems, 2023. URL https://openreview.net/forum?id "
+              },
+              {
+                "type": "equation_inline",
+                "content": "{ . } = { }"
+              },
+              {
+                "type": "text",
+                "content": "OUIFPHEgJU. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tim Dettmers, Ruslan A. Svirschevski, Vage Egiazarian, Denis Kuznedelev, Elias Frantar, Saleh Ashkboos, Alexander Borzunov, Torsten Hoefler, and Dan Alistarh. SpQR: A sparse-quantized representation for near-lossless LLM weight compression. In The Twelfth International Conference on Learning Representations, 2024. URL https://openreview.net/forum?id= Q1u25ahSuy. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Elias Frantar, Saleh Ashkboos, Torsten Hoefler, and Dan Alistarh. GPTQ: Accurate post-training compression for generative pretrained transformers. arXiv preprint arXiv:2210.17323, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Leo Gao, Jonathan Tow, Baber Abbasi, Stella Biderman, Sid Black, Anthony DiPofi, Charles Foster, Laurence Golding, Jeffrey Hsu, Alain Le Noac’h, Haonan Li, Kyle McDonell, Niklas Muennighoff, Chris Ociepa, Jason Phang, Laria Reynolds, Hailey Schoelkopf, Aviya Skowron, Lintang Sutawika, Eric Tang, Anish Thite, Ben Wang, Kevin Wang, and Andy Zou. A framework for few-shot language model evaluation, 07 2024. URL https://zenodo.org/records/ 12608602. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Dirk Groeneveld, Iz Beltagy, Pete Walsh, Akshita Bhagia, Rodney Kinney, Oyvind Tafjord, Ananya Harsh Jha, Hamish Ivison, Ian Magnusson, Yizhong Wang, et al. Olmo: Accelerating the science of language models. arXiv preprint arXiv:2402.00838, 2024. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        126,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        509,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jung Hwan Heo, Jeonghoon Kim, Beomseok Kwon, Byeongwook Kim, Se Jung Kwon, and Dongsoo Lee. Rethinking channel dimensions to isolate outliers for low-bit weight quantization of large language models. In The Twelfth International Conference on Learning Representations, 2024. URL https://openreview.net/forum?id=JzG7kSpjJk. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Albert Q. Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bamford, Devendra Singh Chaplot, Diego de las Casas, Florian Bressand, Gianna Lengyel, Guillaume Lample, Lucile Saulnier, Lelio Renard Lavaud, Marie-Anne Lachaux, Pierre Stock, Teven Le Scao, Thibaut Lavril, ´ Thomas Wang, Timothee Lacroix, and William El Sayed. Mistral 7b, 2023. URL ´ https: //arxiv.org/abs/2310.06825. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Sehoon Kim, Coleman Richard Charles Hooper, Amir Gholami, Zhen Dong, Xiuyu Li, Sheng Shen, Michael W. Mahoney, and Kurt Keutzer. SqueezeLLM: Dense-and-sparse quantization. In Fortyfirst International Conference on Machine Learning, 2024. URL https://openreview. net/forum?id=0jpbpFia8m. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Olga Kovaleva, Saurabh Kulshreshtha, Anna Rogers, and Anna Rumshisky. Bert busters: Outlier dimensions that disrupt transformers. arXiv preprint arXiv:2105.06990, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Changhun Lee, Jungyu Jin, Taesu Kim, Hyungjun Kim, and Eunhyeok Park. Owq: Outlier-aware weight quantization for efficient fine-tuning and inference of large language models. Proceedings of the AAAI Conference on Artificial Intelligence, 38(12):13355–13364, Mar. 2024. doi: 10. 1609/aaai.v38i12.29237. URL https://ojs.aaai.org/index.php/AAAI/article/ view/29237. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ji Lin, Jiaming Tang, Haotian Tang, Shang Yang, Wei-Ming Chen, Wei-Chen Wang, Guangxuan Xiao, Xingyu Dang, Chuang Gan, and Song Han. Awq: Activation-aware weight quantization for on-device llm compression and acceleration. Proceedings of Machine Learning and Systems, 6: 87–100, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zechun Liu, Changsheng Zhao, Igor Fedorov, Bilge Soran, Dhruv Choudhary, Raghuraman Krishnamoorthi, Vikas Chandra, Yuandong Tian, and Tijmen Blankevoort. Spinquant–llm quantization with learned rotations. arXiv preprint arXiv:2405.16406, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. Pointer sentinel mixture models. In International Conference on Learning Representations, 2017. URL https: //openreview.net/forum?id=Byj72udxe. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Denis Paperno, German Kruszewski, Angeliki Lazaridou, Ngoc Quan Pham, Raffaella Bernardi, ´ Sandro Pezzelle, Marco Baroni, Gemma Boleda, and Raquel Fernandez. The LAMBADA dataset: ´ Word prediction requiring a broad discourse context. In Katrin Erk and Noah A. Smith (eds.), Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pp. 1525–1534, Berlin, Germany, August 2016. Association for Computational Linguistics. doi: 10.18653/v1/P16-1144. URL https://aclanthology.org/ P16-1144. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter J Liu. Exploring the limits of transfer learning with a unified text-to-text transformer. Journal of machine learning research, 21(140):1–67, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Keisuke Sakaguchi, Ronan Le Bras, Chandra Bhagavatula, and Yejin Choi. Winogrande: an adversarial winograd schema challenge at scale. Commun. ACM, 64(9):99–106, aug 2021. ISSN 0001-0782. doi: 10.1145/3474381. URL https://doi.org/10.1145/3474381. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Wenqi Shao, Mengzhao Chen, Zhaoyang Zhang, Peng Xu, Lirui Zhao, Zhiqian Li, Kaipeng Zhang, Peng Gao, Yu Qiao, and Ping Luo. Omniquant: Omnidirectionally calibrated quantization for large language models. In The Twelfth International Conference on Learning Representations, 2024. URL https://openreview.net/forum?id=8Wuvhh0LYW. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Seungwoo Son, Wonpyo Park, Woohyun Han, Kyuyeun Kim, and Jaeho Lee. Prefixing attention sinks can mitigate activation outliers for large language model quantization. arXiv preprint arXiv:2406.12016, 2024. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        103,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        490,
+        948,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Mingjie Sun, Xinlei Chen, J Zico Kolter, and Zhuang Liu. Massive activations in large language models. In ICLR 2024 Workshop on Mathematical and Empirical Understanding of Foundation Models, 2024. URL https://openreview.net/forum?id "
+              },
+              {
+                "type": "equation_inline",
+                "content": "^ { = 1 }"
+              },
+              {
+                "type": "text",
+                "content": "ayU4fMqme. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothee´ Lacroix, Baptiste Roziere, Naman Goyal, Eric Hambro, Faisal Azhar, Aurelien Rodriguez, Ar- ` mand Joulin, Edouard Grave, and Guillaume Lample. Llama: Open and efficient foundation language models, 2023. URL https://arxiv.org/abs/2302.13971. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Xiuying Wei, Yunchen Zhang, Xiangguo Zhang, Ruihao Gong, Shanghang Zhang, Qi Zhang, Fengwei Yu, and Xianglong Liu. Outlier suppression: Pushing the limit of low-bit transformer language models. In S. Koyejo, S. Mohamed, A. Agarwal, D. Belgrave, K. Cho, and A. Oh (eds.), Advances in Neural Information Processing Systems, volume 35, pp. 17402–17414. Curran Associates, Inc., 2022. URL https://proceedings.neurips.cc/paper_files/paper/2022/file/ 6f6db140de9c9f111b12ef8a216320a9-Paper-Conference.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Xiuying Wei, Yunchen Zhang, Yuhang Li, Xiangguo Zhang, Ruihao Gong, Jinyang Guo, and Xianglong Liu. Outlier suppression+: Accurate quantization of large language models by equivalent and effective shifting and scaling. In Houda Bouamor, Juan Pino, and Kalika Bali (eds.), Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing, pp. 1648–1665, Singapore, December 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023. emnlp-main.102. URL https://aclanthology.org/2023.emnlp-main.102. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Guangxuan Xiao, Ji Lin, Mickael Seznec, Hao Wu, Julien Demouth, and Song Han. Smoothquant: accurate and efficient post-training quantization for large language models. In Proceedings of the 40th International Conference on Machine Learning, ICML’23. JMLR.org, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Guangxuan Xiao, Yuandong Tian, Beidi Chen, Song Han, and Mike Lewis. Efficient streaming language models with attention sinks. In The Twelfth International Conference on Learning Representations, 2024. URL https://openreview.net/forum?id=NG7sS51zVF. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jaewoo Yang, Hayun Kim, and Younghoon Kim. Mitigating quantization errors due to activation spikes in glu-based llms. arXiv preprint arXiv:2405.14428, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Rowan Zellers, Ari Holtzman, Yonatan Bisk, Ali Farhadi, and Yejin Choi. HellaSwag: Can a machine really finish your sentence? In Anna Korhonen, David Traum, and Llu´ıs Marquez ` (eds.), Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics, pp. 4791–4800, Florence, Italy, July 2019. Association for Computational Linguistics. doi: 10. 18653/v1/P19-1472. URL https://aclanthology.org/P19-1472. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        103,
+        825,
+        632
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A APPENDIX "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        102,
+        299,
+        118
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1 SUPER WEIGHT SENSITIVITY"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        133,
+        423,
+        148
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we show the full set of results on zero-shot downstream datasets. Results are shown in Table 5 for FP16 models. From the table, we can see that some datasets are more sensitive to super weight (SW) amplification. For example, Winogrande and Lambada show consistent improvements across models when amplifying SW, while PIQA shows same or slightly lower accuracy. We also evaluate the 4-bit quantized Llama-7B with amplified SW in Table 6. We observe similar minor improvements when SW is amplified. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        159,
+        826,
+        243
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/6e8db60df5488c92b0d894ff38d3f93ca0113c4b892c99a345349cd2911af2e9.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 5: Accuracy of zero-shot benchmarks of amplifying super weights in FP16 models. The scaling factor is chosen by the highest average accuracy. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td colspan=\"2\">Llama-7B</td><td colspan=\"2\">Llama-13B</td><td colspan=\"2\">Llama-30B</td><td colspan=\"2\">Mistral-7B</td></tr><tr><td></td><td>Original</td><td>Amplified</td><td>Original</td><td>Amplified</td><td>Original</td><td>Amplified</td><td>Original</td><td>Amplified</td></tr><tr><td>ARC-C</td><td>41.81</td><td>41.89</td><td>46.42</td><td>46.76</td><td>52.82</td><td>52.47</td><td>50.25</td><td>49.74</td></tr><tr><td>ARC-E</td><td>75.29</td><td>75.63</td><td>77.36</td><td>77.19</td><td>80.39</td><td>80.51</td><td>80.89</td><td>81.02</td></tr><tr><td>Hella.</td><td>56.93</td><td>56.76</td><td>59.96</td><td>59.82</td><td>63.34</td><td>63.21</td><td>61.23</td><td>61.39</td></tr><tr><td>Lamb.</td><td>73.51</td><td>74.09</td><td>76.15</td><td>76.58</td><td>77.59</td><td>77.68</td><td>75.62</td><td>75.92</td></tr><tr><td>PIQA</td><td>78.67</td><td>78.67</td><td>79.11</td><td>78.94</td><td>80.96</td><td>81.28</td><td>80.73</td><td>80.47</td></tr><tr><td>SciQ</td><td>94.60</td><td>95.40</td><td>95.00</td><td>95.30</td><td>96.10</td><td>96.10</td><td>95.90</td><td>96.00</td></tr><tr><td>Wino.</td><td>70.01</td><td>71.11</td><td>72.77</td><td>72.85</td><td>75.69</td><td>76.01</td><td>73.71</td><td>74.11</td></tr><tr><td>AVG</td><td>70.12</td><td>70.51</td><td>72.39</td><td>72.49</td><td>75.27</td><td>75.33</td><td>74.05</td><td>74.09</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        183,
+        256,
+        815,
+        412
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/fcce053448961f531d6426e9b74472a4f3c1b119650cf5fc6eed97e3176420ab.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 6: Average accuracy of zero-shot benchmarks of amplifying super weights in models with round-tonearest 4bit weight quantization with blocksizes of 8x8 and 64x64. On quantized models, amplifying super weights also yields a small yet consistent quality improvement. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td colspan=\"2\">RTN-4bit-8x8</td><td colspan=\"2\">RTN-4bit-64x64</td></tr><tr><td></td><td>Original</td><td>Amplified</td><td>Original</td><td>Amplified</td></tr><tr><td>Llama-7B</td><td>69.59</td><td>69.88</td><td>66.19</td><td>67.54</td></tr><tr><td>Llama-13B</td><td>72.09</td><td>72.13</td><td>71.86</td><td>72.07</td></tr><tr><td>Llama-30B</td><td>74.93</td><td>75.16</td><td>73.88</td><td>74.04</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        313,
+        468,
+        683,
+        555
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We visualize the full sensitivity graph starting from zero. We note that the average of all zero-shot datasets is around "
+          },
+          {
+            "type": "equation_inline",
+            "content": "30 \\%"
+          },
+          {
+            "type": "text",
+            "content": "when datasets are reduced to guessing accuracies. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        619,
+        823,
+        648
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3b870b1bf7e446d554bf046ccd4714d407f18389b931adb2f8d8cb1a9d8cb59c.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        662,
+        385,
+        789
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/06df26c38b62e05fb55345af7c72105615d100afe56b1b5e406c086c157fb31f.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        392,
+        662,
+        602,
+        789
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/589769664804733db35461a9190b9c10aa127fa123e6905cfe48197d4e84c275.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 8: Amplifying super weight improves quality. Full results for scaling super weight from 0 to 3. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        609,
+        664,
+        816,
+        789
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2 MAXIMUM-MAGNITUDE ACTIVATION OF DOWN PROJECTION MODULE "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        854,
+        709,
+        869
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Below, we show more examples of identifying super weights. We visualize the maximum-magnitude activations in the inputs and outputs of down proj of all the transformer layers. The outlier ”sparks” indicate the row and column index of super weights. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        948,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/f27758704666e9f55a1e8ff73f0140ea26b732724d1252eaeaef2f947fa1c44a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        282,
+        102,
+        495,
+        228
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/aded6d2877cd5fac395f171a10a48575e5c3e666aa499fa235da86121475d7b1.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        102,
+        712,
+        229
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9560330f3435dc380633c5e3491bdd86d56b8a0f5088300eb46627dba89526d5.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 9: Maximum-magnitude activation of down proj across all transformer layers of Mistral-7B. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        282,
+        271,
+        495,
+        397
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/03fb6083c18baf5082aa1088231c157fd2800a64b4d137d8bab3d0682e2c5a1a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 10: Maximum-magnitude activation of down proj across all transformer layers of OLMo-7B. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        271,
+        712,
+        397
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3 LOGIT DISTRIBUTION WITH SUPER WEIGHT REMOVAL "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        450,
+        599,
+        465
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Below, we visualize more of the logit distribution, when super weights are removed from Llama-7B. Despite the more thorough visualization, the conclusions remain the same: stopwords are amplified and non-stopwords see a drastic decrease in likelihood. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        477,
+        823,
+        518
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/2c46c84b5cf83b9cad9ed5c275f8122927e7a62bd3c1c1fa93b9bb9c66374d3c.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 11: Output token distribution before and after removing the super weight on Llama-7B. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        532,
+        823,
+        631
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4 ADDITIONAL ACTIVATION QUANTIZATION RESULTS WITH SUPER ACTIVATIONS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        683,
+        771,
+        698
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Below, we include results for Llama-2 7B using our activation quantization. See Table 7. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        709,
+        754,
+        723
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.5 SUPER WEIGHTS AND ATTENTION SINKS"
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        739,
+        504,
+        753
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Given that super activations are typically observed on the first token of an input sequence, we hypothesized a potential relationship between super weights and the well-documented phenomenon of attention sinks (Xiao et al., 2024; Son et al., 2024). To test this hypothesis, we conducted experiments comparing attention weight patterns in the presence and absence of super weights. Contrary to our initial expectations, we find that attention sinks persist even when super weights are removed from the model, while not preserving model quality. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        766,
+        826,
+        849
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/adc8f334333d1890159cd932c381b20c769615f8b45e9641a059fe9514590c94.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 12: Output token distribution before and after removing the super weight on Mistral-7B. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        174,
+        823,
+        272
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a5853497b940a6e72d5d5d9a9032a35ec9e633095aa175161e2a8fe2a4120fa2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 13: Output token distribution before and after removing the super weight on OLMo-7B. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        174,
+        450,
+        823,
+        547
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/561497bfd5ac7dc5396c170b16a186bb145738d13f14d7909fb7976fd487b48a.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 7: Perplexity (↓) on Wikitext-2 and C4 with Llama-2-7B. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>PPL (↓)</td><td colspan=\"2\">Llama-2-7B</td></tr><tr><td></td><td>Wiki-2</td><td>C4</td></tr><tr><td>FP16</td><td>5.47 (100%)</td><td>6.97 (100%)</td></tr><tr><td>W8A8</td><td>5.58 (0%)</td><td>7.09 (0%)</td></tr><tr><td>Ours</td><td>5.57 (9.1%)</td><td>7.07 (16.7%)</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        383,
+        726,
+        612,
+        825
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ]
+]

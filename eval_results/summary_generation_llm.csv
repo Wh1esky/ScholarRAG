@@ -1,0 +1,3 @@
+Dataset,Questions,ROUGE-L,Token-F1,Context Recall,Context Precision,Faithfulness,Answer Relevancy
+train,50,0.183,0.307,3.50/5,3.90/5,4.44/5,4.09/5
+evaluation,44,0.194,0.314,3.40/5,4.11/5,4.25/5,3.95/5

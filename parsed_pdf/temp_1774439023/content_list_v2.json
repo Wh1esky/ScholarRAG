@@ -1,0 +1,3341 @@
+[
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Crafting Better Contrastive Views for Siamese Representation Learning "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                122,
+                130,
+                846,
+                152
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Xiangyu Peng1* Kai Wang1* Zheng Zhu2 Mang Wang3 Yang You1† 1National University of Singapore 2Tsinghua University 3Alibaba Group "
+                    }
+                ]
+            },
+            "bbox": [
+                179,
+                178,
+                790,
+                215
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "{xiangyupeng, kai.wang, youy}@comp.nus.edu.sg "
+                    }
+                ]
+            },
+            "bbox": [
+                282,
+                218,
+                687,
+                234
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "zhengzhu@ieee.org wangmang.wm@alibaba-inc.com "
+                    }
+                ]
+            },
+            "bbox": [
+                281,
+                237,
+                689,
+                250
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Code: https://github.com/xyupeng/ContrastiveCrop "
+                    }
+                ]
+            },
+            "bbox": [
+                276,
+                253,
+                689,
+                268
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Abstract "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                233,
+                304,
+                312,
+                319
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Recent self-supervised contrastive learning methods greatly benefit from the Siamese structure that aims at minimizing distances between positive pairs. For high performance Siamese representation learning, one of the keys is to design good contrastive pairs. Most previous works simply apply random sampling to make different crops of the same image, which overlooks the semantic information that may degrade the quality of views. In this work, we propose ContrastiveCrop, which could effectively generate better crops for Siamese representation learning. Firstly, a semantic-aware object localization strategy is proposed within the training process in a fully unsupervised manner. This guides us to generate contrastive views which could avoid most false positives (i.e., object vs. background). Moreover, we empirically find that views with similar appearances are trivial for the Siamese model training. Thus, a center-suppressed sampling is further designed to enlarge the variance of crops. Remarkably, our method takes a careful consideration of positive pairs for contrastive learning with negligible extra training overhead. As a plugand-play and framework-agnostic module, ContrastiveCrop consistently improves SimCLR, MoCo, BYOL, SimSiam by "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 4 \\% \\sim \\ 2 . 0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "classification accuracy on CIFAR-10, CIFAR-100, Tiny ImageNet and STL-10. Superior results are also achieved on downstream detection and segmentation tasks when pre-trained on ImageNet-1K. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                335,
+                472,
+                731
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1. Introduction "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                760,
+                207,
+                776
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Self-supervised learning (SSL) has attracted much attention in the computer vision community due to its potential of exploiting large amount of unlabeled data. As a mainstream approach in SSL, contrastive learning has achieved higher performance on several downstream tasks "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                786,
+                468,
+                863
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a32ddd4e40f45fe53c7c9a3de2989e0dc022233ad500e6fa82686b3f062af999.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(a) "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                509,
+                306,
+                632,
+                402
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8282ba59652f3f1e6419bdf500861fdfe0bb5f30654d40866d311f17ce064a09.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                632,
+                308,
+                694,
+                402
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/5140b9d52f38331942ad331985587b63b2a9c0cbd3f6639c892bbdddcba9020b.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(b) "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                699,
+                308,
+                821,
+                402
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/4bfc206be37a8bdfe1b123e5a6e02801a44e4fb4d6a328f3c54c800735aae70d.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(c) "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                509,
+                426,
+                632,
+                522
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ebc92e59e2ba540748711d818b20ccb8761fbc65c616888ffe1c90f5a41b7ef1.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                632,
+                426,
+                694,
+                522
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2bfeaba129cfd2ee443254411a8e14f4f8cac2c847c65bcd77e6cca6c1968e45.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(d) "
+                    },
+                    {
+                        "type": "text",
+                        "content": "Figure 1. The motivation of our proposed ContrastiveCrop. (a) and (c) are generated by typical RandomCrop, while (b) and (d) are crops from our method. We address the false positive problem (object vs. background) shown in (a) by localizing the object and restricting the crop center within the bounding box (the black dashed box) in (b). Moreover, we enlarge the variance of crops in (d) by keeping them away from the center, which avoids the close appearance as shown in (c). "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                699,
+                426,
+                820,
+                522
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "(e.g., object detection, segmentation and pose estimation [16,18,21,27,32,50]) than its supervised counterpart. Such promising results can be largely attributed to the Siamese structure, which is commonly applied in state-of-the-art unsupervised methods, including SimCLR [5], MoCo V1 & V2 [7, 20], BYOL [17] and SimSiam [8]. Typically, the Siamese structure takes two augmented views from an image as input, and minimizes their distance in the embedding space. With proper views selected, Siamese networks demonstrate a strong capability to learn generic visual features [37]. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                699,
+                890,
+                866
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "One of the key issues of contrastive learning is to design positives selection. Some works generate different positive "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                869,
+                890,
+                901
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "arXiv:2202.03278v3 [cs.CV] 30 Mar 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                22,
+                258,
+                57,
+                705
+            ]
+        },
+        {
+            "type": "page_footnote",
+            "content": {
+                "page_footnote_content": [
+                    {
+                        "type": "text",
+                        "content": "*Equal contribution. "
+                    }
+                ]
+            },
+            "bbox": [
+                94,
+                875,
+                205,
+                887
+            ]
+        },
+        {
+            "type": "page_footnote",
+            "content": {
+                "page_footnote_content": [
+                    {
+                        "type": "text",
+                        "content": "†Corresponding author. "
+                    }
+                ]
+            },
+            "bbox": [
+                96,
+                887,
+                220,
+                898
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "views by strong data augmentation, such as color distortion and jigsaw transformation [4, 37]. Another work [34] applies mixture [48, 49] in an unsupervised manner to produce positive pairs that incorporate multiple samples. Additionally, different from data augmentation, [51] creates hard positives with transformation at the feature level. Despite different techniques, these works commonly apply RandomCrop to sample multiple views of an image, and further make the views more diverse. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                90,
+                472,
+                224
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "As a basic sampling method, RandomCrop enables all individual crops to be selected equiprobably. However, it fails to look at the semantic information of paired views, which helps to learn better representations more efficiently and accurately. As shown in Fig. 1a, random crops are prone to miss the object when no prior of object (e.g., scale and location) is given. Optimizing the distance between object and background in the embedding space would mislead the learning of representations. Besides, Fig. 1c indicates that random crops cannot always carry sufficient variances of an object. Such views with large similarity are trivial for learning discriminative models. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                227,
+                472,
+                407
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this paper, we propose ContrastiveCrop, aiming to craft better contrastive pairs for Siamese representation learning. False positives indicate that a better sampling strategy for contrastive learning should consider the content information of the image. Hereby, we propose a semanticaware localization scheme. The module serves as a guidance to select crops, avoiding most false positives, as shown in Fig. 1b. Moreover, we propose a center-suppressed sampling strategy to tackle trivial positive pairs with large similarity. Fig. 1d shows that our crops are more likely to cover different parts of the object. The semantic-aware localization and center-suppressed sampling scheme can be gracefully combined to generate better crops for contrastive learning. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                407,
+                472,
+                619
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The proposed ContrastiveCrop considers both semantic information and maintaining large variance when making pairs. As a plug-and-play method, it can be easily applied into the Siamese structure. More importantly, our approach is agnostic to contrastive frameworks, regardless using negative samples or not. With negligible training overhead, our strategy consistently improves SimCLR, MoCo, BYOL, SimSiam by "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 4 \\% \\sim 2 . 0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "classification accuracy on CIFAR-10, CIFAR-100, Tiny ImageNet and STL-10. Superior results are also achieved on downstream detection and segmentation tasks when pre-trained on ImageNet-1K. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                619,
+                472,
+                785
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The main contributions of this paper can be summarized as: "
+                    }
+                ]
+            },
+            "bbox": [
+                76,
+                785,
+                470,
+                815
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "• To the best of our knowledge, this is the first work to investigate the problem of commonly used Random-Crop in contrastive learning. We propose Contrastive-Crop that is customized to generate better views for this task. "
+                    }
+                ]
+            },
+            "bbox": [
+                94,
+                824,
+                472,
+                898
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "• In ContrastiveCrop, the semantic-aware localization is adopted to avoid most false positives and the centersuppressed sampling strategy is applied to reduce trivial positive pairs. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "• ContrastiveCrop consistently outperforms Random-Crop with popular contrastive methods on a variety of datasets, showing its effectiveness and generality for Siamese representation learning. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                517,
+                90,
+                893,
+                222
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2. Related works "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                500,
+                234,
+                645,
+                251
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this section, we introduce contrastive learning and positives selection related to this work. "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                261,
+                890,
+                291
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.1. Contrastive Learning "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                500,
+                301,
+                700,
+                316
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The core idea of contrastive learning is to pull positive pairs closer while pushing negatives apart in the embedding space. This methodology has shown great promise in learning visual representations without annotation [2, 23, 29, 30, 36, 43, 47]. More recently, contrastive methods based on the Siamese structure achieve remarkable performance on downstream tasks [5, 7, 8, 15, 17, 20, 40, 45, 46], some of which even surpass supervised models. "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                323,
+                890,
+                444
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The milestone work is SimCLR [5], which presents a simple framework for contrastive visual representation learning. It significantly improves the quality of learned representations with a non-linear transformation head. Another famous work is MoCo [20], which uses a memory bank to store large number of negative samples and smoothly updates it with momentum for better consistency. Methods that learn useful representations without negative samples are also proposed. BYOL [17] trains an online network to predict the output of the target network, with the latter slowly updated with momentum. The authors hypothesize that the additional projector to the online network and the momentum encoder are important to avoid collapsed solutions without negative samples. SimSiam [8] further explores simple Siamese networks that can learn meaningful representations without negative sample pairs, large batches and momentum encoders. The role of stopgradient is emphasized in preventing collapsing. In addition to framework design, theoretical analyses and empirical studies have also been proposed to better understand the behavior and properties of contrastive learning [1, 3, 6, 9, 24, 31, 35, 39, 39, 41, 44, 53]. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                445,
+                892,
+                777
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.2. Positives Selection "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                500,
+                786,
+                676,
+                801
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "One of the key issues in contrastive learning is the design of positives selection. An intuitive approach to generating positive pairs is to create different views of a sample using data augmentation. Most SSL works apply data augmentation pipelines that are directly adapted from those in supervised learning [12, 13, 19, 26, 48, 49]. Chen et al. [5] "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                809,
+                890,
+                901
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/cfd6471a476ae075917f6393ed294d8fe231969484db57af79d31e105bac20f3.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                83,
+                90,
+                486,
+                218
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/60f09166e17d477c4d4e7c7e8e33ca7c152c475fffa44de26669b6d31475b39a.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 2. The training dynamic of localization is shown from left to right in each subfigure. We initialize the localization box as the whole image, and update it at a regular interval using the latest heatmap. Note that our goal is not to derive precise localization, but to guide generation of crops by finding the object of interest. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                491,
+                90,
+                890,
+                218
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "comprehensively study the effect of a range of data transformations, and find out the composition made of random cropping and random color distortion can lead to better performance. Tian et al. [37] propose an InfoMin principle to catch a sweet point of mutual information between views, and accordingly generate positive pairs with its InfoMin Augmentation. A close work to this paper is [33], which also uses unsupervised saliency maps as a constraint of crops, but crops are still randomly sampled. All these works commonly apply RandomCrop as the basic sampling method to generate input views, which we find may not be the optimal solution for contrastive learning. [28] take object-scene relation into account when making crops, but require additional object proposal algorithms. In this work, we propose ContrastiveCrop that is tailored to create better positives views for contrastive learning, without the need of external functions. "
+                    }
+                ]
+            },
+            "bbox": [
+                73,
+                308,
+                472,
+                565
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3. Method "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                578,
+                169,
+                594
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this section, we introduce ContrastiveCrop for Siamese representation learning. Firstly, we briefly review RandomCrop as the preliminary knowledge. Then, we describe semantic-aware localization and center-suppressed sampling as two submodules of our ContrastiveCrop. Finally, favorable properties of our method are further discussed for better understanding. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                604,
+                468,
+                709
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.1. Preliminary "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                718,
+                207,
+                734
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "RandomCrop, an efficient data augmentation method, has been widely used in both supervised learning and selfsupervised learning (SSL). Here, we briefly review this technique, using API in Pytorch1 as an example. Given an image "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "I"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", we first determine the scale "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "s"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and aspect ratio "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of the crop from a pre-defined range (e.g., "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "s \\in [ 0 . 2 , 1 . 0 ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r \\in [ 3 / 4 , 4 / 3 ]  ,"
+                    },
+                    {
+                        "type": "text",
+                        "content": ") Then, the height and width of the crop can be obtained with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "s"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". After that, the location of the crop is randomly selected on the image plane, as long "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                742,
+                468,
+                878
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "as the whole crop lies within the image. The procedure of RandomCrop can be formulated as "
+                    }
+                ]
+            },
+            "bbox": [
+                500,
+                308,
+                892,
+                338
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "(x, y, h, w) = \\mathbb {R} _ {c r o p} (s, r, I), \\tag {1}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/52869f9353fcf1a198b2dac4b28f9cc117037d27f7d5bd51bfd8c836deed1223.jpg"
+                }
+            },
+            "bbox": [
+                599,
+                352,
+                892,
+                369
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbb { R } _ { c r o p } ( \\cdot , \\cdot , \\cdot )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is the random sampling function that returns a quaternion "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( x , y , h , w )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "representing the crop. We denote "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "I"
+                    },
+                    {
+                        "type": "text",
+                        "content": "as the input image, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( x , y )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "as the coordinate of the crop center, and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( h , w )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "as the height and width of crop. Usually, the scale "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "s"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and aspect ratio "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of crops are set flexibly, so that crops of variant sizes could be made. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                381,
+                892,
+                470
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In principle, RandomCrop enables all individual crops to be selected, thus could provide diverse views of a sample. However, it performs sampling equiprobably (i.e., each single view is sampled with the same probability), which ignores the semantic information of images. As shown in Fig. 1a, RandomCrop is prone to generate false positives when the scale of object is small. Given objects with variant scales in contrastive learning, RandomCrop would inevitably generate false positives due to lack of the consideration of semantic information. As a result, optimizing the false positives in Fig. 3 may mislead the learning of good representations. Therefore, designing a semanticaware sampling strategy for crops is crucial and vital for Siamese representation learning. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                473,
+                893,
+                684
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.2. Semantic-aware Localization "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                500,
+                695,
+                759,
+                710
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "To tackle the issue of poor content understanding in RandomCrop, we design a semantic-aware localization module that can effectively reduce false positives in an unsupervised manner. To better study the process of feature learning in Siamese networks, we visualize the heatmaps generated at different training stages (e.g., 0th, 20th, 40th, 60th, 80th epoch) in Fig. 2. Note that we derive the heatmap by summing the features of last convolutional layer across the channel dimension and normalizing it to [0, 1]. There are several inspirations from visualization: 1) The Siamese representation learning framework is capable of capturing the location of the object, which can be leveraged to guide the "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                719,
+                893,
+                900
+            ]
+        },
+        {
+            "type": "page_footnote",
+            "content": {
+                "page_footnote_content": [
+                    {
+                        "type": "text",
+                        "content": "1https://pytorch.org/vision/stable/transforms.html "
+                    }
+                ]
+            },
+            "bbox": [
+                94,
+                886,
+                357,
+                898
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/052c531d3ef4eaed4c2d6838ba13f309da452c0cc840f61cb773b0684d782647.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "RandomCrop "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                107,
+                125,
+                269,
+                189
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/28c1e47a7c340615bef6d8cc91de48aefcbfd734d3a2d0e5930ec62425aafe8b.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                277,
+                88,
+                851,
+                202
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/74b0372d0da432497806a591adac3ea20d52460a1f7230e634000d638186b48f.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "RandomCrop + Semantic-aware Localization "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                106,
+                258,
+                269,
+                306
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/85b84cfb616428278d1fe456d2d4d7c18027839081a79f80acd13227a4f0a217.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                277,
+                204,
+                849,
+                318
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/142eaf53142db7af2577bf732e8810aa7584fcb5d8de29288a1be08743aff64f.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "ContrastiveCrop "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                106,
+                364,
+                271,
+                420
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/cf9289c0e237e425f5bb8337fdb3a095a19f0e7cbb79d44cd3c45e6daee769ee.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 3. Visualization of RandomCrop, RandomCrop "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ +"
+                    },
+                    {
+                        "type": "text",
+                        "content": "Semantic-aware Localization and our ContrastiveCrop. We show the sampling distributions and operable regions for three settings on the left, and correspondent sampled pairs on the right. Pairs made by RandomCrop include several false positives that totally miss the object (marked in yellow box). Using RandomCrop with Semantic-aware Localization reduces false positives, but introduces easy positive pairs that share large similarity. Last, our ContrastiveCrop could reduce false positive pairs while increasing variance at the same time. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                279,
+                321,
+                851,
+                434
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "generation of better crops; 2) Heatmaps can roughly indicate the object, but may need some warm-up at early stages. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                558,
+                468,
+                588
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Based on above analyses, we propose to locate the object during the training process using the information in heatmaps. Specifically, RandomCrop is applied at early stage of training to collect semantic information of the whole image. Then, we apply an indicator function to obtain the bounding box of object "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "B"
+                    },
+                    {
+                        "type": "text",
+                        "content": "from heatmaps, which can be written as, "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                589,
+                468,
+                694
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "B = L \\left(\\mathbb {1} [ M > k ]\\right), \\tag {2}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/917e1fc29707e20b97161b67b40816d0857cdecb154b467e3d7f17ede4ae690c.jpg"
+                }
+            },
+            "bbox": [
+                204,
+                707,
+                468,
+                724
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "M"
+                    },
+                    {
+                        "type": "text",
+                        "content": "represents heatmap, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k \\in [ 0 , 1 ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is the threshold of activations, 1 is the indicator function and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L"
+                    },
+                    {
+                        "type": "text",
+                        "content": "calculates the rectangular closure of activated positions. After obtaining the bounding box "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "B"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", the semantic crops could be generated as follows, "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                736,
+                468,
+                810
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "(\\dot {x}, \\dot {y}, \\dot {h}, \\dot {w}) = \\mathbb {R} _ {c r o p} (s, r, B), \\tag {3}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/425c54dcedfc8bd03b457918257492b68065b6a110bb9e24fcb4f27190650381.jpg"
+                }
+            },
+            "bbox": [
+                173,
+                823,
+                468,
+                842
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where the definitions of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ \\dot { x } } , { \\dot { y } } , { \\dot { h } } , { \\dot { w } } , s , r"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbb { R } _ { c r o p }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "are similar to Eq. 1. Considering the probable coarse localization, we enlarge the operable region by only constraining center "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                854,
+                468,
+                901
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "of crops within "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "B"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". This also reduces the potential negative effect of resolution discrepancy at training and inference stages [38]. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                558,
+                890,
+                604
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "At the training stage, the bounding box is progressively updated at a regular interval to leverage the latest features learned by the model. Note that our goal is not to derive precise localization, but to guide generation of crops by finding the object of interest. The scale of the bounding box is controlled by the threshold parameter "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k \\in [ 0 , 1 ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Generally speaking, a large "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": "leads to a small box and would limit the diversity of possible crops to be made. A small "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", however, may still include much unrelated background texture and is not sufficient for finding the object. We study the effect of different threshold "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in Sec. 4.4. We empirically find that the proposed localization module is not sensitive to this parameter and could improve over baseline within a wide range of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                608,
+                892,
+                819
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Finally, we show the sampling effect of semantic-aware localization in Fig. 3. Compared with RandomCrop, one can find that the false positive pairs reduce dramatically when the proposed module is applied. This provides evidence that self-supervised neural networks trained without "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                824,
+                892,
+                900
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "annotations are capable of recognizing the object of interest as well as its location. In this way, additional region proposals or ground truth bounding boxes are no longer necessary for views generation [10, 52]. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                90,
+                468,
+                151
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.3. Center-suppressed Sampling "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                161,
+                333,
+                176
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The semantic-aware localization scheme provides useful guidance to reduce false positive cases, but increases the probability of close appearance pairs due to the smaller operable region. In this subsection, we introduce the centersuppressed sampling that aims to tackle this dilemma. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                184,
+                468,
+                260
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The main idea is to reduce the probability of crops gathering around center by pushing them apart. Specifically, we adopt the beta distribution "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\beta ( \\alpha , \\alpha )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with two identical parameters "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", which shows a symmetric function. In this way, we could easily control the shape of the distribution with different "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". As the goal is to enlarge the variance of crops, we set "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha < 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "which gives us a U-shaped distribution (i.e., with lower probability near center and greater one at other positions). In this way, crops are more likely to be scattered to near border lines of the operable region, and cases of much overlap could be largely avoided. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                260,
+                468,
+                426
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Combining center-suppressed sampling with semanticaware localization, we can finally formulate our ContrastiveCrop as "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                426,
+                468,
+                472
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "(\\dot {x}, \\dot {y}, \\dot {h}, \\dot {w}) = \\mathbb {C} _ {c r o p} (s, r, B), \\tag {4}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/d4c57abccd51914c45eedb918c35447bb5f4ccb82625838bb8aaae8bc603219a.jpg"
+                }
+            },
+            "bbox": [
+                173,
+                482,
+                468,
+                500
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbb { C } _ { c r o p }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "denotes sampling function that applies a center-suppressed distribution, and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "B"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is the same bounding box as in Eq. 3. Note that the shape of beta distribution is determined by the parameter "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and affects the variance of crops. We study the impact of different "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in in Sec. 4.4, including "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha > 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "that gives a inverted U shape. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                512,
+                468,
+                603
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/fabd02b5f5a10490a2c66b228bea063b37780557767b6b1a819aa7d057aab49f.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Algorithm 1 ContrastiveCrop for Siamese Representation Learning "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td colspan=\"2\">Input: Image I, Crop Scale s, Crop Ratio r, Threshold of Activations k, Parameter of β Distribution α.</td></tr><tr><td>h = √s·r</td><td>▷ Height of the crop</td></tr><tr><td>w = √s/r</td><td>▷ Width of the crop</td></tr><tr><td>F = Forward(I)</td><td>▷ Features of last layer</td></tr><tr><td>M =Normalize(F)</td><td>▷ Heatmap after normalizing</td></tr><tr><td>B = L(1[M &gt; k])</td><td>▷ Bounding box by Eq. 2.</td></tr><tr><td colspan=\"2\">x = Bx0 + (Bx1 - Bx0) · u, u ~ β(α, α)</td></tr><tr><td colspan=\"2\">y = By0 + (By1 - By0) · v, v ~ β(α, α)</td></tr><tr><td colspan=\"2\">▷ Sample crop center x and y from β distribution</td></tr><tr><td colspan=\"2\">Output: Crop C = (x, y, h, w)</td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                91,
+                652,
+                468,
+                820
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The effect of our ContrastiveCrop is visualized in Fig. 3. Compared with RandomCrop, our method could significantly reduce false positive pairs due to the semanticaware localization. Meanwhile, it introduces larger variance "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                839,
+                468,
+                900
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8e01a04e90a3a14e9df53ce9ca104ecd5ba28be53bc2be9544088f39f4b1acb1.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 4. The relation between semantic richness and positives similarity. Dots are obtained by varying "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(fix "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k = 0 . 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", delineated in Sec. 4.2), and scores of each dot are calculated by averaging results of a large number of cropping trials. Compared with RandomCrop, our ContrastiveCrop conveys more semantic information at the same level of similarity (vertical), and yields less similar positive pairs under equal semantic information (horizontal). "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                524,
+                95,
+                866,
+                305
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/d51b0a8aae1aaa9ed12533ed1a6b89e0b88c52b0bbbf2d2633912f664a395915.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 5. Similarity of positive pairs in training. Smaller positives similarity indicates harder positive samples which may enhance representation learning [51]. Taking RandomCrop as baseline, adding only localization results in slightly larger similarity. Our ContrastiveCrop combines both semantic-aware localization and center-suppressed sampling, which effectively reduces similarity of positives. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                529,
+                463,
+                857,
+                674
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "within a positive pair by applying the center-suppressed distribution. We show the pipeline for ContrastiveCrop in Algorithm 1. The whole module is agnostic to other transformations and can be easily integrated into general contrastive learning frameworks. "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                824,
+                890,
+                900
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/c0dc6a17711578ba6c8c30598b685fda8a09b3b6c20beeb0d27bf25a10c9733b.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 1. Linear classification results for different contrastive methods and datasets. R-Crop and C-Crop mean RandomCrop and ContrastiveCrop, respectively. We adopt ResNet-18 as the base model and reproduce all the methods with a unified training setup as described in Sec. 4.2. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td rowspan=\"2\">Method</td><td colspan=\"2\">CIFAR-10</td><td colspan=\"2\">CIFAR-100</td><td colspan=\"2\">Tiny ImageNet</td><td colspan=\"2\">STL-10</td></tr><tr><td>R-Crop</td><td>C-Crop</td><td>R-Crop</td><td>C-Crop</td><td>R-Crop</td><td>C-Crop</td><td>R-Crop</td><td>C-Crop</td></tr><tr><td>SimCLR [5]</td><td>89.63</td><td>90.08</td><td>60.30</td><td>61.91</td><td>45.19</td><td>46.21</td><td>88.95</td><td>89.53</td></tr><tr><td>MoCo [20]</td><td>86.73</td><td>88.78</td><td>56.10</td><td>57.65</td><td>47.09</td><td>47.98</td><td>89.17</td><td>89.81</td></tr><tr><td>BYOL [17]</td><td>91.96</td><td>92.54</td><td>63.75</td><td>64.62</td><td>46.08</td><td>47.23</td><td>91.84</td><td>92.42</td></tr><tr><td>SimSiam [8]</td><td>90.96</td><td>91.48</td><td>64.79</td><td>65.82</td><td>43.03</td><td>44.54</td><td>89.39</td><td>89.83</td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                158,
+                88,
+                812,
+                189
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3.4. Discussion "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                262,
+                194,
+                276
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "To better understand the behavior of ContrativeCrop, we discuss several properties that may contribute to its effectiveness. We first investigate the relation between semantic information and positives similarity. We take the class score of a crop as an indicator of richness of categorized semantic information. The similarity of positive pairs is calculated in the latent space as the cosine similarity between positive representations. Both the class score and similarity are average results of a large number of cropping trials from a standard ResNet-50 [22] trained with ImageNet [14] labels. Their relation is shown in Fig. 4. One can find that ContrastiveCrop conveys more semantic information than RandomCrop at the same level of variance, showing the effectiveness of semantic-aware localization. Furthermore, with equal semantic information, ContrastiveCrop achieves larger variance than RandomCrop, which can be owed to center-suppressed sampling. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                285,
+                472,
+                542
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We further visualize the similarity of positive pairs in the training process in Fig. 5. As shown in the figure, adding only semantic-aware localization to RandomCrop slightly increases similarity, as localization restrains crops in a smaller operable region. Our ContrastiveCrop further incorporates center-suppressed sampling, showing smaller positives similarity than the other two. This indicates positive pairs sampled by ContrastiveCrop are harder ones, which are helpful in learning more view-invariant features as suggested in FT [51]. However, different from FT that reduces positives similarity in the feature space, we directly sample harder crops from raw data, while taking a careful consideration of semantic information. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                542,
+                472,
+                739
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4. Experiments "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                753,
+                209,
+                771
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this section, we conduct extensive experiments with popular contrastive methods on a variety of datasets, to demonstrate the effectiveness and generality of our method. We first introduce the datasets and contrastive methods in Sec. 4.1. Sec. 4.2 describes the implementation details. We then evaluate our method with the common linear evaluation protocol in Sec. 4.3. Results of ablation experiments are shown in Sec. 4.4. Finally, Sec. 4.5 presents transfer "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                780,
+                470,
+                902
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "performance on downstream object detection and segmentation tasks. "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                262,
+                890,
+                292
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.1. Datasets & Baseline Approaches "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                498,
+                301,
+                784,
+                318
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We perform evaluation of our method with state-ofthe-art unsupervised contrastive methods, on a wide range of datasets. The datasets include CIFAR-10/CIAFR-100 [25], Tiny ImageNet, STL-10 [11] and ImageNet [14]. Generally, these datasets are built for object recognition and the images contain iconic view of objects. The baseline contrastive methods include SimCLR [5], MoCo V1 & V2 [7, 20], BYOL [17] and SimSiam [8]. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                324,
+                893,
+                446
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.2. Implementation Details "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                498,
+                454,
+                718,
+                470
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Our ContrastiveCrop aims to make better views for contrastive learning, which is agnostic to self-supervised learning frameworks and their related training components, such as backbone networks, losses, optimizers, etc. Thus, we strictly keep the same training setting when making comparison. Larger gains could be expected with further hyperparameter tuning, which is not the focus of this work. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                478,
+                890,
+                583
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "For small datasets (i.e., CIFAR-10/100, Tiny ImageNet and STL-10), we use the same training setup in all experiments. At the pre-train stage, we train ResNet-18 [22] for 500 epochs with a batch size of 512 and a cosine-annealed learning rate of 0.5. The linear classifier is trained for 100 epochs with initial learning rate of 10.0 multiplied by 0.1 at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "6 0 t h"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 0 t h"
+                    },
+                    {
+                        "type": "text",
+                        "content": "epochs. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                584,
+                893,
+                688
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "For experiments on ImageNet, we adopt ResNet-50 as the base model. Pre-train settings of MoCo V1, MoCo V2 and SimSiam exactly follow their original works. We reproduce SimCLR with a smaller batch size of 512 and cosineannealed learning rate of 0.05. We adopt the same setting as in [20] for training the linear classifier for all baseline methods. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                688,
+                893,
+                794
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "For our method, we set "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k = 0 . 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for the threshold of activations and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha ~ = ~ 0 . 6"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for sampling. Localization boxes are updated at a frequency of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "20 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(i.e., 4 updates in total, except the last epoch), which adds negligible extra training overhead; RandomCrop is applied before the first update to collect global information, as described in Sec. 3.2. All the experiments are conducted on an 8-GPU server. We "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                795,
+                893,
+                902
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ba1fae87f804a4a3241524db32f0c920c618636bfc1acafdc0b054de0d157b22.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(a) Accuracy v.s. k "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                86,
+                89,
+                269,
+                204
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2e367ce2a21da2f15a8425ff6353a8bae926ff77fffa35d98ab1e9fe347153ce.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(b) Accuracy v.s. α "
+                    },
+                    {
+                        "type": "text",
+                        "content": "Figure 6. Ablation results on IN-200 w.r.t. "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Subfigure (a) compares RandomCrop baseline (the black plot) with Random-Crop + Semantic-aware Localization (the blue plot). In subfigure (b), we fix the best "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k = 0 . 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for localization (the blue plot) and compare it with ContrastiveCrop to study the influence of different "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                279,
+                90,
+                455,
+                204
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "use SGD optimizer with momentum of 0.9, weight decay of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 0 ^ { - 4 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and 0 for pre-train and linear evaluation, respectively. "
+                    }
+                ]
+            },
+            "bbox": [
+                76,
+                343,
+                468,
+                375
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.3. Linear Classification "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                383,
+                272,
+                398
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this section, we verify our method with linear classification following the common protocol. We freeze pretrained weights of the encoder and train a supervised linear classifier on top of it. Top-1 classification accuracy results on the validation set are reported. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                407,
+                468,
+                482
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Results on CIFAR-10/100, Tiny ImageNet and STL-10. Our results on these small datasets are shown in Tab. 1. With the same training setup for all experiments, ContrastiveCrop consistently improves baseline methods by at least "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 4 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Results show that the proposed method is generic and does not require heavy parameter tuning. The localization boxes are updated at a frequency of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "20 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in the training process (i.e., 4 times in total, except the last epoch), adding negligible training overhead. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                501,
+                468,
+                638
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Results on ImageNet. The results of ImageNet are twopart: 1) standard ImageNet-1K (IN-1K), which is used for pre-training. 2) IN-200, which consists of 200 random classes of IN-1K and is used for ablation experiments. As shown in Tab. 2, our method outperforms RandomCrop with SimCLR, MoCo V1, MoCo V2, SimSiam on IN-1K by "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 2 5 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 . 0 9 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 4 9 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 3 3 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", respectively. A larger improvement is seen on IN-200. The consistent gain over baseline methods shows the effectiveness and generality of ContrastiveCrop for contrastive methods. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                656,
+                468,
+                806
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.4. Ablation Studies "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                816,
+                240,
+                830
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In ablation studies, we investigate the semantic-aware localization module and center-suppressed sampling respectively. We also study the effect of ContrastiveCrop when it is combined with different transformations. We conduct "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                839,
+                468,
+                898
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/8b1bed3bae7c062a670ca52d8e8f28fb12eae7ec362621eddd8aaed0944f0b3a.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 2. Comparison of RandomCrop and our ContrastiveCrop with linear classification results on IN-200 and IN-1K. Models are pre-trained for 100 epochs, with the same training setup within a method for fair comparison. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Method</td><td>Arch.</td><td>Epoch</td><td>IN-200 Top-1</td><td>IN-1K Top-1</td></tr><tr><td>SimCLR</td><td>R50</td><td>100</td><td>62.14</td><td>61.60</td></tr><tr><td>SimCLR + Ours</td><td>R50</td><td>100</td><td>63.08</td><td>61.85</td></tr><tr><td>MoCo V1</td><td>R50</td><td>100</td><td>64.52</td><td>57.25</td></tr><tr><td>MoCo V1 + Ours</td><td>R50</td><td>100</td><td>65.80</td><td>58.34</td></tr><tr><td>MoCo V2</td><td>R50</td><td>100</td><td>63.43</td><td>64.40</td></tr><tr><td>MoCo V2 + Ours</td><td>R50</td><td>100</td><td>64.61</td><td>64.89</td></tr><tr><td>SimSiam</td><td>R50</td><td>100</td><td>62.89</td><td>65.62</td></tr><tr><td>SimSiam + Ours</td><td>R50</td><td>100</td><td>63.54</td><td>65.95</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                514,
+                89,
+                879,
+                244
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "experiments with MoCo V2 and ResNet-50, and report the linear classification results on IN-200. "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                338,
+                890,
+                368
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Semantic-aware Localization. In our method, the unsupervised semantic-aware localization serves as a guidance to make crops. We study the influence of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": "that determines the scale of the localization box, with a larger "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": "leading to a smaller box. We also make comparison with RandomCrop that does not use localization (i.e., "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k = 0 ,"
+                    },
+                    {
+                        "type": "text",
+                        "content": "). Experimental results are shown in Fig. 6a. One can find that using localization box outperforms RandomCrop baseline (the black plot) within a range from 0.05 to 0.2. This shows the effectiveness of largely removing false positives. However, as "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k"
+                    },
+                    {
+                        "type": "text",
+                        "content": "increases over 0.25, the performance starts to fall quickly. We suggest the reason is smaller bounding boxes dramatically reduce variance of views, making it trivial to learn discriminative features. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                388,
+                890,
+                599
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/82e6c93c4b9c3ef39a226f3fbf620ae17909d63dd325529a1ef459aa4f2c8765.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 3. Linear classification accuracy w.r.t different update frequencies of localization boxes. "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "means no update (i.e., RandomCrop baseline) and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "means one update in the right middle of training. RandomCrop is applied before the first update. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Freq.</td><td>0%</td><td>10%</td><td>20%</td><td>30%</td><td>50%</td></tr><tr><td>Acc. (%)</td><td>63.43</td><td>64.40</td><td>64.61</td><td>64.40</td><td>64.11</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                511,
+                609,
+                879,
+                643
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We also study the effect of update frequency of localization boxes in Tab. 3. It shows that only one update in the middle of training (i.e., "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ") could outperform Random-Crop baseline "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( i . e . , 0 \\% )"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "). A larger improvement is seen in a range of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 0 \\% \\sim 3 0 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "where there are more updates. These results show that our method could work well for different update frequencies. "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                729,
+                890,
+                835
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Center-suppressed Sampling. In this work, we use "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\beta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "distribution for the center-suppressed sampling, which allows to control its variance with different "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Here, we in-"
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                854,
+                890,
+                898
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/054021af58e8bf65c982f975c4423295ca872bd7fef93a495b81eeaa5d08bf1e.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 4. Fine-tuning results on PASCAL VOC detection and COCO detection and instance segmentation. All models are pre-trained for 200 epochs on ImageNet-1K. On VOC, the training and evaluation sets are trainval2007+2012 and test2007, on COCO are the train2017 and val2017. All models are fine-tuned for 24K iterations on VOC and 90K on COCO. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td rowspan=\"2\">Pre-train</td><td rowspan=\"2\">IN-1K Top-1</td><td colspan=\"3\">VOC detection</td><td colspan=\"3\">COCO instance seg.</td><td colspan=\"3\">COCO detection</td></tr><tr><td>AP</td><td>\\( AP_{50} \\)</td><td>\\( AP_{75} \\)</td><td>\\( AP^{mk} \\)</td><td>\\( AP^{mk}_{50} \\)</td><td>\\( AP^{mk}_{75} \\)</td><td>\\( AP^{bb} \\)</td><td>\\( AP^{bb}_{50} \\)</td><td>\\( AP^{bb}_{75} \\)</td></tr><tr><td>Random init</td><td>-</td><td>33.8</td><td>60.2</td><td>33.1</td><td>29.3</td><td>46.9</td><td>30.8</td><td>26.4</td><td>44.0</td><td>27.8</td></tr><tr><td>Supervised</td><td>76.1</td><td>53.5</td><td>81.3</td><td>58.8</td><td>33.3</td><td>54.7</td><td>35.2</td><td>38.2</td><td>58.2</td><td>41.2</td></tr><tr><td>InfoMin [37]</td><td>70.1</td><td>57.6</td><td>82.7</td><td>64.6</td><td>34.1</td><td>55.2</td><td>36.3</td><td>39.0</td><td>58.5</td><td>42.0</td></tr><tr><td>MoCoV1 [20]</td><td>60.6</td><td>55.9</td><td>81.5</td><td>62.6</td><td>33.6</td><td>54.8</td><td>35.6</td><td>38.5</td><td>58.3</td><td>41.6</td></tr><tr><td>MoCoV1 + ContrastiveCrop</td><td>63.0</td><td>56.1</td><td>81.7</td><td>63.0</td><td>33.9</td><td>55.2</td><td>36.1</td><td>38.8</td><td>58.5</td><td>41.9</td></tr><tr><td>MoCoV2 [7]</td><td>67.5</td><td>57.0</td><td>82.4</td><td>63.6</td><td>34.2</td><td>55.4</td><td>36.2</td><td>39.0</td><td>58.6</td><td>41.9</td></tr><tr><td>MoCoV2 + ContrastiveCrop</td><td>67.8</td><td>57.3</td><td>82.5</td><td>63.8</td><td>34.5</td><td>55.5</td><td>36.4</td><td>39.2</td><td>58.8</td><td>42.2</td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                81,
+                88,
+                893,
+                262
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "vestigate the impact of different variance by iterating over multiple "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Results are shown in Fig. 6b with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "k = 0 . 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for localization. When "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha < 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", our ContrastiveCrop consistently outperforms RandomCrop with localization, showing the effect of center-suppressed sampling. We also study "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha > 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "that has a smaller variance than uniform distribution (i.e., "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha = 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "). A drop in accuracy is observed with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha > 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". This indicates that larger variance of crops is required for better contrast. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                339,
+                472,
+                474
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "ContrasitveCrop with Other Transformations. To further compare the effect of ContrastiveCrop and Random-Crop, we study their combinations with other image transformations. Here, we choose the transformations used in MoCo V2 [7], including Flip, ColorJitter, Grayscale and Blur. The ablation results are shown in Tab. 5. In case all other transformations are removed, ContrastiveCrop is "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 4 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "higher than RandomCrop, which is a direct evidence of its superiority. Moreover, with only one extra transformation, ContrastiveCrop outperforms RandomCrop by "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 3 \\% \\sim 0 . 8 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". The largest gap of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 . 2 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is achieved when all of the transformations are incorporated, which indicates that the potential of ContrastiveCrop can be larger exploited with further color transformations. Additionally, these results show that our ContrastiveCrop is compatible and orthogonal to other transformations. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                500,
+                470,
+                743
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.5. Downstream Tasks "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                755,
+                259,
+                768
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this section, we measure the transferability of our method on the object detection and instance segmentation task. Following previous works [20, 51], we pre-train ResNet-50 on IN-1K for 200 epochs. For downstream tasks, we use PASCAL VOC [16] and COCO [27] as our benchmarks and we adopt the same setups as in MoCo’s detectron2 codebase [42]. All layers of pre-trained models are fine-tuned end-to-end at target datasets. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                779,
+                468,
+                902
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/05fae15014a21b312c592b5c4a355571f4f375d4463103314a0a4f09eb9def87.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 5. Ablation of other transformations used in MoCo V2. We combine ColorJitter and Grayscale as a single color transformation. R-Crop and C-Crop denote RandomCrop and Contrastive-Crop, respectively. The results are from ResNet-50 pre-trained on IN-200 for 100 epochs. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Flip</td><td>ColorJitter + Grayscale</td><td>Blur</td><td>R-Crop</td><td>C-Crop</td></tr><tr><td>✓</td><td>✓</td><td>✓</td><td>63.4</td><td>64.6</td></tr><tr><td>✓</td><td></td><td></td><td>50.4</td><td>50.9</td></tr><tr><td></td><td>✓</td><td></td><td>60.6</td><td>61.4</td></tr><tr><td></td><td></td><td>✓</td><td>44.9</td><td>45.2</td></tr><tr><td></td><td></td><td></td><td>45.5</td><td>45.9</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                504,
+                337,
+                888,
+                436
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "PASCAL VOC Object Detection. Following [20], we use Faster R-CNN [32] with a backbone of R50-C4 [21] as the detector. We fine-tune the model on the trainval "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 0 0 7 + 2 0 1 2"
+                    },
+                    {
+                        "type": "text",
+                        "content": "split and evaluate on the VOC test2007. The results are present in Tab. 4. Compared with MoCo V1 baseline, our method achieves a consistent improvement of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "+ 0 . 2 \\mathrm { A P } ."
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "+ 0 . 2 \\mathrm { A P } _ { 5 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "+ 0 . 4 \\mathrm { A P _ { 7 5 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                542,
+                893,
+                650
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "COCO Object Detection/Instance Segmentation. The model for both detection and segmentation is Mask R-CNN [21] with R50-C4 backbone. We fine-tune 90K iterations on the train2017 set and evaluate on val2017. As shown in Tab. 4, the proposed ContrastiveCrop achieves superior performance in all metrics. "
+                    }
+                ]
+            },
+            "bbox": [
+                498,
+                666,
+                893,
+                757
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "5. Discussion and Conclusion "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                500,
+                768,
+                748,
+                784
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this work, we propose ContrastiveCrop, that is tailored to make better contrastive views for Siamese representation learning. ContrastiveCrop adopts semantic-aware localization to avoid most false positives and applies the center-suppressed sampling to reduce trivial positive pairs. We innovatively take semantic information into account when transforming a sample, and thoroughly investigate the "
+                    }
+                ]
+            },
+            "bbox": [
+                496,
+                794,
+                893,
+                902
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "suitable variance for contrastive learning. We have shown the effectiveness and generality of our method through extensive experiments with state-of-the-art contrastive methods including SimCLR, MoCo, BYOL and SimSiam. Finally, we hope this work could inspire future research of positives designing, considering its significant role in contrastive learning. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                90,
+                472,
+                196
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "6. Acknowledge "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                76,
+                210,
+                215,
+                228
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "This research is supported by the National Research Foundation, Singapore under its AI Singapore Programme (AISG Award No: AISG2-PhD-2021-08-008). We thank Google TFRC for supporting us to get access to the Cloud TPUs. We thank CSCS (Swiss National Supercomputing Centre) for supporting us to get access to the Piz Daint supercomputer. We thank TACC (Texas Advanced Computing Center) for supporting us to get access to the Longhorn supercomputer and the Frontera supercomputer. We thank LuxProvide (Luxembourg national supercomputer HPC organization) for supporting us to get access to the MeluXina supercomputer. "
+                    }
+                ]
+            },
+            "bbox": [
+                75,
+                236,
+                472,
+                417
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "References "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                78,
+                431,
+                174,
+                448
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[1] Sanjeev Arora, Hrishikesh Khandeparkar, Mikhail Khodak, Orestis Plevrakis, and Nikunj Saunshi. A theoretical analysis of contrastive unsupervised representation learning. arXiv preprint arXiv:1902.09229, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[2] Philip Bachman, R Devon Hjelm, and William Buchwalter. Learning representations by maximizing mutual information across views. In NeurIPS, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[3] Mathilde Caron, Hugo Touvron, Ishan Misra, Herve J ´ egou, ´ Julien Mairal, Piotr Bojanowski, and Armand Joulin. Emerging properties in self-supervised vision transformers. arXiv preprint arXiv:2104.14294, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[4] Pengguang Chen, Shu Liu, and Jiaya Jia. Jigsaw clustering for unsupervised visual representation learning. In CVPR, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[5] Ting Chen, Simon Kornblith, Mohammad Norouzi, and Geoffrey Hinton. A simple framework for contrastive learning of visual representations. In ICML, 2020. 1, 2, 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[6] Ting Chen, Calvin Luo, and Lala Li. Intriguing properties of contrastive losses. arXiv preprint arXiv:2011.02803, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[7] Xinlei Chen, Haoqi Fan, Ross Girshick, and Kaiming He. Improved baselines with momentum contrastive learning. arXiv preprint arXiv:2003.04297, 2020. 1, 2, 6, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[8] Xinlei Chen and Kaiming He. Exploring simple siamese representation learning. CVPR, 2021. 1, 2, 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[9] Xinlei Chen, Saining Xie, and Kaiming He. An empirical study of training self-supervised vision transformers. arXiv preprint arXiv:2104.02057, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[10] Ming-Ming Cheng, Ziming Zhang, Wen-Yan Lin, and Philip Torr. Bing: Binarized normed gradients for objectness estimation at 300fps. In CVPR, 2014. 5 "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                78,
+                457,
+                468,
+                900
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[11] Adam Coates, Andrew Ng, and Honglak Lee. An analysis of single-layer networks in unsupervised feature learning. In AISTATS, 2011. 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[12] Ekin D Cubuk, Barret Zoph, Dandelion Mane, Vijay Vasudevan, and Quoc V Le. Autoaugment: Learning augmentation policies from data. arXiv preprint arXiv:1805.09501, 2018. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[13] Ekin D Cubuk, Barret Zoph, Jonathon Shlens, and Quoc V Le. Randaugment: Practical automated data augmentation with a reduced search space. In CVPR, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[14] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In CVPR, 2009. 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[15] Debidatta Dwibedi, Yusuf Aytar, Jonathan Tompson, Pierre Sermanet, and Andrew Zisserman. With a little help from my friends: Nearest-neighbor contrastive learning of visual representations. arXiv preprint arXiv:2104.14548, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[16] Mark Everingham, Luc Van Gool, Christopher KI Williams, John Winn, and Andrew Zisserman. The pascal visual object classes (voc) challenge. IJCV, 2010. 1, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[17] Jean-Bastien Grill, Florian Strub, Florent Altche, Corentin ´ Tallec, Pierre H Richemond, Elena Buchatskaya, Carl Doersch, Bernardo Avila Pires, Zhaohan Daniel Guo, Mohammad Gheshlaghi Azar, et al. Bootstrap your own latent: A new approach to self-supervised learning. arXiv preprint arXiv:2006.07733, 2020. 1, 2, 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[18] Rıza Alp Guler, Natalia Neverova, and Iasonas Kokkinos.¨ Densepose: Dense human pose estimation in the wild. In CVPR, 2018. 1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[19] Ryuichiro Hataya, Jan Zdenek, Kazuki Yoshizoe, and Hideki Nakayama. Faster autoaugment: Learning augmentation strategies using backpropagation. In ECCV, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[20] Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross Girshick. Momentum contrast for unsupervised visual representation learning. In CVPR, 2020. 1, 2, 6, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[21] Kaiming He, Georgia Gkioxari, Piotr Dollar, and Ross Gir-´ shick. Mask r-cnn. In ICCV, 2017. 1, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[22] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In CVPR, 2016. 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[23] Olivier J Henaff, Aravind Srinivas, Jeffrey De Fauw, Ali ´ Razavi, Carl Doersch, SM Eslami, and Aaron van den Oord. Data-efficient image recognition with contrastive predictive coding. arXiv preprint arXiv:1905.09272, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[24] Tianyu Hua, Wenxiao Wang, Zihui Xue, Sucheng Ren, Yue Wang, and Hang Zhao. On feature decorrelation in selfsupervised learning. In ICCV, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[25] Alex Krizhevsky, Geoffrey Hinton, et al. Learning multiple layers of features from tiny images. Technical report, Citeseer, 2009. 6 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[26] Sungbin Lim, Ildoo Kim, Taesup Kim, Chiheon Kim, and Sungwoong Kim. Fast autoaugment. NeurIPS, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[27] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays, Pietro Perona, Deva Ramanan, Piotr Dollar, and C Lawrence´ Zitnick. Microsoft coco: Common objects in context. In ECCV, 2014. 1, 8 "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                92,
+                890,
+                898
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[28] Shlok Mishra, Anshul Shah, Ankan Bansal, Abhyuday Jagannatha, Abhishek Sharma, David Jacobs, and Dilip Krishnan. Object-aware cropping for self-supervised learning. arXiv preprint arXiv:2112.00319, 2021. 3 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[29] Ishan Misra and Laurens van der Maaten. Self-supervised learning of pretext-invariant representations. In CVPR, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[30] Aaron van den Oord, Yazhe Li, and Oriol Vinyals. Representation learning with contrastive predictive coding. arXiv preprint arXiv:1807.03748, 2018. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[31] Senthil Purushwalkam and Abhinav Gupta. Demystifying contrastive self-supervised learning: Invariances, augmentations and dataset biases. arXiv preprint arXiv:2007.13916, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[32] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun. Faster r-cnn: Towards real-time object detection with region proposal networks. In NeurIPS, 2015. 1, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[33] Ramprasaath R. Selvaraju, Karan Desai, Justin Johnson, and Nikhil Naik. Casting your model: Learning to localize improves self-supervised representations. In CVPR, pages 11058–11067, June 2021. 3 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[34] Zhiqiang Shen, Zechun Liu, Zhuang Liu, Marios Savvides, Trevor Darrell, and Eric Xing. Un-mix: Rethinking image mixtures for unsupervised visual representation learning. arXiv preprint arXiv:2003.05438, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[35] Yuandong Tian, Xinlei Chen, and Surya Ganguli. Understanding self-supervised learning dynamics without contrastive pairs. arXiv preprint arXiv:2102.06810, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[36] Yonglong Tian, Dilip Krishnan, and Phillip Isola. Contrastive multiview coding. ECCV, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[37] Yonglong Tian, Chen Sun, Ben Poole, Dilip Krishnan, Cordelia Schmid, and Phillip Isola. What makes for good views for contrastive learning? arXiv preprint arXiv:2005.10243, 2020. 1, 2, 3, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[38] Hugo Touvron, Andrea Vedaldi, Matthijs Douze, and Herve´ Jegou. Fixing the train-test resolution discrepancy. ´ arXiv preprint arXiv:1906.06423, 2019. 4 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[39] Tongzhou Wang and Phillip Isola. Understanding contrastive representation learning through alignment and uniformity on the hypersphere. In ICML, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[40] Xinlong Wang, Rufeng Zhang, Chunhua Shen, Tao Kong, and Lei Li. Dense contrastive learning for self-supervised visual pre-training. CVPR, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[41] Mike Wu, Chengxu Zhuang, Milan Mosse, Daniel Yamins, and Noah Goodman. On mutual information in contrastive learning for visual representations. arXiv preprint arXiv:2005.13149, 2020. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[42] Yuxin Wu, Alexander Kirillov, Francisco Massa, Wan-Yen Lo, and Ross Girshick. Detectron2. https://github. com/facebookresearch/detectron2, 2019. 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[43] Zhirong Wu, Yuanjun Xiong, Stella X Yu, and Dahua Lin. Unsupervised feature learning via non-parametric instance discrimination. In CVPR, 2018. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[44] Tete Xiao, Xiaolong Wang, Alexei A Efros, and Trevor Darrell. What should not be contrastive in contrastive learning. ICLR, 2021. 2 "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                78,
+                90,
+                470,
+                898
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[45] Enze Xie, Jian Ding, Wenhai Wang, Xiaohang Zhan, Hang Xu, Zhenguo Li, and Ping Luo. Detco: Unsupervised contrastive learning for object detection. arXiv preprint arXiv:2102.04803, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[46] Zhenda Xie, Yutong Lin, Zheng Zhang, Yue Cao, Stephen Lin, and Han Hu. Propagate yourself: Exploring pixel-level consistency for unsupervised visual representation learning. CVPR, 2021. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[47] Mang Ye, Xu Zhang, Pong C Yuen, and Shih-Fu Chang. Unsupervised embedding learning via invariant and spreading instance feature. In CVPR, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[48] Sangdoo Yun, Dongyoon Han, Seong Joon Oh, Sanghyuk Chun, Junsuk Choe, and Youngjoon Yoo. Cutmix: Regularization strategy to train strong classifiers with localizable features. In ICCV, 2019. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[49] Hongyi Zhang, Moustapha Cisse, Yann N Dauphin, and David Lopez-Paz. mixup: Beyond empirical risk minimization. ICLR, 2018. 2 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[50] Junhao Zhang, Yali Wang, Zhipeng Zhou, Tianyu Luan, Zhe Wang, and Yu Qiao. Learning dynamical human-joint affinity for 3d pose estimation in videos. IEEE Transactions on Image Processing, 30:7914–7925, 2021. 1 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[51] Rui Zhu, Bingchen Zhao, Jingen Liu, Zhenglong Sun, and Chang Wen Chen. Improving contrastive learning by visualizing feature transformation. arXiv preprint arXiv:2108.02982, 2021. 2, 5, 6, 8 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[52] C Lawrence Zitnick and Piotr Dollar. Edge boxes: Locating ´ object proposals from edges. In ECCV, 2014. 5 "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "[53] Barret Zoph, Golnaz Ghiasi, Tsung-Yi Lin, Yin Cui, Hanxiao Liu, Ekin D Cubuk, and Quoc V Le. Rethinking pre-training and self-training. arXiv preprint arXiv:2006.06882, 2020. 2 "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                501,
+                92,
+                890,
+                531
+            ]
+        }
+    ]
+]

@@ -1,0 +1,3472 @@
+[
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "INVERSE ONLINE LEARNING: UNDERSTANDING NON-STATIONARY AND REACTIONARY POLICIES "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                99,
+                828,
+                146
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Alex J. Chan, Alicia Curth, and Mihaela van der Schaar "
+                    }
+                ]
+            },
+            "bbox": [
+                179,
+                169,
+                576,
+                184
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "University of Cambridge "
+                    }
+                ]
+            },
+            "bbox": [
+                183,
+                185,
+                349,
+                198
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Department of Applied Mathematics and Theoretical Physics "
+                    }
+                ]
+            },
+            "bbox": [
+                183,
+                198,
+                584,
+                212
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Cambridge, UK "
+                    }
+                ]
+            },
+            "bbox": [
+                183,
+                212,
+                290,
+                224
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "{ajc340, amc253, mv472}@cam.ac.uk "
+                    }
+                ]
+            },
+            "bbox": [
+                183,
+                226,
+                508,
+                239
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "ABSTRACT "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                450,
+                276,
+                545,
+                291
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Human decision making is well known to be imperfect and the ability to analyse such processes individually is crucial when attempting to aid or improve a decisionmaker’s ability to perform a task, e.g. to alert them to potential biases or oversights on their part. To do so, it is necessary to develop interpretable representations of how agents make decisions and how this process changes over time as the agent learns online in reaction to the accrued experience. To then understand the decisionmaking processes underlying a set of observed trajectories, we cast the policy inference problem as the inverse to this online learning problem. By interpreting actions within a potential outcomes framework, we introduce a meaningful mapping based on agents choosing an action they believe to have the greatest treatment effect. We introduce a practical algorithm for retrospectively estimating such perceived effects, alongside the process through which agents update them, using a novel architecture built upon an expressive family of deep state-space models. Through application to the analysis of UNOS organ donation acceptance decisions, we demonstrate that our approach can bring valuable insights into the factors that govern decision processes and how they change over time. "
+                    }
+                ]
+            },
+            "bbox": [
+                228,
+                306,
+                769,
+                529
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1 INTRODUCTION "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                173,
+                551,
+                336,
+                566
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Decision modelling is often viewed through the lens of policy learning (Bain & Sammut, 1995; Abbeel & Ng, 2004), where the aim is to learn some imitation policy that captures the actions (and thus decisions) of an agent in some structured way (Hüyük et al., 2021a). Unfortunately, this usually implicitly relies on the assumption that the actions taken are already optimal with respect to some objective, and hence do not change over time. While this might be appropriate to approximate the stationary policy of an autonomous agent, such assumptions often break down when applying them to more flexible agents that might be learning on-the-fly. In particular, we may want to model the decision making process of a human decision-maker, whose actions we may see executed over time - this is clearly of great use in a range of fields including economics and medicine (Hunink et al., 2014; Zavadskas & Turskis, 2011). In the context of machine learning, they would be considered to be undergoing a process of online learning (Hoi et al., 2018); training while interacting with the environment, where it is to be expected that beliefs and strategies are constantly adapted based on accumulating experience (Elio & Pelletier, 1997). Additionally, such belief updates are often imperfect; for example, people are known to a priori over-weight the potential impact of rare events when they first start a task, before proceeding to neglect them when they do not occur in their experience (Hertwig & Erev, 2009). If our goal is to analyse human decision-making, it is thus important to be able to model non-stationary policies that are potentially imperfect in two senses: both marginally at each time-step, and in the way that they become adapted to new information. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                583,
+                826,
+                834
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this work, instead of relying on the assumption that an agent follows a stationary optimal policy, we consider their actions to be consistent within an online leaning framework where they learn from an incoming sequence of examples (Hoi et al., 2018) and update their policies accordingly, as in Figure 1. Thus, instead of assuming that actions are globally optimal, we assume that at any exact time the agent thought that the action was better than the alternatives. As a natural consequence, we frame the problem of decision modelling as that of inverse online learning; that is, we aim to uncover "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                839,
+                828,
+                925
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "arXiv:2203.07338v2 [cs.LG] 30 Sep 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                22,
+                263,
+                60,
+                708
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "1 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                503,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/25e4484fbc1013936292d02ced632f187093863375d8cac28645f14174eb07ea.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                176,
+                102,
+                316,
+                205
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/d49d1119ef929eb5eb4367750f30b61464ea0919224474e34668413420d25f53.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                344,
+                102,
+                486,
+                205
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/81bd173a4394a8fb06572bfbb1a88d964883d482a0dbc760d9e8fc39a9af2927.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                517,
+                102,
+                658,
+                205
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/3cf56dc723ac9faee05183dd586dd3d488f478cb289e8d9c67ab84ab4d59d050.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 1: Capturing online learning behaviour. We assume the agent models the response surfaces in their mind, and that their belief changes each time step in response to the actions they take and the consequent observations they make. The response surface they model need not converge on the true surface since the update method of the agent may be biased and not appropriately use the information available to them. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                702,
+                109,
+                815,
+                200
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "the process through which an agent is learning online. Note that this does not involve coming up with a new way to do online learning itself, rather we recover how it appears a given agent may have learnt. We do this by modelling the (non-stationary) policy of the agent using a deep state-space model (Krishnan et al., 2017), allowing us to track the memory of the agent while allowing policies to evolve in a non-parametric and non-prescribed fashion. We construct an interpretable mapping from the accrued memory to policies by framing the decision-making process within a potential-outcome setting (Rubin, 2005); letting actions correspond to interventions (or treatments), and assuming that agents make decisions by choosing an action which they perceive to have the highest (treatment) effect. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                301,
+                826,
+                415
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Contributions. In this work we make a number of contributions: First, we formalise the inverse online learning problem and a connection between decision modelling, online learning and potential outcomes, highlighting how they complement each other to result in an interpretable understanding of policies (Section 2); Second, we introduce a practical method to estimate the nonstationary policy and update method of an agent given demonstrations (Section 4); And third, we demonstrate how we can uncover useful practical insights into the decision making process of agents with a case study on the acceptance of liver donation offers (Section 5). Code is made available at https://github.com/XanderJC/inverse-online, along with the group codebase at https://github.com/vanderschaarlab/mlforhealthlabpub. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                420,
+                826,
+                547
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2 PROBLEM FORMALISATION "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                568,
+                433,
+                583
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Preliminaries. Assume we observe a data trajectory1 of the form "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\textit { \\textbf { D } } = \\{ ( X _ { t } , A _ { t } , Y _ { t } ) \\} _ { t = 1 } ^ { T }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Here, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "X _ { t } ~ \\in ~ \\mathcal { X } ~ \\subset ~ \\mathbb { R } ^ { d }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", denotes a context vector of possible confounders; "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "A _ { t } ~ \\in ~ { \\mathcal { A } } ~ ="
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\{ 0 , 1 \\}"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", a binary action or intervention; and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": " { \\boldsymbol { Y } } _ { t } \\in  { \\mathcal { P } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", a binary or continuous outcome of interest. The subscript "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": "indicates a time-ordering of observed triplets; any time-step "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is generated by (i) arrival of context "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", (ii) an intervention "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "a"
+                    },
+                    {
+                        "type": "text",
+                        "content": "being performed by an agent according to some policy "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { t } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and (iii) a corresponding outcome "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "y"
+                    },
+                    {
+                        "type": "text",
+                        "content": "being observed. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                598,
+                826,
+                686
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Goal. We are interested in recovering the agent’s non-stationary policy "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { t } ( x ) = P ( A ="
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 | X = x , H _ { t } = h _ { t } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", which depends on the observed context "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and can change over time due to the observed history "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\begin{array} { r l } { H _ { t } } & { { } = } \\end{array}"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\{ ( X _ { k } , A _ { k } , Y _ { k } ) \\} _ { k = 1 } ^ { t - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". We make the key assumption that the agent acts with the intention to choose an intervention "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "a"
+                    },
+                    {
+                        "type": "text",
+                        "content": "leading to the best (largest) potential outcome "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "Y ( a )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", but that the perception of the optimal intervention may change over time throughout the agent’s learning process about their environment. This problem formalisation naturally places us at the in-"
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                690,
+                486,
+                869
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/d0eba3c1b8dccd57dd2699de8a7f62a4d9db6c6bcad2c366c1a998723b3538ae.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 2: Simplified inverse process. Our task is to infer the evolving perceived effect over time (the blue line) given only realisations of the agent’s behaviour. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                503,
+                698,
+                820,
+                792
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "tersection of treatment effect inference within the Neyman-Rubin potential outcomes (PO) framework "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                869,
+                823,
+                885
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_footnote",
+            "content": {
+                "page_footnote_content": [
+                    {
+                        "type": "text",
+                        "content": "1We assume with a single trajectory here, though learning and inference can be applied over a dataset of multiple trajectories "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                897,
+                823,
+                924
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                946,
+                503,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "(Rubin, 2005) with the classical (inverse) reinforcement learning (RL) paradigm (Abbeel & "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { N g }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", 2004). More specifically though the RL-subproblem of logged contextual bandits (Swaminathan & Joachims, 2015; Atan et al., 2018), where the setting is offline and the contexts arrive independently. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                103,
+                826,
+                147
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Perception Versus Reality. As is standard within the PO framework, we assume that any observation has two potential outcomes "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "Y ( a )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", associated with each intervention (treatment-level), which are generated from some true distribution inherent to the environment, i.e. "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "Y ( 0 ) , Y ( 1 ) \\sim \\mathbb { P } ^ { e } ( \\cdot | X = x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", yet only the potential outcome associated with the chosen treatment is revealed to the agent. If the agent had full knowledge of the environment, its optimal policy would be to choose an action as arg maxa "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mu _ { a } ^ { e } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\bar { \\mu } _ { a } ^ { e } ( x ) = \\mathbb { E } _ { \\mathbb { P } ^ { e } } [ Y ( a ) | X = \\bar { x } ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", or conversely to choose to perform the intervention only when its expected conditional average treatment effect (CATE) "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau ^ { e } ( x ) = \\mu _ { 1 } ^ { e } ( x ) -"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mu _ { 0 } ^ { e } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is positive. In general, we assume that such perfect knowledge of the environment is not available to the agent in many scenarios of practical interest. Instead, we assume that at any time "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", the agent acts according to some perceived model "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\mathbb { P } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of its environment, which induces the perceived expected potential outcomes "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\mu } _ { a } ( x ; t )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and associated treatment effect "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\tau } ( \\boldsymbol { x } ; t )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Here, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\mu } _ { a } ( \\boldsymbol { \\bar { x } } ; t ) = \\mathbb { E } _ { \\tilde { \\mathbb { P } } } [ \\boldsymbol { \\bar { Y } } ( a ) | \\boldsymbol { X } ^ { \\cdot } = x , H _ { t } = h _ { t } ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", is a function not only of the observed context but also the history, such that the agent can update its beliefs according to observed outcomes. Note that we allow the agent’s model of the environment to be misspecified; in this case "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\mu } _ { a } ( x ; t )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "would not converge to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mu _ { a } ^ { e } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "even for very long trajectories. We consider this an important feature, as we assume that human decision-makers generally need to make simplifications (Griffiths et al., 2015). Formally, we make the following assumption about the agent’s decision making process: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                152,
+                826,
+                393
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Assumption 1 Mutual Observability: The observable space "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathcal { X }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "contains only and all the information available to the agent at the point of assigning an action. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                402,
+                823,
+                431
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Assumption 2 Perceived Optimality: An agent assigns the action they think will maximise the outcome. For a deterministic policy "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", the agent believes "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { t } ( x ) = 1 \\iff \\tilde { \\mu } _ { 1 } ( x ; t ) > \\tilde { \\mu } _ { 0 } ( x ; t )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Given a stochastic agent, the policy "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { t } ( x ) = P ( A _ { t } = 1 | x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is a monotonic increasing function of the agent’s belief over the treatment effect "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\tau } ( \\boldsymbol { x } ; t )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                443,
+                826,
+                501
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Assumption 3 Continual Adaptation: The agent may continually adjust their strategy based on experience. The index in the dataset "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathcal { D }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "represents a temporal ordering which π is non-stationary with respect to, i.e. "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { i } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "may not equal "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { j } ( x ) , i \\neq j \\geq 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { i }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "represents the policy at time step i. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                511,
+                826,
+                556
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Assumptions 1 and 2 are generally unverifiable in practice, yet, they are necessary: there would be little opportunity to learn anything meaningful about a non-stationary policy without them. Mutual observability is crucial, as assuming that different information streams are available to the observer and the agent would make it impossible to accurately describe the decision-making process. Assumption 2, albeit untestable, appears very reasonable: in the medical setting, for example, a violation would imply malicious intent – i.e. that a clinician purposefully chooses the intervention with a sub-optimal expected outcome. Nonetheless, this does mean that we do not consider exploratory agents that are routinely willing to sacrifice outcomes for knowledge, a constraint we do not consider too restrictive within the medical applications we have in mind. Assumption 3, on the other hand, is not at all restrictive; on the contrary, it explicitly specifies a more flexible framework than is usual in imitation or inverse reinforcement learning as the set of policies it describes contains stationary policies. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                565,
+                826,
+                720
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3 RELATED WORK "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                738,
+                346,
+                753
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Our problem setting is related to, but distinct from, a number of problems considered within related literature. Effectively, we assume that we observe logged data generated by a learning agent that acts according to its evolving belief over effects of its actions, and aim to solve the inverse problem by making inferences over said belief given the data. Below, we discuss our relationship to work studying both the forward and the inverse problem of decision modelling, with main points summarised in Table 1. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                768,
+                826,
+                840
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The Forward Problem: Inferring Prescriptive Models for Behaviour. The agent, whose (nonstationary) policy we aim to understand, actively learns online through repeated interaction with an environment and thus effectively solves an online learning problem (Hoi et al., 2018). The most prominent example of such an agent would be a contextual bandit (Agarwal et al., 2014), which learns to assign sequentially arriving contexts to (treatment) arms. Designing agents that update "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                854,
+                826,
+                926
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "3 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                504,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "policies online is thus the inverse of the problem we consider here. Another seemingly related problem within the RL context is learning optimal policies from logged bandit data (Swaminathan & Joachims, 2015); this is different from our setting as it is prescriptive rather than descriptive. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                103,
+                826,
+                147
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "If the goal was to infer the true "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau ^ { e } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "from the (logged) observational data "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathcal { D }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(instead of the effect perceived by the agent), this would constitute a standard static CATE estimation problem, for which many solutions have been proposed in the recent ML literature (Alaa & van der Schaar, 2018; Shalit et al., 2017; Künzel et al., 2019). Note that within this literature, the treatmentassignment policy (the so-called propensity score "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi ( x ) = \\mathbb { P } ( A = 1 | X = x ) )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is usually assumed to be stationary and considered a nuisance parameter that is not of primary interest. Estimating CATE can also be a pretext task to the problem of developing optimal treatment rules (OTR) (Zhang et al., 2012a;b; Zhao et al., 2012), as "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\overline { { g } } ( x ) = \\mathbb { 1 } ( \\tau ( x ) > \\overline { { 0 } } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is such an optimal rule (Zhang et al., 2012b). "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                152,
+                828,
+                267
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The Backward Problem: Obtaining a Descriptive Summary of an Agent. When no outcomes are observed (unlike in the bandit problem) the task of learning a policy becomes imitation learning (IL), itself a large field that aims to match the policy of a demonstrator (Bain & Sammut, 1995; Ho & Ermon, 2016). Note that, compared to the bandit problem, there is a subtle shift from obtaining a policy that is optimal with respect to some true notion of outcome to one that minimises some divergence from the demonstrator. While IL is often used in the forward problem to find an optimal policy – thereby implicitly assuming that the demonstrator is themselves acting optimally –, it can also, if done interpretably, be used in the backward problem to very effectively reason about the goals and preferences of the agent (Hüyük et al., 2021a; Pace et al., 2021; Chan, 2020). One way to achieve this is through inverse reinforcement learning (IRL), which aims to recover the reward function that is seemingly maximised by the agent (Ziebart et al., 2008; Fu et al., 2018; Chan & van der Schaar, 2021). This need not be the true reward function, and can be interpreted as a potentially more compact way to describe a policy, which is also more easily portable given shifts in environment dynamics. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                279,
+                828,
+                462
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Our problem formalisation is conceptually closely related to the counterfactual inverse reinforcement learning (CIRL) work of Bica et al. (2021). There the authors similarly aim to explain decisions based on the PO framework, specifically by augmenting a max-margin IRL (Abbeel & Ng, 2004) approach to parameterise the learnt reward as a weighted sum of counterfactual outcomes. However, CIRL involves a pre-processing counterfactual estimation step that focuses on estimating the true treatment effects, and implicitly assumes that these are identical to the ones perceived by the agent (i.e. it assumes that the agent has perfect knowledge of the environment dynamics generating the potential outcomes), marking a significant departure from our (much weaker) assumptions. Without the focus on treatment effects, our method could be seen as a generalised non-parametric extension of the inverse contextual bandits of Hüyük et al. (2021b). In general, the backward problem is hard to evaluate empirically since information about the true beliefs of agents is not normally available in the data, thus relying on simulation to validate (Chan et al., 2021). "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                465,
+                828,
+                635
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/4ee6c28fa7c881ce8ab3557b63defe1ea46e91d104e08980801b652ddd48ec27.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 1: Problems considered in related work, noting the relationship between both input and output. "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Problem</td><td>Input</td><td>Target quantity</td></tr><tr><td>Online Learning of Optimal Polices (Agarwal et al., 2014)</td><td>(Xt, At, Yt)</td><td>πtopt(x)</td></tr><tr><td>Learning Optimal Policy from Logged Bandits (Swaminathan &amp; Joachims, 2015)</td><td>(Xi, Ai, Yt)</td><td>πopt(x)</td></tr><tr><td>Estimating Heterogeneous Treatment Effects (Alaa &amp; van der Schaar, 2018)</td><td>(Xi, Ai, Yt)</td><td>τe(x)</td></tr><tr><td>Learning Imitator Policies via Imitation Learning (Bain &amp; Sammut, 1995)</td><td>(Xi, Ai)</td><td>πobs(x)</td></tr><tr><td>Learning Reward Functions via IRL (Abbeel &amp; Ng, 2004)</td><td>(Xi, Ai)</td><td>Robs(x)</td></tr><tr><td>Learning Reward Functions via CIRL (Bica et al., 2021)</td><td>(Xi, Ai, Yt)</td><td>Robs(x)</td></tr><tr><td>Modelling Dynamic Policies via Inverse Online Learning</td><td>(Xt, At, Yt)</td><td>πtobs(x)</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                173,
+                664,
+                823,
+                781
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4 INFERRING THE ONLINE LEARNING PROCESS "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                809,
+                586,
+                824
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Preliminaries: The Forward Problem. In the forward context, the problem we consider amounts to an agent attempting to, at each time-step, take the action they believe will maximise the outcome, without being aware of the true effect of their intervention. We assume that the agent believes the potential outcomes are a linear combination of the contextual features such that "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tilde { \\mu } _ { a } ( X _ { t } ; t ) \\ = \\ \\tilde { \\langle } X _ { t } , \\omega _ { a } ^ { t } \\rangle"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\omega _ { a } ^ { t } \\in \\Omega"
+                    },
+                    {
+                        "type": "text",
+                        "content": "a set of weights for the action "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "a"
+                    },
+                    {
+                        "type": "text",
+                        "content": "at time "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\langle \\cdot , \\cdot \\rangle"
+                    },
+                    {
+                        "type": "text",
+                        "content": "denoting the inner product. Normally we may consider a linear model an oversimplification, but "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                839,
+                828,
+                926
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "4 "
+                    }
+                ]
+            },
+            "bbox": [
+                491,
+                948,
+                504,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/4688337ff0ef3b51e02f8f3a86f276b0ab19b5c10b39875de76fba0e019cf792.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 3: Model. Solid black lines indicate single time step dependencies. Given covariates "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "X _ { i }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and an observed history then treatment effects are estimated in the mind of the agent. An action "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "A _ { i }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is selected based on these effect and an outcome "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "Y _ { i }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is observed. The dashed grey lines then indicate information flow over time. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                178,
+                97,
+                823,
+                241
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "when modelling the thought process of an agent it appears much more reasonable - for example, does a doctor consider higher order terms when weighing up potential outcomes of a patient? It seems unlikely, especially as clinical guidelines are often given as linear cutoffs (Burgers et al., 2003). The considered forward problem thus proceeds as follows for every given time step "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": ": "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                330,
+                826,
+                388
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "1. A context "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "X _ { t } \\sim P _ { \\mathcal { X } }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "arrives independently over time. We make no assumptions on the form of "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "P _ { \\mathcal { X } }"
+                            },
+                            {
+                                "type": "text",
+                                "content": ", in particular noting that there is no need for any level of stationarity. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "2. Given "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "X _ { t }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "and the current set of weights "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\{ \\omega _ { 1 } ^ { t } , \\omega _ { 0 } ^ { t } \\}"
+                            },
+                            {
+                                "type": "text",
+                                "content": ", the agent predicts their perceived potential outcomes "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\tilde { \\mu } _ { 1 } ( X _ { t } ; t )"
+                            },
+                            {
+                                "type": "text",
+                                "content": "and "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\tilde { \\mu } _ { 0 } ( X _ { t } ; t )"
+                            },
+                            {
+                                "type": "text",
+                                "content": ". "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "3. Action "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "A _ { t }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "is assigned by some probabilistic optimal treatment rule "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pi : \\mathcal { V } ^ { 2 } \\mapsto [ 0 , 1 ]"
+                            },
+                            {
+                                "type": "text",
+                                "content": "such that "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\mathbb { P } ( A _ { t } = 1 | X _ { t } ) = \\pi ( \\tilde { \\mu } _ { 1 } ( X _ { t } ; t ) , \\tilde { \\mu } _ { 0 } ( X _ { t } ; t ) )"
+                            },
+                            {
+                                "type": "text",
+                                "content": ", before the associated true outcome is observed. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "4. Based on this new information the agent (potentially stochastically) updates their belief over the response surface for the taken action according to some update function "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "f : \\Omega ^ { 2 } \\times \\mathcal { X } \\times \\mathcal { A } \\times \\mathcal { Y } \\mapsto"
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\triangle ( \\Omega ^ { 2 } )"
+                            },
+                            {
+                                "type": "text",
+                                "content": "such that "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\omega _ { 1 } ^ { t + 1 } , \\omega _ { 0 } ^ { t + 1 } \\sim f ( \\omega _ { 1 } ^ { t } , \\omega _ { 0 } ^ { t } , X _ { t } , \\overline { { A } } _ { t } , Y _ { t } )"
+                            },
+                            {
+                                "type": "text",
+                                "content": "t+1 . "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                174,
+                397,
+                825,
+                539
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "To maximise outcomes it is crucial to employ an update function "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "f"
+                    },
+                    {
+                        "type": "text",
+                        "content": "that maximally captures the available information at each step of the process. This then allows for an appropriate determination of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi"
+                    },
+                    {
+                        "type": "text",
+                        "content": "that aims to maximise the total (potentially future discounted) outcomes. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                549,
+                826,
+                592
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.1 A MODEL OF INVERSE ONLINE LEARNING "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                608,
+                514,
+                622
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Here, we focus on the inverse to the problem outlined above, which, to the best of our knowledge, has received little to no attention in related work. That is, after observing an agent’s actions, can we recover how they arrived at their decisions, and how this changed over time? In the following, we use vector notation "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\vec { x } _ { t : t ^ { \\prime } } ~ = ~ \\{ x _ { i } \\} _ { i = t } ^ { t ^ { \\prime } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\vec { x } = \\vec { x } _ { 1 : T }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for all realised variables, with histories "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\vec { h } _ { t : t ^ { \\prime } } ~ = ~ \\{ ( x _ { i } , a _ { i } , y _ { i } ) \\} _ { i = t } ^ { t ^ { \\prime } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Note that the previously described forward model assumes a factorisation of the full generative distribution of the observed data given by: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                633,
+                826,
+                724
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "p (\\vec {x}, \\vec {a}, \\vec {y}) = \\prod_ {t = 1} ^ {T} p \\left(y _ {t} \\mid a _ {t}, x _ {t}\\right) \\times p \\left(a _ {t} \\mid \\vec {x} _ {1: t - 1}, \\vec {a} _ {1: t - 1}, \\vec {y} _ {1: t - 1}\\right) \\times p \\left(x _ {t}\\right). \\tag {1}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/13b666ab6927e228e33be38eac9d3e5a1c3b745a34eeed98adbc87270358b39f.jpg"
+                }
+            },
+            "bbox": [
+                272,
+                729,
+                823,
+                771
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We assume that "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "p ( x _ { t } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "p ( y _ { t } | a _ { t } , x _ { t } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "are governed by some true environment dynamics, independent from the perception of the agent and thus not part of our modelling problem. This seems trivially true, as the perception of the agent will neither affect the contexts that arrive nor the true outcome conditional on the action being taken. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                777,
+                828,
+                834
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Our model for the evolving beliefs of an agent with respect to their interaction with the environment revolves around a specialised deep state-space model. Crucially, this takes the form of a latent random variable "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "M _ { t } ^ { \\mathbf { \\bar { \\rho } } } \\in \\mathbb { R } ^ { d }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", which captures the memory of the agent at time "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and can evolve in a flexible way based on the observed history. We consider the memory to be an efficient summary of the history, which can be interpreted as a sufficient statistic for the beliefs of the agent at a given time. Naturally, this memory is unobserved and must be learnt in an unsupervised "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                840,
+                826,
+                925
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "5 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                503,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "manner. The introduction of this latent variable leads to an extended probabilistic model with a more structured factorisation of the conditional distribution of the actions, and a model given by: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                103,
+                826,
+                132
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "p _ {\\theta} (\\vec {a} | \\vec {x}, \\vec {y}) = \\prod_ {t = 1} ^ {T} \\underbrace {\\pi_ {\\theta} \\left(a _ {t} \\mid \\tilde {\\tau} _ {t}\\right)} _ {\\text {T r e a t m e n t R u l e}} \\times \\underbrace {\\mathcal {O} _ {\\theta} \\left(\\tilde {\\tau} _ {t} \\mid x _ {t} , m _ {t}\\right)} _ {\\text {O u t c o m e E s t i m a t i o n}} \\times \\underbrace {\\mathcal {S} _ {\\theta} \\left(m _ {t} \\mid \\vec {x} _ {1 : t - 1} , \\vec {a} _ {1 : t - 1} , \\vec {y} _ {1 : t - 1}\\right)} _ {\\text {M e m o r y A g g r e g a t i o n}}. \\tag {2}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/6a1855bc77eece300b948732c4418c527030e457ca64fb590f67f3dca10d528e.jpg"
+                }
+            },
+            "bbox": [
+                225,
+                135,
+                825,
+                184
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "This model consists of three components: a memory summarisation network "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "S _ { \\theta } : \\mathcal { H } \\mapsto \\triangle ( \\mathcal { M } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", which maps the history into a (distribution over) memory; a (perceived) potential outcome predictor network "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathcal { \\bar { O } } _ { \\theta } : \\mathcal { X } \\times \\mathcal { M } \\mapsto \\mathbb { R } ^ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", that takes the memory and a context and predicts the perceived potential outcomes; and a treatment rule "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi _ { \\theta } : \\mathcal { V } ^ { 2 } \\mapsto [ 0 , 1 ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", that given the potential outcomes (summarised by the perceived treatment effect) outputs a distribution over actions. Throughout, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "denotes the full set of parameters of the generative model and notation is shared across components to reflect that they can all be optimised jointly. Below, we discuss each component in turn. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                193,
+                826,
+                292
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Memory Aggregation. We define the base structure of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\scriptstyle { S _ { \\theta } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "to be relatively simple and recursive, and assume the memory at a given time step to be distributed as: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                297,
+                826,
+                325
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "M _ {t} \\sim \\mathcal {N} \\left(\\boldsymbol {\\mu} _ {t}, \\boldsymbol {\\Sigma} _ {t}\\right) \\quad \\text {w i t h} \\quad \\boldsymbol {\\mu} _ {t}, \\boldsymbol {\\Sigma} _ {t} = \\mathrm {M L P} \\left(\\left[ M _ {t - 1}, X _ {t - 1}, A _ {t - 1}, Y _ {t - 1} \\right]\\right), \\tag {3}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/2d513591504839c735406f651d50f43d2deb730a2e9048332be6e28da9f694b4.jpg"
+                }
+            },
+            "bbox": [
+                261,
+                328,
+                823,
+                347
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\mu } _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\Sigma _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "are two output heads of the memory network "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "s"
+                    },
+                    {
+                        "type": "text",
+                        "content": "given the history "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "h _ { t - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". It is important to note that the memory network does not get the "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": "-th step information (including the context) when predicting the memory at time t - this means the network cannot provide any specific predictive power for a given context and is forced to model the general response surfaces. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                348,
+                826,
+                404
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In many models of behaviour the update function "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "f"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of the agent is modelled as perfect Bayesian inference (Kaelbling et al., 1998; Colombo & Hartmann, 2017). While this may seems natural on the surface given the logical consistency of Bayesian inference, it seems unlikely in practice that agents (and especially humans) will be capable of it. Not least because in all but the simplest cases it will become intractable for computational agents and humans themselves are well known to make simplifying approximations when dealing with past histories (Genewein et al., 2015). By employing a flexible neural architecture, we remove this relatively restrictive assumption on the memory update process. Our model then learns exactly how the agent appears to use previous information to update their predictions - allowing us to model common cognitive biases such as overly weighting recent or largely negative events (Hertwig & Erev, 2009). "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                410,
+                826,
+                551
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Outcome Estimation. Having obtained a memory state "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "m _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", the second stage involves predicting the perceived potential outcomes for a context "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with the network "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\bar { \\mathcal { O } } _ { \\theta } ( \\tilde { \\tau } _ { t } | x _ { t } , \\bar { m } _ { t } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Given the forward model where the potential outcomes are considered a linear combination of the features this then proceeds again in three steps: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                556,
+                826,
+                613
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\omega_ {1} ^ {t}, \\omega_ {0} ^ {t} = \\operatorname {M L P} \\left(m _ {t}\\right), \\tag {4}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/2c1b6332bf4c5ebea1479d6e69e430fbee8fd9f00d32a347fe5cf6a5b531e2c7.jpg"
+                }
+            },
+            "bbox": [
+                437,
+                614,
+                823,
+                632
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\tilde {\\mu} _ {1} \\left(x _ {t}; t\\right) = \\left\\langle x _ {t}, \\omega_ {1} ^ {t} \\right\\rangle , \\quad \\tilde {\\mu} _ {0} \\left(x _ {t}; t\\right) = \\left\\langle x _ {t}, \\omega_ {0} ^ {t} \\right\\rangle \\tag {5}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/c12fd5063a872f6b6ebbed81a0f38c125fadb3806d672c526fa5d69026aa8aa1.jpg"
+                }
+            },
+            "bbox": [
+                346,
+                633,
+                823,
+                652
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\tilde {\\tau} _ {t} = \\tilde {\\mu} _ {1} \\left(x _ {t}; t\\right) - \\tilde {\\mu} _ {0} \\left(x _ {t}; t\\right). \\tag {6}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/db40f5db4c537d539680ae069066a2c94af11f3807b2c11a8f19015461c390c6.jpg"
+                }
+            },
+            "bbox": [
+                467,
+                654,
+                823,
+                669
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "First the memory "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "m _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is decoded into a set of weights for each action using some standard feedforward multi-layer perceptron (MLP), before the potential outcomes are predicted by taking the inner product with the context. This is preferable to, for example, concatenating and passing both "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "m _ { t }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "through a network since, while it may be potentially more expressive, it loses the connection to the forward model as well as the interpretability that is given by linearity. As it is, while our model of the potential outcomes is linear at each time step, the memory allows this to flexibly change throughout the course of the history. The perceived treatment effect is then calculated as the difference between potential outcomes. However, given the linear nature of the predictions, there is no non-degenerate solution for the ωs. Thus, to ensure identifiability, we set "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\boldsymbol { \\omega } _ { 0 } ^ { \\bar { t } } = { \\bf 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "as a baseline. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                671,
+                826,
+                797
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Treatment Rule. Under Assumption 2, the agent should be expected to take an action that maximises the outcome. There are different possible options for the exact treatment rule, the most obvious being "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pi ( a _ { t } | \\tilde { \\tau } _ { t } ) ~ = ~ \\mathbb { 1 } ( \\tilde { \\tau } _ { t } ~ > ~ 0 )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "; assuming that as long as the treatment effect is positive then the intervention will be taken. However, in order to maintain differentiability, as well as to allow for more modelling flexibility to capture the stochasitcity of agents, we parameterise the policy as a soft version of the indicator function: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                804,
+                826,
+                887
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\pi \\left(a _ {t} \\mid \\tilde {\\tau} _ {t}\\right) = \\frac {1}{1 + \\exp \\left(- \\alpha \\left(\\tilde {\\tau} _ {t} - \\beta\\right)\\right)}. \\tag {7}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/0cfeaf656ce118faa43e09aa2b8994687459bed70040b9fe255c3cfc01f458b0.jpg"
+                }
+            },
+            "bbox": [
+                379,
+                890,
+                825,
+                922
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "6 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                504,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Assuming positive "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", this is clearly monotonically increasing, satisfying Assumption 2. These parameters are learnt by the model and thus allow us to model a flexible threshold with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\beta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "as well as aleatoric uncertainty in the actions of the agent with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\alpha"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                103,
+                826,
+                148
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4.2 LEARNING WITH AN INFERENCE NETWORK "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                162,
+                517,
+                176
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "As with all flavours of deep state space models, exact posterior inference is analytically intractable, making optimisation of the marginal likelihood equally so. As such, we aim to maximise an Evidence Lower BOund (ELBO) on this likelihood of the data following standardised variational principles (Blei et al., 2017; Hoffman et al., 2013). This is achieved by positing a parameterised approximate posterior distribution "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "q _ { \\phi } ( \\vec { m } | \\vec { h } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and with a simple application of Jensen’s inequality arrive at: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                186,
+                826,
+                261
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\log p _ {\\theta} (\\vec {h}) \\geq \\mathbb {E} _ {q _ {\\phi}} \\left[ \\log p _ {\\theta} (\\vec {m}, \\vec {h}) - \\log q _ {\\phi} (\\vec {m} | \\vec {h}) \\right]. \\tag {8}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/24e08b6fc1196a4f1e37c9f5c44da9d1c5485f4eb222911095e7c0c6bf762c58.jpg"
+                }
+            },
+            "bbox": [
+                336,
+                265,
+                823,
+                285
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Maximising this bound is not only useful in terms of the marginal likelihood but also equivalently minimises the Kullback-Leibler divergence between the approximate and true posterior "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\dot { D } _ { K L } [ q _ { \\phi } ( \\vec { m } | \\vec { h } ) | | p ( \\vec { m } | \\vec { h } ) ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", giving us more confidence in our inferred posterior. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                287,
+                825,
+                334
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Factorising the Posterior for Efficient Inference. In order to accelerate learning and make inference quick, we factorise the approximate posterior in the same way as the true posterior: "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                339,
+                519,
+                395
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "q _ {\\phi} (\\vec {m} | \\vec {h}) = q _ {\\phi} (m _ {1} | \\vec {h}) \\prod_ {t = 2} ^ {T} q _ {\\phi} \\left(m _ {t} \\mid m _ {t - 1}, \\vec {h} _ {t - 1: T}\\right) \\tag {9}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/0a00e3db3a47ae727908ba68e3921b8d168c2afbac9d122cd87f2ee4ade0e1be.jpg"
+                }
+            },
+            "bbox": [
+                184,
+                398,
+                516,
+                453
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Thus to estimate the approximate posterior,we use a backwards LSTM to create a summary "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\begin{array} { r l } { b _ { t } } & { { } = } \\end{array}"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\operatorname { L S T M } ( h _ { t : T } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". This is then concatenated with the previous memory at time step "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t - 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "before being passed through a fully connected layer to estimate parameters. Given that the memory can be seen as a sufficient statistic of the past within the model, "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                458,
+                517,
+                555
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "it is well known that given this factorisation, conditioning on the memory leads to a Rao-Blackwellization of the more general network that would be conditioned on all variables (Krishnan et al., 2017; Alaa & van der Schaar, 2019). This accelerates learning not only by parameter sharing between "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\phi"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "but also by reducing the variance of the gradient estimates during training. With the specified inference network "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "q _ { \\phi }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", this leads to an optimisation objective: "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                555,
+                826,
+                626
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/276c20427fe2dfb01ece5da8d81564f4755a50d84125d997bf90799483e9f715.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 4: Structure of the approximate posterior inference network. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                527,
+                340,
+                823,
+                518
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\begin{array}{l} \\mathcal {F} (\\phi , \\theta) = \\mathbb {E} _ {q _ {\\phi} (\\vec {m} | \\vec {h})} [ p _ {\\theta} (\\vec {a} | \\vec {h}) ] - D _ {K L} (q _ {\\phi} (m _ {1} | \\vec {x}) | | p _ {\\theta} (m _ {1})) \\tag {10} \\\\ - \\sum_ {t = 2} ^ {T} \\mathbb {E} _ {q _ {\\phi} (m _ {t - 1} | \\vec {h})} \\left[ D _ {K L} \\left(q _ {\\phi} (m _ {t} | m _ {t - 1}, \\vec {h} _ {t - 1: T}) | | p _ {\\theta} (m _ {t} | m _ {t - 1})\\right) \\right] \\\\ \\end{array}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/3cd83fe2cba2494f194a5c3b3ad0475aee717ba79f7fe863d85af8166af8df12.jpg"
+                }
+            },
+            "bbox": [
+                181,
+                630,
+                823,
+                696
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "This can optimised in a straightforward manner using stochastic variational inference and reparameterised Monte Carlo samples from the approximate posterior distribution. At each step a sample is drawn from the posterior through which gradients can flow and the ELBO is evaluated. This can be backpropagated through to get gradients with respect to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\phi"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "which can then be updated as appropriate using an optimiser of the practitioner’s choice. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                705,
+                826,
+                777
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "5 CASE STUDY: LIVER TRANSPLANTATION ACCEPTANCE DECISIONS "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                795,
+                764,
+                810
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In this section we explore the explainability benefits of our method for evaluating real decision making. Given space constraints, we relegate validation of the method on synthetic examples to the appendix, and focus here on a real medical example of accepting liver donation offers for transplantation. This is an important area where much has been done to improve decision support for clinicians (Volk et al., 2015; Berrevoets et al., 2020), but which often focuses on simply suggesting theoretically optimal actions. Here, by trying to understand better the decision making process, we hope to be able to provide more bespoke support in the future. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                825,
+                826,
+                925
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "7 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                503,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/f3413b5ddd2226e485b43f9d5fe3d87d61a01da014f69acdde1edc9c93bcb39a.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                181,
+                108,
+                380,
+                258
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/429de0ab01a2caa0c59d506ea6931ca3dc3d95bae64aff64fc0b733a0ed879f4.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                388,
+                111,
+                599,
+                258
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/f46f1867cbd71ee95a256b1004b44fb7435df2adf5d37b55bf6aded01d4c8f5c.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 5: Changing Focuses. Predicted weights of different covariates at two-year time intervals. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                609,
+                111,
+                812,
+                258
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Organ transplantation is an extreme medical procedure, often considered the last resort for critically ill patients (Merion et al., 2005). Despite the significant risks associated with major surgery, transplantation can offer the chance of a relatively normal life (Starzl et al., 1982) and as a result demand for donor organs far outstrips supply (Wynn & Alexander, 2011). Yet, perhaps surprisingly, a large proportion of organ offers are turned down by clinicians (in consultation with the receiving patients) for various reasons including donor quality or perceived poor compatibility with the recipient (Volk et al., 2015). This decision faced by clinicians can be (under some simplification) described by the process: 1) A donor organ becomes available and is offered to a patient; 2) The clinician considers the state of the organ, the state of the patient, as well as other information such as the previous reject history of the organ (this is the context "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "X"
+                    },
+                    {
+                        "type": "text",
+                        "content": "); 3) The clinician makes the binary decision to accept/reject the organ (the intervention "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "A"
+                    },
+                    {
+                        "type": "text",
+                        "content": "); 4) The patient receives/does not receive the organ and a measure of their outcome is recorded - we measure their survival time as the main outcome of interest (the outcome "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "Y"
+                    },
+                    {
+                        "type": "text",
+                        "content": "). Full details of the dataset, preprocessing steps, and experimental setup can be found in the appendix. Note that in this example we are not trying to capture the policy of any individual doctor, but rather the general policy of a treatment centre over time and how what they find important changes - this is due to the form of the data available, but the method could equally be applied to individual clinicians if that information was made available. Additionally, while survival time will not be recorded immediately, the most powerful signal in this case is usually a death that follows very soon after the decision, which will be effectively captured in the data. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                311,
+                826,
+                577
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Evolving Relative Importances. First, we now examine exactly how our method can explain a nonstationary policy over time. In Figure 5 we plot the relative weights for covariates in terms of the treatment effect for accepting the organ offer as they change at two-year periods. The Model for End-Stage Liver Disease (MELD) score (Kamath & Kim, 2007) was introduced in 2002 to give an overall rating of how sick a patient is. On introduction, it was the main consideration when making an acceptance decision, as can be seen clearly in Figure 5. However, over time this became seen as less important as clinicians started to not want to rely on a single score, with some clinicians even turning down offers for patients with high scores in hopes of a better match, with one study showing that 84 "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                584,
+                517,
+                805
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/835c82b8ad6668288c0326b7912ef14c1f557039632babdf33d110e4981a1956.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Figure 6: One-step policy shift densities after observing an outcome. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                535,
+                590,
+                816,
+                752
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of the patients who died while waiting for an organ had MELD scores "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\geq 1 5"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and had previously declined at least one offer (Lai et al., 2012). This can also be seen reflected in Figure 5 as the importance of the MELD score in accepting the offer decreases and the policy stabilises. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                805,
+                826,
+                848
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Reactionary Policies The most important aspect of our method is that we can model the reaction of the agent to their experience on the fly. For example we can see how observing various outcomes change the opinion of the agent moving forward. This is demonstrated in Figure 6 which plots density estimates of the policy shift (measured as the distance the decision boundary moves) after rejecting the offer and measuring a positive/negative outcome. Here it can be "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                854,
+                826,
+                925
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                173,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "8 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                503,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "seen that when an offer is rejected then a negative outcome shifts the decision boundary downwards more than a positive outcome, making it less likely to reject an offer in the next time-step. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                103,
+                826,
+                133
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Matching Clinical Decisions. While it should be emphasised that our method is (to the best of our knowledge) the only method with the aim or capability to model the evolving decision process of the agent, as mentioned in Section 3 there are a variety of methods that are tangentially related. First, we consider a few standard approaches to imitation learning with behavioural cloning (BC) (Bain & Sammut, 1995), where we consider both a linear (BC-Linear) and deep (BC-Deep) functionapproximator, representing both ends of the interpretability spectrum for BC. Continuing in imitation learning, we also compare alongside reward-regularised classification for apprenticeship learning (RCAL) (Piot et al., 2014), a method that regularises the reward implied by the learnt "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "Q"
+                    },
+                    {
+                        "type": "text",
+                        "content": "-values. We additionally consider an adaptation of counterfactual inverse reinforcement learning (CIRL) (Bica et al., 2021) to the bandit setting where we first estimate the true CATE of the interventions and thus the true potential outcomes. We use these as the reward and apply an optimal policy, which in this one-step case is trivially achieved by choosing the action that maximises the potential outcome. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                138,
+                826,
+                308
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "In Table 2 we compare the predictive power of our method and all benchmarks on the task of imitation learning – i.e. matching the actions of the real demonstrator in some held-out test set. This is the only task for which we can make meaningful comparison with the existing literature, given our divergent goals. Despite the fact that at each step our method only considers a linear decision boundary, we are still able to outperform the deep network architectures used in BC and RCAL in terms of AUC and APS. This can be put down to the flexible way in which the policy can change over time to allow for adaptation. Less surprisingly, we also outperform the stationary linear classifier as well as the version of CIRL, the poor performance of which is probably ex-"
+                    }
+                ]
+            },
+            "bbox": [
+                173,
+                311,
+                486,
+                547
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Table 2: Action prediction performance. Comparison of methods on transplant offer acceptances. Performance of the methods is evaluated on the quality of action matching against a held out test set of demonstrations. We report the area under the receiving operator characteristic curve (AUC) and the average precision score (APS). "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                315,
+                826,
+                415
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/aeb91ba4c05b88ff36317675580357b1fa6b1374ad1fabfd507f021d8529e2c6.jpg"
+                },
+                "table_caption": [],
+                "table_footnote": [],
+                "html": "<table><tr><td>Method</td><td>AUC ↑</td><td>APS ↑</td></tr><tr><td>BC-Linear</td><td>0.798 ± 0.002</td><td>0.647 ± 0.001</td></tr><tr><td>BC-Deep</td><td>0.803 ± 0.002</td><td>0.655 ± 0.001</td></tr><tr><td>RCAL</td><td>0.797 ± 0.008</td><td>0.662 ± 0.003</td></tr><tr><td>CIRL</td><td>0.553 ± 0.008</td><td>0.510 ± 0.002</td></tr><tr><td>IOL (Ours)</td><td>0.824 ± 0.006</td><td>0.677 ± 0.011</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                496,
+                428,
+                823,
+                536
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "plained by the unrealistic nature of the causal assumptions in this setting. Further experimental results on action matching in on multiple additional datasets are provided in the appendix. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                547,
+                828,
+                577
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "6 DISCUSSION "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                579,
+                313,
+                593
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Limitations. By employing a deep architecture our method is able to learn a non-parametric and accurate form of both the non-stationary policy and update function, making far fewer assumptions on their true form than is normal in the literature. This does mean, however, that it works best when training data is abundant, and can otherwise be prone to over-fitting as is common with deep neural networks. Additionally, the assumption that agents are always taking the action they believe will maximise the outcome does mean our method is out-of-the-box unable to account for strategies that deliberately pick actions that could be sub-optimal but may yield useful information (i.e. exploratory strategies). An interesting future direction would include exploring this, potentially by augmenting the outcome to include a measure of expected information. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                599,
+                826,
+                726
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Societal Impact and Ethics. Being able to better understand decision making processes could be highly useful in combating biases or correcting mistakes made by human decisionmakers. Nonetheless, it should be noted that any method that aims to analyse and explain observed behaviour has the potential to be misused, for example to unfairly attribute incorrect intentions to someone. As such, it is important to emphasise that, as is the nature of inverse problems, we are only giving one plausible explanation for the behaviour of an agent and cannot suggest that this is exactly what has gone on in their mind. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                731,
+                826,
+                830
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Conclusions. In this paper we have tackled the problem of inverse online learning – that is descriptively modelling the process through which an observed agent adapts their policy over time – by interpreting actions as targeted interventions, or treatments. We drew together policy learning and treatment effect estimation to present a practical algorithm for solving this problem in an interpretable and meaningful manner, before demonstrating how this could be using in the medical domain to analyse the decisions of clinicians when choosing whether to accept offers for transplantation. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                835,
+                828,
+                921
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "9 "
+                    }
+                ]
+            },
+            "bbox": [
+                493,
+                948,
+                504,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "ACKNOWLEDGEMENTS "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                171,
+                102,
+                369,
+                118
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "AJC would like to acknowledge and thank Microsoft Research for its support through its PhD Scholarship Program with the EPSRC. AC gratefully acknowledges funding from AstraZeneca. This work was additionally supported by the Office of Naval Research (ONR) and the NSF (Grant number: 1722516). We would like to thank all of the anonymous reviewers on OpenReview, alongside the many members of the van der Schaar lab, for their input, comments, and suggestions at various stages that have ultimately improved the manuscript. "
+                    }
+                ]
+            },
+            "bbox": [
+                169,
+                133,
+                826,
+                219
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "REFERENCES "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                173,
+                238,
+                287,
+                253
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Pieter Abbeel and Andrew Y Ng. Apprenticeship learning via inverse reinforcement learning. In Proceedings of the twenty-first international conference on Machine learning, pp. 1, 2004. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alekh Agarwal, Daniel Hsu, Satyen Kale, John Langford, Lihong Li, and Robert Schapire. Taming the monster: A fast and simple algorithm for contextual bandits. In International Conference on Machine Learning, pp. 1638–1646. PMLR, 2014. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Ahmed Alaa and Mihaela van der Schaar. Limits of estimating heterogeneous treatment effects: Guidelines for practical algorithm design. In International Conference on Machine Learning, pp. 129–138, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Ahmed Alaa and Mihaela van der Schaar. Attentive state-space modeling of disease progression. Proceedings of the 33rd Conference on Neural Information Processing Systems, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Onur Atan, James Jordon, and Mihaela van der Schaar. Deep-treat: Learning optimal personalized treatments from observational data using neural networks. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 32, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Michael Bain and Claude Sammut. A framework for behavioural cloning. In Machine Intelligence 15, pp. 103–129, 1995. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Jeroen Berrevoets, James Jordon, Ioana Bica, Alexander Gimson, and Mihaela van der Schaar. Organite: Optimal transplant donor organ offering using an individual treatment effect. https://proceedings. neurips. cc/paper/2020, 33, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Ioana Bica, Daniel Jarrett, Alihan Hüyük, and Mihaela van der Schaar. Learning ”what-if” explanations for sequential decision-making. In International Conference on Learning Representations, 2021. URL https://openreview.net/forum?id=h0de3QWtGG. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "David M Blei, Alp Kucukelbir, and Jon D McAuliffe. Variational inference: A review for statisticians. Journal of the American statistical Association, 112(518):859–877, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Jako S Burgers, Richard PTM Grol, Joost OM Zaat, Teun H Spies, Akke K van der Bij, and Henk GA Mokkink. Characteristics of effective clinical guidelines for general practice. British journal of general practice, 53(486):15–19, 2003. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alex James Chan. Interpretable policy learning. Master’s thesis, University of Cambridge, 2020. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alex James Chan and Mihaela van der Schaar. Scalable bayesian inverse reinforcement learning. In International Conference on Learning Representations, 2021. URL https://openreview. net/forum?id=4qR3coiNaIv. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alex James Chan, Ioana Bica, Alihan Hüyük, Daniel Jarrett, and Mihaela van der Schaar. The medkit-learn (ing) environment: Medical decision modelling through simulation. In Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Matteo Colombo and Stephan Hartmann. Bayesian cognitive science, unification, and explanation. The British Journal for the Philosophy of Science, 68(2):451–484, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Renée Elio and Francis Jeffry Pelletier. Belief change as propositional update. Cognitive Science, 21 (4):419–460, 1997. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                173,
+                261,
+                828,
+                924
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": []
+            },
+            "bbox": [
+                490,
+                948,
+                506,
+                959
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Justin Fu, Katie Luo, and Sergey Levine. Learning robust rewards with adverserial inverse reinforcement learning. In International Conference on Learning Representations, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Tim Genewein, Felix Leibfried, Jordi Grau-Moya, and Daniel Alexander Braun. Bounded rationality, abstraction, and hierarchical decision-making: An information-theoretic optimality principle. Frontiers in Robotics and AI, 2:27, 2015. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Thomas L Griffiths, Falk Lieder, and Noah D Goodman. Rational use of cognitive resources: Levels of analysis between the computational and the algorithmic. Topics in cognitive science, 7(2): 217–229, 2015. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Ralph Hertwig and Ido Erev. The description–experience gap in risky choice. Trends in cognitive sciences, 13(12):517–523, 2009. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Jonathan Ho and Stefano Ermon. Generative adversarial imitation learning. In Proceedings of the 30th International Conference on Neural Information Processing Systems, pp. 4572–4580, 2016. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Matthew D Hoffman, David M Blei, Chong Wang, and John Paisley. Stochastic variational inference. Journal of Machine Learning Research, 14(5), 2013. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Steven CH Hoi, Doyen Sahoo, Jing Lu, and Peilin Zhao. Online learning: A comprehensive survey. arXiv preprint arXiv:1802.02871, 2018. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "MG Myriam Hunink, Milton C Weinstein, Eve Wittenberg, Michael F Drummond, Joseph S Pliskin, John B Wong, and Paul P Glasziou. Decision making in health and medicine: integrating evidence and values. Cambridge university press, 2014. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alihan Hüyük, Daniel Jarrett, Cem Tekin, and Mihaela van der Schaar. Explaining by imitating: Understanding decisions by interpretable policy learning. In International Conference on Learning Representations, 2021a. URL https://openreview.net/forum?id=unI5ucw_Jk. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alihan Hüyük, Daniel Jarrett, and Mihaela van der Schaar. Inverse contextual bandits: Learning how behavior evolves over time. arXiv preprint arXiv:2107.06317, 2021b. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Leslie Pack Kaelbling, Michael L Littman, and Anthony R Cassandra. Planning and acting in partially observable stochastic domains. Artificial intelligence, 101(1-2):99–134, 1998. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Patrick S Kamath and W Ray Kim. The model for end-stage liver disease (meld). Hepatology, 45(3): 797–805, 2007. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Rahul Krishnan, Uri Shalit, and David Sontag. Structured inference networks for nonlinear state space models. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 31, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Sören R Künzel, Jasjeet S Sekhon, Peter J Bickel, and Bin Yu. Metalearners for estimating heterogeneous treatment effects using machine learning. Proceedings of the national academy of sciences, 116(10):4156–4165, 2019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Jennifer Cindy Lai, Sandy Feng, and John Paul Roberts. An examination of liver offers to candidates on the liver transplant wait-list. Gastroenterology, 143(5):1261–1265, 2012. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Robert M Merion, Douglas E Schaubel, Dawn M Dykstra, Richard B Freeman, Friedrich K Port, and Robert A Wolfe. The survival benefit of liver transplantation. American Journal of Transplantation, 5(2):307–313, 2005. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Alizée Pace, Alex James Chan, and Mihaela van der Schaar. Poetree: Interpretable policy learning with adaptive decision trees. In International Conference on Learning Representations, 2021. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Bilal Piot, Matthieu Geist, and Olivier Pietquin. Boosted and reward-regularized classification for apprenticeship learning. In Proceedings of the 2014 international conference on Autonomous agents and multi-agent systems, pp. 1249–1256. International Foundation for Autonomous Agents and Multiagent Systems, 2014. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Donald B Rubin. Causal inference using potential outcomes: Design, modeling, decisions. Journal of the American Statistical Association, 100(469):322–331, 2005. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                102,
+                828,
+                926
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "11 "
+                    }
+                ]
+            },
+            "bbox": [
+                488,
+                946,
+                506,
+                960
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Uri Shalit, Fredrik D Johansson, and David Sontag. Estimating individual treatment effect: generalization bounds and algorithms. In International Conference on Machine Learning, pp. 3076–3085. PMLR, 2017. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Thomas E Starzl, Shunzaburo Iwatsuki, David H Van Thiel, J Carlton Gartner, Basil J Zitelli, J Jeffrey Malatack, Robert R Schade, Byers W Shaw Jr, Thomas R Hakala, J Thomas Rosenthal, et al. Evolution of liver transplantation. Hepatology, 2(5):614S–636S, 1982. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Adith Swaminathan and Thorsten Joachims. Batch learning from logged bandit feedback through counterfactual risk minimization. The Journal of Machine Learning Research, 16(1):1731–1755, 2015. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Michael L Volk, Nathan Goodrich, Jennifer C Lai, Christopher Sonnenday, and Kerby Shedden. Decision support for organ offers in liver transplantation. Liver transplantation, 21(6):784–791, 2015. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "James J Wynn and Charles E Alexander. Increasing organ donation and transplantation: the us experience over the past decade. Transplant International, 24(4):324–332, 2011. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Edmundas Kazimieras Zavadskas and Zenonas Turskis. Multiple criteria decision making (mcdm) methods in economics: an overview. Technological and economic development of economy, 17(2): 397–427, 2011. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Baqun Zhang, Anastasios A Tsiatis, Marie Davidian, Min Zhang, and Eric Laber. Estimating optimal treatment regimes from a classification perspective. Stat, 1(1):103–114, 2012a. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Baqun Zhang, Anastasios A Tsiatis, Eric B Laber, and Marie Davidian. A robust method for estimating optimal treatment regimes. Biometrics, 68(4):1010–1018, 2012b. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Yingqi Zhao, Donglin Zeng, A John Rush, and Michael R Kosorok. Estimating individualized treatment rules using outcome weighted learning. Journal of the American Statistical Association, 107(499):1106–1118, 2012. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "Brian D Ziebart, Andrew L Maas, J Andrew Bagnell, and Anind K Dey. Maximum entropy inverse reinforcement learning. In Aaai, volume 8, pp. 1433–1438. Chicago, IL, USA, 2008. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                102,
+                828,
+                555
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Published as a conference paper at ICLR 2022 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                32,
+                478,
+                47
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "12 "
+                    }
+                ]
+            },
+            "bbox": [
+                490,
+                946,
+                506,
+                959
+            ]
+        }
+    ]
+]

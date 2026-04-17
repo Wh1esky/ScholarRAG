@@ -1,0 +1,3624 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "LEAVING THE BARN DOOR OPEN FOR CLEVER HANS: SIMPLE FEATURES PREDICT LLM BENCHMARK AN-SWERS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        99,
+        823,
+        170
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lorenzo Pacchiardi∗ "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        195,
+        328,
+        208
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Leverhulme Centre for the Future of Intelligence "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        209,
+        504,
+        223
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "University of Cambridge "
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        223,
+        349,
+        238
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cambridge, UK "
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        238,
+        290,
+        251
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "lp666@cam.ac.uk "
+          }
+        ]
+      },
+      "bbox": [
+        184,
+        252,
+        331,
+        265
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Marko Tesiˇ c´∗ "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        195,
+        616,
+        208
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Leverhulme Centre for the Future of Intelligence "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        209,
+        841,
+        223
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "University of Cambridge "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        223,
+        684,
+        238
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cambridge, UK "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        238,
+        627,
+        251
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "mt961@cam.ac.uk "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        252,
+        669,
+        263
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Lucy Cheke "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        286,
+        269,
+        300
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Department of Psychology "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        301,
+        359,
+        315
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Leverhulme Centre for the Future of Intelligence "
+          }
+        ]
+      },
+      "bbox": [
+        181,
+        315,
+        503,
+        328
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "University of Cambridge "
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        329,
+        348,
+        342
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cambridge, UK "
+          }
+        ]
+      },
+      "bbox": [
+        183,
+        342,
+        290,
+        356
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "lgc23@cam.ac.uk "
+          }
+        ]
+      },
+      "bbox": [
+        184,
+        357,
+        331,
+        369
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Jose Hern ´ andez-Orallo ´ "
+          }
+        ]
+      },
+      "bbox": [
+        521,
+        286,
+        684,
+        299
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Leverhulme Centre for the Future of Intelligence "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        300,
+        841,
+        314
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "University of Cambridge "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        315,
+        684,
+        328
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cambridge, UK "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        329,
+        627,
+        342
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "VRAIN, ValGRAI "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        342,
+        643,
+        354
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Universitat Politecnica de Val` encia` "
+          }
+        ]
+      },
+      "bbox": [
+        519,
+        356,
+        750,
+        369
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "jorallo@upv.es "
+          }
+        ]
+      },
+      "bbox": [
+        521,
+        371,
+        658,
+        383
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        450,
+        421,
+        545,
+        435
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The integrity of AI benchmarks is fundamental to accurately assess the capabilities of AI systems. The internal validity of these benchmarks—i.e., making sure they are free from confounding factors—is crucial for ensuring that they are measuring what they are designed to measure. In this paper, we explore a key issue related to internal validity: the possibility that AI systems can solve benchmarks in unintended ways, bypassing the capability being tested. This phenomenon, widely known in human and animal experiments, is often referred to as the ‘Clever Hans’ effect, where tasks are solved using spurious cues, often involving much simpler processes than those putatively assessed. Previous research suggests that language models can exhibit this behaviour as well. In several older Natural Language Processing (NLP) benchmarks, individual "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams like “not” have been found to be highly predictive of the correct labels, and supervised NLP models have been shown to exploit these patterns. In this work, we investigate the extent to which simple "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams extracted from benchmark instances can be combined to predict labels in modern multiple-choice benchmarks designed for LLMs, and whether LLMs might be using such "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram patterns to solve these benchmarks. We show how simple classifiers trained on these "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams can achieve high scores on several benchmarks, despite lacking the capabilities being tested. Additionally, we provide evidence that modern LLMs might be using these superficial patterns to solve benchmarks. This suggests that the internal validity of these benchmarks may be compromised and caution should be exercised when interpreting LLM performance results on them. "
+          }
+        ]
+      },
+      "bbox": [
+        228,
+        452,
+        766,
+        758
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 INTRODUCTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        784,
+        336,
+        800
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "With the rise of large language models (LLMs), numerous benchmarks have been developed to evaluate different capabilities of these models and to rank their performance (see the collections HELM (Liang et al., 2022), BIGBench (Srivastava et al., 2022), LogiGLUE (Luo et al., 2023), CALM-bench (Dalal et al., 2023) and GLoRE (Teng et al., 2023) for examples of capabilities being tested). Ensuring the validity of these benchmarks is essential. One important aspect of validity is internal validity: the benchmarks should be free from confounding factors (Liao et al., 2021; "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        816,
+        826,
+        902
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2410.11672v1 [cs.CL] 15 Oct 2024 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        267,
+        57,
+        707
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "∗Equal contribution. "
+          }
+        ]
+      },
+      "bbox": [
+        191,
+        910,
+        315,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Frank et al., 2023; Rutar et al., 2024). In other words, the behaviour and performance observed in a benchmark should be explainable by the specific capability (or lack thereof) being tested, not by other unrelated capabilities, systematic errors, or biases in the benchmark data. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        103,
+        823,
+        145
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "A benchmark’s internal validity can be compromised in several ways, including annotation errors and disagreement (Ivanova, 2023), selection bias (Gururangan et al., 2018), implementation variations (Liao et al., 2021; Biderman et al., 2024), limited linguistic diversity (McIntosh et al., 2024), and insufficient variability in both task-relevant and irrelevant features (Rutar et al., 2024; Yang et al., 2023). Additionally, a lack of prerequisite capabilities in the system to be tested (Rutar et al., 2024; Hu & Frank, 2024) and train-test contamination (Liao et al., 2021; Dominguez-Olmedo et al., 2024) can also impact validity. Some of these systematic issues may introduce “shortcuts” in benchmarks, which makes it possible for subjects to successfully complete tasks without using the specific capabilities the benchmarks are designed to test. In this paper, we investigate whether such shortcuts persist in modern LLM benchmarks and, if so, whether LLMs are exploiting them. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        152,
+        823,
+        291
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The phenomenon of using shortcuts or cues to solve tasks is known as the Clever Hans effect and is well documented in human and animal experimentation. It occurs when, for example, a participant’s behaviour is influenced by unintended cues from the experimenter, leading to responses based on those cues rather than the task itself (Frank et al., 2023; MaBouDi et al., 2021). To control for such effects, techniques such as manipulation checks, stimulus randomisation and counterbalancing are used to detect and mitigate these issues. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        297,
+        823,
+        382
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In AI, the Clever Hans effect has also been widely recognised (Sturm, 2014; Hernandez-Orallo, 2019). In particular, reinforcement learning agents are known for solving tasks in unintended ways (Krakovna et al., 2020). One of the main goals of explainable AI is to understand the information AI models use to solve tasks and ensure they are relying on the right cues rather than exploiting spurious correlations (Ribeiro et al., 2016). In NLP benchmarks, previous research has shown that simple features extracted from prompts can correlate with labels, despite not being related to the capability being tested (Gururangan et al., 2018; Friedman et al., 2022; Gardner et al., 2021). Moreover, supervised language models have been found to exploit these features to solve tasks. For example, Kavumba et al. (2019) showed that an individual unigram “a” has been exploited by BERT to choose the correct alternative on COPA dataset. Most of the works in this space has focused on traditional NLP models. Fewer studies (e.g. Tu et al., 2020; Kavumba et al., 2022; Du et al., 2023) have investigated LLMs, and these have primarily considered individual "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams or similarly simple features. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        388,
+        823,
+        568
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "LLMs, however, have sufficient capacity to learn and rely on patterns involving multiple simple features. In this paper, we explore the extent to which current LLM benchmarks can be solved using a combination of such simple features. Specifically, we train logistic regression classifiers on unigrams and bigrams extracted from prompts to predict the correct labels in multiple-choice benchmarks. These classifiers lack the capacity to develop the capabilities the benchmarks are designed to test, meaning that any labels successfully predicted using these classifiers indicate that the examples may be solved without invoking the capability of interest. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        575,
+        823,
+        672
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We find that, in several benchmarks, our classifiers can accurately predict ground truth labels, raising concerns about internal validity. Moreover, recent work has highlighted the sensitivity of LLM performance to small perturbations in benchmark data suggesting that LLMs rely on shallow, surface level patterns to solve tasks (Alzahrani et al., 2024). The compromised internal validity of benchmarks may therefore allow LLMs to exploit these superficial patterns to solve tasks, rather than engaging the capabilities of interest. Indeed, our further analysis shows that some LLMs may leverage such "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram associations to solve benchmark tasks, suggesting that they may not be using the intended capabilities to solve those tasks. However, our findings are not conclusive and warrant further investigation. "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        680,
+        823,
+        805
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 RELATED WORK "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        174,
+        832,
+        339,
+        847
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.1 BENCHMARK VALIDITY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        174,
+        867,
+        377,
+        881
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Several factors contribute to the validity of measuring an AI system’s performance on a specific benchmark. One key factor is “construct validity”, which refers to how well the benchmark actually "
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        895,
+        823,
+        922
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "measures the construct that is intended to be measure. A prerequisite for construct validity is “internal validity”, which reflects the extent to which the observed outcomes can be directly attributed to the variables or factors under investigation, without interference from confounding variables or biases. Other forms of validity include ecological and external validity, which refer to the extent to which the benchmark tasks reflect real-world tasks and how the measurement results generalise to real-world performance (Davis, 2023; Ivanova, 2023; Elliot et al., 2024; Liao et al., 2021). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        188
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Several papers review issues related to benchmark validity. For instance, Liao et al. (2021) overview problems with the benchmarking paradigm of supervised ML systems, while Bowman & Dahl (2021) outline criteria NLP benchmarks should meet, some of which contribute to construct and internal validity. Subramonian et al. (2023) instead conduct a survey of AI researchers to develop a taxonomy of validity issues. McIntosh et al. (2024) identify a set of inadequacies in LLM benchmarks, some related to validity, while others are broader, such as security issues and the failure to capture cultural diversity. In contrast, Biderman et al. (2024) focuses primarily on reproducibility issues, which can also impact benchmark validity. Finally, Momennejad et al. (2023) and Rutar et al. (2024) provide guidance on building evaluation frameworks to measure whether AI systems (LLMs in the former case and embodied agents in the latter) possess capabilities that are robust to various perturbations and experimental conditions, thereby ensuring both construct and internal validity. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        194,
+        826,
+        348
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2.2 SPURIOUS CORRELATIONS IN NLP BENCHMARKS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        412,
+        558,
+        426
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The presence of spurious correlations in NLP benchmarks has been demonstrated by several studies, with some showing that these correlations affect the performance of NLP models. For example, Gururangan et al. (2018) identified individual words associated with specific class labels in NLP benchmarks and trained a model on truncated prompts achieving performance above chance, despite removing necessary elements for determining the correct answer. Moreover, they showed that models trained on such datasets performed better on instances that could be successfully classified using the truncated prompts. Poliak et al. (2018), Si et al. (2019), Sugawara et al. (2020) and Kavumba et al. (2019) performed similar experiments on different benchmarks and found comparable results. Niven & Kao (2019) showed that individual unigrams and bigrams were related to label values for specific benchmarks and crafted instances by adversarially manipulating the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams such that NLP models achieved poor accuracy on them. For example, they showed that BERT was able to exploit the presence of the unigram “not” and bigrams like “will not” to correctly answer instances in the ARCT dataset (Habernal et al., 2018). In contrast, our approach identifies patterns involving multiple unigrams and bigrams at the same time. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        458,
+        826,
+        652
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the context of LLMs, Tu et al. (2020) found evidence that pre-trained models finetuned on datasets with spurious correlations can learn to exploit these correlations. Similarly, Du et al. (2023) argued that the supervised fine-tuning step in the LLM development pipeline makes them vulnerable to exploiting spurious correlations. Kavumba et al. (2022) conducted experiments where they shuffled the words in the possible choices and truncated the prompts, following the approach of Gururangan et al. (2018), to demonstrate that LLMs exploit superficial cues; for instance, they found that RoBERTa exploits superficial cues like the word “not”. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        659,
+        823,
+        756
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Finally, more advanced methods for identifying spurious features have been proposed. Friedman et al. (2022) used grammar induction techniques to define features as sub-trees within a probabilistic grammar. Similarly, Gardner et al. (2021) introduced a statistical test to determine whether a spurious correlation arises from bias in the data generation process or is instead randomly introduced. One limitation of this approach however is that it only considers the correlation between individual features and the labels. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        763,
+        823,
+        847
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we identify spurious correlations by training simple logistic regression classifiers to predict labels using only unigrams and bigrams extracted from the prompts. This approach allows us to explore whether combinations of these features are predictive of the correct response labels (e.g., “true” vs. “false”) while remaining computationally lightweight, meaning that the approach is scalable to large datasets (unlike, for example, grammar induction techniques). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/509c36feb14568d1c3c0d60be4f22cc2c0f236d0b9fd5eda8056f0f247f754d9.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: The number of tested instances, the number of possible choices, and the collection to which each dataset belongs. For datasets from LegalBench, instance-level LLM performance results are available from Liang et al. (2022). Likewise, instance-level results for CLadder (Jin et al., 2023) and ProntoQA (Saparov & He, 2023) are also publicly available. For the remaining datasets, we obtained the instance-level LLM performance results ourselves. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td># tested instances</td><td># choices</td><td>Collection</td></tr><tr><td>Fantasy Reasoning</td><td>197</td><td>2</td><td>BIG-Bench</td></tr><tr><td>NeuBAROCO (Ando et al., 2023)</td><td>363</td><td>3</td><td>-</td></tr><tr><td>Moral Permissibility</td><td>338</td><td>2</td><td>BIG-Bench</td></tr><tr><td>Causal Judgment</td><td>184</td><td>2</td><td>BIG-Bench</td></tr><tr><td>Metaphor Boolean</td><td>676</td><td>2</td><td>BIG-Bench</td></tr><tr><td>Commonsense QA 2.0 (Talmor et al., 2021)</td><td>2537</td><td>2</td><td>-</td></tr><tr><td>SpaceNLI (Abzianidze et al., 2023)</td><td>1600</td><td>3</td><td>-</td></tr><tr><td>ANLI (Nie et al., 2019)</td><td>3196</td><td>3</td><td>-</td></tr><tr><td>ART (Collier et al., 2022)</td><td>364</td><td>2</td><td>-</td></tr><tr><td>WANLI (Liu et al., 2022)</td><td>1000</td><td>3</td><td>-</td></tr><tr><td>bAbI Task 16</td><td>1000</td><td>4</td><td>BIG-Bench</td></tr><tr><td>Formal Fallacies Syllogisms Negation</td><td>1000</td><td>2</td><td>BIG-Bench</td></tr><tr><td>Abercrombie</td><td>95</td><td>5</td><td>LegalBench</td></tr><tr><td>Corporate Lobbying</td><td>3267</td><td>2</td><td>LegalBench</td></tr><tr><td>Function of Decision Section</td><td>367</td><td>7</td><td>LegalBench</td></tr><tr><td>PROA</td><td>95</td><td>2</td><td>LegalBench</td></tr><tr><td>International Citizenship Questions</td><td>1000</td><td>2</td><td>LegalBench</td></tr><tr><td>CLadder (Jin et al., 2023)</td><td>8917</td><td>2</td><td>-</td></tr><tr><td>ProntoQA (Saparov &amp; He, 2023)</td><td>7200</td><td>2</td><td>-</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        184,
+        101,
+        813,
+        393
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 METHODS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        500,
+        292,
+        513
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We aim to investigate (1) the extent to which we can predict labels on multiple-choice LLM benchmarks using combinations of simple unigrams and bigrams, and (2) whether LLMs rely on these features to succeed in these tasks. To this end, we evaluate the predictive power of different classifiers across benchmark datasets to correctly classify labels based on these "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram features. Furthermore, we analyse the performance of LLMs on dataset instances that were successfully and unsuccessfully predicted by the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram models to determine if LLMs rely on these "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram patterns to solve benchmark tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        530,
+        823,
+        628
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 DATASETS AND LLMS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        645,
+        372,
+        659
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We conducted experiments on a diverse set of nineteen LLM benchmarks, covering a wide range of linguistic and reasoning tasks: causal reasoning, counterfactual analysis, moral judgment and decision making, different types of formal reasoning, metaphor understanding, commonsense reasoning, spatial reasoning, legal reasoning, and natural language inference. All datasets used are multiplechoice, with the same possible choices across all instances within each dataset. Details of datasets used can be found in Table 1. Some of these datasets are from BIG-Bench (Srivastava et al., 2022), while others are from LegalBench (Guha et al., 2023). Instance-level performance data was collected from forty-four LLMs across eleven model families. For the larger datasets, the LLMs were tested on a random subset of instances to reduce costs; the number of tested instances is indicated in Table 1. Note that not all LLMs were tested on every dataset. For more details on the LLMs included in our analyses and the datasets they were tested on, see Appendix A. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        671,
+        826,
+        825
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 FEATURE EXTRACTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        842,
+        377,
+        856
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We considered thirteen different feature vectors derived from the prompts of each benchmark. To generate these features, we extracted unigrams and bigrams at both the word level and the token level; for token-level features, we used the GPT-2 tokenizer to capture subword information. For each set of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams, we computed three types of feature representations: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        867,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Term Frequency (TF): The raw count of each "
+              },
+              {
+                "type": "equation_inline",
+                "content": "n"
+              },
+              {
+                "type": "text",
+                "content": "-gram in the prompt. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Term Frequency-Inverse Document Frequency (TF-IDF): A weight reflecting how important an "
+              },
+              {
+                "type": "equation_inline",
+                "content": "n"
+              },
+              {
+                "type": "text",
+                "content": "-gram is to a prompt in the context of the entire dataset. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. Presence: A binary indicator where each feature is 1 if the "
+              },
+              {
+                "type": "equation_inline",
+                "content": "n"
+              },
+              {
+                "type": "text",
+                "content": "-gram occurs in the prompt and 0 otherwise. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        207,
+        103,
+        821,
+        183
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This process resulted in twelve feature vectors: (unigrams, unigrams + bigrams) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\times"
+          },
+          {
+            "type": "text",
+            "content": "(word level, token level) × (TF, TF-IDF, Presence). Additionally, we extracted a Readability and Diversity Metrics vector, which includes textual features such as the Flesch Reading Ease Score, Gunning Fog Index, SMOG Index, and Yule’s K adapted from Moros Daval (2023). In total, we obtained thirteen feature vectors for our analysis. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        199,
+        823,
+        270
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3 PERFORMANCE EVALUATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        287,
+        416,
+        301
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To assess the performance of our models, we used Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "coefficient (McHugh, 2012), a statistic that measures the agreement between two raters (or, in our case, between the model’s predictions and the true labels) while accounting for the agreement occurring by chance. This metric is particularly suitable in our context as the datasets differ in the number of possible labels (see Table 1), leading to varying values of chance level performance. Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "is calculated as: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        314,
+        823,
+        383
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\kappa = \\frac {P _ {o} - P _ {e}}{1 - P _ {e}}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/eb07066d2bffc7ac2f4a96bc770e5d721a7f6ae60b9f4eb385315253019a274f.jpg"
+        }
+      },
+      "bbox": [
+        449,
+        401,
+        545,
+        434
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P _ { o }"
+          },
+          {
+            "type": "text",
+            "content": "is the observed accuracy (the proportion of correctly predicted labels), and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "P _ { e }"
+          },
+          {
+            "type": "text",
+            "content": "is the expected accuracy if predictions were made purely by random guessing. The value of Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "ranges from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "- 1"
+          },
+          {
+            "type": "text",
+            "content": "to 1, where a value of 1 indicates that the model perfectly predicts the labels (well beyond chance level), a value of 0 implies that the model’s performance is no better than random guessing, and negative values suggest systematic disagreement between the model’s predictions and the true labels. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        445,
+        823,
+        527
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.4 EXPERIMENTAL SETUP "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        547,
+        375,
+        560
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For each dataset, we partitioned the data into training, validation, and test splits. To explore whether "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams are predictive of labels, we trained logistic regression classifiers on the training split using each of the thirteen feature vectors discussed in Section 3.2. We tested both L2 regularization (with regulation weight "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda = 1"
+          },
+          {
+            "type": "text",
+            "content": ") and L1 regularization (with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda = 1"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda = 1 0"
+          },
+          {
+            "type": "text",
+            "content": "). For each dataset and feature vector, we selected the hyperparameters that achieved the highest accuracy on the validation split, and we report the corresponding results on the test split (see Section 4.1). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        573,
+        823,
+        657
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additionally, to investigate whether LLMs are relying on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram patterns identified by the logistic regression classifiers, we further stratified the test split into two subsets: instances whose labels were successfully predicted by the classifier using the best-performing features on the validation split, and those whose labels were not successfully predicted. We then analyse the performance of the LLMs on these two subsets across the various datasets, as detailed in Section 4.2. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        662,
+        823,
+        734
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the following section, we present the results of our experiments and discuss the implications of our findings. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        739,
+        823,
+        768
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 RESULTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        790,
+        282,
+        804
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Code for reproducing the experiments is available at https://github.com/ Kinds-of-Intelligence-CFI/benchmark-ground-truth-predictability. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        823,
+        823,
+        852
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 DO "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-GRAMS PREDICT GROUND TRUTH LABELS? "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        169,
+        869,
+        553,
+        883
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We first investigate the extent to which logistic regression classifiers built on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams can predict the ground truth labels of various datasets. As mentioned above, we train the classifiers with different "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        46
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sets of hyperparameters on the training split of each dataset, select the configuration that leads to the best validation accuracy and evaluate the performance on the test split. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        132
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 1 shows Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "values for all feature vectors across all datasets. For some datasets, relatively high values of Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "can be achieved, while for others the values are negative or close to 0. This indicates that the ground truth labels can be predicted using simple features for some datasets, whereas for others this is not the case, at least with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram features. One could conjecture that high performance with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram models indicates an easy dataset. However, this does not seem to be the case: the distribution of LLM performance across different datasets is similar regardless of whether "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram model performance is high or low (Figure 4 in Appendix A). Moreover, using TF-IDF seems to generally reduce predictive performance; this is expected as the IDF correction downweights the importance of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams that appear frequently across the datasets, which are the ones that may be more strongly correlated with the labels. Conversely, TF and Presence yield mostly identical results, likely because most of the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams useful for predicting labels tend to appear only once. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        138,
+        826,
+        305
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c4d1e670dd0761a7cd8968df6b0cf8cb88e2a0acc2fe2f137bf8da2e93a6c5be.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: For each dataset and each feature vector, the best-performing classifier (i.e. the classifier with the highest Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": ") on the validation split was selected. The heatmap shows the accuracy of these classifiers on the test split, measured in terms of Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": ". The datasets for which the best set of features achieves "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa > 0 . 2"
+          },
+          {
+            "type": "text",
+            "content": "are in bold. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        181,
+        321,
+        818,
+        588
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the following, for each dataset, we consider the feature vector that leads to the highest validation accuracy, as shown in Table 2. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        676,
+        823,
+        705
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 DO LLMS RELY ON "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-GRAMS TO SUCCEED? "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        723,
+        522,
+        737
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here we analyse the performance of LLMs on instances that were successfully and unsuccessfully predicted by the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram classifiers. First, for each LLM and dataset, we compute the difference in performance between the two test subsets, and plot that against the overall test performance of the LLM on that dataset in Figure 2. The points in the plot are coloured according to the test performance of the best "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram model. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        750,
+        823,
+        820
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The figure shows that the proportion of points where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram performance is high is the greatest in the upper right quadrant, which corresponds to LLM-dataset pairs with above-chance overall performance and a positive difference in performance between the two subsets. This suggests that some LLMs may be succeeding on specific datasets by relying on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram features. However, we note that there is also a smaller number points with high "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram performance and low or close to 0 difference between subsets, as well as points with a strongly positive difference between subsets but poor "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram performance. This indicates that LLMs are not robustly relying on the identified "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        825,
+        826,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/810065f1aae187e7d3b7145e81ed3cf419b0e93458d7cad34c3d97cacf02fb2c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: The feature vector and hyperparameter values for logistic regression that achieved the highest accuracy in predicting the ground truth on the validation split for each dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>Dataset</td><td>Log Reg settings</td><td>Features</td></tr><tr><td>CLadder</td><td>L1, λ = 1</td><td>2-grams TF, word-level</td></tr><tr><td>ProntoQA</td><td>L1, λ = 1</td><td>2-grams TF, word-level</td></tr><tr><td>ANLI</td><td>L1, λ = 1</td><td>Readability and Diversity Metrics</td></tr><tr><td>ART</td><td>L1, λ = 10</td><td>Readability and Diversity Metrics</td></tr><tr><td>bAbI Task 16</td><td>L1, λ = 1</td><td>2-grams TF, word-level</td></tr><tr><td>Causal Judgment</td><td>L1, λ = 10</td><td>Readability and Diversity Metrics</td></tr><tr><td>Commonsense QA 2.0</td><td>L1, λ = 1</td><td>Readability and Diversity Metrics</td></tr><tr><td>Fantasy Reasoning</td><td>L1, λ = 10</td><td>1-grams TF, word-level</td></tr><tr><td>Formal Fallacies Syllogisms Negation</td><td>L2, λ = 1</td><td>Readability and Diversity Metrics</td></tr><tr><td>Abercrombie</td><td>L2, λ = 1</td><td>Readability and Diversity Metrics</td></tr><tr><td>Corporate Lobbying</td><td>L2, λ = 1</td><td>1-grams TF, word-level</td></tr><tr><td>Function of Decision Section</td><td>L2, λ = 1</td><td>2-grams TF, token-level</td></tr><tr><td>International Citizenship Questions</td><td>L1, λ = 1</td><td>1-grams TF, token-level</td></tr><tr><td>PROA</td><td>L2, λ = 1</td><td>1-grams TF, token-level</td></tr><tr><td>Metaphor Boolean</td><td>L2, λ = 1</td><td>Readability and Diversity Metrics</td></tr><tr><td>Moral Permissibility</td><td>L2, λ = 1</td><td>Readability and Diversity Metrics</td></tr><tr><td>NeuBAROCO</td><td>L1, λ = 1</td><td>2-grams TF, word-level</td></tr><tr><td>SpaceNLI</td><td>L1, λ = 1</td><td>2-grams TF,word-level</td></tr><tr><td>WANLI</td><td>L2, λ = 1</td><td>Readability and Diversity Metrics</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        174,
+        101,
+        823,
+        393
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "patterns in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams and that statistical noise may also be contributing to positive differences in performance between subsets. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        460,
+        823,
+        491
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/02d5770d07a969c5e0c0440f901d400bed5192cc0aea94309a1bb477e4df50a7.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Difference in LLM accuracy between instances successfully and unsuccessfully predicted by n-grams vs overall LLM accuracy, colored by n-gram accuracy "
+          },
+          {
+            "type": "text",
+            "content": "Figure 2: Overall LLM test accuracy and difference in accuracy between the two test split subsets. Each point represents a LLM tested on a dataset. The color scheme represents the test accuracy of the best "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram based classifiers on those same datasets. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        243,
+        534,
+        740,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To further investigate whether LLMs may be relying on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram features, we conducted the following analysis. First, we discarded all datasets for which Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "on the test split is less than 0.2, which we consider the threshold above which a small but detectable agreement exists (Landis, 1977). The "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/46be4883d375d57b6286c0065f3d2762d7eba2ba974ba58e59aec55f7bfadc8c.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "u  "
+          },
+          {
+            "type": "text",
+            "content": "Figure 3: Accuracy of each LLM (measured using Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": ") on the two subsets of test split instances. Each box represents the distribution of accuracy of the datasets tested with the considered LLM; notice that not all datasets were tested with all LLMs (see Appendix A). "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        118,
+        818,
+        397
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "kept datasets are marked in bold in Figure 1. Then, in Figure 3, we plotted the performance distribution of each LLM on the two subsets of instances for the datasets on which they were tested. The figures shows that a number of LLMs perform better on the successfully predicted subset compared to the unsuccessfully predicted one. Moreover, we find that these LLMs are primarily from a few specific model families, in particular Meta, OpenAI and Mistral AI. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        486,
+        823,
+        556
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For each LLM family we conducted one-sided paired t-tests to test the hypothesis that the average LLM accuracy (on the datasets they were tested on) is higher on the subset of test instances whose labels were successfully predicted by the logistic regression classifiers than on the subset of instances where the labels were not successfully predicted. We obtained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p"
+          },
+          {
+            "type": "text",
+            "content": "-values from these t-tests and adjusted them for multiple comparisons using the Benjamini-Hochberg procedure (Benjamini & Hochberg, 1995). The results are shown in Table 3. We find moderate evidence (adjusted "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p"
+          },
+          {
+            "type": "text",
+            "content": "-values below 0.1) for the claim that models from OpenAI, Meta, Mistral AI and Writer are more likely to provide correct answers for instances that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram models also successfully predict. We find weaker evidence for Anthropic and Aleph Alpha (adjusted "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p"
+          },
+          {
+            "type": "text",
+            "content": "-values below 0.2) and little to no evidence for other models. However, we note that many model families include only two LLMs (see Table 3) tested on just five datasets (see Table 4). To detect similar effect sizes as those found for model families like OpenAI, which included 18 LLMs tested on at least a dozen benchmarks, additional data may be required. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        563,
+        826,
+        744
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 DISCUSSION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        763,
+        310,
+        780
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this series of experiments, we demonstrate that simple unigram and bigram features extracted from benchmark prompts can be used to predict the correct answers for several multiple-choice LLM benchmarks. Furthermore, we provide evidence suggesting that at least some LLM families may be relying on these features to solve these benchmarks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        796,
+        823,
+        853
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.1 CONTROLLING FOR CLEVER HANS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        869,
+        457,
+        883
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Confounding factors are an issue in all forms of capability evaluation, potentially leading to misleading conclusions based on performance data. These confounds can be related to characteristics of "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/aca39eafc92925ca4c04a7dc0c8f1e2da03fa16707ac3ffeb56ed069f6aed02d.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: LLM families, along with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p"
+          },
+          {
+            "type": "text",
+            "content": "-values and adjusted "
+          },
+          {
+            "type": "equation_inline",
+            "content": "p"
+          },
+          {
+            "type": "text",
+            "content": "-values obtained from one-sided paired ttests testing the hypothesis that the average accuracy of LLMs belonging to a family (on the datasets they were tested on) is higher on the subset of test instances whose labels were successfully predicted by the logistic regression classifiers than on the subset of instances where the labels were not successfully predicted. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>LLM family</td><td>p-value</td><td>Adjusted p-value</td><td>Number of LLMs per family</td></tr><tr><td>Meta</td><td>0.007342</td><td>0.059433</td><td>4</td></tr><tr><td>OpenAI</td><td>0.010806</td><td>0.059433</td><td>18</td></tr><tr><td>Mistral AI</td><td>0.027277</td><td>0.089484</td><td>2</td></tr><tr><td>Writer</td><td>0.032540</td><td>0.089484</td><td>2</td></tr><tr><td>Anthropic</td><td>0.071911</td><td>0.158205</td><td>4</td></tr><tr><td>Aleph Alpha</td><td>0.108315</td><td>0.198578</td><td>3</td></tr><tr><td>01-AI</td><td>0.336185</td><td>0.528291</td><td>2</td></tr><tr><td>Google</td><td>0.393498</td><td>0.541060</td><td>2</td></tr><tr><td>TII UAE</td><td>0.474044</td><td>0.579387</td><td>2</td></tr><tr><td>AI21 Labs</td><td>0.678992</td><td>0.681576</td><td>2</td></tr><tr><td>Cohere</td><td>0.681576</td><td>0.681576</td><td>2</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        236,
+        101,
+        759,
+        282
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "the test participants—for example, older people tend to have encountered more words and thus have higher vocabulary, meaning that IQ tests premised on word-meaning knowledge will consistently attribute higher IQ to older participants (Verhaeghen, 2003))—or they can be related to features of the task itself. Within human behavioural research, it is common wisdom that such confounds are inevitable, and considerable effort goes into identifying, eliminating and controlling for them. In animal research, experimenters will often wear opaque goggles (Tsukasa et al., 2012; Mercado III et al., 2000) or use pre-recorded voice commands (Gabor et al., 2022) to prevent from giving inadvertent ´ clues, while medical research is routinely conducted “double-blind” such that the experimenter does not know—and therefore cannot reveal—the ground truth of the experimental manipulation (Friedman et al., 2010). A fundamental in the avoidance of task-related confounders is the randomisation, variation and counterbalancing of stimuli. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        416,
+        823,
+        569
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In AI evaluation, it has not been standard practice to comprehensively vary and counterbalance stimuli within benchmarks, with examples of this approach only beginning to emerge in recent years (Rutar et al., 2024; Momennejad et al., 2023; Mizrahi et al., 2024; Wang & Zhao, 2024; Cao et al., 2024). The consequences of omitting this methodological practice have become evident through the results of numerous studies of RL agents and NLP systems performance (Krakovna et al., 2020; Gururangan et al., 2018; Poliak et al., 2018; Si et al., 2019; Sugawara et al., 2020; Kavumba et al., 2019; Niven & Kao, 2019). In both cases, systems have been shown to pick up simple surface-level cues that are predictive of the correct answers, allowing them to achieve high performance without using the information or capability putatively at test. Given the power and generality of modern large language models, it is reasonable to expect that these systems may have an even greater capacity to take advantage of such cues. This indeed has shown to be the case for some specific examples (e.g. Tu et al., 2020; Kavumba et al., 2022; Du et al., 2023). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        575,
+        823,
+        742
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this paper, we take a broader approach to investigate whether a combination of such simple cues (in particular, unigrams and bigrams) can in principle be used to solve a wide selection of current LLM benchmarks: in practice, we test whether the ground truth answer labels can be predicted from these simple features of the prompt. We found that for a large number of benchmarks, simple classifiers were able to predict the ground truth with good accuracy. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        750,
+        823,
+        820
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In a fully controlled benchmark, it should not be possible to predict the correct answer from single or two-word or token features of the prompt. Agreement between the predicted label and the ground truth, as measured by Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "(McHugh, 2012), should be close to zero. Traditionally, any value above 0.2 is taken to indicate a small but detectable agreement, anything above 0.4 fair-moderate and values above 0.6 considerable agreement (Landis, 1977). In our analysis, nearly half (9/19) of the benchmarks showed some evidence of agreement between predicted labels based on simple features, and the ground truth. Of these, most showed fair to moderate agreement, with some no-"
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        825,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        491,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "table examples (e.g. Corporate Lobbying and SpaceNLI) showing consistent "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": "values of above 0.6., indicating moderate to strong agreement. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        133
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "These findings suggest that a system capable of recognising statistical regularities can achieve abovechance performance by relying solely on simple surface-level cues. This has two main implications. First, LLMs may be exploiting these cues to pass benchmarks without demonstrating the intended capability. Second, these results highlight a broader issue of bias in benchmark questions that allows for the use of alternative strategies to solve benchmark tasks: we focused on a relatively narrow set of simple cues (unigrams and bigrams), which is by no means a comprehensive overview of all the possible surface cues that could be used. Even if LLMs are not using these specific features, it is possible that they are leveraging some other simple non-target features, which would be advantageous for passing the benchmarks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        138,
+        826,
+        265
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5.2 ARE LLMS USING SURFACE-LEVEL CUES TO SOLVE BENCHMARKS? "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        319,
+        684,
+        333
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To investigate whether language models may be using information from uni/bi-grams to ascertain the correct answers to benchmark questions, we divided each benchmark into two subsets: instances where the classifiers predicted the correct answer and instances where they did not. By comparing LLM performance across these two groups, we aimed to investigate whether LLM scores were consistently higher for instances successfully predicted by the classifiers, suggesting that these LLMs might be using identified uni/bi-grams to solve benchmark tasks. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        361,
+        823,
+        445
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We observe that for certain model families, most notably those produced by OpenAI, Meta, and Mistral AI, there is a small but notable performance advantage in the predictable instances. Specifically, these model families perform better on instances where the classifier was able to predict the correct answer using unigram and bigram features. The fact that the effect is subtle suggests that these models are not relying solely on these surface cues, which is expected: even if the systems were entirely dependent on superficial patterns, it is unlikely they would restrict themselves to only cues from unigram and bigrams. Thus, the absence of evidence for reliance on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams in some model families does not imply that these models are not relying on any spurious features. Furthermore, many LLM families included only two models tested on just five benchmarks, making it more challenging to detect an effect of relying on superficial cues compared to, for example, the OpenAI family, which consisted of 18 models tested on at least 12 datasets (see Tables 3 and 4). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        450,
+        825,
+        604
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Conversely, the evidence we provide is not conclusive in determining that those LLM families rely on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-grams to succeed on the benchmarks considered. To do so, careful experimental manipulation—similar to those conducted in Gururangan et al. (2018); Niven & Kao (2019) and Kavumba et al. (2022)—would be necessary. Lacking these, confounding factors could explain our findings; for instance, it is possible that the instances successfully predicted by the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "-gram models are coincidentally also easier, meaning that LLMs exhibiting the capability tested are more likely to succeed on those instances. While we do not believe this to be the case (indeed, as shown in Section 4.2, only a subset of LLMs shows a detectable pattern), our findings warrant further experimental manipulation. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        611,
+        823,
+        737
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this work, we did not explore how LLMs may learn the statistical regularities present in benchmarks. Unlike traditional NLP models, LLMs are pre-trained and can be applied to different benchmarks out of the box (although techniques such as fine-tuning and few-shot prompting (Brown et al., 2020) can be applied). However, benchmark contamination, where an LLM is perhaps inadvertently trained on benchmark instances, is a widely-known issue (Achiam et al., 2023; Roberts et al., 2023; Jiang et al., 2024). Studies have also shown that fine-tuning LLMs on samples similar, but not identical, to benchmark tasks can improve their performance (Dominguez-Olmedo et al., 2024). Furthermore, the development pipeline for LLMs often involves supervised fine-tuning steps, which helps enhance their performance in question-answer settings. It has been suggested that this step may allow LLMs to learn to exploit spurious correlations (Du et al., 2023). We view the empirical analysis of existing LLMs to understand whether they rely on spurious features as complementary to the study of how they may learn to exploit such features. In particular, studying available LLMs may shed light on proprietary systems, for which analysing the development pipeline is not feasible. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        743,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        509,
+        960
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 CONCLUSION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        102,
+        320,
+        117
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We showed ways in which benchmarks could be solved without needing the assessed capability and provided evidence that LLMs may be using these surface cues to solve them. Future work should focus on identifying other types of cues that LLMs might be exploiting to solve benchmarks without demonstrating the intended capabilities being tested. The goal is that this research will lead to better-designed benchmarks with higher internal validity, allowing us to interpret LLM benchmark performance results with greater confidence with respect to the capabilities being assessed. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        132,
+        826,
+        217
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "REFERENCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        237,
+        285,
+        251
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lasha Abzianidze, Joost Zwarts, and Yoad Winter. SpaceNLI: Evaluating the consistency of predicting inferences in space. ArXiv, abs/2307.02269, 2023. URL https://api. semanticscholar.org/CorpusID:259341771. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. Gpt-4 technical report. arXiv preprint arXiv:2303.08774, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Norah Alzahrani, Hisham Abdullah Alyahya, Yazeed Alnumay, Sultan Alrashed, Shaykhah Alsubaie, Yusef Almushaykeh, Faisal Mirza, Nouf Alotaibi, Nora Altwairesh, Areeb Alowisheq, et al. When benchmarks are targets: Revealing the sensitivity of large language model leaderboards. arXiv preprint arXiv:2402.01781, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Risako Ando, Takanobu Morishita, Hirohiko Abe, Koji Mineshima, and Mitsuhiro Okada. Evaluating large language models with NeuBAROCO: Syllogistic reasoning ability and human-like biases, 2023. URL https://arxiv.org/abs/2306.12567. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yoav Benjamini and Yosef Hochberg. Controlling the false discovery rate: a practical and powerful approach to multiple testing. Journal of the Royal statistical society: series B (Methodological), 57(1):289–300, 1995. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Stella Biderman, Hailey Schoelkopf, Lintang Sutawika, Leo Gao, Jonathan Tow, Baber Abbasi, Alham Fikri Aji, Pawan Sasanka Ammanamanchi, Sid Black, Jordan Clive, Anthony DiPofi, Julen Etxaniz, Benjamin Fattori, Jessica Zosa Forde, Charles Foster, Mimansa Jaiswal, Wilson Y. Lee, Haonan Li, Charles Lovering, Niklas Muennighoff, Ellie Pavlick, Jason Phang, Aviya Skowron, Samson Tan, Xiangru Tang, Kevin A. Wang, Genta Indra Winata, Franccois Yvon, and Andy Zou. Lessons from the trenches on reproducible evaluation of language models. ArXiv, abs/2405.14782, 2024. URL https://api.semanticscholar.org/ CorpusID:269982020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Samuel R. Bowman and George E. Dahl. What will it take to fix benchmarking in natural language understanding? ArXiv, abs/2104.02145, 2021. URL https://api.semanticscholar. org/CorpusID:233033916. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Tom Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared D Kaplan, Prafulla Dhariwal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda Askell, Sandhini Agarwal, Ariel Herbert-Voss, Gretchen Krueger, Tom Henighan, Rewon Child, Aditya Ramesh, Daniel Ziegler, Jeffrey Wu, Clemens Winter, Chris Hesse, Mark Chen, Eric Sigler, Mateusz Litwin, Scott Gray, Benjamin Chess, Jack Clark, Christopher Berner, Sam McCandlish, Alec Radford, Ilya Sutskever, and Dario Amodei. Language models are few-shot learners. In H. Larochelle, M. Ranzato, R. Hadsell, M.F. Balcan, and H. Lin (eds.), Advances in Neural Information Processing Systems, volume 33, pp. 1877–1901. Curran Associates, Inc., 2020. URL https://proceedings.neurips.cc/paper_files/paper/2020/ file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Boxi Cao, Mengjie Ren, Hongyu Lin, Xianpei Han, Feng Zhang, Junfeng Zhan, and Le Sun. StructEval: Deepen and broaden large language model assessment via structured evaluation, 2024. URL https://arxiv.org/abs/2408.03281. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Nigel H. Collier, Fangyu Liu, and Ehsan Shareghi. On reality and the limits of language data, 2022. URL https://arxiv.org/abs/2208.11981. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        258,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        46
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        490,
+        948,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Dhairya Dalal, Paul Buitelaar, and Mihael Arcan. Calm-bench: A multi-task benchmark for evaluating causality-aware language models. In Findings of the Association for Computational Linguistics: EACL 2023, pp. 296–311, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ernest Davis. Benchmarks for automated commonsense reasoning: A survey. ACM Computing Surveys, 56:1 – 41, 2023. URL https://api.semanticscholar.org/CorpusID: 256697203. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ricardo Dominguez-Olmedo, Florian E Dorner, and Moritz Hardt. Training on the test task confounds evaluation and emergence. arXiv preprint arXiv:2407.07890, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Mengnan Du, Fengxiang He, Na Zou, Dacheng Tao, and Xia Hu. Shortcut learning of large language models in natural language understanding. Communications of the ACM, 67(1):110–120, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jones Elliot, Hardalupas Mahi, and Agnew William. Under the radar?, 2024. URL https:// www.adalovelaceinstitute.org/report/under-the-radar/. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Michael C Frank, Mika Braginsky, Julie Cachia, Nicholas Coles, Tom Hardwicke, Robert Hawkins, Maya B Mathur, and Rondeline Williams. Experimentology: An open science approach to experimental psychology methods, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Dan Friedman, Alexander Wettig, and Danqi Chen. Finding dataset shortcuts with grammar induction. arXiv preprint arXiv:2210.11560, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lawrence M Friedman, Curt Furberg, David L DeMets, David M Reboussin, Christopher B Granger, et al. Fundamentals of clinical trials, volume 4. Springer, 2010. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Anna Gabor, No ´ emi Kasz ´ as, Tam ´ as Farag ´ o, Paula P ´ erez Fraga, Melinda Lovas, and Attila Andics.´ The acoustic bases of human voice identity processing in dogs. Animal Cognition, 25(4):905–916, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Matt Gardner, William Merrill, Jesse Dodge, Matthew E Peters, Alexis Ross, Sameer Singh, and Noah A Smith. Competency problems: On finding and removing artifacts in language data. arXiv preprint arXiv:2104.08646, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Neel Guha, Julian Nyarko, Daniel E. Ho, Christopher Re, Adam Chilton, Aditya Narayana, Alex ´ Chohlas-Wood, Austin Peters, Brandon Waldon, Daniel N. Rockmore, Diego Zambrano, Dmitry Talisman, Enam Hoque, Faiz Surani, Frank Fagan, Galit Sarfaty, Gregory M. Dickinson, Haggai Porat, Jason Hegland, Jessica Wu, Joe Nudell, Joel Niklaus, John Nay, Jonathan H. Choi, Kevin Tobia, Margaret Hagan, Megan Ma, Michael Livermore, Nikon Rasumov-Rahe, Nils Holzenberger, Noam Kolt, Peter Henderson, Sean Rehaag, Sharad Goel, Shang Gao, Spencer Williams, Sunny Gandhi, Tom Zur, Varun Iyer, and Zehua Li. LegalBench: A collaboratively built benchmark for measuring legal reasoning in large language models, 2023. URL https://arxiv.org/abs/2308.11462. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Suchin Gururangan, Swabha Swayamdipta, Omer Levy, Roy Schwartz, Samuel Bowman, and Noah A. Smith. Annotation artifacts in natural language inference data. In Marilyn Walker, Heng Ji, and Amanda Stent (eds.), Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 2 (Short Papers), pp. 107–112, New Orleans, Louisiana, June 2018. Association for Computational Linguistics. doi: 10.18653/v1/N18-2017. URL https://aclanthology.org/ N18-2017. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ivan Habernal, Henning Wachsmuth, Iryna Gurevych, and Benno Stein. The argument reasoning comprehension task: Identification and reconstruction of implicit warrants. In Marilyn Walker, Heng Ji, and Amanda Stent (eds.), Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers), pp. 1930–1940, New Orleans, Louisiana, June 2018. Association for Computational Linguistics. doi: 10.18653/v1/N18-1175. URL https://aclanthology. org/N18-1175. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jose Hernandez-Orallo. Gazing into clever hans machines. Nature Machine Intelligence, 1(4): 172–173, 2019. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Jennifer Hu and Michael C. Frank. Auxiliary task demands mask the capabilities of smaller language models. ArXiv, abs/2404.02418, 2024. URL https://api.semanticscholar. org/CorpusID:268876128. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Anna A. Ivanova. Running cognitive evaluations on large language models: The do’s and the don’ts. ArXiv, abs/2312.01276, 2023. URL https://api.semanticscholar.org/ CorpusID:265610018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Minhao Jiang, Ken Liu, Ming Zhong, Rylan Schaeffer, Siru Ouyang, Jiawei Han, and Sanmi Koyejo. Does data contamination make a difference? insights from intentionally contaminating pretraining data for language models. In ICLR 2024 Workshop on Navigating and Addressing Data Problems for Foundation Models, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhijing Jin, Yuen Chen, Felix Leeb, Luigi Gresele, Ojasv Kamal, Zhiheng Lyu, Kevin Blin, Fernando Gonzalez, Max Kleiman-Weiner, Mrinmaya Sachan, and Bernhard Scholkopf. CLad- ¨ der: Assessing causal reasoning in language models. In NeurIPS, 2023. URL https: //openreview.net/forum?id=e2wtjx0Yqu. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pride Kavumba, Naoya Inoue, Benjamin Heinzerling, Keshav Singh, Paul Reisert, and Kentaro Inui. When choosing plausible alternatives, Clever Hans can be clever. arXiv preprint arXiv:1911.00225, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pride Kavumba, Ryo Takahashi, and Yusuke Oda. Are prompt-based models clueless? In Annual Meeting of the Association for Computational Linguistics, 2022. URL https://api. semanticscholar.org/CorpusID:248780567. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Victoria Krakovna, Jonathan Uesato, Vladimir Mikulik, Matthew Rahtz, Tom Everitt, Ramana Kumar, Zac Kenton, Jan Leike, and Shane Legg. Specification gaming: the flip side of AI ingenuity. DeepMind Blog, 3, 2020. URL https://deepmind.google/discover/blog/ specification-gaming-the-flip-side-of-ai-ingenuity/. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "JR Landis. The measurement of observer agreement for categorical data. Biometrics, 1977. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Percy Liang, Rishi Bommasani, Tony Lee, Dimitris Tsipras, Dilara Soylu, Michihiro Yasunaga, Yian Zhang, Deepak Narayanan, Yuhuai Wu, Ananya Kumar, et al. Holistic evaluation of language models. arXiv preprint arXiv:2211.09110, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Thomas Liao, Rohan Taori, Deborah Raji, and Ludwig Schmidt. Are we learning yet? a meta review of evaluation failures across machine learning. In J. Vanschoren and S. Yeung (eds.), Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks, volume 1, 2021. URL https: //datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/ 2021/file/757b505cfd34c64c85ca5b5690ee5293-Paper-round2.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Alisa Liu, Swabha Swayamdipta, Noah A Smith, and Yejin Choi. Wanli: Worker and ai collaboration for natural language inference dataset creation. arXiv preprint arXiv:2201.05955, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Man Luo, Shrinidhi Kumbhar, Mihir Parmar, Neeraj Varshney, Pratyay Banerjee, Somak Aditya, Chitta Baral, et al. Towards logiglue: A brief survey and a benchmark for analyzing logical reasoning capabilities of language models. arXiv preprint arXiv:2310.00836, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "HaDi MaBouDi, Andrew B Barron, Sun Li, Maria Honkanen, Olli J Loukola, Fei Peng, Wenfeng Li, James AR Marshall, Alex Cope, Eleni Vasilaki, et al. Non-numerical strategies used by bees to solve numerical cognition tasks. Proceedings of the Royal Society B, 288(1945):20202711, 2021. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Mary L McHugh. Interrater reliability: the kappa statistic. Biochemia medica, 22(3):276–282, 2012. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Timothy R. McIntosh, Teo Susnjak, Tong Liu, Paul Watters, and Malka N. Halgamuge. Inadequacies of large language model benchmarks in the era of generative artificial intelligence. ArXiv, abs/2402.09880, 2024. URL https://api.semanticscholar.org/ CorpusID:267682172. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Eduardo Mercado III, Deirdre A Killebrew, Adam A Pack, Ines VB M ´ acha, and Louis M Herman. ´ Generalization of ‘same–different’classification abilities in bottlenosed dolphins. Behavioural Processes, 50(2-3):79–94, 2000. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Moran Mizrahi, Guy Kaplan, Dan Malkin, Rotem Dror, Dafna Shahaf, and Gabriel Stanovsky. State of what art? a call for multi-prompt llm evaluation. Transactions of the Association for Computational Linguistics, 12:933–949, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ida Momennejad, Hosein Hasanbeig, Felipe Vieira Frujeri, Hiteshi Sharma, Nebojsa Jojic, Hamid Palangi, Robert Ness, and Jonathan Larson. Evaluating cognitive maps and planning in large language models with CogEval. In Thirty-seventh Conference on Neural Information Processing Systems, 2023. URL https://openreview.net/forum?id=VtkGvGcGe3. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yael Moros Daval. Automated annotation of meta-features for predicting language model performance in natural language processing tasks, 2023. URL http://hdl.handle.net/ 10251/196727. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yixin Nie, Adina Williams, Emily Dinan, Mohit Bansal, Jason Weston, and Douwe Kiela. Adversarial NLI: A new benchmark for natural language understanding. ArXiv, abs/1910.14599, 2019. URL https://api.semanticscholar.org/CorpusID:207756753. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Timothy Niven and Hung-Yu Kao. Probing neural network comprehension of natural language arguments. In Anna Korhonen, David Traum, and Llu´ıs Marquez (eds.), ` Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics, pp. 4658–4664, Florence, Italy, July 2019. Association for Computational Linguistics. doi: 10.18653/v1/P19-1459. URL https://aclanthology.org/P19-1459. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Adam Poliak, Jason Naradowsky, Aparajita Haldar, Rachel Rudinger, and Benjamin Van Durme. Hypothesis only baselines in natural language inference. arXiv preprint arXiv:1805.01042, 2018. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Marco Tulio Ribeiro, Sameer Singh, and Carlos Guestrin. “why should I trust you?” explaining the predictions of any classifier. In Proceedings of the 22nd ACM SIGKDD international conference on knowledge discovery and data mining, pp. 1135–1144, 2016. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Manley Roberts, Himanshu Thakur, Christine Herlihy, Colin White, and Samuel Dooley. Data contamination through the lens of time. arXiv preprint arXiv:2310.10628, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Danaja Rutar, Lucy Gaia Cheke, Jose Hern ´ andez-Orallo, Alva Markelius, and Wout Schellaert. ´ General interaction battery: Simple object navigation and affordances (GIBSONA). Available at SSRN 4924246, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Abulhair Saparov and He He. Language models are greedy reasoners: A systematic formal analysis of chain-of-thought. In The Eleventh International Conference on Learning Representations, 2023. URL https://openreview.net/forum?id "
+              },
+              {
+                "type": "equation_inline",
+                "content": "{ . } = { }"
+              },
+              {
+                "type": "text",
+                "content": "qFVVBzXxR2V. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chenglei Si, Shuohang Wang, Min-Yen Kan, and Jing Jiang. What does BERT learn from multiplechoice reading comprehension datasets? arXiv preprint arXiv:1910.12391, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Aarohi Srivastava, Abhinav Rastogi, Abhishek Rao, Abu Awal Md Shoeb, Abubakar Abid, Adam Fisch, Adam R Brown, Adam Santoro, Aditya Gupta, Adria Garriga-Alonso, et al. Beyond the ` imitation game: Quantifying and extrapolating the capabilities of language models. arXiv preprint arXiv:2206.04615, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bob L Sturm. A simple method to determine if a music information retrieval system is a “horse”. IEEE Transactions on Multimedia, 16(6):1636–1644, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Arjun Subramonian, Xingdi Yuan, Hal Daume III, and Su Lin Blodgett. It takes two to tango: ´ Navigating conceptualizations of NLP tasks and measurements of performance. In Anna Rogers, Jordan Boyd-Graber, and Naoaki Okazaki (eds.), Findings of the Association for Computational Linguistics: ACL 2023, pp. 3234–3279, Toronto, Canada, July 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023.findings-acl.202. URL https://aclanthology. org/2023.findings-acl.202. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        102,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        948,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Saku Sugawara, Pontus Stenetorp, Kentaro Inui, and Akiko Aizawa. Assessing the benchmarking capacity of machine reading comprehension datasets. Proceedings of the AAAI Conference on Artificial Intelligence, 34(05):8918–8927, Apr. 2020. doi: 10.1609/aaai.v34i05.6422. URL https://ojs.aaai.org/index.php/AAAI/article/view/6422. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Alon Talmor, Ori Yoran, Ronan Le Bras, Chandrasekhar Bhagavatula, Yoav Goldberg, Yejin Choi, and Jonathan Berant. CommonsenseQA 2.0: Exposing the limits of AI through gamification. ArXiv, abs/2201.05320, 2021. URL https://api.semanticscholar.org/ CorpusID:237263476. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhiyang Teng, Ruoxi Ning, Jian Liu, Qiji Zhou, Yue Zhang, et al. Glore: Evaluating logical reasoning of large language models. arXiv preprint arXiv:2310.09107, 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Murayama Tsukasa, Yuki Fujii, Takayuki Hashimoto, Aya Shimoda, So Iijima, Kohei Hayasaka, Narumi Shiroma, Mana Koshikawa, Hiroshi Katsumata, Makoto Soichi, et al. Preliminary study of object labeling using sound production in a beluga. International Journal of Comparative Psychology, 25(3), 2012. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Lifu Tu, Garima Lalwani, Spandana Gella, and He He. An empirical study on robustness to spurious correlations using pre-trained language models. Transactions of the Association for Computational Linguistics, 8:621–633, 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Paul Verhaeghen. Aging and vocabulary score: A meta-analysis. Psychology and aging, 18(2):332, 2003. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yuqing Wang and Yun Zhao. Rupbench: Benchmarking reasoning under perturbations for robustness evaluation in large language models. arXiv preprint arXiv:2406.11020, 2024. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Linying Yang, Oscar Clivio, Vik Shirvaikar, and Fabian Falck. A critical review of causal inference benchmarks for large language models. In AAAI 2024 Workshop on ”Are Large Language Models Simply Causal Parrots?”, 2023. URL https://openreview.net/forum?id= mRwgczYZFJ. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        174,
+        103,
+        825,
+        521
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A LLMS TESTED ON THE CONSIDERED DATASETS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        174,
+        547,
+        602,
+        561
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Table 4 reports the LLMs evaluated on the considered datasets. The results for the datasets belonging to LegalBench (Guha et al., 2023) were tested on multiple LLMs from different providers by the HELM project (Liang et al., 2022). We instead tested some of the other datasets on LLMs from OpenAI. Finally, the results for CLadder (Jin et al., 2023) and ProntoQA (Saparov & He, 2023) on some LLMs were available. "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        578,
+        823,
+        648
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Figure 4 shows the distribution of accuracy (in terms of Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": ", see Section 3.3) of the LLMs tested on each considered dataset. "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        655,
+        823,
+        683
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/dd2d4e52c3ec0f3f2f298cef3c1fcc00aa265aa9b81592b305f77f2cf1d57d25.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: LLMs evaluated on each considered dataset. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td>01-a1/a1-34b\nAlphalp/luinous-base\n01-a1/a1-6b\nAlphalp/luinous-base\na21/2-7-nuco\nanaphoric/luinous-supreme\na21/2-7-nuco\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supestimate\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-supreme\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-suprove\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supvent\nanaphoric/luinous-supv\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supv\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supv\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supve\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supv\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supyr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvp\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-suppr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supsr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supmr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvr\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supsj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supwj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supvj\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supj\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-sup jl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-supjl\nanaphoric/luinous-sup]</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        174,
+        183,
+        816,
+        816
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/28b6d7bf2da004e8f337c3bafe398e05e7f99473088a6841117e954f1405f184.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: Distribution of accuracy (Cohen’s "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\kappa"
+          },
+          {
+            "type": "text",
+            "content": ") of the LLMs tested on each considered dataset. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        184,
+        383,
+        818,
+        604
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Preprint "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        32,
+        228,
+        47
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ]
+]

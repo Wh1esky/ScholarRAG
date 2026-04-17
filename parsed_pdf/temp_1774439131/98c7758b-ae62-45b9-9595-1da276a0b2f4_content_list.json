@@ -1,0 +1,2461 @@
+[
+    {
+        "type": "text",
+        "text": "INTERMASK: 3D HUMAN INTERACTION GENERATION VIA COLLABORATIVE MASKED MODELING ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            98,
+            823,
+            148
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Muhammad Gohar Javed1, Chuan Guo2, Li Cheng1, Xingyu Li1 ",
+        "bbox": [
+            179,
+            167,
+            666,
+            185
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1University of Alberta 2Snap Inc. ",
+        "bbox": [
+            183,
+            185,
+            415,
+            199
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "{javed4,lcheng5,xingyu}@ualberta.ca, cguo2@snapchat.com ",
+        "bbox": [
+            183,
+            199,
+            720,
+            214
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "ABSTRACT ",
+        "text_level": 1,
+        "bbox": [
+            450,
+            250,
+            547,
+            265
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Generating realistic 3D human-human interactions from textual descriptions remains a challenging task. Existing approaches, typically based on diffusion models, often produce results lacking realism and fidelity. In this work, we introduce InterMask, a novel framework for generating human interactions using collaborative masked modeling in discrete space. InterMask first employs a VQ-VAE to transform each motion sequence into a 2D discrete motion token map. Unlike traditional 1D VQ token maps, it better preserves fine-grained spatio-temporal details and promotes spatial awareness within each token. Building on this representation, InterMask utilizes a generative masked modeling framework to collaboratively model the tokens of two interacting individuals. This is achieved by employing a transformer architecture specifically designed to capture complex spatio-temporal inter-dependencies. During training, it randomly masks the motion tokens of both individuals and learns to predict them. For inference, starting from fully masked sequences, it progressively fills in the tokens for both individuals. With its enhanced motion representation, dedicated architecture, and effective learning strategy, InterMask achieves state-of-the-art results, producing highfidelity and diverse human interactions. It outperforms previous methods, achieving an FID of 5.154 (vs 5.535 of in2IN) on the InterHuman dataset and 0.399 (vs 5.207 of InterGen) on the InterX dataset. Additionally, InterMask seamlessly supports reaction generation without the need for model redesign or fine-tuning. ",
+        "bbox": [
+            228,
+            277,
+            767,
+            556
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": " gohar-malik.github.io/intermask ",
+        "bbox": [
+            326,
+            559,
+            668,
+            574
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 INTRODUCTION ",
+        "text_level": 1,
+        "bbox": [
+            173,
+            594,
+            336,
+            609
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "3D human interaction generation is a fundamental task in computer vision and graphics, with applications in animation, virtual reality, robotics, and sports. Although significant progress has been made in generating single-person motion sequences from text descriptions (Tevet et al., 2023; Guo et al., 2024; 2022a; Pinyoanuntapong et al., 2024; Zhang et al., 2023; Petrovich et al., 2022), generating two-person interactions remains a significant challenge. In two-person interactions, each individual’s motion depends not only on their own state but also on the state of their interacting partner. Additionally, precise spatial positioning and orientation becomes crucial, specially in closecontact cases. These factors add to the complexity and nuances of human interactions resulting in a higher degree of spatial and temporal interdependence compared to single-person motion. ",
+        "bbox": [
+            169,
+            625,
+            826,
+            751
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Existing works on human interaction generation commonly rely on diffusion models. Com-MDM (Shafir et al., 2024) bridges two pretrained single-person motion diffusion models using a small neural layer with limited interaction data. In contrast, InterGen (Liang et al., 2024) proposes a specifically tailored diffusion model for two-person interactions, which uses cooperative transformers to model each individual’s motion conditioned on the latent features of their partner’s motion. in2IN (Ruiz-Ponce et al., 2024) then extends it by conditioning the diffusion model on LLMgenerated individual descriptions in addition to the overall interaction descriptions, and leveraging motion priors learned from single-person motion datasets like HumanML3D (Guo et al., 2022a). MoMat-MoGen Cai et al. (2024) retrieves motions from supplementary datasets, based on textual inputs, and refines them for interaction quality. Some very recent efforts (Shan et al., 2024; Fan et al., 2024) extend these methods to more than two individuals. Despite these efforts, the generated two-person interactions still fall short of achieving satisfactory realism and fidelity. ",
+        "bbox": [
+            169,
+            757,
+            826,
+            925
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2410.10010v3 [cs.CV] 2 Mar 2025 ",
+        "bbox": [
+            22,
+            265,
+            57,
+            700
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "page_number",
+        "text": "1 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/0d5617561504b4ee4a7199e410b1a53f2d358fd51dfaeeddb88f1262da27bbe5.jpg",
+        "image_caption": [
+            "Figure 1: InterMask generates high fidelity text-conditioned 3D human interactions, with accurate spatial and temporal coordination, including synchronized dance moves, realistic reaction timings in boxing, and correct proximity, while maintaining high-quality poses. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            181,
+            99,
+            816,
+            282
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In this work, we present InterMask, a novel framework based on generative masked modeling in discrete space (Chang et al., 2022). InterMask consists of two stages. First, a shared VQ-VAE is trained to transform each individual’s motion into a 2D discrete token map using a learned codebook $\\mathcal { C }$ (section 3.1). Unlike previous motion VQ-VAEs (Guo et al., 2022b; Zhang et al., 2023; Jiang et al., 2023; Guo et al., 2024; Pinyoanuntapong et al., 2024), which represent motion as a temporal sequence of 1D pose vectors and use 1D convolutions to capture only temporal context in each token, we preserve both temporal and spatial dimensions. Each motion is represented as $\\mathbb { R } ^ { N \\times J \\times d }$ , where $N$ is the number of poses, $J$ is the number of joints, and $d$ is the joint feature dimension. Using 2D convolutions, we generate a 2D token map, which captures body part context over short time ranges in each token, allowing for better spatial awareness. This is crucial for interactions, where relative body part positioning (e.g., hands) of two individuals holds significant importance. ",
+        "bbox": [
+            169,
+            364,
+            826,
+            518
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "In the second stage, a specialized Inter-M Transformer (section 3.2) is trained to collaboratively model the tokens of both individuals using a generative masked modeling framework. During training, a random proportion of tokens from either both individuals or only one individual is masked and predicted. The masking proportion follows a scheduling function to ensure its tractability during inference. The inference process begins with all tokens masked, which are progressively generated over a pre-defined number of iterations. At each iteration, the model predicts all masked tokens, but only the most confident predictions are retained, while the rest are re-masked and re-predicted in subsequent iterations. In addition to the standard self attention module, Inter-M Transformer features a shared spatio-temporal attention module to capture fine-grained dependencies within each individual’s motion, and a cross-attention module to capture dependencies between the two individuals’ motion. This design effectively models the dynamics of spatial and temporal relationships among and between the two individuals, allowing enhanced interaction generation capabilities. ",
+        "bbox": [
+            169,
+            523,
+            823,
+            691
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "The main contributions of this work are as follows. First, we introduce InterMask, a novel masked generative framework for human-human interaction generation from textual descriptions. Inter-Mask utilizes a 2D VQ encoding that transforms motion sequences into discrete 2D token maps and features a dedicated transformer trained with a generative masked modeling framework which effectively captures both intra- and inter-person spatial and temporal dependencies. Second, Inter-Mask achieves state-of-the-art results in generating high-fidelity, text-conditioned human interactions. Empirically, it achieves an FID of 5.15 (vs. 5.54 of Ruiz-Ponce et al. (2024)) on InterHuman and 0.399 (vs. 5.207 of Liang et al. (2024)) on InterX. Third, InterMask seamlessly supports tasks such as reaction generation without requiring any task-specific fine-tuning or architectural changes. ",
+        "bbox": [
+            169,
+            698,
+            823,
+            824
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2 RELATED WORK ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            848,
+            344,
+            863
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Quantized Motion Representation Quantized latent representations transform continuous data into discrete tokens, which has been widely explored in human motion generation. Deep Motion Signatures (Aristidou et al., 2018) adopted the use of contrastive learning to create discrete motif words, ",
+        "bbox": [
+            169,
+            881,
+            823,
+            925
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            493,
+            948,
+            503,
+            959
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "while TM2T (Guo et al., 2022b) was one of the first to apply VQ-VAE (Van Den Oord et al., 2017) to human motion data, producing discrete motion tokens. T2M-GPT (Zhang et al., 2023) used Exponential Moving Average (EMA) and code reset techniques to improve the VQ-VAE, later adopted in PoseGPT (Lucas et al., 2022) and MotionGPT (Jiang et al., 2023; Zhang et al., 2024b). Mo-Mask (Guo et al., 2024) reduced quantization errors via residual quantization, while MMM (Pinyoanuntapong et al., 2024) utilized a large codebook with the factorized codes technique from Yu et al. (2022). Nevertheless, these works often ignore the spatial dimension of motions, where each token encapsulates the whole information of poses in a short range. This limits the locality of each token, which is important in applications like interactions and motion editing. ",
+        "bbox": [
+            169,
+            103,
+            826,
+            229
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Generative Human Motion Modeling Synthesizing single-person motion has gained interest, driven by the availability of large motion capture datasets and advancements in generative modeling techniques like Diffusions (Tevet et al., 2023; Kim et al., $2 0 2 3 \\mathrm { a }$ ; Zhang et al., 2024a; Tseng et al., 2023; Chen et al., 2023; Kong et al., 2023; Lou et al., 2023) and Autoregressive models (Guo et al., 2022b; Zhang et al., 2023; Jiang et al., 2023; Zhang et al., 2024b; Gong et al., 2023; Lucas et al., 2022; Gong et al., 2023). While these models produce high-quality motions, they require numerous sampling steps during inference. Techniques like the DDIM sampler (Song et al., 2021) aim to address this for diffusion models but are still evolving. Additionally, autoregressive models may have limited expressivity since the model only considers past tokens to generate the next one. MoMask (Guo et al., 2024) and MMM (Pinyoanuntapong et al., 2024) attempted to address both these issues by using a masked generative bidirectional transformer to predict all masked tokens simultaneously. These works inspired the base structure of our InterMask. ",
+        "bbox": [
+            169,
+            234,
+            826,
+            402
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Generative Human-Human Interaction Modeling Most research on human interaction modeling has targeted two-person interactions, primarily addressing two major tasks: 1) reaction generation, where the reactor’s motion is generated based on the actor’s motion, and 2) interaction generation, where both individuals’ motions are generated simultaneously. While reaction generation has seen increasing interest Chopin et al., 2023; Liu et al., 2023; Xu et al., 2024b; Ghosh et al., 2024; Ren et al., 2024; Liu et al., 2024, interaction generation is less explored. ComMDM (Shafir et al., 2024) trained a small neural network to bridge two single-person motion diffusion model (MDM (Tevet et al., 2023)) copies on a limited interaction dataset. On the other hand, RIG (Tanaka & Fujiwara, 2023) and InterGen (Liang et al., 2024) introduced interaction diffusion models that simultaneously denoise both individuals’ motions, conditioned on their partner’s latent representation. Subsequent works, like Cai et al. (2024) and Ruiz-Ponce et al. (2024) extended interaction diffusion models by using additional single-person annotations and supplementary motion datasets, whereas Shan et al. (2024) and Fan et al. (2024) extended them to handle more than two individuals. While these methods achieve impressive results, there remains significant room for improvement in the quality and realism of two-person interactions. In this paper, we address this by explicitly modeling the spatiotemporal dependencies between interacting individuals’ using a masked generative framework. ",
+        "bbox": [
+            169,
+            409,
+            826,
+            633
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3 METHODOLOGY ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            656,
+            344,
+            671
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Our objective is to generate two-person interaction $\\{ \\mathbf { m } _ { p } \\} _ { p \\in \\{ a , b \\} }$ given a textual description, where $\\mathbf { m } _ { p } \\in \\mathbb { R } ^ { N \\times J \\times d }$ represents the motion sequences of one individual (either $a$ or $b$ ), consisting of $N$ poses, each with $J$ joints and $d$ -dimensional joint features. As shown in Figure 2, our methodology consists of two stages. First, we learn a discrete representation of individual motions using a VQ-VAE (section 3.1), which maps motion sequences to a 2-dimensional token map $\\{ t _ { p } \\} _ { p \\in \\{ a , b \\} } \\in$ $\\{ 0 , 1 , \\cdots , | { \\mathcal { C } } | - 1 \\} ^ { n \\times j }$ , where $n$ and $j$ are down-sampled temporal and spatial dimensions, and $| { \\mathcal { C } } |$ is the number of codes in the codebook. Then we learn an interaction masked generative transformer (Inter-M Transformer), (section 3.2) to collaboratively model the discrete tokens of both individuals. ",
+        "bbox": [
+            169,
+            689,
+            826,
+            806
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3.1 2D DISCRETE MOTION TOKEN MAP ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            825,
+            470,
+            840
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We start by learning a discrete latent representation space for individual motions using a VQ-VAE. We tokenize individual motions instead of the entire interaction because the complexity of modeling interactions is significantly higher. This allows both individuals to share the same discrete token space, simplifying the representation and improving expressivity, as empirically shown in Table 2. Additionally, this provides greater flexibility for complementary tasks such as reaction generation. ",
+        "bbox": [
+            169,
+            854,
+            823,
+            926
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/3e5acc19f3e0d1f77e3d3bc3fcee24e5db10054d13ba96bada59d59a1a5a619b.jpg",
+        "image_caption": [
+            "(c) Transformer Block Design ",
+            "Figure 2: Overview of InterMask. (a) Individual motions are quantized through vector quantization (VQ) to obtain 2D tokens $\\{ t _ { a } , t _ { b } \\}$ for each. (b) Motion tokens from both individuals are flattened, concatenated, masked and predicted collaboratively by the Inter-M Transformer. (c) Each block in Inter-M Transformer consists of Self, Spatio-Temporal and Cross Attention modules to learn complex spatio-temporal dependencies within and between both interacting individuals. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            207,
+            104,
+            802,
+            444
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "We create a 2D token map with both spatial and temporal dimensions by representing motion as $\\mathbf { m } _ { p } \\in \\mathbb { R } ^ { N \\times J \\times d }$ and using 2D convolutions. As illustrated in Figure 2(a), our VQ-VAE downsamples the input sequence $\\mathbf { m } _ { p }$ into a latent representation $\\tilde { \\mathbf { t } } _ { \\mathbf { p } } \\in \\mathbb { R } ^ { n \\times j \\times d ^ { \\prime } }$ , with downsampling ratios $n / N$ and $j \\bar { / } J$ . Each $d ^ { \\prime }$ -dimensional vector is then quantized by replacing it with the nearest entry from a learnable codebook C = {ck}|C|−1k=0 $\\mathcal { C } = \\{ \\mathbf { c } _ { k } \\} _ { k = 0 } ^ { | \\mathcal { C } | - 1 } \\subset \\mathbb { R } ^ { d ^ { \\prime } }$ , producing a quantized sequence $\\mathbf { t } _ { p } = \\mathbf { Q } ( \\tilde { \\mathbf { t } } _ { p } ) \\in \\mathbb { R } ^ { n \\times j \\times d ^ { \\prime } }$ This is then decoded to reconstruct the motion $\\hat { \\bf m } _ { \\bf p } = \\mathrm { D } ( { \\bf t _ { p } } )$ . After training, each vector in $\\mathbf { t } _ { p }$ can be replaced by its respective index $k$ in $\\mathcal { C }$ to obtain the 2d discrete representation of motion, namely motion tokens $\\{ t _ { p } \\} _ { p \\in \\{ a , b \\} } \\in \\{ 0 , 1 , \\cdots , | { \\mathcal { C } } | - 1 \\} ^ { n \\times j }$ , which is modeled in our Inter-M Transformer. More details are provided in appendix B. ",
+        "bbox": [
+            169,
+            575,
+            823,
+            708
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "3.1.1 TRAINING OBJECTIVE ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            727,
+            383,
+            739
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Our primary VQ-VAE training objective consists of a motion reconstruction loss and the commitment loss (Van Den Oord et al., 2017): ",
+        "bbox": [
+            169,
+            753,
+            823,
+            781
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {v q} = \\left\\| \\mathbf {m} _ {p} - \\hat {\\mathbf {m}} _ {p} \\right\\| _ {1} + \\beta \\left\\| \\tilde {\\mathbf {t}} _ {p} - \\operatorname {s g} \\left(\\mathbf {t} _ {p}\\right) \\right\\| _ {2} ^ {2}, \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            357,
+            791,
+            823,
+            811
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "where $\\operatorname { s g } ( \\cdot )$ denotes the stop-gradient operation, and $\\beta$ a weighting factor. We use Exponential Moving Average (EMA) and codebook reset to update $\\mathcal { C }$ , following Zhang et al. (2023). ",
+        "bbox": [
+            169,
+            820,
+            823,
+            849
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "We also incorporate geometric losses from Liang et al. (2024) to impose additional constraints, including the joint velocity loss $\\mathcal { L } _ { v e l }$ , the foot contact loss $\\mathcal { L } _ { f c }$ , and the bone length loss $\\mathcal { L } _ { b l }$ , which are explained in appendix C. The overall loss function $\\mathcal { L } _ { v q v a e }$ is a weighted sum of these losses: ",
+        "bbox": [
+            169,
+            854,
+            823,
+            898
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {v q v a e} = \\mathcal {L} _ {v q} + \\lambda_ {v e l} \\mathcal {L} _ {v e l} + \\lambda_ {f c} \\mathcal {L} _ {f c} + \\lambda_ {b l} \\mathcal {L} _ {b l} \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            344,
+            909,
+            823,
+            926
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "3.2 INTERACTION MASKED GENERATIVE TRANSFORMER ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            103,
+            584,
+            118
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Next, the motion tokens for both individuals $\\{ t _ { a } , t _ { b } \\}$ are collaboratively modeled by our Inter-M Transformer, capturing complex spatial and temporal dependencies within and between them. Importantly, there is no order to the actions of interacting individuals in this task. Therefore we make sure our data sampling, transformer architecture and embedding design are all permutation invariant. ",
+        "bbox": [
+            169,
+            128,
+            823,
+            188
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "3.2.1 TOKEN MASKING AND EMBEDDING ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            200,
+            478,
+            215
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "As shown in Figure 2(b), we first flatten and concatenate $t _ { a }$ and $t _ { b }$ , separated by a special [SEP] token, to form a consolidated sequence $t \\in \\mathbb { Z } ^ { 2 n j + 1 }$ . A subset of these tokens is then masked by replacing with a learnable special-purpose token [MASK] following a two-stage scheme. In the first stage, we apply random masking with probability $p _ { r }$ or interaction masking with $1 - p _ { r }$ . In random masking, both $t _ { a }$ and $t _ { b }$ are randomly masked with ratio $\\gamma ( \\tau _ { i } )$ , controlled by a cosine scheduling function (Chang et al., 2022), as shown in eq. (3). In interaction masking, one of $\\{ t _ { a } , t _ { b } \\}$ is kept fully unmasked, encouraging the model not to rely on the tokens from the same individual and learn inter-individual dependencies. ",
+        "bbox": [
+            169,
+            224,
+            823,
+            335
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\gamma \\left(\\tau_ {i}\\right) = \\cos \\left(\\frac {\\pi \\tau_ {i}}{2}\\right) \\in [ 0, 1 ] \\tag {3} \\\\ \\tau_ {i} \\sim \\mathcal {U} (0, 1) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            405,
+            335,
+            823,
+            380
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "In the second stage, we employ step unroll masking, adopted from Kim et al. (2023b), where we remask a portion $( \\gamma ( \\tau _ { i + 1 } ) )$ of the predicted tokens with the lowest confidence scores and predict them again. This refines the predictions iteratively, aligning with the inference process, where tokens are progressively revealed. More details of the masking strategy are provided in appendix D. The masked tokens $\\tilde { t }$ are then embedded using the input process module, consisting of a learnable embedding layer and a linear transformation. Then, 2D positional encodings, from Wang & Liu (2021), are added to impose spatio-temporal structure on the embeddings. The updated embeddings, $\\mathbf { e } ^ { 0 } \\in \\mathbb { R } ^ { ( 2 n j + 1 ) \\times \\tilde { d } }$ , where $\\tilde { d }$ is the transformer embedding dimension, are then passed through L blocks of the Inter-M transformer. ",
+        "bbox": [
+            169,
+            391,
+            823,
+            518
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "3.2.2 TRANSFORMER BLOCK DESIGN ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            535,
+            444,
+            547
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "As illustrated in Figure 2(c), each Inter-M block starts with a self-attention module (Vaswani et al., 2017) to model long-range, global dependencies within and between individuals. Then we introduce a novel shared spatio-temporal attention layer to model spatial and temporal dependencies within each individual’s motion tokens. Finally, we employ a shared cross attention layer to model inter-individual dependencies. This design enables rich and dynamic modeling of spatio-temporal interactions, ensuring effective learning of both intra- and inter-individual relationships. ",
+        "bbox": [
+            169,
+            559,
+            823,
+            643
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Self Attention Let $\\mathbf { e } ^ { l - 1 } \\in \\mathbb { R } ^ { ( 2 n j + 1 ) \\times \\tilde { d } }$ represent the input token embeddings to block l, where $l \\in$ $\\{ 1 , 2 , \\ldots \\mathbf { L } \\}$ . The block architecture begins with a self-attention module which computes attention scores for all tokens in the sequence using the standard scaled dot-product attention mechanism: ",
+        "bbox": [
+            169,
+            652,
+            823,
+            696
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\operatorname {A t t n} (\\mathbf {Q}, \\mathbf {K}, \\mathbf {V}) = \\operatorname {s o f t m a x} \\left(\\mathbf {Q} \\mathbf {K} ^ {\\top} / \\sqrt {\\tilde {d}}\\right) \\mathbf {V} \\tag {4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            352,
+            704,
+            823,
+            724
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where the query, key, and value matrices, Q, K, and V, are linear projections of $\\mathbf { e } _ { l - 1 }$ . The self attention module is followed by a feedforward network (FFN). ",
+        "bbox": [
+            169,
+            731,
+            826,
+            761
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Spatio-Temporal Attention Next, we split the embeddings of the two individuals and pass them through a shared spatio-temporal attention module. This module consists of two separate attention mechanisms: spatial attention and temporal attention. In the spatial attention module, each token attends only to other spatial tokens within the same temporal instance; and in the temporal attention module, each token attends only to tokens across the temporal dimension at the same spatial location. Let $\\mathbf { e } _ { p } ^ { l - 1 }$ represent the updated embeddings of individual $p \\in \\{ a , b \\}$ in block $l$ after the self attention module. We drop the $l - 1$ superscript to simplify the notation. Then $\\mathbf { e } _ { p } ( i _ { n } ) \\in \\mathbb { R } ^ { j \\times \\tilde { d } }$ represent the spatial tokens of individual $p$ at temporal instance $i _ { n }$ , and $\\mathbf { e } _ { p } ( i _ { j } ) \\in \\mathbb { R } ^ { n \\times \\tilde { d } }$ represent the temporal tokens of individual $p$ at spatial location $i _ { j }$ . The spatial and temporal attention is defined as: ",
+        "bbox": [
+            169,
+            766,
+            825,
+            902
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {e} _ {p} ^ {\\prime} (i _ {n}) = \\operatorname {A t t n} (\\mathbf {Q} _ {j}, \\mathbf {K} _ {j}, \\mathbf {V} _ {j}) \\quad \\mathbf {e} _ {p} ^ {\\prime \\prime} (i _ {j}) = \\operatorname {A t t n} (\\mathbf {Q} _ {n}, \\mathbf {K} _ {n}, \\mathbf {V} _ {n}) \\tag {5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            292,
+            907,
+            823,
+            928
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            948,
+            503,
+            959
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/2de06251834e02da544f0d5968d1610c71097483be01ca8e4a945e30cf0553df.jpg",
+        "image_caption": [
+            "Figure 3: Inference process. Starting from completely masked token sequences of both individuals $\\{ t _ { a } ( 0 ) , t _ { b } ( 0 ) \\}$ , the Inter-M transformer generates all tokens in $I$ iterations. Next, the tokens are dequantized and decoded to generate motion sequences $\\{ \\mathbf { m } _ { a } , \\mathbf { m } _ { b } \\}$ using the VQ-VAE decoder. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            174,
+            99,
+            803,
+            233
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { Q } _ { j } , \\mathbf { K } _ { j } , \\mathbf { V } _ { j }$ , and $\\mathbf { Q } _ { n } , \\mathbf { K } _ { n } , \\mathbf { V } _ { n }$ are the spatial queries, keys and values and temporal queries, keys, and values, obtained from ${ \\bf e } _ { p } ( i _ { n } )$ and ${ \\bf e } _ { p } ( i _ { j } )$ respectively. After updating the embeddings with spatial and temporal attention, the outputs of these two modules are added together for each token: ",
+        "bbox": [
+            169,
+            315,
+            823,
+            359
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {e} _ {p} = \\mathbf {e} _ {p} ^ {\\prime} (i _ {n}) + \\mathbf {e} _ {p} ^ {\\prime \\prime} (i _ {j}) \\quad \\forall \\quad 0 <   i _ {n} <   n, 0 <   i _ {j} <   j \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            323,
+            363,
+            825,
+            383
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Cross Attention Next, we apply a shared cross attention module to model dependencies between the two individuals. Each token of individual $a$ attends to all tokens of individual $b$ and vice versa: ",
+        "bbox": [
+            169,
+            393,
+            823,
+            422
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {e} _ {a} ^ {\\prime} = \\operatorname {A t t n} (\\mathbf {Q} _ {a}, \\mathbf {K} _ {b}, \\mathbf {V} _ {b}) \\quad \\mathbf {e} _ {b} ^ {\\prime} = \\operatorname {A t t n} (\\mathbf {Q} _ {b}, \\mathbf {K} _ {a}, \\mathbf {V} _ {a}) \\tag {7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            323,
+            426,
+            823,
+            446
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\mathbf { Q } _ { a } , \\mathbf { K } _ { a } , \\mathbf { V } _ { a }$ , and $\\mathbf { Q } _ { b } , \\mathbf { K } _ { b } , \\mathbf { V } _ { b }$ are the queries, keys and values obtained from embeddings $\\mathbf { e } _ { a } , \\mathbf { e } _ { b }$ of each individual. Finally, each individual’s embeddings are passed through another FFN and concatenated to form the sequence $\\mathbf { e } ^ { l } \\in \\mathbb { R } ^ { ( 2 n j + 1 ) \\times \\tilde { d } }$ , which is passed to the next block. ",
+        "bbox": [
+            169,
+            450,
+            823,
+            496
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Text Conditioning We condition our transformer blocks on the input text by replacing the standard layer normalization in each attention and FFN module with modulated adaptive layer normalization (AdaLN-mod) as proposed by Peebles & Xie (2023). In AdaLN-mod, the dimension-wise scale and shift parameters are regressed using a multi-layer perceptron (MLP), from the conditional vector $c$ , obtained from a frozen, pre-trained CLIP network (Radford et al., 2021). This modulation allows the model to dynamically adapt its normalization based on the content of $c$ . Additionally, we initialize each residual connection in the transformer block as an identity function by regressing another scale parameter $\\alpha$ from $c$ , which is initialized to output a zero vector. This ensures that the network can adapt the modulation during learning without imposing strong biases at initialization. ",
+        "bbox": [
+            169,
+            502,
+            825,
+            628
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "3.2.3 OUTPUT PROCESS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            643,
+            356,
+            657
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "After the final block, we use a standard linear projector with AdaLN-mod to map the output $\\mathbf { e ^ { L } }$ to the indices of codebook $\\mathcal { C }$ , $\\mathbf { e } _ { o u t } \\in \\mathbb { R } ^ { 2 n j \\times | \\mathcal { C } | }$ , where $| { \\mathcal { C } } |$ represents the size of $\\mathcal { C }$ . As defined in eq. (8), the transformer’s training objective minimizes the negative log-likelihood of the masked tokens, computed as the cross-entropy between the one-hot encoded ground truth and model predictions. ",
+        "bbox": [
+            169,
+            666,
+            823,
+            726
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {\\text {m a s k}} = \\sum_ {\\tilde {t} _ {k} = [ \\text {M A S K} ]} - \\log p _ {\\theta} \\left(t _ {k} | \\tilde {t}, c\\right). \\tag {8}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            370,
+            750,
+            825,
+            785
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "3.3 INFERENCE ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            800,
+            295,
+            814
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "As illustrated in Figure 3, the inference process consists of two stages. Starting with a fully masked sequence $t ( 0 )$ , the Inter-M transformer generates tokens for both individuals over $I$ iterations. At each iteration $i$ , the transformer predicts token probabilities at masked locations, then samples tokens and remasks those with the lowest $\\begin{array} { r } { \\left\\lceil \\gamma \\left( \\frac { i } { I } \\right) ^ { \\star } 2 n j \\right\\rceil } \\end{array}$ confidence scores, repeating until $i$ reaches $I$ . The final token sequence is decoded back into motion using the VQ-VAE decoder. A cosine schedule $\\begin{array} { r } { \\gamma \\left( \\frac { i } { I } \\right) } \\end{array}$ controls the number of retained tokens, increasing as $i$ progresses. Classifier-free guidance (Ho & Salimans, 2021) is also applied for refinement, following Chang et al. (2022). ",
+        "bbox": [
+            169,
+            825,
+            825,
+            925
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/c05871b8a20a2a3b90cc219db094b485353fd327d8c9bb1d5674badd82e203c0.jpg",
+        "table_caption": [
+            "Table 1: Quantitative evaluation on the InterHuman and InterX test sets. $\\pm$ indicates a $9 5 \\%$ confidence interval and means the closer to ground truth the better. Bold face indicates the best result, while underscore refers to the second best. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Dataset</td><td rowspan=\"2\">Method</td><td colspan=\"3\">R Precision↑</td><td rowspan=\"2\">FID↓</td><td rowspan=\"2\">MM Dist↓</td><td rowspan=\"2\">Diversity→</td><td rowspan=\"2\">MModality↑</td></tr><tr><td>Top 1</td><td>Top 2</td><td>Top 3</td></tr><tr><td rowspan=\"8\">Inter Human</td><td>Ground Truth</td><td>0.452±.008</td><td>0.610±.009</td><td>0.701±.008</td><td>0.273±.007</td><td>3.755±.008</td><td>7.948±.064</td><td>-</td></tr><tr><td>T2M (Guo et al., 2022a)</td><td>0.238±.012</td><td>0.325±.010</td><td>0.464±.014</td><td>13.769±.072</td><td>5.731±.013</td><td>7.046±.022</td><td>1.387±.076</td></tr><tr><td>MDM (Tevet et al., 2023)</td><td>0.153±.012</td><td>0.260±.009</td><td>0.339±.012</td><td>9.167±.056</td><td>7.125±.018</td><td>7.602±.045</td><td>2.350±.080</td></tr><tr><td>ComMDM (Shafir et al., 2024)</td><td>0.223±.009</td><td>0.334±.008</td><td>0.466±.010</td><td>7.069±.054</td><td>6.212±.021</td><td>7.244±.038</td><td>1.822±.052</td></tr><tr><td>InterGen (Liang et al., 2024)</td><td>0.371±.010</td><td>0.515±.012</td><td>0.624±.010</td><td>5.918±.079</td><td>5.108±.014</td><td>7.387±.029</td><td>2.141±.063</td></tr><tr><td>MoMat-MoGen (Cai et al., 2024)</td><td>0.449±.004</td><td>0.591±.003</td><td>0.666±.004</td><td>5.674±.085</td><td>3.790±.001</td><td>8.021±.35</td><td>1.295±.023</td></tr><tr><td>in2IN (Ruiz-Ponce et al., 2024)</td><td>0.425±.008</td><td>0.576±.008</td><td>0.662±.009</td><td>5.535±.120</td><td>3.803±.002</td><td>7.953±.047</td><td>1.215±.023</td></tr><tr><td>InterMask</td><td>0.449±.004</td><td>0.599±.005</td><td>0.683±.004</td><td>5.154±.061</td><td>3.790±.002</td><td>7.944±.033</td><td>1.737±.020</td></tr><tr><td rowspan=\"6\">InterX</td><td>Ground Truth</td><td>0.429±.004</td><td>0.626±.003</td><td>0.736±.003</td><td>0.002±.0002</td><td>3.536±.013</td><td>9.734±.078</td><td>-</td></tr><tr><td>T2M (Guo et al., 2022a)</td><td>0.184±.010</td><td>0.298±.006</td><td>0.396±.005</td><td>5.481±.382</td><td>9.576±.006</td><td>2.771±.151</td><td>2.761±.042</td></tr><tr><td>MDM (Tevet et al., 2023)</td><td>0.203±.009</td><td>0.329±.007</td><td>0.426±.005</td><td>23.701±.057</td><td>9.548±.014</td><td>5.856±.077</td><td>3.490±.061</td></tr><tr><td>ComMDM (Shafir et al., 2024)</td><td>0.090±.002</td><td>0.165±.004</td><td>0.236±.004</td><td>29.266±.067</td><td>6.870±.017</td><td>4.734±.067</td><td>0.771±.053</td></tr><tr><td>InterGen (Liang et al., 2024)</td><td>0.207±.004</td><td>0.335±.005</td><td>0.429±.005</td><td>5.207±.216</td><td>9.580±.011</td><td>7.788±.208</td><td>3.686±.052</td></tr><tr><td>InterMask</td><td>0.403±.005</td><td>0.595±.004</td><td>0.705±.005</td><td>0.399±.013</td><td>3.705±.017</td><td>9.046±.073</td><td>2.261±.081</td></tr></table>",
+        "bbox": [
+            176,
+            99,
+            823,
+            303
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "4 EXPERIMENTS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            378,
+            328,
+            395
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Datasets We adopt two datasets to evaluate InterMask for the text-conditioned human interaction generation task: InterHuman (Liang et al., 2024) and InterX (Xu et al., 2024a). The InterHuman dataset contains 7,779 interaction sequences and InterX contains 11,388, each paired with 3 distinct textual annotations. InterHuman follows the AMASS (Mahmood et al., 2019) skeleton representation with 22 joints, including the root joint. Each joint is represented by $\\{ p _ { g } , v _ { g } , r _ { 6 d } \\}$ , where $p _ { g } \\in \\mathbb { R } ^ { 3 }$ is the global position, $v _ { g } \\in \\mathbb { R } ^ { 3 }$ is the global velocity, and $r _ { 6 d } \\in \\mathbb { R } ^ { 6 }$ is the local 6D rotation of each joint, rendering $\\mathbf { m } _ { p } \\in \\mathbb { R } ^ { N \\times 2 2 \\times 1 2 }$ . InterX follows the SMPL-X (Pavlakos et al., 2019) skeleton representation, comprising 54 body, hands and face joints, accompanied by root orientation and translation. Each joint and root orientation is represented by $\\{ r _ { 6 d } \\}$ and root translation by $\\{ p _ { g } \\}$ , to which we incorporate root velocity rendering root $\\{ p _ { g } , v _ { g } \\}$ and $\\dot { \\mathbf { m } _ { p } } \\in \\mathbb { R } ^ { N \\times 5 6 \\times 6 }$ . We adhere to the respective body representations of both datasets to demonstrate that our framework is compatible with different representation formats and joint counts. Other implementation details including architecture, training and inference hyper-parameters are provided in appendix E. ",
+        "bbox": [
+            169,
+            410,
+            826,
+            597
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Evaluation Metrics Following Liang et al. (2024), we adopt several feature-space evaluation metrics to assess the performance of our model. These include the Frechet Inception Distance (FID), which measures the fidelity of the generated interactions by calculating similarity between the generated and real interactions feature distributions. Additionally we employ $R$ -precision and MMDist, which evaluate how well the generated interactions align with the corresponding texts. Furthermore, we use Diversity to measure the overall variation in generated interactions, and multimodality (MModality) to quantify the ability to generate multiple distinct interactions for the same text. ",
+        "bbox": [
+            169,
+            603,
+            823,
+            702
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "4.1 COMPARISON WITH STATE-OF-THE-ART APPROACHES",
+        "text_level": 1,
+        "bbox": [
+            171,
+            717,
+            584,
+            732
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Quantitative Comparison Table 1 shows quantitative comparison of our InterMask with previous methods. All evaluations are run 20 times (with the exception of MModality, which is run 5 times), and we report the averaged results along with a $9 5 \\%$ confidence interval. InterMask achieves stateof-the-art (SOTA) results on both InterHuman and InterX datasets. It records the lowest FID scores (5.154 on InterHuman and 0.399 on InterX), indicating superior realism and quality of generated interactions, and leads in R-Precision and MMdist, showing excellent text alignment. With different body representations in each dataset, these results highlight the robustness of our method, proving it is not dependent on a specific body pose structure. Furthermore, the larger performance gap on the larger InterX dataset suggests that InterMask scales effectively with more data. While our MModality is slightly lower than some methods, the high R-Precision and low MMdist emphasize that InterMask prioritizes adherence to text over extreme diversity, yet still achieves high Diversity scores, demonstrating its ability to generate a broad range of interactions. Please refer to appendix F for visual demonstration of InterMask’s ability to generate diverse results from the same text prompt. ",
+        "bbox": [
+            169,
+            743,
+            826,
+            925
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            173,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/66767466ae445bd849439e55a9cb316e5261edec1c1fd2d29f02555bc7ebc965.jpg",
+        "image_caption": [
+            "Figure 4: Qualitative comparison between InterMask and InterGen (Liang et al., 2024), highlighting InterMask’s superior interaction quality, text adherence and avoidance of implicit biases. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            183,
+            99,
+            815,
+            327
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "table",
+        "img_path": "images/b33730772a3a89b0db2ef0cacfb754d92feae06bc4c777a97f70a93cdbb78c0c.jpg",
+        "table_caption": [
+            "Table 2: Ablation Study results on InterHuman test set to verify key components of the proposed Motion VQ-VAE. Bold face indicates the best result. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Input Modality</td><td>Token Map</td><td>Recon FID↓</td><td>MPJPE ↓</td></tr><tr><td>Individual Motion</td><td>1d</td><td>3.146</td><td>0.354</td></tr><tr><td>Two-Person Interaction</td><td>2d</td><td>1.276</td><td>0.198</td></tr><tr><td>Individual Motion</td><td>2d</td><td>0.970</td><td>0.129</td></tr></table>",
+        "bbox": [
+            192,
+            407,
+            500,
+            477
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/aafd8e0a3848e9daee1ff9733d29f8dd5e6075c472a65c23c86ddb7404147fa3.jpg",
+        "image_caption": [
+            "Figure 5: User Study comparing our Inter-Mask and InterGen (Liang et al., 2024). "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            545,
+            395,
+            823,
+            506
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Qualitative Comparison In Figure 4, we provide a qualitative comparison of interaction sequences generated by our InterMask and InterGen Liang et al. (2024), trained on the InterHuman dataset, for the same text descriptions. For the prompt ”The first person raises the right leg aggressively towards the second”, InterGen incorrectly raises both legs, while InterMask accurately raises only the right leg. For ”Two people bow to each other”, InterGen introduces an unnecessary fighting gesture after the bow, indicating overfitting to implicit biases in the training data, whereas InterMask stays true to the simple bow. Lastly, for ”One person is sitting and waving their hands at the other person, while the other drifts away”, InterGen generates a crouching pose instead of sitting and misplaces the waving action, while InterMask faithfully generates the described scene. These examples demonstrate that InterMask produces more higher quality and more reliable interactions compared to InterGen. For more qualitative results please refer to appendix A. ",
+        "bbox": [
+            169,
+            575,
+            826,
+            731
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "User Study User studies are essential in generative AI, complementing metrics like FID by incorporating human perception to evaluate the realism and quality of generated content. To compare our InterMask with InterGen (Liang et al., 2024), we conducted a user study with 16 participants, where 30 interaction sequences were generated by both models with identical motion lengths. Each sequence pair was rated by 3 distinct users on interaction quality and adherence to text (scores out of 5), and their preferred interaction sequence among the two. More details are provided in appendix K. As shown in Figure 5, InterMask outperforms InterGen in interaction quality (4.089 vs. 3.296) and text adherence (3.938 vs. 3.198), with $6 9 . 1 4 \\%$ of users preferring InterMask over InterGen. ",
+        "bbox": [
+            169,
+            734,
+            826,
+            849
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Computation and Time Cost In addition to superior generation fidelity and text adherence, Inter-Mask demonstrates better computational efficiency when compared to InterGen (Liang et al., 2024). InterMask contains only ${ 7 4 } \\bf { M }$ inference parameters, compared to $1 8 2 \\textbf { M }$ for InterGen, resulting in a considerably smaller model footprint. Furthermore, InterMask achieves an average inference time of 0.77 seconds, less than half of InterGen’s 1.63 seconds, highlighting its low latency. ",
+        "bbox": [
+            169,
+            854,
+            823,
+            925
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            173,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            493,
+            948,
+            503,
+            959
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "4.2 ABLATION STUDIES ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            104,
+            354,
+            118
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "table",
+        "img_path": "images/ce48fd7ee1b19b0bbbbc827f973aa469c96cb9cb218cfe9c982661e78e0dc8c8.jpg",
+        "table_caption": [
+            "Table 3: Ablation Study results on the InterHuman test set to verify key components of the proposed Inter-M Transformer. Bold face indicates the best result. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">Method</td><td colspan=\"3\">R Precision↑</td><td rowspan=\"2\">FID↓</td><td rowspan=\"2\">MM Dist↓</td><td rowspan=\"2\">Diversity→</td><td rowspan=\"2\">MModality↑</td></tr><tr><td>Top 1</td><td>Top 2</td><td>Top 3</td></tr><tr><td>Ground Truth</td><td>0.452±.008</td><td>0.610±.009</td><td>0.701±.008</td><td>0.273±.007</td><td>3.755±.008</td><td>7.948±.064</td><td>-</td></tr><tr><td>Alternative Modeling</td><td>0.340±.002</td><td>0.425±.009</td><td>0.514±.006</td><td>7.637±.072</td><td>3.937±.003</td><td>8.424±.022</td><td>2.192±.076</td></tr><tr><td>Collaborative Modeling</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>w/o Self Attention</td><td>0.393±.006</td><td>0.527±.005</td><td>0.596±.007</td><td>5.715±.067</td><td>3.827±.003</td><td>7.873±.034</td><td>1.683±.076</td></tr><tr><td>w/o Cross Attention</td><td>0.328±.008</td><td>0.416±.009</td><td>0.508±.007</td><td>8.461±.076</td><td>3.972±.005</td><td>7.951±.085</td><td>1.942±.076</td></tr><tr><td>w/o Spatio-Temporal Attention</td><td>0.296±.004</td><td>0.391±.007</td><td>0.470±.005</td><td>10.968±.093</td><td>4.219±.006</td><td>7.659±.023</td><td>1.607±.076</td></tr><tr><td>w/o Step Unroll and Interaction Masking</td><td>0.402±.003</td><td>0.548±.004</td><td>0.633±.002</td><td>5.629±.053</td><td>3.806±.002</td><td>7.942±.096</td><td>1.741±.076</td></tr><tr><td>InterMask</td><td>0.449±.004</td><td>0.599±.005</td><td>0.683±.004</td><td>5.154±.061</td><td>3.790±.002</td><td>7.944±.033</td><td>1.737±.020</td></tr></table>",
+        "bbox": [
+            174,
+            138,
+            823,
+            268
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Table 2 presents an ablation study to evaluate key components of our proposed Motion VQ-VAE. We investigated two primary factors: the input modality (individual motions vs two-person interactions) and the token map dimensions (1d vs 2d), using Reconstruction FID and MPJPE (Mean Per Joint Position Error). The results demonstrate that using individual motions as input with a 2D token map outperforms both the baseline of individual motions with a 1D token map, and the two-person interaction with a 2D token map. These findings suggest that preserving spatial information through 2D token maps and focusing on individual motions performs accurate motion reconstruction, and creates a more expressive token map with high-fidelity movement details. ",
+        "bbox": [
+            169,
+            330,
+            826,
+            443
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Table 3 presents an ablation study to evaluate key components of our Inter-M Transformer. We compared collaborative modeling against alternative modeling and examined the impact of various attention mechanisms and masking strategies. Alternative Modeling (appendix G) models tokens of one person at a time, while conditioning in on the tokens of the other person, leading to an alternative generation during inference. Collaborative Modeling on the other hand, models tokens of both individuals simultaneously. Our full InterMask model with collaborataive modeling outperforms all ablated versions, particularly in R-Precision and FID scores. Notably, removing any of the attention mechanisms or employing alternative modeling severely degraded performance, with spatio-temporal attention being the most crucial one. Additionally, step unroll and interaction masking proved to be further fine-tuning the results. These results highlight the synergistic importance of all components in our transformer architecture for effective interaction modeling. Qualitative results for selected ablation studies are shown in appendix H. ",
+        "bbox": [
+            169,
+            449,
+            826,
+            617
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "4.3 APPLICATION: REACTION GENERATION ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            638,
+            491,
+            652
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "One of the key strengths of our InterMask model is its seamless support for the task of reaction generation with or without a text condition, where the motion of one person in an interaction is generated based on the provided reference motion of the other person. Unlike previous diffusion-based models, such as InterGen (Liang et al., 2024), InterMask can perform this task without any task-specific fine-tuning or architectural re-design. This flexibility arises from our use of the masked modeling technique combined with an individual motion tokenizer, which does not require interactions as input. During inference, we simply tokenize the reference motion, leave its tokens unmasked, and progressively generate tokens of the other person. More details are provided in appendix I. ",
+        "bbox": [
+            169,
+            666,
+            826,
+            779
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Quantitatively, InterMask achieves an FID of 2.99 and an R-precision of 0.462 on InterHuman for reaction generation. In comparison, InterGen suffers from a performance drop with an FID of 52.89 (vs 5.918 for interaction generation) and an R-precision of 0.194 (vs 0.371) when adopted for reaction generation without fine-tuning, demonstrating its inability to perform reaction generation out-of-the-box. As shown qualitatively in Figure 6, InterMask produces high-quality reaction motions. In cases without text conditioning, when the reference motion involves dancing, the generated motion follows the reference steps and even captures nuanced details like raising the same leg or arm. Similarly, for the physical combat scenario, when the reference motion attacks, the generated motion retreats and vice versa. For text-conditioned samples, InterMask performs equally well, whether the text describes both people’s motions or provides separate descriptions for each. The ",
+        "bbox": [
+            169,
+            784,
+            826,
+            925
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            173,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            493,
+            948,
+            504,
+            959
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/b62464cf59b81100fb8841597d3c79ce157ecefdfe58ae41c76529daaebdb78d.jpg",
+        "image_caption": [
+            "Figure 6: Reaction generation samples with and without text descriptions, including holistic instruction for both individuals and separate instructions for each. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            202,
+            99,
+            823,
+            388
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "model accurately identifies the required reaction form text and the reference motion and generates the corresponding motion, maintaining high-quality poses and realistic timings throughout. ",
+        "bbox": [
+            169,
+            452,
+            823,
+            482
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "5 CONCLUSION ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            501,
+            320,
+            515
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "In this paper, we presented InterMask, a novel framework for generating realistic 3D human interactions through generative masked modeling in the discrete space. InterMask first employs a VQ-VAE to transform individual motion sequences into 2D discrete token maps, preserving both spatial and temporal dimensions. Then, a specialized Inter-M transformer collaboratively models the motion tokens of both individuals, capturing intricate spatial and temporal dependencies within and between them. Quantitative evaluations show that InterMask excels in generating realistic and contextually aligned motions, achieving the lowest FID scores and superior results in R-Precision and MMdist on both the InterHuman and InterX datasets compared to existing models. Additionally, user studies comparing InterMask to InterGen reveal a $69 \\%$ user preference for InterMask, noting higher-quality and more realistic interactions. The flexibility of our approach is also evident by its ability to perform equally well for different body representations. While there are minor trade-offs in diversity (MModality), InterMask consistently maintains high quality and adherence to text while generating a wide range of realistic interactions. ",
+        "bbox": [
+            169,
+            532,
+            826,
+            714
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Limitations and Future Work While InterMask generates high-quality human interactions, there are some limitations. First, when visualized as SMPL Loper et al. (2015) meshes, issues such as body penetration between individuals and jerky movements during rapid actions can occur. Second, our model sometimes interprets motions as dances without explicit prompting, likely due to implicit biases in the training dataset. Lastly, our approach is currently optimized for short sequences up to 10 seconds, reflecting the constraints of the dataset. Visual examples are shown in appendix J. Future research directions include implementing techniques for smoother transitions, preventing penetrations, addressing dataset biases, and expanding the model’s capacity to handle longer sequences. ",
+        "bbox": [
+            169,
+            720,
+            823,
+            832
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Reproducibility Statement We have made our best effort to ensure reproducibility, including but not limited to: 1) description of our implementation details in appendix E; 2) detailed graphic illustrations of our model architectures, training mechanisms and inference processes in Figures 2, 3, 7, 8, 10 and 13; and 4) public release of code and model checkpoints (appendix A). ",
+        "bbox": [
+            169,
+            838,
+            823,
+            895
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "REFERENCES ",
+        "text_level": 1,
+        "bbox": [
+            174,
+            102,
+            287,
+            117
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Andreas Aristidou, Daniel Cohen-Or, Jessica K Hodgins, Yiorgos Chrysanthou, and Ariel Shamir. Deep motifs and motion signatures. ACM Transactions on Graphics (TOG), 37(6):1–13, 2018. ",
+            "Zhongang Cai, Jianping Jiang, Zhongfei Qing, Xinying Guo, Mingyuan Zhang, Zhengyu Lin, Haiyi Mei, Chen Wei, Ruisi Wang, Wanqi Yin, et al. Digital life project: Autonomous 3d characters with social intelligence. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 582–592, 2024. ",
+            "Huiwen Chang, Han Zhang, Lu Jiang, Ce Liu, and William T Freeman. Maskgit: Masked generative image transformer. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 11315–11325, 2022. ",
+            "Xin Chen, Biao Jiang, Wen Liu, Zilong Huang, Bin Fu, Tao Chen, and Gang Yu. Executing your commands via motion diffusion in latent space. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 18000–18010, 2023. ",
+            "Baptiste Chopin, Hao Tang, Naima Otberdout, Mohamed Daoudi, and Nicu Sebe. Interaction transformer for human reaction generation. IEEE Transactions on Multimedia, 25:8842–8854, 2023. ",
+            "Ke Fan, Junshu Tang, Weijian Cao, Ran Yi, Moran Li, Jingyu Gong, Jiangning Zhang, Yabiao Wang, Chengjie Wang, and Lizhuang Ma. Freemotion: A unified framework for number-free text-to-motion synthesis. arXiv preprint arXiv:2405.15763, 2024. ",
+            "Anindita Ghosh, Rishabh Dabral, Vladislav Golyanik, Christian Theobalt, and Philipp Slusallek. Remos: 3d motion-conditioned reaction synthesis for two-person interactions. In European Conference on Computer Vision (ECCV), 2024. ",
+            "Kehong Gong, Dongze Lian, Heng Chang, Chuan Guo, Zihang Jiang, Xinxin Zuo, Michael Bi Mi, and Xinchao Wang. Tm2d: Bimodality driven 3d dance generation via music-text integration. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pp. 9942–9952, 2023. ",
+            "Chuan Guo, Shihao Zou, Xinxin Zuo, Sen Wang, Wei Ji, Xingyu Li, and Li Cheng. Generating diverse and natural 3d human motions from text. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 5152–5161, 2022a. ",
+            "Chuan Guo, Xinxin Zuo, Sen Wang, and Li Cheng. Tm2t: Stochastic and tokenized modeling for the reciprocal generation of 3d human motions and texts. In European Conference on Computer Vision, pp. 580–597. Springer, 2022b. ",
+            "Chuan Guo, Yuxuan Mu, Muhammad Gohar Javed, Sen Wang, and Li Cheng. Momask: Generative masked modeling of 3d human motions. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 1900–1910, 2024. ",
+            "Jonathan Ho and Tim Salimans. Classifier-free diffusion guidance. In NeurIPS 2021 Workshop on Deep Generative Models and Downstream Applications, 2021. URL https://openreview. net/forum?id=qw8AKxfYbI. ",
+            "Biao Jiang, Xin Chen, Wen Liu, Jingyi Yu, Gang Yu, and Tao Chen. Motiongpt: Human motion as a foreign language. Advances in Neural Information Processing Systems, 36:20067–20079, 2023. ",
+            "Jihoon Kim, Jiseob Kim, and Sungjoon Choi. Flame: Free-form language-based motion synthesis & editing. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 37, pp. 8255–8263, 2023a. ",
+            "Sungwoong Kim, Daejin Jo, Donghoon Lee, and Jongmin Kim. Magvlt: Masked generative visionand-language transformer. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 23338–23348, 2023b. ",
+            "Hanyang Kong, Kehong Gong, Dongze Lian, Michael Bi Mi, and Xinchao Wang. Priority-centric human motion generation in discrete latent space. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pp. 14806–14816, 2023. "
+        ],
+        "bbox": [
+            171,
+            125,
+            828,
+            925
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            948,
+            506,
+            959
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Han Liang, Wenqian Zhang, Wenxuan Li, Jingyi Yu, and Lan Xu. Intergen: Diffusion-based multihuman motion generation under complex interactions. International Journal of Computer Vision, pp. 1–21, 2024. ",
+            "Yunze Liu, Changxi Chen, and Li Yi. Interactive humanoid: Online full-body motion reaction synthesis with social affordance canonicalization and forecasting. arXiv preprint arXiv:2312.08983, 2023. ",
+            "Yunze Liu, Changxi Chen, Chenjing Ding, and Li Yi. Physreaction: Physically plausible realtime humanoid reaction synthesis via forward dynamics guided 4d imitation. arXiv preprint arXiv:2404.01081, 2024. ",
+            "Matthew Loper, Naureen Mahmood, Javier Romero, Gerard Pons-Moll, and Michael J Black. Smpl: A skinned multi-person linear model. ACM transactions on graphics (TOG), 34(6):1–16, 2015. ",
+            "Yunhong Lou, Linchao Zhu, Yaxiong Wang, Xiaohan Wang, and Yi Yang. Diversemotion: Towards diverse human motion generation via discrete diffusion. arXiv preprint arXiv:2309.01372, 2023. ",
+            "Thomas Lucas, Fabien Baradel, Philippe Weinzaepfel, and Gregory Rogez. Posegpt: Quantization-´ based 3d human motion generation and forecasting. In European Conference on Computer Vision, pp. 417–435. Springer, 2022. ",
+            "Naureen Mahmood, Nima Ghorbani, Nikolaus F Troje, Gerard Pons-Moll, and Michael J Black. Amass: Archive of motion capture as surface shapes. In Proceedings of the IEEE/CVF international conference on computer vision, pp. 5442–5451, 2019. ",
+            "Georgios Pavlakos, Vasileios Choutas, Nima Ghorbani, Timo Bolkart, Ahmed A. A. Osman, Dimitrios Tzionas, and Michael J. Black. Expressive body capture: 3d hands, face, and body from a single image. In Proceedings IEEE Conf. on Computer Vision and Pattern Recognition (CVPR), 2019. ",
+            "William Peebles and Saining Xie. Scalable diffusion models with transformers. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pp. 4195–4205, October 2023. ",
+            "Mathis Petrovich, Michael J Black, and Gul Varol. Temos: Generating diverse human motions from ¨ textual descriptions. In European Conference on Computer Vision, pp. 480–497. Springer, 2022. ",
+            "Ekkasit Pinyoanuntapong, Pu Wang, Minwoo Lee, and Chen Chen. Mmm: Generative masked motion model. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 1546–1555, 2024. ",
+            "Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learning transferable visual models from natural language supervision. In International Conference on Machine Learning, pp. 8748–8763. PMLR, 2021. ",
+            "Jiawei Ren, Mingyuan Zhang, Cunjun Yu, Xiao Ma, Liang Pan, and Ziwei Liu. Insactor: Instructiondriven physics-based characters. Advances in Neural Information Processing Systems, 36, 2024. ",
+            "Pablo Ruiz-Ponce, German Barquero, Cristina Palmero, Sergio Escalera, and Jose Garc ´ ´ıa-Rodr´ıguez. in2in: Leveraging individual information to generate human interactions. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 1941–1951, 2024. ",
+            "Yoni Shafir, Guy Tevet, Roy Kapon, and Amit Haim Bermano. Human motion diffusion as a generative prior. In The Twelfth International Conference on Learning Representations, 2024. URL https://openreview.net/forum?id=dTpbEdN9kr. ",
+            "Mengyi Shan, Lu Dong, Yutao Han, Yuan Yao, Tao Liu, Ifeoma Nwogo, Guo-Jun Qi, and Mitch Hill. Towards open domain text-driven synthesis of multi-person motions. In European Conference on Computer Vision (ECCV), 2024. "
+        ],
+        "bbox": [
+            171,
+            102,
+            825,
+            924
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "Jiaming Song, Chenlin Meng, and Stefano Ermon. Denoising diffusion implicit models. In International Conference on Learning Representations, 2021. URL https://openreview.net/ forum?id $\\underline { { \\underline { { \\mathbf { \\Pi } } } } } =$ St1giarCHLP. ",
+            "Mikihiro Tanaka and Kent Fujiwara. Role-aware interaction generation from textual description. In ICCV, 2023. ",
+            "Guy Tevet, Sigal Raab, Brian Gordon, Yoni Shafir, Daniel Cohen-or, and Amit Haim Bermano. Human motion diffusion model. In The Eleventh International Conference on Learning Representations, 2023. URL https://openreview.net/forum?id ${ . } =$ SJ1kSyO2jwu. ",
+            "Jonathan Tseng, Rodrigo Castellon, and Karen Liu. Edge: Editable dance generation from music. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 448–458, 2023. ",
+            "Aaron Van Den Oord, Oriol Vinyals, et al. Neural discrete representation learning. Advances in Neural Information Processing Systems, 30, 2017. ",
+            "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. Attention is all you need. Advances in Neural Information Processing Systems, 30, 2017. ",
+            "Zelun Wang and Jyh-Charn Liu. Translating math formula images to latex sequences using deep neural networks with sequence-level training. International Journal on Document Analysis and Recognition (IJDAR), 24(1):63–75, 2021. ",
+            "Liang Xu, Xintao Lv, Yichao Yan, Xin Jin, Shuwen Wu, Congsheng Xu, Yifan Liu, Yizhou Zhou, Fengyun Rao, Xingdong Sheng, et al. Inter-x: Towards versatile human-human interaction analysis. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 22260–22271, 2024a. ",
+            "Liang Xu, Yizhou Zhou, Yichao Yan, Xin Jin, Wenhan Zhu, Fengyun Rao, Xiaokang Yang, and Wenjun Zeng. Regennet: Towards human action-reaction synthesis. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 1759–1769, 2024b. ",
+            "Jiahui Yu, Xin Li, Jing Yu Koh, Han Zhang, Ruoming Pang, James Qin, Alexander Ku, Yuanzhong Xu, Jason Baldridge, and Yonghui Wu. Vector-quantized image modeling with improved VQGAN. In International Conference on Learning Representations, 2022. URL https: //openreview.net/forum?id=pfNyExj7z2. ",
+            "Jianrong Zhang, Yangsong Zhang, Xiaodong Cun, Yong Zhang, Hongwei Zhao, Hongtao Lu, Xi Shen, and Ying Shan. Generating human motion from textual descriptions with discrete representations. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, pp. 14730–14740, 2023. ",
+            "Mingyuan Zhang, Zhongang Cai, Liang Pan, Fangzhou Hong, Xinying Guo, Lei Yang, and Ziwei Liu. Motiondiffuse: Text-driven human motion generation with diffusion model. IEEE Transactions on Pattern Analysis and Machine Intelligence, 46(6):4115–4128, 2024a. doi: 10.1109/TPAMI.2024.3355414. ",
+            "Yaqi Zhang, Di Huang, Bin Liu, Shixiang Tang, Yan Lu, Lu Chen, Lei Bai, Qi Chu, Nenghai Yu, and Wanli Ouyang. Motiongpt: Finetuned llms are general-purpose motion generators. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 38, pp. 7368–7376, 2024b. "
+        ],
+        "bbox": [
+            171,
+            102,
+            825,
+            792
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "13 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "A SUPPLEMENTARY MATERIAL ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            102,
+            454,
+            118
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "In addition to the subsequent appendix sections, we provide the following as supplementary material for this work: ",
+        "bbox": [
+            169,
+            138,
+            823,
+            167
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "• Demo Videos: We provide several demonstration videos on open review, showcasing visual interaction results generated using InterMask. These include an animation gallery with generated interactions for everyday actions, dance and combat; nuanced description demonstration to highlight the capability of Intermask to follow specific details in text; diversity demonstration with multiple generated interactions for each text prompt; comparison videos to compare the generated results of InterMask and InterGen (Liang et al., 2024); comparison videos for the ablation study on Inter-M Transformer; an animation gallery to show reaction generation results; some results on more complex prompts; some results showing longer 10 second interactions; and finally some failure cases and some results addressing the concerns on fluidity of the generated motions. The videos are shown in form of a webpage, provided as an html file. ",
+            "• Code Implementation: We provide the open-source code implementation of our method to ensure reproducibility. "
+        ],
+        "bbox": [
+            215,
+            183,
+            826,
+            378
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "§ github.com/gohar-malik/intermask ",
+        "bbox": [
+            351,
+            390,
+            700,
+            407
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "B MOTION VQ-VAE ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            444,
+            366,
+            460
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Our VQ-VAE framework, illustrated in Figure 7, constructs a 2D motion token map to represent individual motion sequences in a discrete manner, while retaning both spatial and temporal dimensions. The encoder processes motion sequences represented as $\\mathbf { m } _ { p } \\in \\dot { \\mathbb { R } } ^ { N \\times J \\times d }$ , where $N$ is the number of poses, $J$ is the number of joints, and $d$ is the joint feature dimension. By employing 2D convolutional layers, the encoder effectively captures spatial and temporal dependencies within the motion data while progressively downsampling both dimensions. The downsampling process is achieved through strided 2D convolutions and ResNet blocks, which also use 2D convolutions along with dropout layers. This results in a latent representation of size $\\tilde { \\mathbf { t } } _ { \\mathbf { p } } \\in \\mathbb { R } ^ { n \\times j \\times d ^ { \\prime } }$ , where $n$ and $j$ are the downsampled temporal and spatial dimensions, and $d ^ { \\prime }$ is the latent feature dimension. ",
+        "bbox": [
+            169,
+            479,
+            826,
+            609
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "The latent representation $\\tilde { \\mathbf { t } } _ { \\mathbf { p } }$ is quantized using a learned codebook $\\mathcal { C }$ with $| { \\mathcal { C } } |$ entries. Each feature vector $\\tilde { t } _ { i }$ in $\\tilde { \\mathbf { t } } _ { \\mathbf { p } }$ is replaced by the index of its nearest codebook entry, using the vector quantization process: ",
+        "bbox": [
+            169,
+            616,
+            823,
+            660
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathbf {q} \\left(\\tilde {t} _ {i}\\right) = \\arg \\min  _ {c _ {k} \\in \\mathcal {C}} \\| \\tilde {t} _ {i} - c _ {k} \\| ^ {2}, \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            398,
+            670,
+            823,
+            694
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "where $c _ { k }$ represents the codebook entries. ",
+        "bbox": [
+            171,
+            710,
+            449,
+            724
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "The resulting quantized representation is a 2D motion token map $t _ { p }$ , where each token encodes local spatio-temporal context. This design enables the preservation of both spatial and temporal dimensions in the motion data, enhancing the model’s ability to generate realistic and contextually accurate interactions. ",
+        "bbox": [
+            169,
+            731,
+            825,
+            787
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "C VQ-VAE GEOMETRIC LOSSES ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            816,
+            467,
+            834
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Equation (10) shows the geometric losses used to train our Motion VQ-VAE to impose physical and geometric constraints on the reconstructed motion, in a data-driven way. The velocity loss $\\mathcal { L } _ { v e l }$ encourages the reconstructed motion sequences to obey the velocity of joints in the ground truth sequences and the bone length loss $\\mathcal { L } _ { b l }$ the distance between adjacent joints. The foot contact loss $\\mathcal { L } _ { f } c$ encourages the feet to have zero velocity whenever they are in contact with the ground. ",
+        "bbox": [
+            169,
+            854,
+            823,
+            925
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            490,
+            948,
+            509,
+            959
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/339f924754974b9928fbddc46fba6b06a55e22abc98735089081c3d7e59207bb.jpg",
+        "image_caption": [
+            "Figure 7: Detailed illustration of the 2d discrete motion token map construction. The 2d encoder, consisting of 2d convolutional layers, downsamples the input motion from $( N , J , d )$ to $( n , j , d ^ { \\prime } )$ . The downsampled representation is then quantized by replacing each vector with the index of its closest vector in the learned codebook. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            217,
+            104,
+            759,
+            390
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "table",
+        "img_path": "images/93f2a2e0d209b06cfc2d7352f034f2489f906144c17a21927cb8870ca4c54e60.jpg",
+        "table_caption": [
+            "Table 4: Interaction Generation and Reaction Generation results of different values of $p _ { r }$ . Bold face indicates the best result, while underscore refers to the second best. "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td rowspan=\"2\">pr</td><td colspan=\"2\">Interaction Generation</td><td colspan=\"2\">Reaction Generation</td></tr><tr><td>FID ↓</td><td>R Prec (Top1) ↑</td><td>FID ↓</td><td>R Prec (Top1) ↑</td></tr><tr><td>0.7</td><td>5.214</td><td>0.447</td><td>2.850</td><td>0.476</td></tr><tr><td>0.8</td><td>5.154</td><td>0.449</td><td>2.991</td><td>0.462</td></tr><tr><td>0.9</td><td>5.152</td><td>0.450</td><td>3.368</td><td>0.416</td></tr></table>",
+        "bbox": [
+            295,
+            476,
+            702,
+            570
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {v e l} = \\frac {1}{N - 1} \\sum_ {i _ {n} = 1} ^ {N} \\| \\left(m _ {i _ {n} + 1} - m _ {i _ {n}}\\right) - \\left(\\hat {m} _ {i _ {n} + 1} - \\hat {m} _ {i _ {n}}\\right) \\| _ {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            303,
+            643,
+            691,
+            686
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {f c} = \\frac {1}{N - 1} \\sum_ {i _ {n} = 1} ^ {N} \\| \\left(\\hat {m} _ {i _ {n} + 1} - \\hat {m} _ {i _ {n}}\\right) \\cdot f _ {i _ {n}} \\| _ {1} \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            397,
+            690,
+            825,
+            733
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} _ {b l} = \\frac {1}{N - 1} \\sum_ {i _ {n} = 1} ^ {N} \\| B (m _ {i _ {n}}) - B (\\hat {m} _ {i _ {n}}) \\| _ {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            411,
+            734,
+            692,
+            777
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Here, $m _ { i _ { n } }$ represents the ground pose, $\\hat { m } _ { i _ { n } }$ represents the reconstructed pose at time step $i _ { n }$ , $N$ represents the total time steps in the sequence, $\\bar { f } _ { i _ { n } } \\in \\{ 0 , 1 \\}$ represents the binary foot contact label for the heel and toe joints for each pose $m _ { i _ { n } }$ , and $B ( \\cdot )$ denotes the bone lengths joining adjacent joints. ",
+        "bbox": [
+            169,
+            787,
+            823,
+            844
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "D TWO-STAGE TOKEN MASKING ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            864,
+            467,
+            878
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Here we provide more details on the masking strategy (section 3.2.1) used in training the Inter-M Transformer. As illustrated in Figure 8, the two-stage masking technique begins with random ",
+        "bbox": [
+            169,
+            895,
+            823,
+            925
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "15 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/52f9bea3a8c351a6b8440f75dfb50713e45ef2f034881c0f62a15cd202148579.jpg",
+        "image_caption": [
+            "Figure 8: Illustration of the two-stage masking technique used during training of the Inter-M Transformer. For stage 1, we either apply Random Masking with a probability of $p _ { r }$ or Interaction Masking with probability $1 - p _ { r }$ . In stage 2, we apply the Step Unroll Masking on the predicted tokens from stage 1. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            181,
+            103,
+            799,
+            340
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "masking or interaction masking in the first stage. Random masking teaches the model to predict random tokens from both individuals. Whereas Interaction masking, where only one individual’s tokens are masked, promotes learning inter-person dependencies critical for coherent interactions and to improve performance in the reaction generation task. The masking strategy alternates between these two methods based on a probability parameter $p _ { r }$ , with random masking applied $p _ { r }$ of the time and interaction masking $( 1 - p _ { r } )$ . To evaluate the effect of $p _ { r }$ , we test different values 0.7, 0.8, 0.9 and find that $p _ { r } = 0 . 8$ offers the best balance between interaction and reaction generation, as shown in Table 4. In the second stage, step unroll masking is applied which retains some of the predicted tokens from stage 1, remasks the remaining tokens and predicts them again. This is employed to incorporate the inference-time progressive refinement of tokens in the training process. ",
+        "bbox": [
+            169,
+            446,
+            826,
+            587
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "E IMPLEMENTATION DETAILS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            608,
+            439,
+            625
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Our models are implemented using PyTorch, with details of the model architecture, training, and inference provided below. Key hyperparameters are summarized in the accompanying tables. ",
+        "bbox": [
+            169,
+            641,
+            823,
+            671
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "E.1 MODEL ARCHITECTURE ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            689,
+            387,
+            703
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "The Motion VQ-VAE employs 2D convolutional residual blocks for both the encoder and decoder. The temporal downsampling factor is $n / N = 1 / 4$ for both datasets, while the spatial downsampling is dataset-specific: $j / \\bar { J ( \\ l ) ( \\ l ) } = \\bar { 5 } / 2 2$ for InterHuman and $j / J = 5 / 5 6$ for InterX. Strided convolutions are used for downsampling in the encoder, while the decoder restores dimensions via upsampling and convolutional layers. The latent representation in VQ-VAE has a dimension $d ^ { \\prime } = 5 1 \\bar { 2 }$ , and the codebook size $| \\mathcal { C } | = 1 0 2 4$ . ",
+        "bbox": [
+            169,
+            715,
+            823,
+            801
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "For the Inter-M transformer, we use $\\mathbf { L } = 6$ transformer blocks, each with 6 attention heads. The transformer embedding dimension is $\\tilde { d } = 3 8 4$ . ",
+        "bbox": [
+            169,
+            806,
+            823,
+            835
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "E.2 TRAINING DETAILS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            854,
+            354,
+            869
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "The Motion VQ-VAE is trained for 50 epochs with a batch size of 512. The learning rate is initialized at 0.0002 and decays via a multistep learning rate schedule, reducing by a factor of 0.1 after $70 \\%$ and $85 \\%$ of the iterations. A linear warm-up is applied for the first quarter of the iterations. The ",
+        "bbox": [
+            169,
+            881,
+            823,
+            925
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            490,
+            948,
+            509,
+            960
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "table",
+        "img_path": "images/953eb2273bf8ddca1892eee50592410c4f293393d79d9c25dc343de9aaed1743.jpg",
+        "table_caption": [
+            "Table 5: Motion VQ-VAE and Inter-M Transformer Model Parameters "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Parameter</td><td>Value</td><td>Description</td></tr><tr><td>d&#x27;</td><td>512</td><td>Latent space dimension of VQ-VAE</td></tr><tr><td>|C|</td><td>1024</td><td>Codebook size (number of entries)</td></tr><tr><td>n/N</td><td>1/4</td><td>Temporal downsampling factor for both datasets</td></tr><tr><td>j/J (InterHuman)</td><td>5/22</td><td>Spatial downsampling for InterHuman dataset</td></tr><tr><td>j/J (InterX)</td><td>5/56</td><td>Spatial downsampling for InterX dataset</td></tr><tr><td>L</td><td>6</td><td>Number of transformer blocks</td></tr><tr><td>Attention heads</td><td>6</td><td>Number of attention heads per block</td></tr><tr><td>d</td><td>384</td><td>Transformer embedding dimension</td></tr><tr><td>CLIP version</td><td>ViT-L/14@336px</td><td>Version of CLIP used for text in transformer</td></tr></table>",
+        "bbox": [
+            191,
+            101,
+            803,
+            258
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "commitment loss factor $\\beta$ is 0.02, and the geometric losses for velocity, foot contact, and bone length are weighted differently across the datasets. ",
+        "bbox": [
+            169,
+            309,
+            823,
+            339
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "The Inter-M transformer is trained for 500 epochs with a batch size of 52, following a similar multistep learning rate decay but with a decay factor of 1/3 after $50 \\%$ , $70 \\%$ , and $85 \\%$ of the iterations. The condition drop probability is 0.1 to allow for flexibility in training with or without text conditioning. ",
+        "bbox": [
+            169,
+            345,
+            823,
+            388
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "table",
+        "img_path": "images/503e5ab9b0b48c2e80dae180c9368ca2a57e0ca90a7bb5a641656d5b3a9a1a8d.jpg",
+        "table_caption": [
+            "Table 6: Training Hyperparameters for the Motion VQ-VAE and Inter-M Transformer "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Parameter</td><td>Value</td><td>Description</td></tr><tr><td>VQ-VAE batch size</td><td>512</td><td>Number of samples per batch for VQ-VAE</td></tr><tr><td>Transformer batch size</td><td>52</td><td>Number of samples per batch for transformer</td></tr><tr><td>Initial learning rate</td><td>0.0002</td><td>Starting learning rate for both models</td></tr><tr><td>Learning rate decay</td><td>0.1 / 1/3</td><td>Decay factor for VQ-VAE / Transformer learning rate</td></tr><tr><td>β</td><td>0.02</td><td>Commitment loss factor for VQ-VAE</td></tr><tr><td>λvel, λfc, λbl (InterHuman)</td><td>100, 500, 5</td><td>Geometric loss weights for InterHuman</td></tr><tr><td>λvel, λfc, λbl (InterX)</td><td>100, 100, 5</td><td>Geometric loss weights for InterX dataset</td></tr><tr><td>Condition drop prob.</td><td>0.1</td><td>Drop probability for text conditioning during transformer training</td></tr><tr><td>pr</td><td>0.8</td><td>Random Masking probability for stage 1 masking during training</td></tr></table>",
+        "bbox": [
+            176,
+            400,
+            820,
+            536
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "E.3 INFERENCE DETAILS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            585,
+            362,
+            599
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "During inference, the number of iterations $I$ is set to 20 for interaction generation and 12 for reaction generation. A classifier-free guidance (CFG) scale of 2 is applied, and the temperature is set to 1 to balance diversity and coherence in the generated results. ",
+        "bbox": [
+            169,
+            612,
+            823,
+            655
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "table",
+        "img_path": "images/2611859283505793f51900f5506fa591be5e8bef585f7b835d33b443fd7d5b2a.jpg",
+        "table_caption": [
+            "Table 7: Inference Hyperparameters for Interaction and Reaction Generation "
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>Parameter</td><td>Interaction Generation</td><td>Reaction Generation</td></tr><tr><td>Number of iterations</td><td>I=20</td><td>Ireact=12</td></tr><tr><td>CFG scale</td><td>2</td><td></td></tr><tr><td>Temperature</td><td>1</td><td></td></tr></table>",
+        "bbox": [
+            259,
+            667,
+            738,
+            739
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "F DIVERSITY DEMONSTRATION ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            794,
+            455,
+            810
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Our quantitative comparison (section 4.1) shows that InterMask prioritizes adherence to text over extreme diversity, while still being able to generate different distinct interactions for the same text prompt. Here, in Figure 9, we show 2 visual examples to demonstrate this. In both cases, the model remains consistent in generating interactions described in the text prompt while exhibiting distinct features in different samples. For the dancing case, first sample shows waving hands in the beginning followed by a synchronized forward step, while individuals face the same direction throughout. The second sample shows individuals facing each other in the beginning, followed by waving hands and ",
+        "bbox": [
+            169,
+            825,
+            826,
+            925
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            173,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "17 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "image",
+        "img_path": "images/f1dd1e48b2236975cf14a93f54aea838a70a250a65b37bd42615112af6726023.jpg",
+        "image_caption": [
+            "Two people are waving their hands and performing a dance step together "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            271,
+            102,
+            736,
+            268
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "image",
+        "img_path": "images/f8ead167353c7a5e493db2196bfbfbcca996d0191b6e7f8bb11333781e787579.jpg",
+        "image_caption": [
+            "In an intense boxing match, one is continuously punching while the other is defending and counterattacking ",
+            "Figure 9: Diversity Demonstration of our method, where it generates two distinct interaction sequences for the same text prompt. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            263,
+            290,
+            740,
+            465
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "a synchronized spin. For the boxing case, first sample shows one individual punching three times and continuously moving forward, while the second sample shows them punching two times and retreating at the end. ",
+        "bbox": [
+            169,
+            569,
+            823,
+            612
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "G ALTERNATIVE MODELING ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            633,
+            429,
+            648
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "In our ablation study (section 4.2), we explore a one-at-a-time modeling framework for interaction generation, referred to as Alternative Modeling, which contrasts with the collaborative modeling framework of InterMask. While collaborative modeling predicts the tokens of both individuals simultaneously, alternative modeling follows a sequential process, generating tokens for one individual at a time, conditioned on the thus far predicted tokens of the other. ",
+        "bbox": [
+            169,
+            664,
+            823,
+            736
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "During training, as shown in Figure 10(a), we randomly mask both individuals’ tokens $\\{ \\tilde { t } _ { a } , \\tilde { t } _ { b } \\}$ and obtain their embeddings $\\left\\{ \\mathbf { e } _ { a } , \\mathbf { e } _ { b } \\right\\}$ through the input process. Then, only the tokens of one individual are predicted $( \\hat { t } _ { a } )$ by passing their embeddings through the transformer blocks, conditioned on the embeddings of the other individual using a cross-attention module. During inference (Figure 10(b)), both individuals’ tokens are initially fully masked $\\{ t _ { a } ( 0 ) , t _ { b } ( 0 ) \\}$ . In the first iteration, the tokens of one individual are predicted, and these are remasked based on their confidence scores to obtain $t _ { a } ( 1 )$ . The second individual’s tokens are then predicted in the next iteration, conditioned on the retained tokens from the first, to obtain $t _ { b } ( 1 )$ . This alternation continues iteratively, progressively refining the tokens of both individuals. As shown in Table 3, the FID score for alternative modeling is 7.637 (compared to 5.154 for collaborative modeling), and the R-precision is 0.340 (compared to 0.449). These results indicate that while alternative modeling increases diversity, collaborative modeling produces high-quality and more realistic interactions, offering a better balance between diversity and interaction fidelity. ",
+        "bbox": [
+            169,
+            739,
+            826,
+            924
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            173,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "page_number",
+        "text": "18 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "image",
+        "img_path": "images/b280c212ec020214020481d6d107c1eddfed62d5ba7783bcc1264de0a7f023cd.jpg",
+        "image_caption": [
+            "(b) Alternative Modeling Inference "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            171,
+            102,
+            816,
+            378
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "image",
+        "img_path": "images/87f148283fe53cf2a8c94d5d7b963d8a88aa71359018425397f7d8ab006e6f3b.jpg",
+        "image_caption": [
+            "Figure 10: Overview of the Alternative Modeling approach, where we predict the tokens of one person at a time. (a) During training, only the embeddings of one individual $\\mathbf { e } _ { a }$ are updated in the transformer blocks, conditioned on the other individual’s embeddings $\\mathbf { e } _ { b }$ . (b) During inference, the process alternates between predicting and remasking the tokens of each individual, starting with both fully masked $\\{ t _ { a } ( 0 ) , t _ { b } \\mathbf { \\bar { ( } 0 ) } \\}$ . This process continues for $I _ { a l t e r }$ iterations for each individual. ",
+            "Figure 11: Qualitative results for the ablation study on Motion VQ-VAE to verify the proposed 2D token map. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            173,
+            518,
+            789,
+            676
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "H ABLATION STUDY QUALITATIVE RESULTS ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            773,
+            563,
+            791
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "In this section, we present qualitative results for our ablation studies to complement the quantitative findings discussed in section 4.2. Figure 11 shows two ground truth interaction sequences with their reconstructed samples from the 2D token map VQ-VAE and the baseline 1D token map VQ-VAE. As shown, the 1D VQ-VAE struggles to accurately reconstruct the spatial positions and orientations of the joints for both individuals, leading to incorrect positioning and orientation relative to each other. This results in not only unrealistic interactions but also bizarre individual poses. In contrast, the proposed 2D VQ-VAE provides highly accurate reconstructions at both the individual pose and the collective interaction level. ",
+        "bbox": [
+            169,
+            811,
+            826,
+            924
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "page_number",
+        "text": "19 ",
+        "bbox": [
+            490,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "image",
+        "img_path": "images/7f856713283f70d70254b927e4a09eac0972b1633301ae33b1b9f0324a503d0a.jpg",
+        "image_caption": [
+            "Figure 12: Qualitative results for the ablation study on Inter-M Transformer to verify contributions of the proposed Attention modules. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            173,
+            101,
+            823,
+            329
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Figure 12 illustrates the impact of different attention modules in our Inter-M transformer by comparing outputs by removing the spatio-temporal attention, cross-attention, and self-attention modules independently. We provide results for three distinct interaction scenarios: boxing, sneaking, and synchronized dancing. The spatio-temporal attention module emerges as a critical component for generating complex poses and ensuring spatial awareness in interactions. Without this module, the boxing scenario exhibits overly simplistic poses, such as timid punching and blocking, alongwith the individuals failing to face each other properly. In the sneaking scenario, the absence of spatiotemporal attention eliminates the essential spatial progression, as the sneaking individual does not gradually approach the other. Similarly, in the dancing scenario, the generated motions are reduced to basic hand raises, and one individual adopts an unnatural crouching pose. By contrast, the inclusion of spatio-temporal attention enables accurate spatial positioning and expressive, synchronized interactions. The cross-attention module seems vital for modeling inter-person dependencies, particularly in achieving accurate reaction timing. Without it, the response motions of the interacting individual appear either delayed or prematurely executed across all examples. For instance, in the boxing scenario, the reactive movements fail to synchronize with the initiating individual’s punches. In the dancing scenario, the lack of cross-attention results in poor synchronization, disrupting the fluidity of the interaction. Lastly, the self-attention module serves as a refinement mechanism, enhancing the overall quality and coherence of individual motions. Its removal introduces subtle inconsistencies, such as jerky transitions or less fluid movements, which slightly degrade the interaction’s realism.These observations collectively underscore the importance of each attention module in generating realistic, contextually accurate, and expressive interactions. ",
+        "bbox": [
+            169,
+            402,
+            826,
+            696
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "I REACTION GENERATION INFERENCE ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            715,
+            511,
+            732
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "InterMask does not require task-specific fine-tuning or architectural re-design for reaction generation, needing only minor adjustments to the inference process, as illustrated in Figure 13. The process begins by encoding the reference individual’s motion $\\mathbf { m } _ { b }$ into tokens $t _ { b }$ using the VQ-VAE encoder. For the other individual, whose reaction is to be generated, we initialize with a fully masked token sequence, $t _ { a } ( 0 )$ . Over the course of $I _ { \\mathrm { r e a c t } }$ iterations, the transformer progressively predicts and fills in the masked tokens, while the reference tokens remain unmasked throughout. At each iteration $i _ { \\mathrm { r e a c t } }$ , the least confident $\\begin{array} { r } { \\gamma \\left( \\frac { i _ { \\mathrm { r e a c t } } } { I _ { \\mathrm { r e a c t } } } \\right) \\cdot n j } \\end{array}$ tokens are remasked and predicted again, following a cosine Ireact scheduling function $\\gamma ( \\cdot )$ . Once all tokens are generated, the final token sequence $t _ { a }$ is decoded back into motion $\\mathbf { m } _ { a }$ using the VQ-VAE decoder. Since we drop the conditioning signal during some training passes, reaction generation functions effectively both with and without a text description, enabling the model to generate motions based solely on the reference motion or guided by additional textual instructions. ",
+        "bbox": [
+            169,
+            747,
+            826,
+            924
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            173,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "page_number",
+        "text": "20 ",
+        "bbox": [
+            488,
+            946,
+            509,
+            960
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "image",
+        "img_path": "images/44a010a4c08eee7ea4bd041d5da7ec832d22a5575a7f19dde04095df8efc0ca1.jpg",
+        "image_caption": [
+            "Figure 13: Inference process for the Reaction Generation task. The motion tokens of the reference individual $t _ { b }$ are obtained from the encoder and kept unmasked throughout. The second individual’s tokens are initially fully masked $t _ { a } ( 0 )$ , and are predicted progressively over $I _ { \\mathrm { r e a c t } }$ iterations to obtain $t _ { a }$ , which is then decoded using the decoder. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            178,
+            99,
+            823,
+            233
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "image",
+        "img_path": "images/5467d8a98c5d94543b474f2e7b3e1b1ea91030d9da2f63c125e497c21113a7e1.jpg",
+        "image_caption": [
+            "First person is sitting in a chair, the second takes a step forward with their right foot "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            300,
+            367,
+            653,
+            500
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "image",
+        "img_path": "images/9ae808d03a1802546a7dca3c1b4baee25a18e2f417f27842f1c9a2665ef716b7.jpg",
+        "image_caption": [
+            "The first takes a step with their left foot ",
+            "Figure 14: Examples of Limitations of our method. The first row shows body penetration when converted from output skeleton to SMPL mesh. The second row shows implicit bias towards dancing. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            261,
+            537,
+            723,
+            657
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "J FAILURE CASES ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            777,
+            339,
+            792
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "In Figure 14, we show visual examples of failure cases emerging from the limitations of our method, as decribed in section 5. In the first row, we show that when converting our output skeletons to SMPL (Loper et al., 2015) meshes for visualizations, the results can exhibit body penetration among the interacting individuals. One possible future solution to this problem is to include the mesh conversion in the training process and incorporate anti-penetration in the training loss. In the second row, we show that the model suffers from some implicit biases present in the dataset, where it assumes that the individuals are dancing without explicit mention in the text prompt. ",
+        "bbox": [
+            169,
+            825,
+            826,
+            925
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "page_number",
+        "text": "21 ",
+        "bbox": [
+            488,
+            946,
+            506,
+            959
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "K USER STUDY ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            102,
+            320,
+            118
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "We conducted the user study on the Amazon Mechanical Turk platform, where the interface presented to the users is shown in Figure 15. For each sample, users were provided with clear instructions to rate two animations—one generated by InterMask and the other by InterGen (Liang et al., 2024)—from the same text description, with the order of the animations randomized for each sample to avoid bias. Participants were asked to rate both animations on a scale of 1 to 5 for interaction quality and text adherence. Following the individual ratings, they were asked to select the better animation based on their overall impression. A total of 16 users evaluated a total 30 samples, with each sample being rated by three users. To ensure high-quality feedback, we filtered users to include only those with Amazon Mechanical Turk master status, with a task approval rating of over $9 7 \\%$ and more than 1000 previously approved tasks. ",
+        "bbox": [
+            169,
+            132,
+            826,
+            272
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "different point of views for better visibility. ",
+        "bbox": [
+            227,
+            282,
+            753,
+            301
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "You need to rate both interactions (1 and 2) on their Quality and Adherence to Text. ",
+        "bbox": [
+            228,
+            305,
+            558,
+            316
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "quality, 1: min quality) ",
+            "Animation 1: ",
+            "Animation 2: ",
+            "description? - (5: max adherence, 1: min adherence) ",
+            "Animation 1: ",
+            "Animation 2: ",
+            "3) Preference - Overall which animation is better in your preference based on the above factors ",
+            "Animation 1 ",
+            "Animation 2 "
+        ],
+        "bbox": [
+            240,
+            333,
+            754,
+            515
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Text Description: ",
+        "text_level": 1,
+        "bbox": [
+            266,
+            522,
+            339,
+            529
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "I o  h ",
+        "bbox": [
+            266,
+            530,
+            679,
+            539
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Front View ",
+        "bbox": [
+            308,
+            560,
+            361,
+            569
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Side View ",
+        "bbox": [
+            674,
+            560,
+            720,
+            569
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "image",
+        "img_path": "images/072399853af19b2066b9fd293a7581b097ef5d57f8ecd143d1816522d569a84e.jpg",
+        "image_caption": [
+            "Animation 1 "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            344,
+            618,
+            509,
+            709
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "image",
+        "img_path": "images/c4d5b5b4e2067e736cc2b8e3619cda8981c0573779c736a771b399c20e73b1aa.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            542,
+            617,
+            707,
+            709
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Front View ",
+        "bbox": [
+            310,
+            729,
+            359,
+            738
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Animation 2 ",
+        "bbox": [
+            491,
+            714,
+            544,
+            723
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "text",
+        "text": "Side View ",
+        "bbox": [
+            674,
+            729,
+            720,
+            738
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "image",
+        "img_path": "images/6e1f2f092cbb26aaab95c22f5f25ca4ee529e3bda7a92888ea730ded464e7885.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            344,
+            779,
+            509,
+            878
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "image",
+        "img_path": "images/c707c0d112c6321ca09f3bc8981232ac7e526b24b190b457afe1f66235439ac5.jpg",
+        "image_caption": [
+            "Figure 15: Interface of the User Study on Amazon Mechanical Turk. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            544,
+            787,
+            707,
+            878
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "header",
+        "text": "Published as a conference paper at ICLR 2025 ",
+        "bbox": [
+            171,
+            32,
+            478,
+            47
+        ],
+        "page_idx": 21
+    },
+    {
+        "type": "page_number",
+        "text": "22 ",
+        "bbox": [
+            488,
+            946,
+            508,
+            959
+        ],
+        "page_idx": 21
+    }
+]

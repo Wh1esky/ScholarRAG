@@ -1,0 +1,3698 @@
+[
+    {
+        "type": "text",
+        "text": "Gradient Descent Is Optimal Under Lower Restricted Secant Inequality And Upper Error Bound ",
+        "text_level": 1,
+        "bbox": [
+            174,
+            122,
+            823,
+            174
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Charles Guille-Escuret ",
+        "bbox": [
+            259,
+            224,
+            423,
+            239
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Mila, Université de Montréal ",
+        "bbox": [
+            243,
+            241,
+            439,
+            253
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "guillech@mila.quebec ",
+        "bbox": [
+            243,
+            255,
+            439,
+            268
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Adam Ibrahim ",
+        "bbox": [
+            581,
+            226,
+            689,
+            239
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Mila, Université de Montréal ",
+        "bbox": [
+            540,
+            241,
+            732,
+            253
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "adam.ibrahim@mila.quebec ",
+        "bbox": [
+            517,
+            255,
+            754,
+            268
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Baptiste Goujaud ",
+        "bbox": [
+            302,
+            289,
+            428,
+            303
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Ecole Polytechnique ",
+        "bbox": [
+            297,
+            304,
+            434,
+            316
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "baptiste.goujaud@gmail.com ",
+        "bbox": [
+            236,
+            318,
+            493,
+            330
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Ioannis Mitliagkas ",
+        "bbox": [
+            594,
+            289,
+            728,
+            303
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Mila, Université de Montréal, ",
+        "bbox": [
+            563,
+            303,
+            759,
+            316
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Canada CIFAR AI chair ",
+        "bbox": [
+            581,
+            318,
+            743,
+            330
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "ioannis@mila.quebec ",
+        "bbox": [
+            568,
+            332,
+            756,
+            345
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "bbox": [
+            459,
+            380,
+            537,
+            396
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The study of first-order optimization is sensitive to the assumptions made on the objective functions. These assumptions induce complexity classes which play a key role in worst-case analysis, including the fundamental concept of algorithm optimality. Recent work argues that strong convexity and smoothness—popular assumptions in literature—lead to a pathological definition of the condition number [12]. Motivated by this result, we focus on the class of functions satisfying a lower restricted secant inequality and an upper error bound. On top of being robust to the aforementioned pathological behavior and including some non-convex functions, this pair of conditions displays interesting geometrical properties. In particular, the necessary and sufficient conditions to interpolate a set of points and their gradients within the class can be separated into simple conditions on each sampled gradient. This allows the performance estimation problem (PEP, [7, 33]) to be solved analytically, leading to a lower bound on the convergence rate that proves gradient descent to be exactly optimal on this class of functions among all first-order algorithms. ",
+        "bbox": [
+            228,
+            410,
+            767,
+            619
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 Introduction ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            642,
+            313,
+            657
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The typical framework to study convergence properties of first-order algorithms in the context of machine learning is to first establish a class of objective functions to optimize through assumptions usually bound to a constant, such as $L$ -smoothness and $\\mu$ -strong convexity. A tuning prescription of an algorithm is then made based on the constants, (e.g. step size $\\begin{array} { r } { \\dot { \\alpha } = \\frac { 2 } { \\mu + L } } \\end{array}$ 2µ+L in the case of the gradient descent method on smooth and strongly convex functions), and finally a worst-case convergence rate can be derived for this algorithm when using this tuning prescription. In some cases, a lower bound on the achievable worst-case convergence rate can also be derived, leading to the theoretical optimality of an algorithm on the considered class of function, for instance the Nesterov accelerated gradient method [27] is known to be optimal up to a constant on strongly convex and smooth functions. ",
+        "bbox": [
+            169,
+            672,
+            826,
+            800
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "However in [12], the authors establish that such framework and its derived results are very sensitive to the choice of assumptions, and that strong convexity and smoothness can exhibit pathological behaviors leading to conservative tuning and arbitrarily sub-optimal convergence rates, even when the resulting algorithm achieves theoretical worst-case optimality on this class of functions. Furthermore, they propose a set of more robust alternative conditions. In this work, we focus on a specific pair of such alternative conditions : lower restricted secant inequality $( \\mathrm { R S I ^ { - } } )$ and upper error bounds $( \\mathrm { E B ^ { + } } )$ . Our main contribution is to show that the gradient descent (GD) method with a certain tuning ",
+        "bbox": [
+            169,
+            805,
+            826,
+            905
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "aside_text",
+        "text": "arXiv:2203.00342v3 [math.OC] 28 Sep 2022 ",
+        "bbox": [
+            22,
+            246,
+            60,
+            720
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "footer",
+        "text": "36th Conference on Neural Information Processing Systems (NeurIPS 2022). ",
+        "bbox": [
+            171,
+            922,
+            630,
+            936
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "is exactly optimal on the classes of objective functions induced by these conditions, confirming that optimality results are highly sensitive to the choice of conditions. Another consequence is that no algorithm can accelerate on this class of functions, implying that additional assumptions are required to explain the practical efficiency of accelerated methods. ",
+        "bbox": [
+            169,
+            90,
+            823,
+            148
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Notation Let $\\mathcal { F }$ the set of differentiable functions from $\\mathbb { R } ^ { d }$ to $\\mathbb { R }$ that admit a convex set of global minima $X _ { f } ^ { \\ast }$ . We focus on the problem of optimizing a function $f \\in { \\mathcal { F } }$ , i.e. finding $x \\in X _ { f } ^ { * }$ . For any $\\boldsymbol { x } \\in \\mathbb { R } ^ { d }$ , we denote $\\boldsymbol { x } _ { f } ^ { * }$ the orthogonal projection of $x$ on $X _ { f } ^ { \\ast }$ . By abuse of notation, when the context is not ambiguous, we will simply denote $\\boldsymbol { x } _ { f } ^ { * }$ as $x ^ { * }$ . ",
+        "bbox": [
+            169,
+            161,
+            823,
+            224
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We call gradient descent (GD) the standard optimization algorithm based on the following update, where $\\alpha$ is the step size : ",
+        "bbox": [
+            169,
+            229,
+            825,
+            258
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\nx _ {i + 1} = x _ {i} - \\alpha \\nabla f (x _ {i})\n$$",
+        "text_format": "latex",
+        "bbox": [
+            419,
+            258,
+            573,
+            273
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We call first-order algorithm all $\\mathcal { A }$ that consider past iterates, function values and gradients and output a next iterate. Formally, $\\mathcal { A }$ can be seen as a sequence of functions $\\{ \\mathcal A _ { n } \\ | \\ n \\in \\mathbb N \\}$ such that for any n ∈ N, An is a function defined on \u0000Rd × R × Rd\u0001n+1 $n \\in \\mathbb N$ $\\mathcal { A } _ { n }$ $\\left( \\mathbb { R } ^ { d } \\times \\mathbb { R } \\times \\mathbb { R } ^ { d } \\right) ^ { n + 1 }$ with values in $\\mathbb { R } ^ { d }$ . Under that formalism, applying $\\mathcal { A }$ to optimize an objective function $f$ starting in $x _ { 0 } \\in \\mathbb { R } ^ { d }$ generates a sequence of iterates $( x _ { i } ) _ { i }$ such that $\\forall i , x _ { i + 1 } = { A _ { i } } \\left( \\left( x _ { j } , f ( x _ { j } ) , \\nabla f ( x _ { j } ) \\right) _ { j \\leq i } \\right)$ . Note that we do not require the iterates of $\\mathcal { A }$ to lie within the span of observed gradients as it is often the case in the literature. ",
+        "bbox": [
+            169,
+            284,
+            826,
+            383
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Outline Section 2 introduces $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ and provides some basic properties and motivation. Section 3 discusses related works in the literature. Section 4 defines and establishes the necessary and sufficient interpolation conditions for $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ , which is a key element of our analysis. Section 5 proves the lower bound on the convergence rate of first-order algorithms under $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ , and finally Section 6 concludes our work. Detailed proofs are provided in the appendix. ",
+        "bbox": [
+            169,
+            397,
+            826,
+            469
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2 Lower restricted secant inequality and upper error bounds ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            487,
+            697,
+            505
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We now define $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ and discuss some basic properties. ",
+        "bbox": [
+            169,
+            518,
+            607,
+            535
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Definition 2.1 (Lower restricted secant inequality) Let $f \\in { \\mathcal { F } }$ and $\\mu > 0$ ",
+        "bbox": [
+            169,
+            545,
+            669,
+            561
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf \\in \\operatorname {R S I} ^ {-} (\\mu) \\Leftrightarrow \\forall x \\in \\mathbb {R} ^ {d}, \\langle \\nabla f (x) \\mid x - x ^ {*} \\rangle \\geq \\mu \\| x - x ^ {*} \\| _ {2} ^ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            292,
+            566,
+            702,
+            588
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Intuitively, $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ enforces that the further $x$ is from $X _ { f } ^ { \\ast }$ , the stronger the gradient of $f$ in $x$ must be in the opposite direction of $X _ { f } ^ { \\ast }$ . ",
+        "bbox": [
+            169,
+            602,
+            823,
+            635
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Remark 2. $2 \\ \\mathrm { R S I } ^ { - } ( \\mu )$ includes non-convex functions. However, it prevents flat landscapes outside of $X _ { f } ^ { \\ast }$ , and requires $f$ to increase at least quadratically with the distance to $X _ { f } ^ { \\ast }$ , as established in $I I 2 J$ : ",
+        "bbox": [
+            169,
+            648,
+            823,
+            691
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf \\in \\operatorname {R S I} ^ {-} (\\mu) \\Rightarrow \\forall x \\in \\mathbb {R} ^ {d}, f (x) - f ^ {*} \\geq \\frac {\\mu}{2} \\| x - x ^ {*} \\| _ {2} ^ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            315,
+            690,
+            679,
+            715
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Definition 2.3 (Upper Error Bounds) Let $f \\in { \\mathcal { F } }$ and $L > 0$ ",
+        "bbox": [
+            169,
+            727,
+            580,
+            742
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf \\in \\operatorname {E B} ^ {+} (L) \\Leftrightarrow \\forall x \\in \\mathbb {R} ^ {d}, \\| \\nabla f (x) \\| _ {2} \\leq L \\| x - x ^ {*} \\| _ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            318,
+            750,
+            676,
+            768
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "$\\mathrm { E B } ^ { + } ( L )$ thus enforces that the gradient of $f$ is controlled by the distance to $X _ { f } ^ { \\ast }$ ",
+        "bbox": [
+            169,
+            782,
+            697,
+            801
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Remark 2.4 $L$ -smoothness implies $\\mathrm { E B } ^ { + } ( L )$ and $\\mu$ -strong convexity implies $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ . However, one must be careful before claiming that $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ are respectively weaker than strong convexity and smoothness : for $\\mu _ { 0 } > \\mu _ { 1 }$ , $\\mathrm { R S I } ^ { - } \\left( \\mu _ { 0 } \\right)$ is neither stronger or weaker than $\\mu _ { 1 }$ -strong convexity, and for $L _ { 0 } < L _ { 1 }$ , $\\mathrm { E B } ^ { + } ( L _ { 0 } )$ is neither stronger or weaker than $L _ { 1 }$ -smoothness. ",
+        "bbox": [
+            169,
+            811,
+            825,
+            872
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Therefore, even when the objective function is smooth and strongly convex, considering convergence results under $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E \\bar { B } ^ { + } }$ is relevant, as we might obtain better constants $\\mu$ and $L$ . Many ",
+        "bbox": [
+            169,
+            883,
+            823,
+            912
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "2 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "convergence results depend of the condition number condition number, and thus a potentially better converg $\\begin{array} { r } { \\kappa = \\frac { L } { \\mu } } \\end{array}$ . Better constants leads to a bettere (including when the dependence in the condition number $\\kappa$ is the same or worse). As a consequence, machine learning problems with strongly convex and smooth objective functions are all potential applications of results under $\\mathrm { R S I ^ { - } }$ and $\\bar { \\mathrm { E B ^ { + } } }$ , provided we can obtain better constants under these conditions. ",
+        "bbox": [
+            169,
+            90,
+            823,
+            162
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Prop 1 (convergence rate of GD under $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ ) Let $f \\in \\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ . Then gradient descent with learning rate $\\textstyle \\alpha = { \\frac { \\mu } { L ^ { 2 } } }$ on $f$ will guarantee the following convergence rate: ",
+        "bbox": [
+            187,
+            170,
+            810,
+            202
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\leq \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) ^ {i} \\left\\| x _ {0} - x _ {0} ^ {*} \\right\\| _ {2} ^ {2} \\tag {1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            367,
+            209,
+            807,
+            246
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Moreover, when the learning rate is set to $\\begin{array} { r } { \\alpha _ { 0 } = \\frac { 1 } { 2 \\mu } } \\end{array}$ on the first step, and $\\textstyle \\alpha = { \\frac { \\mu } { L ^ { 2 } } }$ on every other step, gradient descent guarantees the following convergence rate: ",
+        "bbox": [
+            187,
+            250,
+            807,
+            281
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\leq \\frac {\\left\\| \\nabla f \\left(x _ {0}\\right) \\right\\| _ {2} ^ {2}}{4 \\mu^ {2}} \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) ^ {i - 1} \\tag {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            357,
+            287,
+            807,
+            325
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Proof. When $\\textstyle \\alpha = { \\frac { \\mu } { L ^ { 2 } } }$ , we have ",
+        "bbox": [
+            171,
+            339,
+            377,
+            357
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\| x _ {i + 1} - x _ {i + 1} ^ {*} \\right\\| _ {2} ^ {2} \\leq \\left\\| x _ {i + 1} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\\\ = \\left\\| x _ {i} - \\alpha \\nabla f (x _ {i}) - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\\\ = \\| x _ {i} - x _ {i} ^ {*} \\| _ {2} ^ {2} - 2 \\alpha \\left\\langle \\nabla f \\left(x _ {i}\\right) \\mid x _ {i} - x _ {i} ^ {*} \\right\\rangle + \\alpha^ {2} \\| \\nabla f (x _ {i}) \\| _ {2} ^ {2} \\tag {3} \\\\ \\leq \\left(1 - 2 \\alpha \\mu + L ^ {2} \\alpha^ {2}\\right) \\| x _ {i} - x _ {i} ^ {*} \\| _ {2} ^ {2} \\\\ = \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) \\| x _ {i} - x _ {i} ^ {*} \\| _ {2} ^ {2}, \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            250,
+            359,
+            823,
+            481
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "which proves (1). To prove (2), we simply note that when using $\\begin{array} { r } { \\alpha = \\frac { 1 } { 2 \\mu } } \\end{array}$ , we have: ",
+        "bbox": [
+            169,
+            484,
+            712,
+            505
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\| x _ {1} - x _ {1} ^ {*} \\right\\| _ {2} ^ {2} \\leq \\left\\| x _ {0} - x _ {0} ^ {*} \\right\\| _ {2} ^ {2} - 2 \\alpha \\left\\langle \\nabla f (x _ {0}) \\mid x _ {0} - x _ {0} ^ {*} \\right\\rangle + \\alpha^ {2} \\left\\| \\nabla f (x _ {0}) \\right\\| _ {2} ^ {2} \\\\ \\leq \\frac {1}{\\mu} \\left\\langle \\nabla f \\left(x _ {0}\\right) \\mid x _ {0} - x _ {0} ^ {*} \\right\\rangle - \\frac {1}{\\mu} \\left\\langle \\nabla f \\left(x _ {0}\\right) \\mid x _ {0} - x _ {0} ^ {*} \\right\\rangle + \\frac {\\left\\| \\nabla f \\left(x _ {0}\\right) \\right\\| _ {2} ^ {2}}{4 \\mu^ {2}} \\tag {4} \\\\ = \\frac {\\| \\nabla f (x _ {0}) \\| _ {2} ^ {2}}{4 \\mu^ {2}}. \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            236,
+            508,
+            823,
+            601
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Interestingly, $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ are direct bounds on the two additional terms obtained by developing $\\lVert x _ { i } - \\alpha \\nabla f ( x _ { i } ) - x _ { i } ^ { * } \\rVert _ { 2 } ^ { 2 }$ , leading to an extremely simple proof. On the intuitive level, $\\mathrm { R S I ^ { - } }$ lower bounds the gain from stepping in the direction of $X _ { f } ^ { \\ast }$ , while $\\mathrm { E B ^ { + } }$ upper bounds the error coming from the component of the gradient orthogonal to that direction. ",
+        "bbox": [
+            169,
+            631,
+            823,
+            694
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Remark 2.5 The literature gives a worst case convergence rate of gradient descent on $\\mu$ -strongly convex and $L$ -smooth functions of $\\begin{array} { r } { \\left\\| x _ { i } - x _ { i } ^ { * } \\right\\| _ { 2 } ^ { 2 } \\leq \\left( 1 - \\frac { 2 \\mu } { \\mu + L } \\right) ^ { 2 i } \\left\\| x _ { 0 } - x _ { 0 } ^ { * } \\right\\| _ { 2 } ^ { 2 } } \\end{array}$ , using the step size $\\begin{array} { r } { \\alpha = \\frac { 2 } { \\mu + L } } \\end{array}$ [28, 30]. While this rate is better for a fixed $\\mu$ and $L$ , we again emphasize that the constants $\\mu$ and $L$ may be very different depending on the chosen conditions, and thus these two rates can not directly be compared. ",
+        "bbox": [
+            169,
+            704,
+            823,
+            789
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Motivation: we empirically verify in Appendix A that the optimization path of a ResNet18 [16] trained for classification on CIFAR10 [20] verifies the interpolation conditions of $R S I ^ { - } \\cap E B ^ { + }$ , which are introduced in Section 4. This result guarantees the existence of a function in $R S I ^ { - } \\cap E B ^ { + }$ which exactly interpolates the observed gradients, and thus all convergence guarantees of $R S I ^ { - } \\cap$ $E B ^ { + }$ naturally apply in this practical deep learning setting. $R S I ^ { - } \\cap \\bar { E } B ^ { + }$ therefore provides linear convergence guarantees while being empirically applicable to neural networks (although with respects to a local minima), an impressive feat given the highly non-convex nature of neural networks loss functions. ",
+        "bbox": [
+            169,
+            800,
+            826,
+            910
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "3 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "3 Related Work ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            321,
+            104
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Throughout the literature, many choices of assumptions have been used to study first-order optimization. Most assumptions fall into one of two categories : lower conditions and upper conditions that respectively take the form of a lower and an upper bound on properties of the objective function. For instance, strong convexity lower bounds the curvature of the objective function and is thus a lower condition. Similarly, smoothness is an upper condition. ",
+        "bbox": [
+            169,
+            121,
+            826,
+            191
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Lower conditions have been the most extensively studied assumptions, such as Polyak-Łojasiewicz [29], local-quasi-convexity [15], weak quasi-convexity [14], quadratic growth [2, 4, 18], Kurdyka-Łojasiewicz [21, 3], optimal strong convexity [22, 25, 8], weak strong convexity [19, 26], error bounds [24]. Some recent works have explored the relations between these lower conditions [19, 38]. In this work we focus on the restricted secant inequality $( \\mathrm { R S I } ^ { - } )$ ) (which we denote as lower restricted secant inequality to differentiate it from its upper bound equivalent) which was introduced in [39], and has been used (along with its convex extension restricted strong convexity) in many recent theoretical derivations of linear convergence rates [36, 31, 37]. ",
+        "bbox": [
+            169,
+            196,
+            826,
+            309
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "On the contrary, because most machine learning objective functions are naturally smooth, fewer works have explored alternatives to smoothness. However as discussed in Remark 2.4, it is still relevant to study these alternatives on smooth objectives due to potentially better conditioning. The most notable ones in the literature are local smoothness [15], restricted smoothness [1], relative smoothness [23, 13, 40], weak-smoothness [14], expected smoothness [11]. In [12], the authors argue that lower conditions can be naturally translated into equivalent upper conditions by changing the lower bound into an upper bound, and vice-versa. Subsequently, they introduce a set of upper equivalent to existing lower conditions, such as upper error bounds $\\dot { \\mathrm { E B ^ { + } } }$ , the natural upper equivalent to error bounds from [24]. Throughout this work, we focus on $\\mathrm { E B ^ { + } }$ as an upper condition. ",
+        "bbox": [
+            169,
+            314,
+            823,
+            439
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Finally, a key to our analysis are the necessary and sufficient interpolation conditions of $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap$ $\\mathrm { E B } ^ { + } ( L )$ (Section 4). The search of these conditions has been largely motivated by Performance Estimation Problems (PEP), introduced in [33] and with many recent successful applications [17, 32, 6, 35, 34]. PEP is a framework for computer-assisted worst-case convergence analysis, that only requires necessary and sufficient interpolation conditions for the considered class of objective functions. In the case of $\\mathrm { \\dot { R } S I ^ { - } } \\cap \\mathrm { E B ^ { + } }$ however, we found the interpolation conditions to be independent (see Section 4), which made the worst-case analysis directly solvable analytically. ",
+        "bbox": [
+            169,
+            445,
+            826,
+            544
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "4 Interpolation conditions ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            565,
+            408,
+            580
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "In this section we provide and discuss the necessary and sufficient interpolation conditions for $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ . Their importance stems from the framework used in PEP and in this work to analyze worst-case convergence. Given a first-order optimization algorithm $\\mathcal { A }$ we want to find the slowest convergence rate of $\\mathcal { A }$ among all $f$ within a class of objective functions $\\mathcal { C }$ and starting point $x _ { 0 } \\in$ $\\mathbb { R } ^ { d } \\setminus { \\bar { X _ { f } ^ { * } } }$ . That is equivalent to solving the following optimization problem at any step number $n$ : ",
+        "bbox": [
+            169,
+            597,
+            823,
+            667
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\min  _ {f \\in \\mathcal {C}, \\left(x _ {i}\\right) _ {i \\leq n} \\in \\left(\\mathbb {R} ^ {d}\\right) ^ {n + 1}} \\frac {\\left\\| x _ {0} - x _ {0} ^ {*} \\right\\| _ {2}}{\\left\\| x _ {n} - x _ {n} ^ {*} \\right\\| _ {2}} \\tag {5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            184,
+            676,
+            823,
+            712
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\text {s . t .} \\forall i \\leq n - 1, x _ {i + 1} = \\mathcal {A} \\left(\\left(x _ {0}, f (x _ {0}), \\nabla f (x _ {0})\\right),..., \\left(x _ {i}, f (x _ {i}), \\nabla f (x _ {i})\\right)\\right)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            292,
+            714,
+            790,
+            732
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Directly searching for $f$ in the functional space is generally intractable, however if we can explicitly find the set $\\mathcal { G }$ of all families $( x _ { i } , f _ { i } , g _ { i } ) _ { i }$ such that $\\exists f \\in { \\mathcal { C } } , \\forall i , \\nabla f ( x _ { i } ) = g _ { i }$ and $f ( x _ { i } ) = f _ { i }$ (we say that $f$ interpolates $( x _ { i } , f _ { i } , g _ { i } ) _ { i } )$ , then problem (5) can be reduced to: ",
+        "bbox": [
+            169,
+            739,
+            823,
+            782
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\min  _ {\\left(x _ {i}, g _ {i}, f _ {i}\\right) _ {i \\leq n} \\in \\left(\\mathbb {R} ^ {d} \\times \\mathbb {R} ^ {d} \\times \\mathbb {R}\\right) ^ {n + 1}} \\frac {\\left\\| x _ {0} - x _ {0} ^ {*} \\right\\| _ {2}}{\\left\\| x _ {n} - x _ {n} ^ {*} \\right\\| _ {2}} \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            232,
+            791,
+            823,
+            833
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\text {s . t .} \\quad \\forall i \\leq n - 1, x _ {i + 1} = \\mathcal {A} \\left(\\left(x _ {0}, f _ {0}, g _ {0}\\right), \\dots , \\left(x _ {i}, f _ {i}, g _ {i}\\right)\\right) \\\\ \\text {a n d} \\quad \\left(x _ {i}, f _ {i}, g _ {i}\\right) _ {i \\leq n} \\in \\mathcal {G} \\end{array} \\tag {6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            387,
+            820,
+            823,
+            862
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "In many cases (see Section 3), problem (6) is tractable and becomes a very powerful analysis tool providing lower bounds, upper bounds, and optimal tuning for different types of algorithms and assumptions used. A crucial and difficult component of this analysis is to formulate the interpolation ",
+        "bbox": [
+            169,
+            869,
+            823,
+            912
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "4 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "conditions, that is the necessary and sufficient conditions for a family $( x _ { i } , f _ { i } , g _ { i } ) _ { i }$ to belong in $\\mathcal { G }$ . Driven by these motivations, we now establish the interpolation conditions for $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ . ",
+        "bbox": [
+            169,
+            90,
+            826,
+            121
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "In Theorem 1, we introduce the necessary and sufficient conditions to interpolate a family $( x _ { i } , g _ { i } )$ , without considering the function values $( f _ { i } ) _ { i }$ . This theorem could be used to find the worst case convergence rate over all first-order algorithms that ignore function values. However, in Corollary 1, we deduce from Theorem 1 sufficient (but not necessary) conditions to interpolate a family $( x _ { i } , f _ { i } , g _ { i } )$ . These conditions allow us in Section 5 to find a lower bound on the worst-case convergence rate for all first-order algorithms (including algorithms that have access to function values information), which we know is tight thanks to Prop 1. ",
+        "bbox": [
+            169,
+            127,
+            826,
+            224
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Theorem 1 (Interpolation conditions) $L e t \\left( x _ { i } , g _ { i } \\right) _ { i \\leq n } \\in \\left( \\mathbb { R } ^ { d } \\times \\mathbb { R } ^ { d } \\right) ^ { n + 1 }$ , such that the $x _ { i }$ are separate points. ",
+        "bbox": [
+            187,
+            250,
+            807,
+            282
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Then, $\\forall \\mu , L > 0$ : ",
+        "bbox": [
+            187,
+            287,
+            305,
+            301
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exists f \\in \\operatorname {R S I} ^ {-} (\\mu) \\cap \\operatorname {E B} ^ {+} (L), s. t. \\forall i, \\nabla f (x _ {i}) = g _ {i}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            334,
+            299,
+            661,
+            318
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/a23343f87934c5f2da807e529eb5a154aa902d5e89d26f4f9246801f0035df13.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            491,
+            321,
+            504,
+            335
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exists X ^ {*} \\subseteq \\mathbb {R} ^ {d} c o n v e x, s. t. \\forall i,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            403,
+            339,
+            593,
+            357
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| g _ {i} \\right\\| _ {2} \\leq L \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} \\quad a n d \\quad \\left\\langle g _ {i} \\mid x _ {i} - x _ {i} ^ {*} \\right\\rangle \\geq \\mu \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2}, \\tag {7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            287,
+            372,
+            807,
+            392
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "where $\\boldsymbol { x } _ { i } ^ { * }$ is the orthogonal projection of $x _ { i }$ onto $X ^ { \\ast }$ . ",
+        "bbox": [
+            187,
+            398,
+            537,
+            416
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Proof. In order to preserve concision and clarity, we will only present the broad outline of the proof here. For a complete technical proof, see Appendix B. ",
+        "bbox": [
+            169,
+            446,
+            823,
+            476
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The direct implication is trivial as it is a direct application of $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ and $\\mathrm { E B } ^ { + } ( L )$ definitions to $f$ in $( x _ { i } ) _ { i }$ . For the reverse implication, we will construct a function $f _ { \\epsilon , \\beta }$ that interpolates $( x _ { i } , g _ { i } ) _ { i }$ . The function $f _ { \\epsilon , \\beta }$ is a quadratic everywhere except in the spheres of radius $\\epsilon$ around each $x _ { i }$ , $\\epsilon$ being small enough for these spheres to never intersect. Inside the sphere of radius $\\epsilon$ around a given $x _ { i }$ $f _ { \\epsilon , \\beta }$ will be perturbed by adding a term $\\lambda ( \\| x - x _ { i } \\| _ { 2 } ) h ( x )$ where $h$ is affine in $x$ , and $\\lambda$ is a scaling term so that $\\bar { \\lambda } ( \\epsilon ) = 0$ at the border of the sphere, and $\\lambda ( 0 ) = 1$ in its center $x _ { i }$ . ",
+        "bbox": [
+            169,
+            481,
+            825,
+            566
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The key is to find a function $\\lambda$ that preserves the properties of $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ and $\\mathrm { E B } ^ { + } ( L )$ . We use ",
+        "bbox": [
+            169,
+            571,
+            787,
+            588
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\lambda_ {\\epsilon , \\beta} (u) = \\frac {1 + \\cos \\left(\\pi \\frac {u ^ {\\beta}}{\\epsilon^ {\\beta}}\\right)}{2} \\tag {8}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            628,
+            823,
+            667
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "And our construction $f _ { \\epsilon , \\beta }$ is given by: ",
+        "bbox": [
+            169,
+            707,
+            423,
+            722
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {\\epsilon , \\beta} (x) = \\left\\{ \\begin{array}{l l} \\frac {\\mu + L}{4} \\| x - x ^ {*} \\| _ {2} ^ {2} & \\text {i f} \\forall i, \\| x - x _ {i} \\| _ {2} \\geq \\epsilon \\\\ \\frac {\\mu + L}{4} \\| x - x ^ {*} \\| _ {2} ^ {2} + \\lambda_ {\\epsilon , \\beta} \\left(\\| x - x _ {i} \\| _ {2}\\right) \\left\\langle g _ {i} - \\frac {\\mu + L}{2} \\left(x _ {i} - x _ {i} ^ {*}\\right) \\mid x - x _ {i} \\right\\rangle & \\text {i f} \\exists i, \\| x - x _ {i} \\| _ {2} <   \\epsilon \\end{array} \\right. \\tag {9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            169,
+            762,
+            851,
+            819
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The rest of the proof is to use the Taylor expansions of $f _ { \\epsilon , \\beta }$ to show that for sufficiently small $\\epsilon$ and $\\beta , f _ { \\epsilon , \\beta }$ will belong in $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ and $\\mathrm { E B } ^ { + } ( L )$ (see Appendix B). ",
+        "bbox": [
+            169,
+            859,
+            823,
+            892
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "5 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Corollary 1 Let $( x _ { i } , f _ { i } , g _ { i } ) _ { i \\leq n } \\in \\left( \\mathbb { R } ^ { d } \\times \\mathbb { R } \\times \\mathbb { R } ^ { d } \\right) ^ { n + 1 }$ , such that the $x _ { i }$ are separate points. ",
+        "bbox": [
+            186,
+            94,
+            792,
+            114
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Then, $\\forall \\mu , L > 0$ : ",
+        "bbox": [
+            187,
+            118,
+            305,
+            133
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exists X ^ {*} \\subseteq \\mathbb {R} ^ {d} c o n v e x, s. t. \\forall i,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            403,
+            128,
+            593,
+            148
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| g _ {i} \\right\\| _ {2} \\leq L \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            433,
+            161,
+            584,
+            179
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\langle g _ {i} \\mid x _ {i} - x _ {i} ^ {*} \\right\\rangle \\geq \\mu \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\tag {10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            380,
+            181,
+            807,
+            203
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {i} = \\frac {\\mu + L}{4} \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            455,
+            202,
+            617,
+            231
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "⇓ ",
+        "bbox": [
+            491,
+            244,
+            504,
+            258
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exists f \\in \\operatorname {R S I} ^ {-} (\\mu) \\cap \\operatorname {E B} ^ {+} (L), s. t. \\forall i, \\nabla f (x _ {i}) = g _ {i} \\quad a n d \\quad f (x _ {i}) = f _ {i},\n$$",
+        "text_format": "latex",
+        "bbox": [
+            267,
+            263,
+            728,
+            280
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $\\boldsymbol { x } _ { i } ^ { * }$ is the orthogonal projection of $x _ { i }$ onto $X ^ { \\ast }$ . ",
+        "bbox": [
+            187,
+            289,
+            537,
+            306
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Proof. We simply use the function $f _ { \\epsilon , \\beta }$ from the proof of Theorem 1 and note that $\\forall i$ $i , f _ { \\epsilon , \\beta } ( x _ { i } ) =$ $\\begin{array} { r } { \\frac { \\mu + L } { 4 } \\| x _ { i } - x _ { i } ^ { * } \\| _ { 2 } ^ { 2 } } \\end{array}$ . ",
+        "bbox": [
+            169,
+            339,
+            823,
+            375
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Theorem 1 and Corollary 1 are the key elements to prove the optimality of gradient descent on $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ among all first-order algorithms (see Section 5). ",
+        "bbox": [
+            169,
+            397,
+            823,
+            428
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Remark 4.1 The interpolation conditions in Theorem 1 are independent, in the sense that a family $( x _ { i } , g _ { i } ) _ { i }$ admits an interpolation in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ if and only if each $\\{ ( x _ { i } , g _ { i } ) \\}$ admits an interpolation in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ . Similarly, the sufficient interpolation conditions in Corollary 1 are also independent. ",
+        "bbox": [
+            169,
+            465,
+            826,
+            523
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "This property of independent interpolation conditions drastically simplifies convergence analysis and is the main reason we are able to analytically derive a lower bound in Section 5. Indeed, given an interpolable family $( x _ { i } , f _ { i } , g _ { i } ) _ { i \\leq n }$ for a given set $X ^ { \\ast }$ , it is sufficient to show that $\\left( x _ { n + 1 } , f _ { n + 1 } , g _ { n + 1 } \\right)$ is interpolable with $X ^ { * }$ to prove that the entire family $( x _ { i } , f _ { i } , g _ { i } ) _ { i \\leq n + 1 }$ can be interpolated. It is thus simple to find the set of interpolable $( f _ { n + 1 } , g _ { n + 1 } )$ given $X ^ { * }$ , $x _ { n + 1 }$ , and an interpolable (xi, fi, gi)i≤n. $( x _ { i } , f _ { i } , g _ { i } ) _ { i \\leq n }$ ",
+        "bbox": [
+            169,
+            561,
+            826,
+            650
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "5 Lower bound on the convergence rate ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            705,
+            521,
+            724
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "In this Section we derive a lower bound on the convergence rate of first-order algorithms on $\\mathrm { R S I ^ { - } }$ and $\\mathrm { E B ^ { + } }$ . This lower bounds applies under the assumption that the number of steps taken is smaller than the number of dimension $d$ . This assumption is frequent in the literature (e.g. [5]) and not constraining for high-dimensional optimization. The observed gradients of the worst-case functions for optimal algorithms are typically orthogonal to one another (see [6]) which is not possible when the number of steps becomes larger than the dimension $d$ . We conjecture that when not bounding the number of steps, it is possible to achieve an asymptotic rate in $O \\left( 2 ^ { - { \\frac { n } { d } } } \\right)$ which would be better than the usual rates obtained for very ill-conditioned functions, while having little to no practical uses due to the bad convergence properties on a lower number of steps. ",
+        "bbox": [
+            169,
+            762,
+            826,
+            888
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "We now introduce Lemma 1, which is the cornerstone of the proof of Theorem 2: ",
+        "bbox": [
+            169,
+            893,
+            705,
+            909
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "6 ",
+        "bbox": [
+            493,
+            936,
+            504,
+            946
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Lemma 1 Let $\\mu > 0$ and $L > \\mu$ . Let $\\begin{array} { r l r } { \\alpha _ { 0 } ~ \\in } & { { } \\left[ \\frac { \\mu } { L ^ { 2 } } , \\operatorname* { m a x } \\left( \\frac { \\mu } { L ^ { 2 } } , \\frac { 1 } { 2 \\mu } \\right) \\right] } \\end{array}$ . For any first-order optimization algorithm $\\mathcal { A }$ and starting point $\\boldsymbol { x } _ { 0 } \\in \\mathbb { R } ^ { \\bar { d } }$ , there exists $( g _ { i } ) _ { i \\leq d - 2 } \\in \\mathbb { R } ^ { d }$ , $( f _ { i } ) _ { i \\leq d - 2 } \\in$ $\\mathbb { R }$ and $S _ { d - 2 } \\subseteq S _ { d - 1 } \\subseteq \\cdot \\cdot \\cdot \\subseteq S _ { 0 } \\subseteq \\mathbb { R } ^ { d }$ such that: ",
+        "bbox": [
+            187,
+            93,
+            807,
+            148
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1. $\\forall i \\leq d - 2$ , there exists a $( d - i - 1 )$ -dimensional affine space $\\mathcal { H } _ { i }$ containing $\\boldsymbol { S } _ { i }$ and in which $S _ { i }$ is a $( d - i - 2 )$ -sphere of radius $\\begin{array} { r } { r _ { i } = \\sqrt { \\frac { \\alpha _ { 0 } } { \\mu } - \\alpha _ { 0 } ^ { 2 } } \\left. g _ { 0 } \\right. _ { 2 } \\left( 1 - \\frac { \\mu ^ { 2 } } { L ^ { 2 } } \\right) ^ { \\frac { i } { 2 } } } \\end{array}$ and center $c _ { i } \\in \\mathcal { H } _ { i }$ . ",
+            "2. Let $( x _ { i } ) _ { i }$ be the iterates generated by $\\mathcal { A }$ starting from $x _ { 0 }$ and reading gradients $( g _ { i } ) _ { i }$ and function values $( f _ { i } ) _ { i }$ , then for any $i \\leq d - 2$ and any $x \\in S _ { i }$ , there exists a function $f$ in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ minimized by $\\{ x \\}$ that interpolates $( x _ { j } , f _ { j } , g _ { j } ) _ { j \\leq i }$ . "
+        ],
+        "bbox": [
+            225,
+            159,
+            807,
+            271
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Proof. In order to preserve concision and clarity, we will only present the broad outline of the proof here. For a complete technical proof, see Appendix C. ",
+        "bbox": [
+            169,
+            289,
+            823,
+            318
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "ratively. For initialisation, we take any non-zero , and finally $g _ { 0 }$ , set $f _ { 0 } ~ =$ $\\frac { \\mu + L } { 4 \\mu } \\alpha _ { 0 } \\left\\| g _ { 0 } \\right\\| _ { 2 } ^ { 2 }$ $c _ { 0 } = x _ { 0 } - \\alpha _ { 0 } g _ { 0 }$ ",
+        "bbox": [
+            171,
+            324,
+            823,
+            358
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {S} _ {0} = \\left\\{x \\in \\mathbb {R} ^ {d} \\big | \\langle x - c _ {0} \\mid g _ {0} \\rangle = 0 \\right\\} \\cap \\left\\{x \\in \\mathbb {R} ^ {d} \\Big | \\| x - c _ {0} \\| _ {2} = \\sqrt {\\frac {\\alpha_ {0}}{\\mu} - \\alpha_ {0} ^ {2}} \\| g _ {0} \\| _ {2} \\right\\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            228,
+            372,
+            764,
+            407
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Then assuming we have a sequence $( f _ { j } , g _ { j } , S _ { j } ) _ { j \\leq i < ( d - 2 ) }$ respecting the conditions of the Lemma, noting $\\mathcal { H } _ { i }$ the $d - i - 1$ dimensional affine space in which $s _ { i }$ is a $( d - i - 2 )$ dimensional sphere, and $x _ { i + 1 }$ the $( i + 1 )$ -th iterate returned by $\\mathcal { A }$ . Let $h _ { i + 1 }$ the orthogonal projection of $x _ { i + 1 }$ into $\\mathcal { H } _ { i }$ . ",
+        "bbox": [
+            169,
+            421,
+            826,
+            465
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "If $h _ { i + 1 } \\neq c _ { i }$ , let $\\begin{array} { r } { v = \\frac { ( h _ { i + 1 } - c _ { i } ) } { \\Vert h _ { i + 1 } - c _ { i } \\Vert _ { 2 } } } \\end{array}$ (hi+1−ci)kh −c k . If hi+1 = ci, let s ∈ Si and v = $h _ { i + 1 } = c _ { i }$ $s \\in S _ { i }$ $\\begin{array} { r } { v = \\frac { ( s - c _ { i } ) } { \\left\\| s - c _ { i } \\right\\| _ { 2 } } } \\end{array}$ . ",
+        "bbox": [
+            169,
+            470,
+            663,
+            494
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We then construct: ",
+        "bbox": [
+            171,
+            498,
+            297,
+            511
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\nc _ {i + 1} = c _ {i} - \\frac {\\mu}{L} r _ {i} v\n$$",
+        "text_format": "latex",
+        "bbox": [
+            434,
+            539,
+            560,
+            566
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {i + 1} = \\frac {\\mu + L}{4} \\left(\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2} + \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) r _ {i} ^ {2}\\right)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            339,
+            602,
+            653,
+            633
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\ng _ {i + 1} = L \\frac {\\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2}}{\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2}} \\left(x _ {i + 1} - c _ {i + 1}\\right)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            362,
+            667,
+            632,
+            702
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {H} _ {i + 1} = \\left\\{x \\in \\mathcal {H} _ {i} \\mid \\langle x - c _ {i} \\mid v \\rangle = - \\frac {\\mu}{L} r _ {i} \\right\\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            354,
+            734,
+            638,
+            762
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {S} _ {i + 1} = \\mathcal {S} _ {i} \\cap \\mathcal {H} _ {i + 1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            433,
+            801,
+            560,
+            816
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We verify in Appendix C that this construction respects the properties of Lemma 1. ",
+        "bbox": [
+            169,
+            838,
+            717,
+            854
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "We can now introduce Theorem 2 which gives us a lower bound on the worst-case convergence rate of any first-order algorithm on $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ and $\\mathrm { E B } ^ { + } ( L )$ . ",
+        "bbox": [
+            169,
+            878,
+            823,
+            909
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "7 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Theorem 2 (Lower bound on $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ ) Let $\\mathcal { A }$ be any first-order algorithm on $\\mathbb { R } ^ { d }$ , $\\mu > 0$ and $L \\geq \\mu$ . For any $\\boldsymbol { x } _ { 0 } \\in \\mathbb { R } ^ { d }$ , there exists $x ^ { * } \\in \\mathbb { R } ^ { d }$ and a function $f$ in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ minimized by $X ^ { * } = \\{ x ^ { * } \\}$ such that ",
+        "bbox": [
+            187,
+            93,
+            810,
+            138
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\forall i \\leq d - 1, \\| x _ {i} - x _ {i} ^ {*} \\| _ {2} ^ {2} \\geq \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) ^ {i} \\| x _ {0} - x _ {0} ^ {*} \\| _ {2} ^ {2} \\tag {11}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            325,
+            146,
+            807,
+            181
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Furthermore, $\\begin{array} { r } { i f { \\frac { L } { \\mu } } \\geq \\sqrt { 2 } } \\end{array}$ , there exists h in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ minimized by $X ^ { * } = \\{ x ^ { * } \\}$ such that ",
+        "bbox": [
+            186,
+            188,
+            808,
+            219
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\forall i \\leq d - 1, \\| z _ {i} - z _ {i} ^ {*} \\| _ {2} ^ {2} \\geq \\frac {\\left\\| \\nabla h (z _ {0}) \\right\\| _ {2} ^ {2}}{4 \\mu^ {2}} \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) ^ {i - 1} \\tag {12}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            318,
+            218,
+            807,
+            253
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "where $( x _ { i } )$ (resp. $( z _ { i } ) .$ ) is the trajectory obtained by applying $\\mathcal { A }$ to $f$ (resp. h) starting in $x _ { 0 }$ . ",
+        "bbox": [
+            187,
+            257,
+            794,
+            273
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Note that since $X ^ { * }$ is a singleton, $\\forall i , x _ { i } ^ { * } = z _ { i } ^ { * } = x ^ { * }$ . ",
+        "bbox": [
+            169,
+            287,
+            517,
+            303
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Proof. If $L = \\mu$ , then the inequalities are trivial from the positivity of the norm. If $L > \\mu$ , let $( g _ { i } , f _ { i } , S _ { i } ) _ { i \\leq ( d - 2 ) }$ be the sequence introduced in Lemma 1 for $\\begin{array} { r } { \\alpha _ { 0 } \\in \\left[ \\frac { \\mu } { L ^ { 2 } } , \\operatorname* { m a x } \\left( \\frac { \\mu } { L ^ { 2 } } , \\frac { 1 } { 2 \\mu } \\right) \\right] } \\end{array}$ . Let us note that for any $x \\in S _ { 0 }$ , $\\begin{array} { r } { \\| \\boldsymbol { x } _ { 0 } - \\boldsymbol { x } \\| _ { 2 } ^ { 2 } = \\frac { \\alpha _ { 0 } \\| \\boldsymbol { g } _ { 0 } \\| _ { 2 } ^ { 2 } } { \\mu } } \\end{array}$ (see initialisation in Appendix C). ",
+        "bbox": [
+            169,
+            308,
+            823,
+            368
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Let $i \\in \\{ 1 , \\ldots , d - 1 \\}$ . $\\boldsymbol { S } _ { i - 1 }$ has radius $r _ { i - 1 }$ , thus there exists $x ^ { \\ast } \\in S _ { i - 1 }$ such that $\\| x _ { i } - x ^ { * } \\| _ { 2 } \\geq$ $r _ { i - 1 }$ , and thus : ",
+        "bbox": [
+            169,
+            375,
+            823,
+            402
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x _ {i} - x ^ {*} \\right\\| _ {2} ^ {2} \\geq r _ {i - 1} ^ {2} = \\left(\\frac {\\alpha_ {0}}{\\mu} - \\alpha_ {0} ^ {2}\\right) \\left\\| g _ {0} \\right\\| _ {2} ^ {2} \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) ^ {i - 1} \\tag {13}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            308,
+            419,
+            823,
+            457
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "When setting $\\textstyle \\alpha _ { 0 } = { \\frac { \\mu } { L ^ { 2 } } }$ and observing that $x ^ { * } \\in S _ { i - 1 } \\subseteq S _ { 0 }$ and thus $\\begin{array} { r } { \\left\\| x _ { 0 } - x ^ { * } \\right\\| _ { 2 } ^ { 2 } = \\frac { \\alpha _ { 0 } \\left\\| g _ { 0 } \\right\\| _ { 2 } ^ { 2 } } { \\mu } } \\end{array}$ in (13), we obtain (11). If $\\begin{array} { r } { \\frac { L } { \\mu } \\geq \\sqrt { 2 } } \\end{array}$ , we set $\\begin{array} { r } { \\alpha _ { 0 } = \\frac { 1 } { 2 \\mu } } \\end{array}$ and (13) immediately yields (12). ",
+        "bbox": [
+            169,
+            467,
+            826,
+            508
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Remark 5.1 Since the lower bounds established in Theorem 2 are exactly matched by the convergence guarantees of gradient descent (see Prop 1), these bounds are tight and gradient descent is exactly optimal on $\\operatorname { \\mathrm { R S I } } ^ { - } ( \\mu ) \\cap \\operatorname { E B } ^ { + } ( L )$ . This is a concrete example of the sensitivity of theoretical optimality to the choice of complexity classes. ",
+        "bbox": [
+            169,
+            537,
+            826,
+            595
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5.1 Discussion ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            609,
+            287,
+            625
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "The first bound presented in Theorem 2 gives the optimal solution when trying to solve ",
+        "bbox": [
+            169,
+            636,
+            743,
+            651
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\min  _ {\\mathcal {A}} \\max  _ {f, x _ {0}} \\frac {\\left\\| x _ {n} - x _ {n} ^ {*} \\right\\| _ {2}}{\\left\\| x _ {0} - x _ {0} ^ {*} \\right\\| _ {2}} \\tag {14}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            413,
+            656,
+            823,
+            691
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "While the second bound gives the optimal solution when trying to solve ",
+        "bbox": [
+            169,
+            695,
+            643,
+            710
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\min  _ {\\mathcal {A}} \\max  _ {f, x _ {0}} \\frac {\\left\\| x _ {n} - x _ {n} ^ {*} \\right\\| _ {2}}{\\left\\| \\nabla f (x _ {0}) \\right\\| _ {2}} \\tag {15}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            413,
+            715,
+            823,
+            750
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "For general smooth and convex functions, (15) will not have a solution (for any $\\mathcal { A }$ , the quantity will not have a worst case upper bound), which is why (14) has historically been the focus of optimization literature. However in practice, when (15) admits a solution, as is the case for $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { \\dot { E } B } ^ { + } ( L )$ , it fits practical motivations better than (14) : when starting from $x _ { 0 }$ and observing an initial gradient $g _ { 0 }$ , the solution to (15) is the one that will minimize $\\lVert x _ { n } - x _ { n } ^ { * } \\rVert _ { 2 }$ in the worst case. In comparison, for a fixed $\\| \\nabla f ( x _ { 0 } ) \\| _ { 2 }$ , the solution to (14) will be faster when $\\lVert x _ { 0 } - x _ { 0 } ^ { * } \\rVert _ { 2 }$ is small, and slower when $\\lVert x _ { 0 } - x _ { 0 } ^ { * } \\rVert _ { 2 }$ is large, leading to a slower worst-case convergence. ",
+        "bbox": [
+            169,
+            753,
+            826,
+            853
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "When conver $\\textstyle { \\frac { L } { \\mu } } > { \\sqrt { 2 } }$ ing of better $\\textstyle \\alpha _ { 0 } = { \\frac { 1 } { 2 \\mu } }$ on tant nstead of . While s $\\frac { \\mu } { L ^ { 2 } }$ leads to a worst-case small constant factor $\\lVert x _ { n } - x _ { n } ^ { * } \\rVert _ { 2 }$ $\\begin{array} { r } { c = \\frac { L ^ { 2 } } { 2 ( L ^ { 2 } - \\mu ^ { 2 } ) } } \\end{array}$ is often considered not impactful, the number of steps required to make up for this constant factor ",
+        "bbox": [
+            169,
+            859,
+            825,
+            912
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "8 ",
+        "bbox": [
+            493,
+            935,
+            504,
+            946
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "image",
+        "img_path": "images/344d2822d6a61e3c679711fa23ea37e3002540daabdeb200345c9548a81d7d0c.jpg",
+        "image_caption": [
+            ""
+        ],
+        "image_footnote": [],
+        "bbox": [
+            218,
+            104,
+            401,
+            212
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/242b75f63aeb8ac7aa94acdf1a6c02c2137b6af4fd2efaf84af19e9b5336c987.jpg",
+        "image_caption": [
+            ""
+        ],
+        "image_footnote": [],
+        "bbox": [
+            408,
+            107,
+            570,
+            212
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/be40cc147c5ecdb733ec9fa27852c08e0cc2f36c2fba0015fd9b05d59184fba4.jpg",
+        "image_caption": [
+            "",
+            "Figure 1: 2D representations of the possible positions of $x ^ { * }$ given $x _ { 0 }$ and √ $g _ { 0 }$ , for three possible values of $\\frac { L } { \\mu }$ . $x ^ { * }$ must be in $C _ { R S I }$ (red) but not in $C _ { E B }$ (green). When $\\textstyle { \\frac { L } { \\mu } } > { \\sqrt { 2 } }$ (left), doing a larger step to reach the center of $C _ { R S I }$ will minimize worst-case sub-optimality. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            602,
+            107,
+            753,
+            212
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "is $\\begin{array} { r } { n = \\frac { - \\log ( 2 ) } { \\log \\left( 1 - \\frac { \\mu ^ { 2 } } { L ^ { 2 } } \\right) } - 1 } \\end{array}$ , which yields $n \\approx 6 8$ for $\\begin{array} { r } { \\frac { L } { \\mu } = 1 0 } \\end{array}$ and $n \\approx 6 9 3 0$ for $\\begin{array} { r } { \\frac { L } { \\mu } = 1 0 0 } \\end{array}$ , and can thus become substantial on ill-conditioned functions. ",
+        "bbox": [
+            169,
+            323,
+            823,
+            363
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Finally, we propose a geometric interpretation of the threshold $\\textstyle { \\frac { L } { \\mu } } = { \\sqrt { 2 } }$ . Given $x _ { 0 }$ and $g _ { 0 }$ , $\\mathrm { R S I } ^ { - } \\left( \\mu \\right)$ requires $x ^ { * }$ to be within the circle of center $\\textstyle x _ { 0 } - { \\frac { g _ { 0 } } { 2 \\mu } }$ and radius kg0k22µ , while EB+(L) requires x∗ to $\\frac { \\| g _ { 0 } \\| _ { 2 } } { 2 \\mu }$ $\\mathrm { E B } ^ { + } ( L )$ $x ^ { * }$ not be within the circle of center $x _ { 0 }$ and radius kg0k2L . In Figure 1 we show these circles for different $\\frac { \\| g _ { 0 } \\| _ { 2 } } { L }$ values of $\\frac { L } { \\mu }$ . When $\\textstyle { \\frac { L } { \\mu } } > { \\sqrt { 2 } }$ (Figure 1(a)), $\\begin{array} { r } { x _ { 1 } = x _ { 0 } - \\frac { \\mu } { L ^ { 2 } } g _ { 0 } } \\end{array}$ minimizes $\\frac { \\| { \\boldsymbol { x } } _ { 1 } - { \\boldsymbol { x } } ^ { * } \\| _ { 2 } } { \\| { \\boldsymbol { x } } _ { 0 } - { \\boldsymbol { x } } ^ { * } \\| _ { 2 } }$ over all possible $x ^ { * }$ , while $\\textstyle x _ { 1 } = x _ { 0 } - { \\frac { g _ { 0 } } { 2 \\mu } }$ minimizes $\\lVert x _ { 1 } - x ^ { * } \\rVert _ { 2 }$ . As $\\frac { L } { \\mu }$ becomes smaller than $\\sqrt { 2 }$ (Figure 1(b) and 1(c)), the same point $\\begin{array} { r } { x _ { 1 } = x _ { 0 } - \\frac { \\mu } { L ^ { 2 } } g _ { 0 } } \\end{array}$ minimizes both quantities. ",
+        "bbox": [
+            169,
+            369,
+            826,
+            484
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "5.2 PEP experiment ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            500,
+            326,
+            513
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Since we have found necessary and sufficient interpolation conditions in Theorem 1, we can use the PEP framework on $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ to confirm our results and derive the worst-case convergence rate of first-order algorithms. In Figure 2 we show the worst-case linear rate of convergence of Heavy Ball (HB) [29] on $\\mathrm { R S I } ^ { - } ( 0 . 1 ) \\cap \\bar { \\mathrm { E B } } ^ { + } ( 1 . 0 )$ for regularly sampled learning rate $\\alpha$ and momentum $\\beta$ (bright yellow means no linear convergence), generated with PEPit [9]. We remind the update rule of HB ",
+        "bbox": [
+            169,
+            525,
+            823,
+            595
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "equation",
+        "text": "$$\nx _ {n + 1} = x _ {n} - \\alpha \\nabla f (x _ {n}) + \\beta \\left(x _ {n} - x _ {n - 1}\\right)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            356,
+            604,
+            635,
+            619
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Since gradient descent is a special case of HB where $\\beta = 0$ , we observe as expected that the optimal rate of convergence is achieved for $\\beta = 0$ and $\\alpha = 0 . 1 = \\textstyle { \\frac { \\mu } { L ^ { 2 } } }$ . Moreover, Figure 2 shows that momentum does not do well on $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ but gradient decent benefits from a relative robustness to the tuning of $\\alpha :$ we get similar convergence rates for any $\\alpha \\in [ 0 . 0 5 , 0 . 1 5 ]$ . ",
+        "bbox": [
+            169,
+            627,
+            823,
+            686
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "6 Conclusion ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            699,
+            299,
+            714
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Our main result is to prove that for any $\\mu > 0$ and $L \\geq \\mu$ , gradient descent is exactly optimal on the class of functions $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\bar { \\mathrm { E B } } ^ { + } ( L )$ (by exact optimality, we mean that the convergence guarantees of GD match the lower bound of worst-case performances exactly, without a constant factor of difference). This result confirms the observation in [12] that optimality is overly sensitive to the choice of assumptions, and should thus be considered with a lot of caution. ",
+        "bbox": [
+            169,
+            731,
+            823,
+            801
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Interestingly, our analysis also identifies two similar notions of optimality, one of which suggests using a larger step size on the first iteration when the function is not particularly well-conditioned to improve worst-case convergence speed (see section 5.1). ",
+        "bbox": [
+            169,
+            806,
+            823,
+            849
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "We verified empirically that $R S I ^ { - } \\cap E B ^ { + }$ , with respect to the last iterate, are verified on the optimization paths of simple deep neural networks (c.f. Appendix A). This suggests that unlike usual alternatives which are known to not be verified on the highly non-convex loss landscapes of neural networks, convergence guarantees on $R S I ^ { - } \\cap E B ^ { + }$ realistically apply to deep learning. On the ",
+        "bbox": [
+            169,
+            854,
+            823,
+            912
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "9 ",
+        "bbox": [
+            493,
+            935,
+            503,
+            946
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/383f97f3dab21005cab5d7c47322bf8ba11a0d458794aa4ab4133f2dba0c4efa.jpg",
+        "image_caption": [
+            "Figure 2: Worst-case linear convergence rate of heavy ball on $\\mathrm { R S I } ^ { - } ( 0 . 1 ) \\cap \\mathrm { E B } ^ { + } ( 1 )$ depending of its hyperparameters $\\alpha$ and $\\beta$ , as calculated by PEP. The best rate is achieved for $\\alpha = 0 . 1$ and $\\beta = 0$ . "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            287,
+            104,
+            684,
+            349
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "other hand, the impossibility to accelerate the convergence rate on $R S I ^ { - } \\cap E B ^ { + }$ implies that these assumptions are insufficient to explain the empirical successes of accelerated methods. ",
+        "bbox": [
+            169,
+            409,
+            823,
+            439
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "For the scope of this work we have focused on worst-case convergence analysis. While in practice average-case convergence rates are more insightful than their worst-case counterparts, such results are rare due to the necessity of defining a reasonable distribution on the considered class of functions, which is generally unfeasible. While such distribution on $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ is equally difficult to define, it should be feasible to define instead a reasonable distribution of the observed gradient for a given sampling point $x$ and nearest minima $x ^ { * }$ , e.g. an uniform distribution over the (simple) set of possible gradients. Such approach is conceivable with $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ only because the interpolation conditions are independent (see remark 4.1), and thus we can easily make sure that any set of gradients sampled from this distribution can be interpolated within the class. While the distribution will necessarily be arbitrary, we believe such analysis could yield very useful insights and $\\mathrm { R S I } ^ { - } \\cap \\mathrm { E B } ^ { + }$ is a rare opportunity to follow this approach. ",
+        "bbox": [
+            169,
+            444,
+            826,
+            597
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Finally, many alternative conditions have been introduced in the literature (see Section 3), for which optimality results are still unknown. The PEP framework is a powerful tool to study conditions for which we can determine sufficient and necessary interpolation conditions, which would improve our understanding of first-order algorithm properties and tuning on a wide variety of objective function classes. ",
+        "bbox": [
+            169,
+            602,
+            823,
+            674
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgments and Disclosure of Funding ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            691,
+            555,
+            709
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "The authors would like to thank Leonard Boussioux, for useful discussions and feedback. Ioannis Mitliagkas acknowledges support by an NSERC Discovery grant (RGPIN-2019-06512), a Samsung grant and a Canada CIFAR AI chair. ",
+        "bbox": [
+            169,
+            722,
+            823,
+            765
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "bbox": [
+            173,
+            784,
+            267,
+            799
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[1] A. Agarwal, S. N. Negahban, and M. J. Wainwright. Fast global convergence of gradient methods for high-dimensional statistical recovery. Ann. Statist., 40(5):2452–2482, 2012. ",
+            "[2] M. Anitescu. Degenerate nonlinear programming with a quadratic growth condition. SIAM Journal on Optimization, 10(4):1116–1135, 2000. ",
+            "[3] J. Bolte, A. Daniilidis, O. Ley, and L. Mazet. Characterizations of łojasiewicz inequalities and applications. arXiv:0802.0826, 2008. "
+        ],
+        "bbox": [
+            179,
+            806,
+            825,
+            911
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "10 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[4] J. F. Bonnans and A. D. Ioffe. Second-order sufficiency and quadratic growth for non isolated minima. PhD thesis, INRIA, 1993. ",
+            "[5] S. Bubeck. Convex optimization: Algorithms and complexity, 2015. ",
+            "[6] Y. Drori and A. B. Taylor. Efficient first-order methods for convex minimization: a constructive approach. Mathematical Programming, 184(1-2):183–220, Jun 2019. ISSN 1436-4646. doi: 10.1007/s10107-019-01410-2. URL http://dx.doi.org/10.1007/ s10107-019-01410-2. ",
+            "[7] Y. Drori and M. Teboulle. Performance of first-order methods for smooth convex minimization: a novel approach, 2012. ",
+            "[8] P. Gong and J. Ye. Linear convergence of variance-reduced stochastic gradient without strong convexity. arXiv:1406.1102, 2014. ",
+            "[9] B. Goujaud, C. Moucer, F. Glineur, J. Hendrickx, A. Taylor, and A. Dieuleveut. Pepit: computerassisted worst-case analyses of first-order optimization methods in python, 2022. ",
+            "[10] R. M. Gower. Convergence theorems for gradient descent. Lecture notes for Statistical Optimization, 2018. ",
+            "[11] R. M. Gower, O. Sebbouh, and N. Loizou. Sgd for structured nonconvex functions: Learning rates, minibatching and interpolation. arXiv:2006.1031, 2020. ",
+            "[12] C. Guille-Escuret, M. Girotti, B. Goujaud, and I. Mitliagkas. A study of condition numbers for first-order optimization. In International Conference on Artificial Intelligence and Statistics, pages 1261–1269. PMLR, 2021. ",
+            "[13] F. Hanzely, P. Richtarik, and L. Xiao. Accelerated Bregman proximal gradient methods for relatively smooth convex optimization. Technical Report MSR-TR-2018-22, Microsoft, 2018. ",
+            "[14] M. Hardt, T. Ma, and B. Recht. Gradient descent learns linear dynamical systems. Journal of Machine Learning Research, 19, 2018. ",
+            "[15] E. Hazan, K. Levy, and S. Shalev-Shwartz. Beyond convexity: Stochastic quasi-convex optimization. In C. Cortes, N. D. Lawrence, D. D. Lee, M. Sugiyama, and R. Garnett, editors, Advances in Neural Information Processing Systems 28, pages 1594–1602. Curran Associates, Inc., 2015. ",
+            "[16] K. He, X. Zhang, S. Ren, and J. Sun. Deep residual learning for image recognition, 2015. URL https://arxiv.org/abs/1512.03385. ",
+            "[17] B. Hu and L. Lessard. Dissipativity theory for nesterov’s accelerated method, 2017. ",
+            "[18] A. Ioffe. On sensitivity analysis of nonlinear programs in banach spaces: the approach via composite unconstrained optimization. SIAM Journal on Optimization, 4(1):1–43, 1994. ",
+            "[19] H. Karimi, J. Nutini, and M. Schmidt. Linear convergence of gradient and proximal-gradient methods under the polyak-łojasiewicz condition. CoRR, abs/1608.04636, 2016. URL http: //arxiv.org/abs/1608.04636. ",
+            "[20] A. Krizhevsky. Learning multiple layers of features from tiny images. Technical report, 2009. ",
+            "[21] K. Kurdyka. On gradients of functions definable in o-minimal structures. Annales de l’institut Fourier, 48:769–783, 1998. ",
+            "[22] J. Liu and S. J. Wright. Asynchronous stochastic coordinate descent: Parallelism and convergence properties. SIAM J. Optim., 25(1):351—376, 2015. ",
+            "[23] H. Lu, R. M. Freund, and Y. Nesterov. Relatively-smooth convex optimization by first-order methods, and applications. SIAM J. Optim., 28(1):333–354, 2018. ",
+            "[24] Z.-Q. Luo and P. Tseng. Error bounds and convergence analysis of feasible descent methods: a general approach. Annals of Operations Research, 46(1):157–178, 1993. "
+        ],
+        "bbox": [
+            173,
+            90,
+            826,
+            912
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "[25] C. Ma, R. Tappenden, and M. Takàc. Linear convergence of the randomized feasible descent ˇ method under the weak strong convexity assumption. Journal of Machine Learning Research, 17(228):1–24, 2016. ",
+            "[26] I. Necoara, Y. Nesterov, and F. Glineur. Linear convergence of first order methods for nonstrongly convex optimization, 2016. ",
+            "[27] Y. Nesterov. A method of solving a convex programming problem with convergence rate $\\textstyle { \\mathcal { O } } \\left( { \\frac { 1 } { k ^ { 2 } } } \\right)$ . Soviet Mathematics Doklady, 27:372–376, 1983. ",
+            "[28] Y. Nesterov. Introductory lectures on convex optimization: A basic course, volume 87. Springer Science & Business Media, 2003. ",
+            "[29] B. T. Polyak. Gradient methods for the minimisation of functionals. USSR Computational Mathematics and Mathematical Physics, 3(4):864 – 878, 1963. ",
+            "[30] B. T. Polyak. Introduction to optimization. optimization software. Inc., Publications Division, New York, 1:32, 1987. ",
+            "[31] F. Schöpfer. Linear convergence of descent methods for the unconstrained minimization of restricted strongly convex functions. SIAM J. Optim., 26:1883–1911, 2016. ",
+            "[32] A. B. Taylor. Convex interpolation and performance estimation of first-order methods for convex optimization, 2017. ",
+            "[33] A. B. Taylor, J. M. Hendrickx, and F. Glineur. Smooth strongly convex interpolation and exact worst-case performance of first-order methods, 2016. ",
+            "[34] A. B. Taylor, J. M. Hendrickx, and F. Glineur. Exact worst-case performance of first-order methods for composite convex optimization. SIAM Journal on Optimization, 27(3):1283–1313, Jan 2017. ISSN 1095-7189. doi: 10.1137/16m108104x. URL http://dx.doi.org/10. 1137/16M108104X. ",
+            "[35] A. B. Taylor, J. M. Hendrickx, and F. Glineur. Exact worst-case convergence rates of the proximal gradient method for composite convex minimization, 2020. ",
+            "[36] X. Yi, S. Zhang, T. Yang, K. H. Johansson, and T. Chai. Exponential convergence for distributed smooth optimization under the restricted secant inequality condition, 2019. ",
+            "[37] K. Yuan, Q. Ling, and W. Yin. On the convergence of decentralized gradient descent. SIAM J. Optim., 26:1835–1854, 2016. ",
+            "[38] H. Zhang. The restricted strong convexity revisited: analysis of equivalence to error bound and quadratic growth. Optimization Letters, 11(4):817–833, 2017. ",
+            "[39] H. Zhang and W. Yin. Gradient methods for convex minimization: better rates under weaker conditions. Cam report, UCLA, 2013. ",
+            "[40] Y. Zhou, Y. Liang, and L. Shen. A simple convergence analysis of bregman proximal gradient algorithm. Computational Optimization and Applications, 73(3):903–912, 2019. "
+        ],
+        "bbox": [
+            173,
+            90,
+            828,
+            724
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "12 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "A Optimization paths of neural networks are in $R S I ^ { - } \\cap E B ^ { + }$ ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            89,
+            702,
+            107
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "In this section we present a short experiment motivating $R S I ^ { - } \\cap E B ^ { + }$ as useful assumptions for the study of optimization of neural networks. The goal is to estimate whether the gradients seen by training neural networks are interpolable by a function $f \\in R S I ^ { - } \\cap E B ^ { + }$ . We propose the following process : ",
+        "bbox": [
+            169,
+            146,
+            823,
+            204
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1. Set random seed S ",
+            "2. Train a ResNet18 on CIFAR10 until convergence, and save the last iterate $x ^ { * }$ ",
+            "3. Reset random seed to S ",
+            "4. Train a ResNet18 on CIFAR10, and at each iteration $i$ , sample batch $B$ and measure "
+        ],
+        "bbox": [
+            207,
+            233,
+            823,
+            422
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\nR S I _ {i} = \\frac {\\left\\langle \\nabla f _ {B} \\left(x _ {i}\\right) \\mid x _ {i} - x ^ {*} \\right\\rangle}{\\left\\| x _ {i} - x ^ {*} \\right\\| _ {2} ^ {2}} \\text {a n d} E B _ {i} = \\frac {\\left\\| \\nabla f _ {B} \\left(x _ {i}\\right) \\right\\| _ {2}}{\\left\\| x _ {i} - x ^ {*} \\right\\| _ {2}}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            232,
+            422,
+            552,
+            444
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Where $\\nabla f _ { B } ( x )$ is the gradient of the loss function on minibatch $B$ , $x _ { i }$ is the value of the weight at iteration $i$ , and $x ^ { * }$ is the value of the last iterate measured at step 2. ",
+        "bbox": [
+            169,
+            474,
+            823,
+            503
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Due to resetting the seed to a same value, the two training runs will be identical. We consider the last iterate $x ^ { * }$ to approximate a local minima, and $R S I _ { i }$ and $E B _ { i }$ will indicate whether the gradients seen during optimization are compatible with $R S I ^ { - } \\cap E B ^ { + }$ with respect to that minima. ",
+        "bbox": [
+            169,
+            508,
+            823,
+            551
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Even if the full-batch objective function that we intend to optimize is in $R S I ^ { - } \\cap E B ^ { + }$ , it is possible for $R S I _ { i }$ to be negative due to the variance w.r.t the sampling of the minibatch $B$ . However, we observe empirically that despite this, $R S I _ { i }$ is lower bounded by a strictly positive value for every single iteration, without exception. This behavior is consistent across optimization algorithms (LARS, SGD without momentum, SGD with momentum, and ADAM) and initializations. For simplicity, we present here the results using SGD without momentum, with learning rate 0.1 and batch size $| B | = 1 0 0 0$ , and train for 360 epochs. ",
+        "bbox": [
+            169,
+            556,
+            826,
+            656
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Results: we report the log of training loss in Figure 3 and the measured $R S I _ { i }$ and $E B _ { i }$ in Figure 4. Moreover, in order to better observe the behavior of $R S I _ { i }$ and $E B _ { i }$ outside of the initial peak, we report in Figure 5 the measured $R S I _ { i }$ and $E B _ { i }$ starting at epoch 30. We observe that $E B _ { i }$ is upper bounded by $L = 2 . 3 0 3$ and $R S I _ { i }$ is lower bounded by $\\mu = 0 . 0 0 1 0$ , with a resulting condition number $\\begin{array} { r } { \\kappa = \\frac { L } { \\mu } = \\dot { 2 } 1 9 6 . 0 } \\end{array}$ . Both have a significant peak at the beginning of training, justifying the popular use of learning rate warm-ups. When measuring bounds after epoch 30, we obtain $L = 0 . 2 3 0 8$ resulting in a condition number $\\kappa = 2 2 0 . 1$ . ",
+        "bbox": [
+            169,
+            660,
+            826,
+            760
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Surprisingly, despite the variance induced by minibatch sampling, the observed $R S I _ { i }$ are all lower bounded by $\\mu = 0 . 0 0 1 0 > 0$ . In particular, due to the necessary and sufficient conditions of $R S I ^ { - } \\cap E B ^ { + }$ (See Section 4), it is guaranteed that there exists a function $f \\in R S I ^ { - } \\cap E B ^ { + }$ which exactly interpolates the gradients seen by the optimizer. And therefore, the convergence guarantees of $R \\dot { S } I ^ { - } \\cap \\bar { E } B ^ { + }$ naturally apply to the optimization of neural networks in this setting. ",
+        "bbox": [
+            169,
+            766,
+            823,
+            837
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Note that we do not claim that the objective function is in $R S I ^ { - } \\cap E B ^ { + }$ , which seems unlikely, but that the iterates explored by first-order algorithms are interpolable by functions in $R S I ^ { - } \\cap E B ^ { + }$ , including when sampling only part of the objective function through minibatches. This result strongly motivates the study of $R S I ^ { - } \\cap E B ^ { + }$ as its guarantees apply to the optimization of neural network under assumptions empirically verified (at least in this simple setting). ",
+        "bbox": [
+            169,
+            840,
+            826,
+            912
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "image",
+        "img_path": "images/d6034601b58bf4d7203864907821651f9264f77aefc0ec3b7e2d4ec875a1763d.jpg",
+        "image_caption": [
+            "Figure 3: log-loss throughout training. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            310,
+            111,
+            661,
+            289
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/44bee799cfccd11578f4397351393e073e7a83887641f7641d01bacd7764be71.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            184,
+            368,
+            472,
+            518
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/ad4c65dd4a1873a58691865f4708d80b49febef8f0dc2033181afb345b7c7dd9.jpg",
+        "image_caption": [
+            "Figure 4: $R S I _ { i }$ (right) and $E B _ { i }$ (left) throughout training from epoch 0 to 360. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            501,
+            368,
+            795,
+            517
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/038332df1a3a44a235f734e2099626cad214bee3e018fb79cbe82f10cf789176.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            179,
+            595,
+            472,
+            746
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "image",
+        "img_path": "images/8abd1d2e02a1357b169ce09205dd864f86ccc2f9995eb5cd8ea34c6e6e43abd8.jpg",
+        "image_caption": [
+            "Figure 5: $R S I _ { i }$ (right) and $E B _ { i }$ (left) throughout training from epoch 30 to 360. "
+        ],
+        "image_footnote": [],
+        "bbox": [
+            496,
+            593,
+            795,
+            744
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "B Proof of Theorem 1 ",
+        "text_level": 1,
+        "bbox": [
+            171,
+            800,
+            372,
+            815
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "We start with two simple lemmas ",
+        "bbox": [
+            171,
+            832,
+            393,
+            848
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Lemma 2 Let $X ^ { * }$ be a closed convex set, and $x ^ { * } \\in X ^ { * }$ be the orthogonal projection of x onto $X ^ { * }$ . Then for any $y \\in X ^ { * }$ , ",
+        "bbox": [
+            187,
+            854,
+            808,
+            886
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\langle x ^ {*} - y \\mid x - x ^ {*} \\rangle \\geq 0 \\tag {16}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            423,
+            891,
+            807,
+            909
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "14 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "Proof. Let $y \\in X ^ { * }$ . ",
+        "bbox": [
+            171,
+            90,
+            303,
+            104
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "For $\\theta \\in [ 0 , 1 ]$ ",
+        "bbox": [
+            171,
+            111,
+            267,
+            126
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "let $\\begin{array} { r } { h ( \\theta ) \\stackrel {  } { = } \\| x - ( ( 1 - \\theta ) x ^ { * } + \\theta y ) \\| _ { 2 } ^ { 2 } = \\| x - x ^ { * } \\| _ { 2 } ^ { 2 } + 2 \\theta  x - x ^ { * } \\mid x ^ { * } - y  + \\theta ^ { 2 } \\| x ^ { * } - y \\| _ { 2 } ^ { 2 } . } \\end{array}$ ",
+        "bbox": [
+            171,
+            126,
+            774,
+            145
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "$h$ is differentiable and ",
+        "bbox": [
+            171,
+            148,
+            320,
+            162
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\nh ^ {\\prime} (\\theta) = 2 \\left\\langle x - x ^ {*} \\mid x ^ {*} - y \\right\\rangle + 2 \\theta \\| x ^ {*} - y \\| _ {2} ^ {2} \\tag {17}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            352,
+            167,
+            823,
+            185
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Since $x ^ { * }$ is the orthogonal projection of $x$ onto $X ^ { \\ast }$ and $\\forall \\theta \\in [ 0 , 1 ] , ( 1 - \\theta ) x ^ { * } + \\theta y \\in X ^ { * }$ , we have $\\forall \\theta \\in [ 0 , 1 ] , h ( \\theta ) \\geq h ( 0 )$ , and thus $h ^ { \\prime } ( 0 ) \\geq 0$ . This concludes the proof of the Lemma thanks to (17). ",
+        "bbox": [
+            169,
+            195,
+            826,
+            224
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Lemma 3 If x and $x _ { i }$ are two points with respective orthogonal projections $x ^ { * }$ and $\\boldsymbol { x } _ { i } ^ { * }$ on $a$ closed convex set, then ",
+        "bbox": [
+            187,
+            248,
+            807,
+            277
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x - x ^ {*} - \\left(x _ {i} - x _ {i} ^ {*}\\right) \\right\\| _ {2} \\leq 2 \\| x - x _ {i} \\| _ {2} \\tag {18}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            372,
+            285,
+            805,
+            301
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Proof. As the case $x ^ { * } = x _ { i } ^ { * }$ is trivial, we may assume that $x ^ { * } \\neq x _ { i } ^ { * }$ ",
+        "bbox": [
+            169,
+            334,
+            617,
+            351
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Using lemma 2 twice, we get ",
+        "bbox": [
+            171,
+            356,
+            367,
+            369
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n0 \\leq \\left\\langle x - x ^ {*} \\mid x ^ {*} - x _ {i} ^ {*} \\right\\rangle \\tag {19}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            341,
+            376,
+            823,
+            391
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n0 \\leq \\left\\langle x _ {i} - x _ {i} ^ {*} \\mid x _ {i} ^ {*} - x ^ {*} \\right\\rangle = \\left\\langle x _ {i} ^ {*} - x _ {i} \\mid x ^ {*} - x _ {i} ^ {*} \\right\\rangle \\tag {20}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            341,
+            393,
+            823,
+            409
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Adding the two inequalities, we get that ",
+        "bbox": [
+            171,
+            414,
+            437,
+            428
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} 0 \\leq \\langle x - x ^ {*} - x _ {i} + x _ {i} ^ {*} \\mid x ^ {*} - x _ {i} ^ {*} \\rangle = \\langle x - x _ {i} \\mid x ^ {*} - x _ {i} ^ {*} \\rangle - \\| x ^ {*} - x _ {i} ^ {*} \\| _ {2} ^ {2} \\\\ \\leq \\left\\| x - x _ {i} \\right\\| _ {2} \\left\\| x ^ {*} - x _ {i} ^ {*} \\right\\| _ {2} - \\left\\| x ^ {*} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\tag {21} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            251,
+            434,
+            823,
+            472
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Since ${ \\boldsymbol { x } } ^ { * } \\neq { \\boldsymbol { x } } _ { i } ^ { * }$ , we obtain ",
+        "bbox": [
+            171,
+            476,
+            344,
+            492
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x ^ {*} - x _ {i} ^ {*} \\right\\| _ {2} \\leq \\left\\| x - x _ {i} \\right\\| _ {2} \\tag {22}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            416,
+            497,
+            823,
+            513
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "And thus ",
+        "bbox": [
+            171,
+            517,
+            235,
+            529
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x - x ^ {*} - \\left(x _ {i} - x _ {i} ^ {*}\\right) \\right\\| _ {2} \\leq \\left\\| x - x _ {i} \\right\\| _ {2} + \\left\\| x ^ {*} - x _ {i} ^ {*} \\right\\| _ {2} \\leq 2 \\left\\| x - x _ {i} \\right\\| _ {2} \\tag {23}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            277,
+            531,
+            823,
+            547
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "We now move on to the proof of Theorem 1, that is : ",
+        "bbox": [
+            169,
+            575,
+            517,
+            590
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Let $( x _ { i } , g _ { i } ) _ { i \\leq n } \\in \\left( \\mathbb { R } ^ { d } \\times \\mathbb { R } ^ { d } \\right) ^ { n + 1 }$ , such that the $x _ { i }$ are separate points. ",
+        "bbox": [
+            169,
+            597,
+            630,
+            616
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Then, $\\forall \\mu , L > 0$ : ",
+        "bbox": [
+            171,
+            619,
+            289,
+            635
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exists f \\in \\mathrm {R S I} ^ {-} (\\mu) \\cap \\mathrm {E B} ^ {+} (L), s. t. \\forall i, \\nabla f (x _ {i}) = g _ {i}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            336,
+            633,
+            658,
+            650
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/b81c11838efd623776c476a553608019b90e4ce8cab369cd04fb0e039cc7ff83.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            491,
+            652,
+            504,
+            666
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\exists X ^ {*} \\subseteq \\mathbb {R} ^ {d} \\text {c o n v e x}, s. t. \\forall i,\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            669,
+            591,
+            685
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| g _ {i} \\right\\| _ {2} \\leq L \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} \\quad \\text {a n d} \\quad \\left\\langle g _ {i} \\mid x _ {i} - x _ {i} ^ {*} \\right\\rangle \\geq \\mu \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} ^ {2} \\tag {24}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            295,
+            700,
+            823,
+            719
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Where $\\boldsymbol { x } _ { i } ^ { * }$ is the orthogonal projection of $x _ { i }$ onto $X ^ { * }$ . ",
+        "bbox": [
+            169,
+            726,
+            522,
+            741
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Proof. The direct implication is trivial since the second property is simply the application of RSI− and $\\mathrm { E B ^ { + } }$ in each $x _ { i }$ . Let us now assume that (7) is verified. ",
+        "bbox": [
+            169,
+            748,
+            823,
+            776
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "First, let us note that if $L = \\mu$ , then we have $\\forall i , g _ { i } = \\mu ( x _ { i } - x _ { i } ^ { * } )$ and thus we can easily interpolate the $( x _ { i } , g _ { i } )$ using $\\begin{array} { r } { f ( x ) = \\frac { \\mu } { 2 } \\left. x - x ^ { * } \\right. _ { 2 } ^ { 2 } } \\end{array}$ . We now assume $L > \\mu$ . ",
+        "bbox": [
+            169,
+            782,
+            823,
+            816
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "If there is only one pair $( x _ { i } , g _ { i } )$ , then we can simply use $\\begin{array} { r } { f ( x ) = \\langle g _ { i } \\mid x - x _ { i } \\rangle + \\frac { \\mu + L } { 4 } \\left\\| x - x _ { i } \\right\\| _ { 2 } ^ { 2 } } \\end{array}$ to interpolate $( x _ { i } , g _ { i } )$ . $f$ is then $\\mu$ -strongly convex and $L$ -smooth so it is also in $R S I ^ { - } ( \\mu )$ and $E B ^ { + } ( L )$ . Let us now assume there are at least two pairs $( x _ { i } , g _ { i } ) _ { i }$ . Let ",
+        "bbox": [
+            169,
+            821,
+            826,
+            869
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\epsilon_ {0} = \\frac {1}{2} \\min  _ {i \\neq j} \\left(\\left\\| x _ {i} - x _ {j} \\right\\| _ {2}\\right) > 0 \\tag {25}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            400,
+            885,
+            823,
+            914
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "By construction, ",
+        "bbox": [
+            171,
+            90,
+            284,
+            104
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\forall x \\in \\mathbb {R} ^ {d}, (\\exists i, \\| x - x _ {i} \\| _ {2} <   \\epsilon_ {0}) \\Rightarrow \\forall j \\neq i, \\| x - x _ {j} \\| _ {2} \\geq \\epsilon_ {0} \\tag {26}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            300,
+            125,
+            823,
+            142
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Moreover, if $\\forall i , x _ { i } \\in X ^ { * }$ , we can simply take $\\begin{array} { r c l } { f ( x ) } & { = } & { \\frac { \\mu } { 2 } \\left\\| x - x ^ { * } \\right\\| _ { 2 } ^ { 2 } } \\end{array}$ . Otherwise, let $\\mathcal { T } = \\{ i \\mid x _ { i } \\neq x _ { i } ^ { * } \\}$ , and let $\\begin{array} { r } { \\epsilon _ { 1 } = \\frac { 1 } { 2 } \\operatorname* { m i n } _ { i \\in \\mathcal { I } } ( \\left\\| x _ { i } - x _ { i } ^ { * } \\right\\| _ { 2 } ) > 0 } \\end{array}$ ",
+        "bbox": [
+            169,
+            152,
+            825,
+            188
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Let $\\epsilon < \\operatorname* { m i n } ( \\epsilon _ { 0 } , \\epsilon _ { 1 } )$ and $0 < \\beta < { \\frac { 1 } { 2 } }$ . We introduce the function $\\lambda _ { \\epsilon , \\beta }$ from $[ 0 , \\epsilon ]$ to [0, 1] defined by : ",
+        "bbox": [
+            169,
+            204,
+            825,
+            222
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\lambda_ {\\epsilon , \\beta} (u) = \\frac {1 + \\cos \\left(\\pi \\frac {u ^ {\\beta}}{\\epsilon^ {\\beta}}\\right)}{2} \\tag {27}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            237,
+            825,
+            276
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "We finally introduce our interpolation function : ",
+        "bbox": [
+            169,
+            285,
+            488,
+            300
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {\\epsilon , \\beta} (x) = \\left\\{ \\begin{array}{l l} \\frac {\\mu + L}{4} \\| x - x ^ {*} \\| _ {2} ^ {2} & i f \\forall i, \\| x - x _ {i} \\| _ {2} \\geq \\epsilon \\\\ \\frac {\\mu + L}{4} \\| x - x ^ {*} \\| _ {2} ^ {2} + \\lambda_ {\\epsilon , \\beta} \\left(\\| x - x _ {i} \\| _ {2}\\right) \\left\\langle g _ {i} - \\frac {\\mu + L}{2} \\left(x _ {i} - x _ {i} ^ {*}\\right) \\mid x - x _ {i} \\right\\rangle & i f \\exists i, \\| x - x _ {i} \\| _ {2} <   \\epsilon \\end{array} \\right. \\tag {28}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            169,
+            323,
+            857,
+            380
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "First let us note that $f _ { \\epsilon , \\beta }$ is properly defined : as stated in (26), there may be at most one $i$ such that $\\| x - x _ { i } \\| _ { 2 } < \\epsilon$ . Moreover, $f _ { \\epsilon , \\beta }$ is continuous because $\\lambda _ { \\epsilon , \\beta } ( \\epsilon ) = 0$ . ",
+        "bbox": [
+            169,
+            393,
+            823,
+            425
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Since $\\lambda _ { \\epsilon , \\beta } ( \\epsilon ) = 0$ and $\\lambda _ { \\epsilon , \\beta } ^ { \\prime } ( \\epsilon ) = 0$ , we can easily verify that for $x$ such that $\\lVert x - x _ { i } \\rVert _ { 2 } = \\epsilon ,$ $f _ { \\epsilon , \\beta }$ is differentisuch that $x$ $\\begin{array} { r } { \\nabla f _ { \\epsilon , \\beta } ( x ) = \\frac { \\mu + L } { 2 } ( x - x ^ { * } ) } \\end{array}$ $f _ { \\epsilon , \\beta }$ ifferentiable on and thus trivia $\\mathbb { R } ^ { d }$ . For any $x \\in \\mathbb { R } ^ { d }$ $\\forall i , \\| x - x _ { i } \\| _ { 2 } \\geq \\epsilon .$ $\\begin{array} { r } { \\nabla f _ { \\epsilon , \\beta } ( x ) = \\frac { \\mu + L } { 2 } ( x - x ^ { * } ) } \\end{array}$ ",
+        "bbox": [
+            169,
+            428,
+            825,
+            481
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\langle \\nabla f _ {\\epsilon , \\beta} (x) \\mid x - x ^ {*} \\right\\rangle = \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} ^ {2} \\geq \\mu \\| x - x ^ {*} \\| _ {2} ^ {2} \\tag {29}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            305,
+            487,
+            825,
+            516
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| \\nabla f _ {\\epsilon , \\beta} (x) \\right\\| = \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} \\leq L \\| x - x ^ {*} \\| _ {2} \\tag {30}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            334,
+            527,
+            825,
+            556
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Let us now assume there is $i$ such that $\\| x - x _ { i } \\| _ { 2 } < \\epsilon$ . If $x _ { i } = x _ { i } ^ { * }$ , then $g _ { i } = 0$ and $\\nabla f ( x ) =$ $\\frac { \\mu + L } { 4 } ( x - x ^ { * } )$ and equations (29) and (30) are respected as well. Otherwise, we have $\\| x - x ^ { * } \\| _ { 2 } \\geq$ $\\begin{array} { r } { \\operatorname* { m i n } _ { i \\in \\mathcal { I } } ( \\| x _ { i } - x _ { i } ^ { * } \\| _ { 2 } ) - \\epsilon = \\epsilon _ { 1 } - \\epsilon > 0 } \\end{array}$ ",
+        "bbox": [
+            169,
+            566,
+            825,
+            612
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "We then have, for $x \\neq x _ { i }$ : ",
+        "bbox": [
+            171,
+            612,
+            344,
+            626
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\nabla f _ {\\epsilon , \\beta} (x) = \\frac {\\mu + L}{2} \\left(x - x ^ {*}\\right) + \\lambda_ {\\epsilon , \\beta} \\left(\\| x - x _ {i} \\| _ {2}\\right) \\left(g _ {i} - \\frac {\\mu + L}{2} \\left(x _ {i} - x _ {i} ^ {*}\\right)\\right) \\\\ + \\lambda_ {\\epsilon , \\beta} ^ {\\prime} \\left(\\| x - x _ {i} \\| _ {2}\\right) \\frac {x - x _ {i}}{\\| x - x _ {i} \\| _ {2}} \\left\\langle g _ {i} - \\frac {\\mu + L}{2} (x _ {i} - x _ {i} ^ {*}) \\mid x - x _ {i} \\right\\rangle \\\\ = \\left(1 - \\lambda_ {\\epsilon , \\beta} \\left(\\| x - x _ {i} \\| _ {2}\\right)\\right) \\frac {\\mu + L}{2} \\left(x - x ^ {*}\\right) + \\lambda_ {\\epsilon , \\beta} \\left(\\| x - x _ {i} \\| _ {2}\\right) g _ {i} \\tag {31} \\\\ + \\lambda_ {\\epsilon , \\beta} (\\left\\| x - x _ {i} \\right\\| _ {2}) \\frac {\\mu + L}{2} (x - x ^ {*} - (x _ {i} - x _ {i} ^ {*})) \\\\ - \\frac {\\pi}{2} \\frac {\\| x - x _ {i} \\| _ {2} ^ {\\beta}}{\\epsilon^ {\\beta}} \\frac {\\beta (x - x _ {i})}{\\| x - x _ {i} \\| _ {2} ^ {2}} s i n (\\pi \\frac {\\| x - x _ {i} \\| _ {2} ^ {\\beta}}{\\epsilon^ {\\beta}}) \\left\\langle g _ {i} - \\frac {\\mu + L}{2} (x _ {i} - x _ {i} ^ {*}) \\mid x - x _ {i} \\right\\rangle \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            181,
+            650,
+            823,
+            821
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Since $X ^ { \\ast }$ is a convex set (and closed by continuity of $f _ { \\epsilon , \\beta } )$ ), we have from Lemma 3 $\\left\\| ( x - x ^ { * } - ( x _ { i } - x _ { i } ^ { * } ) ) \\right\\| _ { 2 } \\leq 2 \\left\\| x - x _ { i } \\right\\| _ { 2 }$ . ",
+        "bbox": [
+            169,
+            834,
+            823,
+            864
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "To simplify notations, let us note $\\boldsymbol { u } = \\| \\boldsymbol { x } - \\boldsymbol { x } _ { i } \\| _ { 2 }$ , $\\lambda = \\lambda _ { \\epsilon , \\beta } ( u )$ , and ",
+        "bbox": [
+            169,
+            868,
+            614,
+            883
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "equation",
+        "text": "$$\nr = - \\frac {\\pi}{2} \\frac {u ^ {\\beta}}{\\epsilon^ {\\beta}} \\frac {\\beta (x - x _ {i})}{u ^ {2}} s i n (\\pi \\frac {u ^ {\\beta}}{\\epsilon^ {\\beta}}) \\Big \\langle g _ {i} - \\frac {\\mu + L}{2} (x _ {i} - x _ {i} ^ {*}) \\mid x - x _ {i} \\Big \\rangle .\n$$",
+        "text_format": "latex",
+        "bbox": [
+            169,
+            890,
+            578,
+            915
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "page_number",
+        "text": "16 ",
+        "bbox": [
+            490,
+            935,
+            509,
+            946
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "We first want to upper bound $\\| \\nabla f _ { \\epsilon , \\beta } \\| _ { 2 }$ using (31): ",
+        "bbox": [
+            169,
+            90,
+            506,
+            107
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\| \\nabla f _ {\\epsilon , \\beta} (x) \\| _ {2} \\leq (1 - \\lambda) \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} + \\lambda \\| g _ {i} \\| _ {2} + (\\mu + L) \\lambda u + \\| r \\| _ {2} \\\\ \\leq (1 - \\lambda) \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} + \\lambda L \\left(\\| x - x ^ {*} \\| _ {2} + \\| x _ {i} - x _ {i} ^ {*} \\| - \\| x - x ^ {*} \\|\\right) + (\\mu + L) \\lambda u + \\| r \\| _ {2} \\\\ \\leq L \\| x - x ^ {*} \\| _ {2} - (1 - \\lambda) \\frac {L - \\mu}{2} \\| x - x ^ {*} \\| _ {2} + (\\mu + 3 L) \\lambda u + \\| r \\| _ {2} \\tag {32} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            176,
+            157,
+            890,
+            260
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "in Moreover, the 3rd order remainder of the Taylor expansion of $[ 0 , \\pi \\frac { u } { \\epsilon } ]$ and by upper bounding it we get $\\begin{array} { r } { c o s ( \\pi \\frac { u ^ { \\beta } } { \\epsilon ^ { \\beta } } ) \\leq 1 - \\frac { \\pi ^ { 2 } u ^ { 2 \\beta } } { 2 \\epsilon ^ { 2 \\beta } } + \\frac { \\pi ^ { 4 } u ^ { 4 \\beta } } { 2 4 \\epsilon ^ { 4 \\beta } } } \\end{array}$ $\\begin{array} { r } { c o s ( \\pi \\frac { u ^ { \\beta } } { \\epsilon ^ { \\beta } } ) } \\end{array}$ uβ \u000fβ ) + 24\u000f4β is $\\frac { c o s ( c ) } { 4 ! } ( \\pi ^ { 4 } \\frac { u ^ { 4 \\beta } } { \\epsilon ^ { 4 \\beta } } )$ 4!  and thus, for ) (π4 u4β ) \u000f4β for some $\\begin{array} { r } { \\frac { u } { \\epsilon } \\leq 1 } \\end{array}$ , $c$ ",
+        "bbox": [
+            169,
+            266,
+            823,
+            305
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} - (1 - \\lambda) \\frac {L - \\mu}{2} \\| x - x ^ {*} \\| _ {2} \\leq \\left(- \\frac {\\pi^ {2} u ^ {2 \\beta}}{4 \\epsilon^ {2 \\beta}} + \\frac {\\pi^ {4} u ^ {4 \\beta}}{4 8 \\epsilon^ {4 \\beta}}\\right) \\frac {L - \\mu}{2} \\| x - x ^ {*} \\| _ {2} \\tag {33} \\\\ \\leq - C _ {0} \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            264,
+            338,
+            823,
+            405
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "with $\\begin{array} { r } { C _ { 0 } = \\left( \\frac { \\pi ^ { 2 } } { 4 } - \\frac { \\pi ^ { 4 } } { 4 8 } \\right) \\frac { L - \\mu } { 2 } \\epsilon _ { 1 } > 0 } \\end{array}$ ",
+        "bbox": [
+            169,
+            445,
+            403,
+            469
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Furthermore, since $2 \\beta < 1$ and $\\frac { u } { \\epsilon } \\le 1$ , we can also bound ",
+        "bbox": [
+            169,
+            469,
+            553,
+            484
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n(\\mu + 3 L) \\lambda u \\leq \\epsilon (\\mu + 3 L) \\frac {u}{\\epsilon} \\leq \\epsilon C _ {1} \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} \\tag {34}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            366,
+            520,
+            823,
+            550
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "with $C _ { 1 } = \\mu + 3 L > 0$ ",
+        "bbox": [
+            169,
+            590,
+            328,
+            604
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Finally, we can bound the last term using $s i n ( x ) \\leq | x |$ ",
+        "bbox": [
+            169,
+            609,
+            532,
+            626
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\| r \\right\\| _ {2} \\leq \\beta \\frac {\\pi^ {2}}{2} \\frac {3 L + \\mu}{2} \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} \\tag {35} \\\\ \\leq \\beta C _ {2} \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            375,
+            681,
+            823,
+            744
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "with C2 = $\\begin{array} { r } { C _ { 2 } = \\frac { \\pi ^ { 2 } } { 2 } \\frac { 3 L + \\mu } { 2 } \\operatorname* { m a x } _ { i } ( \\| x _ { i } - x _ { i } ^ { * } \\| _ { 2 } ) } \\end{array}$ π22 3L+µ2 maxi(kxi − x∗i k2) ",
+        "bbox": [
+            169,
+            795,
+            429,
+            816
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "Finally, by choosing $\\begin{array} { r } { \\epsilon \\leq \\frac { C _ { 0 } } { 2 C _ { 1 } } } \\end{array}$ and $\\begin{array} { r } { \\beta \\le \\frac { C _ { 0 } } { 2 C _ { 2 } } } \\end{array}$ , and plugging (33), (34), (35) into (32), we get : ",
+        "bbox": [
+            169,
+            820,
+            772,
+            840
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| \\nabla f _ {\\epsilon , \\beta} (x) \\right\\| _ {2} \\leq L \\left\\| x - x ^ {*} \\right\\| _ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            401,
+            896,
+            596,
+            912
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            490,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "It only remains now to adequately lower bound $\\langle \\nabla f _ { \\epsilon , \\beta } ( x ) \\mid x - x ^ { * } \\rangle$ . We use the same method as before and keep the notations : ",
+        "bbox": [
+            169,
+            90,
+            823,
+            119
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\langle \\nabla f _ {\\epsilon , \\beta} (x) \\mid x - x ^ {*} \\rangle = (1 - \\lambda) \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} ^ {2} + \\lambda \\langle g _ {i} \\mid x - x ^ {*} \\rangle \\\\ + \\lambda \\frac {\\mu + L}{2} \\left\\langle x - x ^ {*} - \\left(x _ {i} - x _ {i} ^ {*}\\right) \\mid x - x ^ {*} \\right\\rangle + \\left\\langle r \\mid x - x ^ {*} \\right\\rangle \\\\ \\geq (1 - \\lambda) \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} ^ {2} + \\lambda \\mu \\| x _ {i} - x _ {i} ^ {*} \\| _ {2} ^ {2} + \\lambda \\langle g _ {i} | x - x ^ {*} - (x _ {i} - x _ {i} ^ {*}) \\rangle \\\\ - \\lambda (\\mu + L) u \\| x - x ^ {*} \\| _ {2} - \\| r \\| _ {2} \\| x - x ^ {*} \\| _ {2} \\\\ \\geq (1 - \\lambda) \\frac {\\mu + L}{2} \\| x - x ^ {*} \\| _ {2} ^ {2} - (1 - \\lambda) \\mu \\| x - x ^ {*} \\| _ {2} ^ {2} + \\mu \\| x - x ^ {*} \\| _ {2} ^ {2} \\\\ + \\lambda \\mu \\left(\\| x _ {i} - x _ {i} ^ {*} \\| _ {2} ^ {2} - \\| x - x ^ {*} \\| _ {2} ^ {2}\\right) - 2 u \\lambda \\| g _ {i} \\| _ {2} \\\\ - \\lambda (\\mu + L) u \\| x - x ^ {*} \\| _ {2} - \\| r \\| _ {2} \\| x - x ^ {*} \\| _ {2} \\\\ \\geq \\mu \\left\\| x - x ^ {*} \\right\\| _ {2} ^ {2} + C _ {0} \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} - 2 \\mu u (2 \\left\\| x _ {i} - x _ {i} ^ {*} \\right\\| _ {2} + u) \\\\ - 2 \\epsilon \\lambda L \\| x _ {i} - x _ {i} ^ {*} \\| _ {2} \\frac {u}{\\epsilon} - \\epsilon \\lambda (\\mu + L) \\| x - x ^ {*} \\| _ {2} \\frac {u}{\\epsilon} - \\beta C _ {2} \\| x - x ^ {*} \\| _ {2} \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} \\\\ \\geq \\mu \\| x - x ^ {*} \\| _ {2} ^ {2} + \\left(C _ {0} - \\epsilon M _ {0} - \\beta M _ {1}\\right) \\frac {u ^ {2 \\beta}}{\\epsilon^ {2 \\beta}} \\tag {36} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            179,
+            148,
+            823,
+            444
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "With $M _ { 0 } = 4 ( \\mu + L ) \\operatorname* { m a x } _ { i } ( \\| x _ { i } - x _ { i } ^ { * } \\| _ { 2 } ) + ( L + 3 \\mu ) \\epsilon _ { 1 } > 0$ ",
+        "bbox": [
+            169,
+            450,
+            570,
+            465
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "and $M _ { 1 } = { C } _ { 2 } ( \\operatorname* { m a x } _ { i } ( \\| x _ { i } - x _ { i } ^ { * } \\| _ { 2 } ) + \\epsilon _ { 1 } ) > 0$ ",
+        "bbox": [
+            171,
+            465,
+            468,
+            481
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Therefore by taking $\\begin{array} { r } { \\epsilon \\leq \\frac { C _ { 0 } } { 2 M _ { 0 } } } \\end{array}$ and $\\begin{array} { r } { \\beta \\le \\frac { C _ { 0 } } { 2 M _ { 1 } } } \\end{array}$ , we guarantee ",
+        "bbox": [
+            169,
+            497,
+            553,
+            517
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\langle \\nabla f _ {\\epsilon , \\beta} (x) | x - x ^ {*} \\rangle \\geq \\mu \\| x - x ^ {*} \\| _ {2} ^ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            377,
+            534,
+            620,
+            554
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Finally, for any $i$ , we have : ",
+        "bbox": [
+            169,
+            566,
+            356,
+            583
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x - x _ {i} \\right\\| _ {2} \\lambda_ {\\epsilon , \\beta} ^ {\\prime} \\left(\\left\\| x - x _ {i} \\right\\| _ {2}\\right) = - \\frac {\\pi}{2} \\frac {\\left\\| x - x _ {i} \\right\\| _ {2} ^ {\\beta}}{\\epsilon^ {\\beta}} \\frac {\\beta \\left(x - x _ {i}\\right)}{\\left\\| x - x _ {i} \\right\\| _ {2}} \\sin \\left(\\pi \\frac {\\left\\| x - x _ {i} \\right\\| _ {2} ^ {\\beta}}{\\epsilon^ {\\beta}}\\right) \\tag {37}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            250,
+            602,
+            823,
+            640
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Which goes to 0 as $x$ tends to $x _ { i }$ . Therefore using the definition of $f _ { \\epsilon , \\beta }$ in (28) and the fact that $\\begin{array} { r } { \\left. g _ { i } - \\frac { \\mu + L } { 2 } ( x _ { i } - x _ { i } ^ { * } ) \\mid x - x _ { i } \\right. } \\end{array}$ is linear in $x - x _ { i }$ , we can conclude $\\begin{array} { r } { \\nabla f _ { \\epsilon , \\beta } ( x _ { i } ) = \\frac { \\mu + L } { 2 } ( x _ { i } - x _ { i } ^ { * } ) + } \\end{array}$ $\\begin{array} { r } { \\lambda _ { \\epsilon , \\beta } ( 0 ) ( g _ { i } - \\frac { \\mu + L } { 2 } ( x _ { i } - x _ { i } ^ { * } ) ) = g _ { i } } \\end{array}$ . ",
+        "bbox": [
+            169,
+            652,
+            826,
+            709
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "We thus have proven that for sufficiently small $\\epsilon$ and $\\beta , \\ \\forall i , \\nabla f _ { \\epsilon , \\beta } ( x _ { i } ) \\ = \\ g _ { i }$ , that for all $x$ , $\\langle \\nabla f _ { \\epsilon , \\beta } ( x ) \\mid x - x ^ { * } \\rangle \\geq \\mu \\left\\| x - x ^ { * } \\right\\| _ { 2 } ^ { 2 }$ and $\\| \\nabla f _ { \\epsilon , \\beta } ( x ) \\| _ { 2 } \\le L \\| x - x ^ { * } \\| _ { 2 }$ . Therefore by definition, $f _ { \\epsilon , \\beta }$ is in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ and interpolates the $x _ { i } , g _ { i }$ . ",
+        "bbox": [
+            169,
+            713,
+            826,
+            763
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Which concludes the proof. ",
+        "bbox": [
+            169,
+            768,
+            354,
+            782
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "C Proof of Lemma 1 ",
+        "text_level": 1,
+        "bbox": [
+            169,
+            825,
+            359,
+            840
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "text",
+        "text": "Let $\\mu > 0$ and $L > \\mu$ . Let $\\begin{array} { r } { \\alpha _ { 0 } \\in \\left[ \\frac { \\mu } { L ^ { 2 } } , \\operatorname* { m a x } \\left( \\frac { \\mu } { L ^ { 2 } } , \\frac { 1 } { 2 \\mu } \\right) \\right] } \\end{array}$ . For any first-order optimization algorithm $\\mathcal { A }$ and starting point $x _ { 0 } \\in \\mathbb { R } ^ { d }$ , there exists $( g _ { i } ) _ { i \\leq ( d - 2 ) } \\in \\mathbb { R } ^ { d }$ , $( f _ { i } ) _ { i \\leq ( d - 2 ) } \\in \\mathbb { R }$ and $S _ { d - 2 } \\subseteq S _ { d - 1 } \\subseteq$ $\\cdot \\cdot \\subseteq { \\mathcal { S } } _ { 0 } \\subseteq \\mathbb { R } ^ { d }$ such that: ",
+        "bbox": [
+            169,
+            856,
+            823,
+            912
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "page_number",
+        "text": "18 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 17
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1. $\\forall i \\leq d - 2$ , there exists a $( d - i - 1 )$ -dimensional affine space $\\mathcal { H } _ { i }$ containing $s _ { i }$ and in which $s _ { i }$ is a $( d - i - 2 )$ -sphere of radius $\\begin{array} { r } { r _ { i } = \\sqrt { \\frac { \\alpha _ { 0 } } { \\mu } - \\alpha _ { 0 } ^ { 2 } } \\left. g _ { 0 } \\right. _ { 2 } \\left( 1 - \\frac { \\mu ^ { 2 } } { L ^ { 2 } } \\right) ^ { \\frac { i } { 2 } } } \\end{array}$ and center $c _ { i } \\in \\mathcal { H } _ { i } .$ ",
+            "2. Let $( x _ { i } ) _ { i }$ the iterates generated by $\\mathcal { A }$ starting from $x _ { 0 }$ and reading gradients $( g _ { i } ) _ { i }$ and function values $( f _ { i } ) _ { i }$ , then for any $i \\leq d - 2$ and any $x \\in S _ { i }$ , there exists a function $f$ in $\\mathrm { R S I } ^ { - } ( \\mu ) \\cap \\mathrm { E B } ^ { + } ( L )$ minimized by $\\{ x \\}$ that interpolates $( x _ { j } , f _ { j } , g _ { j } ) _ { j \\leq i }$ . "
+        ],
+        "bbox": [
+            207,
+            90,
+            825,
+            199
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Proof. For any first-order optimization algorithm $\\mathcal { A }$ and starting point $x _ { 0 }$ , we are going to construct by induction the sequences $( g _ { i } ) _ { i } , ( f _ { i } ) _ { i }$ and $( S _ { i } ) _ { i }$ . ",
+        "bbox": [
+            169,
+            208,
+            823,
+            238
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Initialisation: Let $g _ { 0 } \\in \\mathbb { R } ^ { d } \\backslash \\{ 0 \\}$ . We can take any non-zero gradient as initialisation. Let $c _ { 0 } =$ $x _ { 0 } - \\alpha _ { 0 } g _ { 0 }$ , $\\begin{array} { r } { f _ { 0 } = \\frac { \\mu + L } { 4 \\mu } \\alpha _ { 0 } \\left\\| g _ { 0 } \\right\\| _ { 2 } ^ { 2 } } \\end{array}$ , and ",
+        "bbox": [
+            169,
+            243,
+            825,
+            277
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {H} _ {0} = \\{x \\in \\mathbb {R} ^ {d} | \\langle x - c _ {0} | g _ {0} \\rangle = 0 \\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            377,
+            286,
+            617,
+            305
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "$\\mathcal { H } _ { 0 }$ is an hyperplane with dimension $d - 1$ , and we finally introduce ",
+        "bbox": [
+            171,
+            311,
+            622,
+            327
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {S} _ {0} = \\left\\{x \\in \\mathcal {H} _ {0} \\mid \\| x - c _ {0} \\| _ {2} = \\sqrt {\\frac {\\alpha_ {0}}{\\mu} - \\alpha_ {0} ^ {2}} \\| g _ {0} \\| _ {2} \\right\\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            326,
+            334,
+            666,
+            368
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "By construction, $c _ { 0 } ~ \\in ~ \\mathcal { H }$ and $ { \\boldsymbol { S } } _ { 0 }$ is the $( d - 2 )$ -sphere in $\\mathcal { H } _ { \\mathrm { 0 } }$ of center $c _ { 0 }$ and radius $r _ { 0 } =$ ${ \\sqrt { { \\frac { \\alpha _ { 0 } } { \\mu } } - \\alpha _ { 0 } ^ { 2 } } } \\| g _ { 0 } \\| _ { 2 }$ . Moreover, let $x ^ { * } \\in S _ { 0 }$ . We have ",
+        "bbox": [
+            169,
+            376,
+            823,
+            415
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\| x ^ {*} - x _ {0} \\| _ {2} ^ {2} = \\| x ^ {*} - c _ {0} + c _ {0} - x _ {0} \\| _ {2} ^ {2} = r _ {0} ^ {2} + \\alpha_ {0} ^ {2} \\| g _ {0} \\| _ {2} ^ {2} = \\frac {\\alpha_ {0} \\| g _ {0} \\| _ {2} ^ {2}}{\\mu}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            272,
+            426,
+            723,
+            462
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "And thus $\\begin{array} { r } { f _ { 0 } = \\frac { \\mu + L } { 4 } \\left\\| x ^ { * } - x _ { 0 } \\right\\| _ { 2 } ^ { 2 } } \\end{array}$ . We also have : ",
+        "bbox": [
+            169,
+            473,
+            491,
+            492
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\langle g _ {0} \\mid x _ {0} - x ^ {*} \\right\\rangle = \\left\\langle g _ {0} \\mid x _ {0} - c _ {0} \\right\\rangle + \\left\\langle g _ {0} \\mid c _ {0} - x ^ {*} \\right\\rangle = \\alpha_ {0} \\| g _ {0} \\| _ {2} ^ {2} + 0 = \\mu \\| x _ {0} - x ^ {*} \\| _ {2} ^ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            225,
+            500,
+            771,
+            518
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Finally, since $\\alpha _ { 0 } \\geq \\frac { \\mu } { L ^ { 2 } }$ , ",
+        "bbox": [
+            169,
+            525,
+            331,
+            542
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\| g _ {0} \\| _ {2} ^ {2} = \\frac {\\mu}{\\alpha_ {0}} \\| x _ {0} - x ^ {*} \\| _ {2} ^ {2} \\leq L ^ {2} \\| x _ {0} - x ^ {*} \\| _ {2} ^ {2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            354,
+            550,
+            643,
+            578
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": ". Therefore all the sufficient conditions of Corollary 1 are verified, and there exists $f \\in R S I ^ { - } ( \\mu ) \\cap$ $E B ^ { + } ( L )$ which is minimized by $\\{ x ^ { * } \\}$ and interpolates $( x _ { 0 } , f _ { 0 } , g _ { 0 } )$ . This concludes the initialization. ",
+        "bbox": [
+            171,
+            585,
+            826,
+            616
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Induction: Let us assume the existence of such $( f _ { j } ) _ { j } , ( g _ { j } ) _ { j }$ and $( S _ { j } ) _ { j }$ up to step $i \\leq d - 3$ . Let $x _ { i + 1 }$ be the iterate given by $\\mathcal { A }$ after reading iterates $( x _ { j } ) _ { j }$ , function values $( f _ { j } ) _ { j }$ , and gradients $( g _ { j } ) _ { j }$ , let $\\mathcal { H } _ { i }$ the $( d - i - 1 )$ -dimensional affine space in which $s _ { i }$ is a sphere, and let $c _ { i } \\in \\mathcal { H } _ { i }$ the center of the sphere $s _ { i }$ . ",
+        "bbox": [
+            169,
+            619,
+            823,
+            676
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "If there exists $j \\le i$ such that $x _ { i + 1 } = x _ { j }$ , then we simply return $g _ { i + 1 } = g _ { j }$ and $f _ { i + 1 } = f _ { j }$ . We can take as $S _ { i + 1 }$ any $( d - i - 2 )$ -dimensional sphere of radius $r _ { i + 1 }$ included in $S _ { i }$ , $\\mathcal { H } _ { i + 1 }$ its supporting affine space and $c _ { i + 1 }$ its center. We now assume $\\forall j \\leq i , x _ { i + 1 } \\neq x _ { j }$ . ",
+        "bbox": [
+            169,
+            683,
+            823,
+            726
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Let $h _ { i + 1 }$ the orthogonal projection of $x _ { i + 1 }$ into $\\mathcal { H } _ { i }$ . If $h _ { i + 1 } \\neq c _ { i }$ , let $\\begin{array} { r } { v = \\frac { ( h _ { i + 1 } - c _ { i } ) } { \\Vert h _ { i + 1 } - c _ { i } \\Vert _ { 2 } } } \\end{array}$ . If hi+1 = ci, $h _ { i + 1 } = c _ { i }$ let $s \\in S _ { i }$ and $\\begin{array} { r } { v = \\frac { ( s - c _ { i } ) } { \\left\\| s - c _ { i } \\right\\| _ { 2 } } } \\end{array}$ ks−cik2 . ",
+        "bbox": [
+            169,
+            732,
+            826,
+            776
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "text",
+        "text": "Let ",
+        "bbox": [
+            171,
+            780,
+            199,
+            792
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\nc _ {i + 1} = c _ {i} - \\frac {\\mu}{L} r _ {i} v\n$$",
+        "text_format": "latex",
+        "bbox": [
+            434,
+            790,
+            560,
+            816
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {i + 1} = \\frac {\\mu + L}{4} (\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2} + (1 - \\frac {\\mu^ {2}}{L ^ {2}}) r _ {i} ^ {2})\n$$",
+        "text_format": "latex",
+        "bbox": [
+            339,
+            834,
+            655,
+            864
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\ng _ {i + 1} = L \\frac {\\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2}}{\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2}} \\left(x _ {i + 1} - c _ {i + 1}\\right)\n$$",
+        "text_format": "latex",
+        "bbox": [
+            362,
+            881,
+            632,
+            916
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "page_number",
+        "text": "19 ",
+        "bbox": [
+            490,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 18
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {H} _ {i + 1} = \\left\\{x \\in \\mathcal {H} _ {i} \\mid \\langle x - c _ {i} \\mid v \\rangle = - \\frac {\\mu}{L} r _ {i} \\right\\}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            354,
+            101,
+            638,
+            128
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {S} _ {i + 1} = \\mathcal {S} _ {i} \\cap \\mathcal {H} _ {i + 1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            433,
+            145,
+            558,
+            160
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "$v$ is the difference between two points of $\\mathcal { H } _ { i }$ , therefore it is one of the direction of $\\mathcal { H } _ { i }$ , and since $c _ { i } \\in \\mathcal { H } _ { i }$ , $\\mathcal { H } _ { i + 1 }$ indeed defines an affine subspace of $\\mathcal { H } _ { i }$ of dimension $( d - i - 2 )$ . Let $\\mathcal { C }$ the sphere in $\\mathcal { H } _ { i + 1 }$ of center $c _ { i + 1 } \\in \\mathcal { H } _ { i + 1 }$ and radius $r _ { i + 1 } = \\sqrt { 1 - \\textstyle { \\frac { \\mu ^ { 2 } } { L ^ { 2 } } } } r _ { i }$ . We now want to prove that $\\mathcal { C } = S _ { i + 1 }$ . ",
+        "bbox": [
+            169,
+            170,
+            823,
+            224
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "First, let $x \\in \\mathcal { H } _ { i + 1 }$ . Then ",
+        "bbox": [
+            171,
+            228,
+            343,
+            243
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\langle x - c _ {i + 1} \\mid v \\right\\rangle = \\left\\langle x - c _ {i} + \\frac {\\mu}{L} r _ {i} v \\mid v \\right\\rangle \\\\ = \\left\\langle x - c _ {i} \\mid v \\right\\rangle + \\frac {\\mu}{L} r _ {i} \\\\ = - \\frac {\\mu}{\\bar {L}} r _ {i} + \\frac {\\mu}{\\bar {L}} r _ {i} = 0 \\tag {38} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            369,
+            250,
+            823,
+            330
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "i) First, we show that $\\mathcal { C } \\subseteq S _ { i + 1 }$ . Let $x \\in { \\mathcal { C } }$ ",
+        "bbox": [
+            169,
+            335,
+            455,
+            351
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\| x - c _ {i} \\right\\| _ {2} ^ {2} = \\left\\| x - c _ {i + 1} - \\frac {\\mu}{L} r _ {i} v \\right\\| _ {2} ^ {2} \\\\ = \\| x - c _ {i + 1} \\| _ {2} ^ {2} + \\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2} - 2 \\frac {\\mu}{L} r _ {i} \\left\\langle x - c _ {i + 1} \\mid v \\right\\rangle \\\\ = \\| x - c _ {i + 1} \\| _ {2} ^ {2} + \\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2} \\quad \\text {u s i n g (3 8) s i n c e} x \\in \\mathcal {C} \\subseteq \\mathcal {H} _ {i + 1} \\\\ = (1 - \\frac {\\mu^ {2}}{L ^ {2}}) r _ {i} ^ {2} + \\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2} \\\\ = r _ {i} ^ {2} \\tag {39} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            192,
+            357,
+            823,
+            503
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "since $x \\in \\mathcal { H } _ { i + 1 } \\subseteq \\mathcal { H } _ { i }$ and $\\| x - c _ { i } \\| _ { 2 } = r _ { i }$ , $x \\in S _ { i }$ and therefore $x \\in S _ { i + 1 }$ ",
+        "bbox": [
+            169,
+            508,
+            656,
+            525
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "ii) Conversely, we show that $S _ { i + 1 } \\subseteq { \\mathcal { C } }$ . Let $x \\in S _ { i + 1 }$ ",
+        "bbox": [
+            169,
+            530,
+            527,
+            546
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} r _ {i} ^ {2} = \\left\\| x - c _ {i} \\right\\| _ {2} ^ {2} \\quad \\text {a s} x \\in \\mathcal {S} _ {i + 1} \\subseteq \\mathcal {S} _ {i} \\\\ = \\left\\| x - c _ {i + 1} - \\frac {\\mu}{L} r _ {i} v \\right\\| _ {2} ^ {2} \\\\ = \\| x - c _ {i + 1} \\| _ {2} ^ {2} + \\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2} - 2 \\frac {\\mu}{L} r _ {i} \\left\\langle x - c _ {i + 1} \\mid v \\right\\rangle \\\\ = \\| x - c _ {i + 1} \\| _ {2} ^ {2} + \\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2} \\quad \\text {u s i n g (3 8) s i n c e} x \\in \\mathcal {S} _ {i + 1} \\subseteq \\mathcal {H} _ {i + 1} \\tag {40} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            192,
+            570,
+            823,
+            685
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "from which we obtain that ",
+        "bbox": [
+            171,
+            691,
+            349,
+            704
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x - c _ {i + 1} \\right\\| _ {2} ^ {2} = r _ {i + 1} ^ {2} \\tag {41}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            429,
+            709,
+            823,
+            729
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "So $x \\in \\mathcal { H } _ { i + 1 }$ and $\\| x - c _ { i + 1 } \\| _ { 2 } = r _ { i + 1 }$ , thus $x \\in { \\mathcal { C } }$ . We have thus proved that $\\boldsymbol { S } _ { i + 1 }$ is indeed a $( d - i - 3 )$ -sphere in a $( d - i - 2 )$ affine space with the desired radius and center which concludes the first item of the induction. ",
+        "bbox": [
+            169,
+            733,
+            823,
+            773
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "We now want to prove the second item. For $x ^ { * } \\in S _ { i + 1 }$ , $x _ { i + 1 } - h _ { i + 1 }$ is orthogonal to $\\mathcal { H } _ { i + 1 }$ due to being orthogonal to $\\mathcal { H } _ { i }$ by construction. $h _ { i + 1 } - c _ { i + 1 }$ is aligned with $v$ and thus is orthogonal to $\\mathcal { H } _ { i + 1 }$ . Therefore, their sum $x _ { i + 1 } - c _ { i + 1 }$ is orthogonal to $\\mathcal { H } _ { i + 1 }$ and we get ",
+        "bbox": [
+            169,
+            781,
+            825,
+            824
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} = \\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2} + \\left\\| c _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} \\tag {42} \\\\ = \\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2} + r _ {i + 1} ^ {2} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            331,
+            829,
+            823,
+            869
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "And thus ",
+        "bbox": [
+            171,
+            876,
+            235,
+            888
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {i + 1} = \\frac {\\mu + L}{4} \\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} \\tag {43}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            400,
+            886,
+            823,
+            916
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "page_number",
+        "text": "20 ",
+        "bbox": [
+            488,
+            935,
+            508,
+            946
+        ],
+        "page_idx": 19
+    },
+    {
+        "type": "text",
+        "text": "Let $x ^ { * } \\in S _ { i + 1 }$ . Since $S _ { i + 1 } \\subseteq S _ { i }$ , then by recurrence hypothesis there exists an interpolation of the $( x _ { j } , f _ { j } , g _ { j } )$ in $R S I ^ { - } ( \\mu ) \\cap E B ^ { + } ( L )$ minimized by $x ^ { * }$ , hence from Theorem 1, ",
+        "bbox": [
+            169,
+            90,
+            823,
+            121
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\forall j \\leq i, \\| g _ {j} \\| _ {2} \\leq L \\| x _ {j} - x ^ {*} \\| _ {2} \\quad \\text {a n d} \\quad \\left\\langle g _ {j} \\mid x _ {j} - x ^ {*} \\right\\rangle \\geq \\mu \\| x _ {j} - x ^ {*} \\| _ {2} ^ {2} \\tag {44}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            259,
+            128,
+            825,
+            148
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "Moreover, by construction of $g _ { i + 1 }$ ",
+        "bbox": [
+            171,
+            152,
+            403,
+            167
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| g _ {i + 1} \\right\\| _ {2} = L \\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} \\tag {45}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            406,
+            175,
+            823,
+            191
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "Since $x _ { i + 1 } - c _ { i + 1 }$ is orthogonal to $\\mathcal { H } _ { i + 1 }$ and thus to $c _ { i + 1 } - x ^ { * }$ , we have ",
+        "bbox": [
+            171,
+            205,
+            650,
+            220
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\langle x _ {i + 1} - c _ {i + 1} \\mid x _ {i + 1} - x ^ {*} \\right\\rangle = \\left\\| c _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} \\tag {46}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            352,
+            227,
+            823,
+            247
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "Besides, $x _ { i + 1 } - c _ { i + 1 }$ is orthogonal to $c _ { i + 1 } - x ^ { * }$ and thus ",
+        "bbox": [
+            171,
+            253,
+            552,
+            268
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} = \\left\\| x _ {i + 1} - c _ {i + 1} + c _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} = \\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2} + r _ {i + 1} ^ {2} \\tag {47}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            256,
+            273,
+            825,
+            296
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "By construction, ",
+        "bbox": [
+            171,
+            306,
+            284,
+            321
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\left\\| c _ {i + 1} - x _ {i + 1} \\right\\| _ {2} \\geq \\left\\| c _ {i + 1} - h _ {i + 1} \\right\\| _ {2} \\\\ = \\left\\| c _ {i + 1} - c _ {i} + c _ {i} - h _ {i + 1} \\right\\| _ {2} \\\\ = \\left\\| - \\frac {\\mu}{L} r _ {i} v - \\| h _ {i + 1} - c _ {i} \\| _ {2} v \\right\\| _ {2} \\tag {48} \\\\ = \\frac {\\mu}{L} r _ {i} + \\left\\| h _ {i + 1} - c _ {i} \\right\\| _ {2} \\\\ \\geq \\frac {\\mu}{L} r _ {i} \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            336,
+            338,
+            823,
+            458
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "and finally : ",
+        "bbox": [
+            171,
+            465,
+            254,
+            481
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\frac {\\left\\langle g _ {i + 1} \\mid x _ {i + 1} - x ^ {*} \\right\\rangle^ {2}}{\\mu^ {2} \\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {4}} = \\frac {L ^ {2}}{\\mu^ {2}} \\frac {\\left\\langle x _ {i + 1} - c _ {i + 1} \\mid x _ {i + 1} - x ^ {*} \\right\\rangle^ {2}}{\\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2} \\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2}} \\\\ = \\frac {L ^ {2}}{\\mu^ {2}} \\frac {\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2}}{\\left\\| x _ {i + 1} - x ^ {*} \\right\\| _ {2} ^ {2}} \\quad \\text {u s i n g} (46) \\\\ = \\frac {L ^ {2}}{\\mu^ {2}} \\frac {\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2}}{\\left\\| x _ {i + 1} - c _ {i + 1} \\right\\| _ {2} ^ {2} + r _ {i + 1} ^ {2}} \\quad \\text {u s i n g (4 7)} (49) \\\\ \\geq \\frac {L ^ {2}}{\\mu^ {2}} \\frac {\\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2}}{\\frac {\\mu^ {2}}{L ^ {2}} r _ {i} ^ {2} + \\left(1 - \\frac {\\mu^ {2}}{L ^ {2}}\\right) r _ {i} ^ {2}} \\quad \\text {u s i n g (4 8)} \\\\ = 1 \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            256,
+            496,
+            823,
+            674
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "And thus ",
+        "bbox": [
+            171,
+            688,
+            235,
+            700
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\left\\langle g _ {i + 1} \\mid x _ {i + 1} - x ^ {*} \\right\\rangle \\geq \\mu \\| x _ {i + 1} - x ^ {*} \\| _ {2} ^ {2} \\tag {50}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            370,
+            720,
+            823,
+            739
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "Since $\\forall j \\leq i , x ^ { * } \\in S _ { j }$ , we also have ",
+        "bbox": [
+            171,
+            747,
+            413,
+            763
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "equation",
+        "text": "$$\nf _ {j} = \\frac {\\mu + L}{4} \\left\\| x _ {j} - x ^ {*} \\right\\| _ {2} ^ {2} \\tag {51}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            415,
+            770,
+            823,
+            800
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "text",
+        "text": "We finally apply Corollary 1 to all unique triples $( x _ { j } , f _ { j } , g _ { j } ) _ { j \\leq i + 1 }$ (which ensures by construction that all $x _ { j }$ are distincts) which allows us to conclude from (43), (45), (44), (50) and (51) that there exists an interpolation in $R S I ^ { - } ( \\mu ) \\cap E B ^ { + } ( L )$ that is minimized by $\\{ x ^ { * } \\}$ , proving the second item of the induction and thus concluding the proof. ",
+        "bbox": [
+            169,
+            806,
+            825,
+            864
+        ],
+        "page_idx": 20
+    },
+    {
+        "type": "page_number",
+        "text": "21 ",
+        "bbox": [
+            488,
+            935,
+            506,
+            946
+        ],
+        "page_idx": 20
+    }
+]

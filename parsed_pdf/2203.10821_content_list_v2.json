@@ -1,0 +1,5515 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF: Converting Single-View Semantic Masks to Neural Radiance Fields "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        250,
+        140,
+        751,
+        184
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Yuedong Chen 1 \u0000 "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\oplus \\boxtimes"
+          },
+          {
+            "type": "text",
+            "content": ", Qianyi "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathrm { W u } ^ { 1 \\oplus }"
+          },
+          {
+            "type": "text",
+            "content": ", Chuanxia Zheng "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ 1 \\oplus"
+          },
+          {
+            "type": "text",
+            "content": ", Tat-Jen Cham . , "
+          },
+          {
+            "type": "equation_inline",
+            "content": "^ 2 \\oplus"
+          },
+          {
+            "type": "text",
+            "content": "and Jianfei Cai1 "
+          }
+        ]
+      },
+      "bbox": [
+        303,
+        210,
+        697,
+        243
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "1 Monash University, Australia {yuedong.chen, qianyi.wu, jianfei.cai}@monash.edu 2 Nanyang Technological University, Singapore chuanxia001@e.ntu.edu.sg, astjcham@ntu.edu.sg "
+          }
+        ]
+      },
+      "bbox": [
+        310,
+        253,
+        691,
+        311
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Abstract. Image translation and manipulation have gain increasing attention along with the rapid development of deep generative models. Although existing approaches have brought impressive results, they mainly operated in 2D space. In light of recent advances in NeRFbased 3D-aware generative models, we introduce a new task, Semanticto-NeRF translation, that aims to reconstruct a 3D scene modelled by NeRF, conditioned on one single-view semantic mask as input. To kickoff this novel task, we propose the Sem2NeRF framework. In particular, Sem2NeRF addresses the highly challenging task by encoding the semantic mask into the latent code that controls the 3D scene representation of a pre-trained decoder. To further improve the accuracy of the mapping, we integrate a new region-aware learning strategy into the design of both the encoder and the decoder. We verify the efficacy of the proposed Sem2NeRF and demonstrate that it outperforms several strong baselines on two benchmark datasets. Code and video are available at https://donydchen.github.io/sem2nerf/. "
+          }
+        ]
+      },
+      "bbox": [
+        259,
+        349,
+        743,
+        571
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Keywords: NeRF-based generation, conditional generative model, 3D deep learning, neural radiance fields, image-to-image translation "
+          }
+        ]
+      },
+      "bbox": [
+        259,
+        585,
+        740,
+        613
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 Introduction "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        640,
+        375,
+        656
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Controllable image generation, translation, and manipulation have seen rapid advances in the last few years along with the emergence of Generative Adversarial Networks (GANs) [14]. Current systems are able to freely change the image appearance through referenced images [21,70,20], modify scene content via semantic masks [53,40,29], and even accurately manipulate various attributes in feature space [24,56,57]. Despite impressive performance and wide applicability, these systems are mainly focused on 2D images, without directly considering the 3D nature of the world and the objects within. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        672,
+        787,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Concurrently, significant progress has been made for 3D generation by using deep generative networks [14,26]. Methods were developed for different 3D shape representations, including voxels [54], point clouds [36], and meshes [13]. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        795,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2203.10821v2 [cs.CV] 21 Jul 2022 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        270,
+        57,
+        705
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/936b35820b9416da35a5f1e20698ff0799187777d0e4d709ef59c5b0ac363b3b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 1. Illustration of the Semantic-to-NeRF translation task, which aims to achieve free-viewpoint image generation by taking only a single-view semantic mask as input "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        225,
+        143,
+        781,
+        276
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "More recently, Neural Radiance Fields (NeRF) [38] has been a new paradigm for 3D representation, providing accurate 3D shape and view-dependent appearance simultaneously. Based on this new representation, seminal 3D generation approaches [46,39,3,15,2] have been proposed that aim to generate photorealistic images from a given distribution in a 3D-aware and view-consistent manner. However, these techniques are primarily developed purely for high-quality 3D generation, leaving controllable 3D manipulation and editing unsolved. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        340,
+        787,
+        446
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "It would be a dramatic enhancement if we can freely manipulate and edit an object’s content and appearance in 3D space, while only leveraging easily obtained 2D input information. In this paper, we take an initial step toward this grand goal by introducing a new task, termed Semantic-to-NeRF translation, analogous to a 2D Semantic-to-Image translation task but operating on 3D space. Specifically, Semantic-to-NeRF translation (see Fig. 1) takes as input a singleview 2D semantic mask, yet output a NeRF-based 3D representation that can be used to render photorealistic images in a 3D-aware view-consistent manner. More importantly, it allows free editing of the object’s content and appearance in 3D space, by modifying the content only via a single-view 2D semantic mask. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        446,
+        789,
+        598
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "However, generating 3D structure from a single 2D image is already an illposed problem, and it will be even more so from a single 2D semantic mask. There are also two other major issues in this novel task: "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        598,
+        787,
+        643
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Large information gap between 3D structure and 2D semantics. A singleview 2D semantic mask neither holds any 3D shape or surface information, nor provides much guidance for plausible appearances, making it tough to generate a neural radiance field with comprehensive details. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Imbalanced semantic distribution. Since semantic classes tend to be areaimbalanced within an image, e.g. eyes occupy less than 1% of a face while hair can take up larger than 40%, existing CNN-based networks may overattend to larger semantic regions, while discounting smaller semantic regions that may be perceptually more salient. This will result in poor controllable editing in 3D space when we alter small semantic regions. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        220,
+        651,
+        787,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To mitigate these issues, we propose a novel framework, Sem2NeRF, that builds on NeRF [38] for 3D representation, by augmenting it with a seman-"
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        809,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "tic translation branch that conditionally generates high-quality 3D-consistent images. In particular, the framework is based on an encoder-decoder architecture that converts a singe-view 2D semantic mask to an embedded code, and then transfers it to a NeRF representation for rendering 3D-consistent images. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        205
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our broad idea here is that, instead of directly learning to predict 3D structure from degenerate single-view 2D semantic masks, the network can alternatively learn the 3D shape and appearance representation from large numbers of unstructured 2D RGB images. This has achieved significant advances in NeRFbased generator [46,39,3,15,2], which transforms a random vector to a NeRF representation. In short, our scenario is thus: we have a well-trained 3D generator, but we aim to further control the generated content and appearance easily. The main idea is then to learn a good mapping network (like current methods for 2D GAN inversion [44,49]) that can encode the semantic mask into the somewhat smaller latent space domain for 3D controllable translation and manipulation. As for the second issue, we intriguingly discover that a region-aware learning strategy is of vital importance. We therefore aim to tame an encoder that is sensitive to image patches, and adopt a region-based sampling pattern for the decoder. Furthermore, augmenting the input semantic masks with extracted contours and distance field representations [6] also considerably helps to highlight the intended semantic changes, making them more easily perceptible. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        207,
+        785,
+        446
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Following the above analysis, we build our Sem2NeRF framework upon the Swin Transformer encoder [33] and the pre-trained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN decoder [3]. To kick off the single-view Semantic-to-NeRF translation task, we pinpoint two suitable yet challenging datasets, including CelebAMask-HQ [27] and CatMask, where the latter contains cat faces rendered using "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN and labelled with 6-class semantic masks using DatasetGAN [65]. We showcase the superiority of our model over several strong baselines by considering SofGAN [4], pix2pixHD [53] with GAN-inversion [25], and pSp [44]. Our contributions are three-fold: "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        449,
+        787,
+        570
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "text_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "– We introduce a novel and challenging task, Semantic-to-NeRF translation, which converts a single-view 2D semantic mask to a 3D scene modelled by neural radiance fields. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "With the insight of needing a region-aware learning strategy, we propose a novel framework, Sem2NeRF, which is capable of achieving 3D-consistent free viewpoint image generation, semantic editing and multi-model synthesis, by taking as input only one single-view semantic mask of a specific category, e.g., human face, cat face. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "– We validate our insight regarding our region-aware learning strategy and the efficacy of Sem2NeRF via extensive ablation studies, and demonstrate that Sem2NeRF outperforms strong baselines on two challenging datasets. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        225,
+        577,
+        784,
+        739
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 Related Work "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        763,
+        387,
+        780
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NeRF and Generative NeRF. Starting as an approach focused on modelling a single static scene, NeRF [38] had seen rapid development in different aspects. Several approaches managed to reduce the training [50] and inference "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        794,
+        782,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        774,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "time [31,35], while others improved visual quality [1]. Besides, it had also been extended in other ways, e.g., dynamic scene [43], compositional scene [55], pose estimation [60], portrait generation [32], semantic segmentation [68]. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        191
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Follow-up works that integrated NeRF with generative models were most relevant to ours. Schwarz et al. [46] proposed to learn a NeRF distribution by conditioning the input point positions with a sampled random vector. Niemeyer et al. [39] enabled multi-object generation by representing the whole scenes as a composition of different components. To improve the visual quality, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN [3] adopted a SIREN-based [48] network structure with FiLM [42] conditioning. StyleNeRF [15] turned to embedding the volume rendering technique into Style-GAN [25]. More recently, VolumeGAN [59] relied on separately learning structure and texture features. MVCGAN [64] leveraged the underlying 3D geometry information. EG3D [2] proposed an efficient tri-plane hybrid 3D representation. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        194,
+        784,
+        345
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our work belongs to the class of generative models, but unlike all existing methods that aimed to create a random scene, we aim to generate a specific scene that is conditioned by a given single-view semantic mask. Although there are concurrent works, e.g., 3D-SGAN [61], FENeRF [51], exploring the similar condition settings, most of them purely focus on improving the quality of the generated images, while resort to existing GAN inversion [25] to do the mapping. In contrast, our work is more focused on improving the mapping from the mask to the NeRF-based scene. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        348,
+        785,
+        468
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Image-to-Image Translation is about converting an image from one source representation, e.g., semantic masks, to another target representation, e.g., photorealistic images. Since its introduction [20], progress has been made with regard to better image quality [53,7], multi-modal outputs [71,66,9], unsupervised learning [70,30], etc.. More recently, there is a new trend [44,47,58] of tackling this task by editing the latent space of a pre-trained generator, e.g., StyleGAN. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        472,
+        785,
+        561
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In contrast to all mentioned work that aimed to map a semantic mask to an image, ours is focused on mapping to a 3D scene. We also notice that there are some recent approaches targeted at converting semantic masks to 3D scenes. Huang et al. [19] introduced rendering novel-view photorealistic images from a given semantic mask, by first applying semantic-to-image translation [40], then converting the single-view image to a 3D scene modelled by multiplane images (MPI) [69]. Hao et al. [16] proposed to learn a mapping from a semanticallylabelled 3D block world to a NeRF-based 3D scene, using a scene-specific setting. Chen et al. [4] introduced a 3D-aware portrait generator by first mapping the given latent code to a semantic occupancy field (SOF) [8] for rendering novel view semantic masks, followed by applying image-to-image translation. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        566,
+        785,
+        731
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Unlike all mentioned attempts on learning semantic to 3D scene mappings, ours is the first to introduce the single-view semantic to NeRF translation task. Our work differs from theirs in: 1) We do not rely on any separate image-toimage translation stage, resulting in better multi-view consistency; 2) We do not require multi-view semantic masks for both training and testing phases, easing the data collection effort; 3) We pinpoint a solution for creating pseudo labels and demonstrate reasonable results beyond the human face domain. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        734,
+        785,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        127
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/6ee4021e3f826d2439b60f78a45ccd087274050710662efa703d62bfbef86303.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 2. Architecture of the Sem2NeRF framework. It aims to convert a single-view semantic mask to a 3D scene represented by NeRF. Specifically, a given semantic mask will be partitioned into patches, which will be further encoded by a patch-based encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\xi _ { \\theta }"
+          },
+          {
+            "type": "text",
+            "content": "into a latent style code "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\gamma , \\beta )"
+          },
+          {
+            "type": "text",
+            "content": "of a pre-trained NeRF-based 3D generator "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi }"
+          },
+          {
+            "type": "text",
+            "content": ". A region "
+          },
+          {
+            "type": "equation_inline",
+            "content": "_ { \\mathcal { R } }"
+          },
+          {
+            "type": "text",
+            "content": "will be randomly sampled to enforce awareness of differences among regions. And an optional latent vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z }"
+          },
+          {
+            "type": "text",
+            "content": "is included to enable multi-modal synthesis "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        222,
+        143,
+        781,
+        343
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 Methodology "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        470,
+        380,
+        488
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Fig. 1, our main goal is to train a Semantic-to-NeRF translation network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { s  \\gamma }"
+          },
+          {
+            "type": "text",
+            "content": ", such that when presented with a single-view 2D semantic mask s, it generates the corresponding NeRF representation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\nu"
+          },
+          {
+            "type": "text",
+            "content": ", which can then be used to render realistic 3D-consistent images. This task is conceptually similar to the conventional semantic-to-image setting, except that here we opt to go beyond 2D image translation, and deal with the novel controllable 3D translation. More importantly, we can freely change the 3D content by simply modifying the corresponding content in a single-view 2D semantic mask. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        506,
+        787,
+        626
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In order to learn such a framework without enough supervision for arbitrary view appearances, we observed that 3D information can be learned from large image collections [22,3,2]. Therefore, our key motivational insight is this: instead of directly training "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { s  \\gamma }"
+          },
+          {
+            "type": "text",
+            "content": "using single-view semantic-image pairs "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { s } , \\mathbf { I } )"
+          },
+          {
+            "type": "text",
+            "content": "(like current methods for 2D semantic-to-image translation [53,40]), we will train it as a two-stage pipeline shown in Fig. 2. Here, (A) we utilize a pre-trained 3D generator (lower portion "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi }"
+          },
+          {
+            "type": "text",
+            "content": ") that learns 3D shape and appearance information from a large set of collected images; (B) we pose this challenging task as a 3D inversion problem, where our main target is to design a front-end encoder (upper portion "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { \\varepsilon _ { \\theta } }"
+          },
+          {
+            "type": "text",
+            "content": ") that maps the semantic mask into the generator latent space accurately. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        628,
+        787,
+        779
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The two training stages are executed independently and can be separately implemented with different frameworks. There are at least two unique benefits of breaking down the entire controllable 3D translation into two-stages: 1) The training does not require copious views of semantic-image pairs for each instance, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        779,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        784,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "which are difficult to collect, or even impossible in some scenarios; 2) The compartmentalization of the 3D generator and the 2D encoder allows greater agility, where the 3D information can be previously learned on various tasks with a large collection of images and then be freely plugged into the 3D inversion pipeline. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        787,
+        208
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 3D Decoder with Region-Aware Ray Sampling "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        229,
+        648,
+        244
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Preliminaries on NeRF. We first provide some preliminaries on NeRF before discussing how we exploit it for Sem2NeRF. NeRF [38] is one kind of implicit functions that represents a continuous 3D scene, which has achieved great successes in modeling 3D shape and appearance. A NeRF is a neural network that maps a 3D location "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x } \\in \\mathbb { R } ^ { 3 }"
+          },
+          {
+            "type": "text",
+            "content": "and a viewing direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": " { \\mathbf { d } } \\in \\mathbb { S } ^ { 2 }"
+          },
+          {
+            "type": "text",
+            "content": "to a spatially varying volume density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and a view-dependent emitted color "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { c } = ( r , g , b )"
+          },
+          {
+            "type": "text",
+            "content": ". NeRFs trained on natural images are able to continuously render realistic images at arbitrary views. In particular, it requires to use the volume rendering [28], which computes the following integral to obtain the color of a pixel: "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        253,
+        787,
+        391
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "C (\\mathbf {r}) = \\int_ {t _ {n}} ^ {t _ {f}} T (t) \\sigma (\\mathbf {r} (t)) \\mathbf {c} (\\mathbf {r} (t), \\mathbf {d}) d t, \\text {w h e r e} T (t) = \\exp (- \\int_ {t _ {n}} ^ {t} \\sigma (\\mathbf {r} (s)) d s), \\quad (1)",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/a9859a3a21b8a0ac427bb2d1f2bec8f8263eb9d3f00b7f303464359d4fbbaeaf.jpg"
+        }
+      },
+      "bbox": [
+        240,
+        402,
+        785,
+        436
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { r } ( t ) = \\pmb { o } + t \\pmb { d }"
+          },
+          {
+            "type": "text",
+            "content": "is the ray casting from the virtual camera located at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pmb { O }"
+          },
+          {
+            "type": "text",
+            "content": ", bounded by near "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t _ { n }"
+          },
+          {
+            "type": "text",
+            "content": "and far "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t _ { f }"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T ( t )"
+          },
+          {
+            "type": "text",
+            "content": "represents the accumulated transmittance of the ray traveling from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t _ { n }"
+          },
+          {
+            "type": "text",
+            "content": "to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          },
+          {
+            "type": "text",
+            "content": ". The integral "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C ( \\mathbf { r } )"
+          },
+          {
+            "type": "text",
+            "content": "is further implemented with a hierarchical volume sampling strategy [28,38], resulting in the optimization of a “coarse” network followed by a “fine” network. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        446,
+        787,
+        523
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "NeRF-based Generator. Our work is mainly based on a representative NeRFbased generator, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN [3], which learns 3D representation using only 2D supervision. Inspired by StyleGAN2 [25], the architecture of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN is mainly composed of two parts, a mapping network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { F } : \\mathcal { Z }  \\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": "that maps a latent vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "z"
+          },
+          {
+            "type": "text",
+            "content": "in the input latent space "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { Z }"
+          },
+          {
+            "type": "text",
+            "content": "to an intermediate latent vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w  \\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": ", and a SIREN-based [48] synthesis network that maps "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w"
+          },
+          {
+            "type": "text",
+            "content": "to the NeRF representation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\nu"
+          },
+          {
+            "type": "text",
+            "content": "that supports rendering 3D-consistent images from arbitrary camera poses. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        537,
+        787,
+        643
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Our Sem2NeRF framework can use various NeRF-based generators. Here, we choose "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN as the main decoder in our architecture for two main reasons. Firstly, among all published works related to NeRF-based generators, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "- GAN achieves state-of-the-art performance in terms of rendered image quality and their underlying 3D consistency. Secondly and more importantly, similar to StyleGAN, the FiLM [42] conditioning used by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN enables layer-wise control over the decoder and the mapping network decouples some high-level attributes, making it easier to perform "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\it 3 D"
+          },
+          {
+            "type": "text",
+            "content": "inversion on top of NeRF, i.e., searching for the desired latent code "
+          },
+          {
+            "type": "equation_inline",
+            "content": "w"
+          },
+          {
+            "type": "text",
+            "content": "that best reconstructs an ideal target. The similar observation has been previously explored in the latest 2D GAN inversion [10,25,44]. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        643,
+        787,
+        796
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Region-Aware Ray Sampling. While "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN already provides high-quality view-consistent rendered images, our main goal is to accurately restore the NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        809,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        127
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "from a single-view semantic mask, and even freely edit the 3D content via such a map. To achieve this, the network should be sensitive to local small modifications. However, this is not supported in the original "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN, which is trained on each entire image with a global perception. It stores scene-specific information in a latent code, which is shared across all points that are bounded by the rendering volume. As a result, a small change in an original latent code will easily cause a global modification in generation. This may not impact pure 3D generation, for which only the quality of global shape and appearance is paramount, but it has a large negative effect on recreating a 3D representation that accurately matches the corresponding semantic mask. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        296
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To mitigate this issue, we adopt a region-based ray sampling pattern [46,32] in the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN decoder, that attempts to encourage latent codes to represent local regions at different scales and locations. Suppose the rendered image I with a target size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "h \\times w"
+          },
+          {
+            "type": "text",
+            "content": ", a local region "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "used for training is randomly sampled as "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        297,
+        784,
+        358
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {R} (\\alpha , (\\Delta h, \\Delta w)) = \\left\\{\\left(\\alpha h + \\Delta h, \\alpha w + \\Delta w\\right) \\right\\}, \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/786164a8791f58076f6e4aea8d8c7a7a88b3fee3b19757d1e5b3516daf989a70.jpg"
+        }
+      },
+      "bbox": [
+        346,
+        369,
+        784,
+        386
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\alpha h + \\varDelta h , \\alpha w + \\varDelta w )"
+          },
+          {
+            "type": "text",
+            "content": "denotes the sampling coordinates of rays, with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha \\in"
+          },
+          {
+            "type": "equation_inline",
+            "content": "( 0 , 1 ]"
+          },
+          {
+            "type": "text",
+            "content": "being the scaling factor and ( "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\varDelta h \\in [ 0 , ( 1 - \\alpha ) h ] , \\varDelta w \\in [ 0 , ( 1 - \\alpha ) w ] )"
+          },
+          {
+            "type": "text",
+            "content": "being the translation factor. To obtain such training pairs between the NeRF rendered output and the local ground truth, we sample the original whole image using the same region coordinates "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "with bilinear interpolation. This strategy leads to large improvements on conditional generation as shown in the experiments. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        395,
+        782,
+        486
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 3D Inversion Using Region-Aware 2D Encoder "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        507,
+        645,
+        523
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "3D Inversion. To inversely map a semantic mask s into the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": "latent space of the 3D generator "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi }"
+          },
+          {
+            "type": "text",
+            "content": "by an encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { \\varepsilon _ { \\theta } }"
+          },
+          {
+            "type": "text",
+            "content": ", with respective parameters "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\psi"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\theta"
+          },
+          {
+            "type": "text",
+            "content": ", we train "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { \\varepsilon _ { \\theta } }"
+          },
+          {
+            "type": "text",
+            "content": "to minimize the reconstruction error between ground truth image I and output "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat { \\bf I }"
+          },
+          {
+            "type": "text",
+            "content": ". Specifically, Semantic-to-NeRF translation represents the mapping "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        531,
+        782,
+        592
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\varPhi_ {\\mathbf {s} \\rightarrow \\mathcal {V}} (\\mathbf {x}, \\mathbf {d}, \\mathbf {z}; \\mathbf {s}) = \\mathcal {G} _ {\\psi} (\\mathbf {x}, \\mathbf {d}, \\mathbf {z}; \\mathcal {E} _ {\\theta} (\\mathbf {s})) = \\mathcal {V} (\\sigma , \\mathbf {c}) \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/23b0489cd579b499d0563aa9fbb98b741ea5814d6349b5ba33a29722d71a8c32.jpg"
+        }
+      },
+      "bbox": [
+        339,
+        604,
+        784,
+        619
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { x } , \\mathbf { d }"
+          },
+          {
+            "type": "text",
+            "content": "denotes point position and ray direction, while the derived density "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\sigma"
+          },
+          {
+            "type": "text",
+            "content": "and color "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { \\vec { c } }"
+          },
+          {
+            "type": "text",
+            "content": "can be used to calculate the corresponding pixel value via volume rendering as in Eq. (1). For controllable 3D generation, s is the input single-view semantic mask, embedded into "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": "space to control the generated 3D content, while we also enable multi-modal synthesis by adding another latent vector "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z }"
+          },
+          {
+            "type": "text",
+            "content": "to model the generated appearance. Note that s only comes in a single view, which is not necessary the same as the output viewing direction. In short, we use only single-view semantic-image pairs "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\mathbf { s } , \\mathbf { I } )"
+          },
+          {
+            "type": "text",
+            "content": "for the Sem2NeRF training, as the 3D view-consistent information has been captured by the fixed pre-trained 3D generator "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi }"
+          },
+          {
+            "type": "text",
+            "content": ". Hence, we focus only on training the encoder network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { \\varepsilon _ { \\theta } }"
+          },
+          {
+            "type": "text",
+            "content": "to learn the posterior distribution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "q ( w | \\mathbf { s } )"
+          },
+          {
+            "type": "text",
+            "content": "for 3D inversion. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        628,
+        784,
+        795
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Region-Aware 2D Encoder. A simple way for 3D inversion is to directly apply an existing 2D GAN inversion framework. However, this straightforward idea "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        809,
+        782,
+        839
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        651,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "does not work well as we originally discovered when using the state-of-the-art pSp encoder [44] in our setting, especially for small but perceptually important regions, such as eyes. Our conjecture is that the conventional CNN-based architecture integrates the neighboring information via overaggressive filtering, resulting in heavy loss of small details [62]. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        222
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To mitigate this issue, we also deploy a region-aware learning strategy in the 2D encoder, which is inspired by the latest patch-based methods [12,67] that capture information in every patch with equal possibility. In other words, when we directly extract features from local patches, it will be more sensitive to the semantic variation within each patch, which can ameliorate the problem of imbalanced semantic distribution within an image. In particular, we adopt the Swin Transformer [33] as the encoder architecture. To embed the semantic mask s into the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": "latent space of the pre-trained 3D generator, we replace the final classification output size with the size of the latent vectors w. Besides, to further stabilize the inversion training, we take inspiration from the truncation trick [24,44] and set the learned latent codes for the pre-trained decoder as "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        222,
+        787,
+        388
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\gamma = \\bar {\\gamma} + \\Delta \\gamma , \\beta = \\bar {\\beta} + \\Delta \\beta , \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/75c2a73948fc9bf91147fd90553de1f3ebc1c444e4536d62ba72171fa20b07c6.jpg"
+        }
+      },
+      "bbox": [
+        410,
+        402,
+        784,
+        419
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "represent the embedded vectors for the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": "latent space, i.e., frequency and phase shift of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN, respectively; "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\varDelta \\gamma"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\varDelta \\beta"
+          },
+          {
+            "type": "text",
+            "content": "are the outputs of the proposed encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\dot { \\varepsilon _ { \\theta } }"
+          },
+          {
+            "type": "text",
+            "content": ", while "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\overline { \\gamma }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\overline { { \\beta } }"
+          },
+          {
+            "type": "text",
+            "content": "are the average latent codes extracted by the pre-trained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN original mapping network "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { F } : \\mathcal { Z }  \\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        422,
+        784,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additional Inputs for the 2D Encoder. As mentioned, a semantic mask contains sparse information, where the changing of small regions may be imperceptible to the network, making the semantic-based controllable 3D editing very challenging. Considering that editing a semantic mask only effectively alters the boundaries between different semantic labels, we conjecture that explicitly augmenting the semantic input with boundary information will be useful for semantic editing. Therefore, we concatenate the semantic mask input with contours and distance field representations [6] for the region-aware encoder. These additional inputs further improve the semantic editing performance considerably as shown in the experiments. Note that contours and distance field representations are both directly calculated from the semantic masks (refer to Section A.1 for more details), which do not involve any extra labels. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        494,
+        787,
+        676
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.3 Training Loss Functions "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        695,
+        460,
+        710
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "During the training phase, we use the single-view semantic mask s, the corresponding viewing direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { s }"
+          },
+          {
+            "type": "text",
+            "content": ", and the paired ground truth RGB image I. Similar to Semantic-to-Image translation, we start by applying a pixel-level reconstruction loss, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        718,
+        784,
+        777
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\text {r e c}} (\\mathbf {I}, \\mathbf {s}, d _ {s}) = \\| \\mathbf {I} - \\mathcal {G} _ {\\psi} \\left(\\mathcal {E} _ {\\theta} (\\mathbf {s}), d _ {s}\\right) \\| _ {2}, \\tag {5}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/df36aa2abf85783561ff12444a2c23bb9037add1cf5323db24c067787b054715.jpg"
+        }
+      },
+      "bbox": [
+        372,
+        787,
+        784,
+        803
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } _ { \\boldsymbol { \\theta } } ( \\mathbf { s } )"
+          },
+          {
+            "type": "text",
+            "content": "denotes the latent codes mapped from s via the region-aware encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } _ { \\theta } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": ", while "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi } ( \\mathcal { E } _ { \\theta } ( \\mathbf { s } ) , d _ { s } )"
+          },
+          {
+            "type": "text",
+            "content": "represents the generated image rendered from direction "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        809,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        228,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        127
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "equation_inline",
+            "content": "d _ { s }"
+          },
+          {
+            "type": "text",
+            "content": "via the decoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": ". Unless otherwise specified, the aforementioned regionaware sampling strategy is applied to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { G } _ { \\psi }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { I }"
+          },
+          {
+            "type": "text",
+            "content": "before calculating any losses. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        176
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To further enforce the feature-level similarity between the generated image and the ground truth, the LPIPS loss [63] is leveraged, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        176,
+        782,
+        207
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\mathrm {L P I P S}} (\\mathbf {I}, \\mathbf {s}, d _ {s}) = \\| \\mathcal {F} (\\mathbf {I}) - \\mathcal {F} \\left(\\mathcal {G} _ {\\psi} \\left(\\mathcal {E} _ {\\theta} (\\mathbf {s}), d _ {s}\\right)\\right) \\| _ {2}, \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/ac4179f993c265198fa7f4e468f610383d0443e8a30725a0cf29e80a57671a75.jpg"
+        }
+      },
+      "bbox": [
+        334,
+        214,
+        785,
+        229
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal F ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": "refers to the pre-trained feature extraction network. "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        234,
+        673,
+        250
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Inspired by the truncation trick [24,44], we further encourage the decoder latent codes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "to be close to the average codes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\overline { \\gamma }"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\overline { { \\beta } }"
+          },
+          {
+            "type": "text",
+            "content": ", which is achieved by regularizing the encoder with "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        250,
+        782,
+        294
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\text {r e g}} (\\mathbf {s}) = \\left\\| \\mathcal {E} _ {\\theta} (\\mathbf {s}) \\right\\| _ {2}. \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d8d7afb7c79575485728fedff8eb95fa8f77915a4784480d312cb610b8414d45.jpg"
+        }
+      },
+      "bbox": [
+        433,
+        301,
+        784,
+        318
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To improve image quality, especially for novel views, we further apply a nonsaturating GAN loss with R1 regularization [37], "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        323,
+        782,
+        354
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\mathrm {G A N}} (\\mathbf {I}, \\mathbf {s}, d) = f (\\mathcal {D} (\\mathcal {G} _ {\\psi} (\\mathcal {E} _ {\\theta} (\\mathbf {I}), d))) + f (- \\mathcal {D} (\\mathbf {I})) + \\lambda_ {\\mathrm {R} 1} | \\nabla \\mathcal {D} (\\mathbf {I}) | ^ {2}, \\tag {8}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7b4a064fe056a78b6a9aefef99f8d5aff7c88edf2aeb3763d043d284d3bf3144.jpg"
+        }
+      },
+      "bbox": [
+        276,
+        361,
+        785,
+        386
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "w h e r e f (u) = - \\log (1 + \\exp (- u)).",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/45e0d97b34c466dfda03a1176bbb2e529df0653dd32475449dd84cff5bf38e15.jpg"
+        }
+      },
+      "bbox": [
+        366,
+        381,
+        607,
+        396
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { D } ( \\cdot )"
+          },
+          {
+            "type": "text",
+            "content": "is a patch discriminator [20], aligned with our region-aware learning strategy for the decoder, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda _ { \\mathrm { R 1 } }"
+          },
+          {
+            "type": "text",
+            "content": "is a hyperparameter that is set to 10. Note that here the viewing direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "is not required to be the same as the input semantic viewing direction "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { s }"
+          },
+          {
+            "type": "text",
+            "content": ", and we randomly sample this viewing direction from a known distribution, i.e. Gaussian, following the settings of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN [3]. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        402,
+        782,
+        477
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Finally, the overall training objective for our framework is a weighted combination of the above loss functions as "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        478,
+        782,
+        506
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\text {S e m 2 N e R F}} = \\lambda_ {\\text {r e c}} \\mathcal {L} _ {\\text {r e c}} + \\lambda_ {\\text {L P I P S}} \\mathcal {L} _ {\\text {L P I P S}} + \\lambda_ {\\text {r e g}} \\mathcal {L} _ {\\text {r e g}} + \\lambda_ {\\text {G A N}} \\mathcal {L} _ {\\text {G A N}}. \\tag {9}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/3aca9f657d3f2221a5f5cc88c83cf4d92cab8d4df1582bcd799104bbf6735daf.jpg"
+        }
+      },
+      "bbox": [
+        276,
+        516,
+        784,
+        530
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.4 Model Inference "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        214,
+        547,
+        395,
+        561
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "For inference, our model takes as input a 2D single-view semantic mask, while "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d _ { s }"
+          },
+          {
+            "type": "text",
+            "content": "is optional, required only when rendering an image with the same viewing direction as the semantic mask. Different from the training phase, during inference the rays are cast to cover the whole image plane, rather than a local region. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        568,
+        782,
+        627
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-View Generation. Since the employed decoder is a NeRF-based generator, Sem2NeRF inherently supports novel view generation. Specifically, given a semantic mask s, it will first be mapped as an embedded vector in the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { W }"
+          },
+          {
+            "type": "text",
+            "content": "latent space that controls the “content” of the NeRF-based generator, whereupon a novel view image can then be generated by volume rendering the NeRF from an arbitrary viewing direction. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        628,
+        782,
+        718
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-Modal Synthesis. Similar to the diversified mapping in semantic-toimage [40], ideally a single semantic mask should be translated into multiple NeRFs consistent to it. Our Sem2NeRF framework inherently supports multimodal synthesis in inference due to the usage of FiLM [42] conditioning on "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN, without requiring any special customization in training. In practice, we additionally pass a random-sampled vector to the pre-trained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN noise mapping module to obtain corresponding latent style codes "
+          },
+          {
+            "type": "equation_inline",
+            "content": "_ z"
+          },
+          {
+            "type": "text",
+            "content": ". Style mixing [44,24] is then performed between "
+          },
+          {
+            "type": "equation_inline",
+            "content": "_ { z }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { E } _ { \\boldsymbol { \\theta } } ( \\mathbf { s } )"
+          },
+          {
+            "type": "text",
+            "content": "to yield multi-modal outcomes. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        719,
+        782,
+        839
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        774,
+        116,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 Experiments "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        143,
+        375,
+        162
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 Settings "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        176,
+        330,
+        193
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Datasets. To achieve Semantic-to-NeRF translation, we assume the training data to have single-view registered semantic masks and images, with the corresponding viewing directions. Two datasets were used for evaluation in our experiments. CelebAMask-HQ [27] contains images from CelebA-HQ [34,23], manually-labelled 19-class semantic masks, and head poses. We merged the leftright labels of symmetric parts, i.e., eyes, eyebrows and ears, into one label per part. The dataset was randomly partitioned into training set with 28,000 samples and test set with 2,000 samples. CatMask is built using "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN and Dataset-GAN [65] to further demonstrate the potential of Semantic-to-NeRF task and Sem2NeRF. Technical details are elaborated in Section A.2. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        202,
+        787,
+        352
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Baselines. We identified the following three methods as baselines for comparison in our introduced Semantic-to-NeRF task. SofGAN [4] is an image translation approach. For a given single-view mask, we first apply inversion via iterative optimizations to find the corresponding latent vector for the preceding SOF [8] network, which can generate novel view semantic masks for further image-to-image mapping. Note that SofGAN requires training data to have highquality multi-view semantic masks, which is not available nor needed in our task. pix2pixHD [53] is an image translation approach. We adopt it with general GAN-inversion techniques [3,25]. For a given mask, it is first mapped to a photorealistic image via pix2pixHD, which will then be mapped to the corresponding latent code in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN via GAN-inversion. With the recovered codes, multi-view images can be directly obtained using "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN. pSp [44] is an image translation approach that is designed for encoding into StyleGAN2 [25]. We adapted it by using its ResNet [17]-based pSp encoder to replace the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN mapping network, and we further trained the network with objective functions used by pSp. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        353,
+        787,
+        580
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Evaluation Metrics. We show qualitative results by rendering images with different viewing directions and FOV (Field of View). We also report Frechet Inception Distance (FID) [18] and Inception Score (IS) [45] using Inception-v3 [52] over the test sets. Average running time and model sizes are also compared. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        580,
+        787,
+        641
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Implementation Details. Swin-T is used in all experiments with input resolution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 2 4 \\times 2 2 4"
+          },
+          {
+            "type": "text",
+            "content": ". For the decoder, the size of local region "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { R }"
+          },
+          {
+            "type": "text",
+            "content": "is set to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 2 8 \\times 1 2 8"
+          },
+          {
+            "type": "text",
+            "content": ". The step size of each ray is set to 28. Other miscellaneous settings of the pre-trained decoder, e.g., ray depth ranges, are kept unchanged. Hyper-parameters in Eq. (9) are set as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\lambda _ { \\mathrm { { r e c } } }"
+          },
+          {
+            "type": "text",
+            "content": "=1, λLPIPS=0.8, λreg=0.005, λGAN=0.08. The implementation is done in PyTorch [41]. More details are provided in Section A.3. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        641,
+        787,
+        731
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        753,
+        323,
+        768
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Comparisons on CelebAMask-HQ. As shown in Fig. 3, compared to all other baseline models, Sem2NeRF (1st&5th columns) achieved the best performance on both mapping accuracy and multi-view consistency. pSp (2nd&6th columns) generated images with lower quality compared to ours, especially for "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        779,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/168cc18efe7a36deee12dcc212ec2d6bb753229d670c0b8c30f20d95dfa28cbd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        142,
+        504,
+        366
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b93724836d8547fc55655f477a909687cbd2af0d2e60c96cc0b21e62f26e7fc3.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 3. Comparisons on CelebAMask. Images at each column are generated by the corresponding models mentioned at the bottom. Only SofGAN requires generation of multi-view semantic masks, shown at the top right corners of related images "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        509,
+        142,
+        784,
+        364
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "novel views, mainly because our model is designed with a region-aware learning strategy and a GAN loss for random-posed images during training. The CNNbased encoder also failed to capture fine-grained details, e.g., eyebrow shapes for the left face. Our method and the inversion-based pix2pixHD were better in matching semantics compared to pSp. pix2pixHD (3rd&7th columns) can map semantic masks to high quality images in the same viewpoint (top row), but does not generate novel views well. Basic GAN-inversion is not an efficient or easy way to find the desired latent codes, since the current 3D generative models are still quite immature. Even though images with the same viewing direction as the masks are reasonable, those novel view outputs contain artifacts. SofGAN (4th&8th columns) generated each single-view image with good quality; however, its results do not match with the given mask and lacked 3D consistency. The reason is that it is hard to map the given semantic mask to the desired latent codes of its semantic generator (SOF Net), whose sampling space is relatively small due to the lack of training data (only 122 subjects). The recovered mask did not match well with the given mask (top row). Besides, although the semantic masks show good multi-view consistency (top right corner of each image), conducting semantic-to-image mapping separately for each viewpoint does not guarantee that the consistency will be retained, since a semantic mask hardly contains any texture information and is geometrically ambiguous. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        457,
+        787,
+        760
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Quantitative results are give in Table 1. It can be seen that our Sem2NeRF method achieves the best performance, significantly outperforming the two baselines in both FID and IS scores. Note that we did not quantitatively compare single view image quality with SofGAN, considering that SofGAN for Semanticto-NeRF is limited by its mask inversion quality and multi-view consistency, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        763,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "11 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        116,
+        782,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/c0b596df2c7f56c9647954d67b0bfb0d0c0f4d425fd977f5052e921fec44dac8.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1. Quantitative comparisons on CelebAMask @ 128 "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\times"
+          },
+          {
+            "type": "text",
+            "content": "128 "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td></td><td>FID ↓</td><td>IS ↑</td><td>Runtime(s) ↓</td><td># Params(M) ↓</td></tr><tr><td>pix2pixHD [53] (with inversion)</td><td>67.32</td><td>1.72</td><td>161.59±0.859</td><td>~184.24</td></tr><tr><td>pSp [44]</td><td>55.56</td><td>1.74</td><td>0.25±0.004</td><td>~138.27</td></tr><tr><td>Sem2NeRF(Ours)</td><td>41.52</td><td>2.03</td><td>0.18±0.003</td><td>~32.01</td></tr></table>",
+        "table_type": "simple_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        217,
+        166,
+        785,
+        227
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3aabbd1c4938178468eb196d5e8cdfa53e5010cbda23bd31172da1dcd0a16dd3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        222,
+        256,
+        496,
+        357
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b3d2c264fb20ccc3d1f7842036d4a6e853f847c1690e40abb9396ac36a46fa4e.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        222,
+        357,
+        496,
+        455
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5c25e1ea130cbfbbb9c9f9185748178531d7284bb8057eabd7d932402f4aa95d.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        504,
+        256,
+        781,
+        357
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5ce9717195283b7003a8c0154250c586e54172e4a37f8a32c644fec423b7eb0a.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 4. Editing 3D scenes by changing single-view semantic masks. Three viewpoints are shown for better comparison in each group "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        504,
+        357,
+        781,
+        455
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "both of which cannot be measured by FID or IS scores. We also notice that scores of all models are lower than expected. The main reason is that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN is initially trained on CelebA, but due to the requirement of semantic masks, our task conducted experiments using CelebA-HQ. The domain gap between CelebA and CelebA-HQ reduced the FID scores dramatically. Besides, our model also sees advantages in terms of running time and model size. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        532,
+        787,
+        625
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Mask Editing. As depicted in Fig. 4, our framework supports editing of 3D scenes by simply changing the given semantic mask, and is applicable to both labels associated with large regions, e.g., hair, as well as small regions, e.g., eyes, nose, mouth. This is not trivial since the semantic mask is not directly leveraged to control the 3D scene at the pixel level (if even possible), but is instead encoded into a sparse latent code, which may fail to preserve fine-grain editing. We address this challenge via the region-aware learning strategy. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        625,
+        787,
+        731
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Multi-Modal Synthesis. Sem2NeRF supports multi-modal synthesis by simply changing the last few layers of the style codes. As shown in Fig. 5, we randomly sampled two style codes, and applied linear blending to continuously change the general styles of the 3D scenes generated by the given masks. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        732,
+        787,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Ablation Studies. To further evaluate the efficacy of Sem2NeRF, we designed four ablation models, including 1) without region-aware encoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { \\mathrm { w o . R E } }"
+          },
+          {
+            "type": "text",
+            "content": ", where the Swin-T encoder is replaced by the pSp encoder; 2) without region-aware "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        794,
+        787,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/e5621aa2497affd875e2aaf24289133ada62606314f1a701a8c28090b0a30e2f.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 5. Multi-modal synthesis. Styles are linearly blended from left to right. Three viewpoints are provided from top to bottom "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        223,
+        143,
+        782,
+        303
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c005432ee9d7f7bf4d10a4a9871dd69ec24f75ccde36547b711dbd1c84b40a59.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "not aware of small modifications "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        222,
+        363,
+        359,
+        429
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b1c8a33908dc08127b6f13d6f0944afa9f5fb5eb375b53f4ac7119f484f91e50.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "blurry & not sensitive to changes "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        364,
+        364,
+        500,
+        429
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/45413c623c16a230393ed91f0f209e5d50f4e7f2b0dae72dbe9004ac4b38bcf2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "contains blurry edges "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        364,
+        638,
+        429
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1b14f0eba5459580b5dabcad6edc5b41c0fa7c4cf8e833f78eaa638f2c9a1b4b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "contains obvious artifacts "
+          },
+          {
+            "type": "text",
+            "content": "Fig. 6. Results of ablation studies. Each group (two views) is generated by a model without the component mentioned at the top. Main issues are described at the bottom "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        640,
+        364,
+        779,
+        429
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "decoder "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\varPhi _ { \\mathrm { w o . R D } }"
+          },
+          {
+            "type": "text",
+            "content": ", where the region-aware ray sampling strategy is discarded; 3) without input augmentation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { \\mathrm { w o \\_ I A } }"
+          },
+          {
+            "type": "text",
+            "content": ", where contours and distance field representations are removed from the input; and 4) without random-pose GAN loss "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { \\mathrm { w o \\_ G A N } }"
+          },
+          {
+            "type": "text",
+            "content": ", where both Eq. (8) and the discriminator are removed. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        518,
+        784,
+        579
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As shown in Fig. 6, compared to the full model (Fig. 4), "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { \\mathrm { w o - R E } }"
+          },
+          {
+            "type": "text",
+            "content": "(1st group) is not sensitive to changes in small regions, i.e., eyes, mainly because the CNNbased encoder tends to ignore small changes. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\varPhi _ { \\mathrm { w o - R D } }"
+          },
+          {
+            "type": "text",
+            "content": "(2nd group) shows similar pattern (nose region) as the latent codes are not trained to be region-aware. It also has lower image quality, because the region-aware strategy enables denser sampling. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\phi _ { \\mathrm { w o . I A } }"
+          },
+          {
+            "type": "text",
+            "content": "(3rd group) achieves comparable performance but with blurry edges for some regions, e.g., mouth. This is because both contour and distance field representation help highlight the boundary information. Finally, images obtained by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\varPhi _ { \\mathrm { w o \\_ G A N } }"
+          },
+          {
+            "type": "text",
+            "content": "(4th group) have more artifacts in both views, demonstrating that GAN loss is important for improving the image quality of different poses. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        580,
+        785,
+        733
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Experiments beyond Human Faces. The introduced task can easily go beyond the human face domain by leveraging state-of-the-art weakly supervised semantic segmentation model to create pseudo labels. In this work, we present a Cat face example. Experimental results are shown in Fig. 7. Even when training with noisy pseudo labels, Sem2NeRF is robust enough to generate plausible results. For a given cat semantic mask, our model can map it to a 3D scene and render cat faces from arbitrary viewpoints, including different viewing directions "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        734,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ae9b33c6f3b34d05672f213383f66e99a67132e17d7d4a6778818a225fd0a3de.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        143,
+        782,
+        271
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3bb87bc48486c76c7a2e5d3a0cd1024dc1913b884c15edd01c0a063e5d3e3889.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 7. Results on CatMask. Left part compares results of changing eyes shape. Right part showcases results of style linear blending (in zigzag order) "
+          },
+          {
+            "type": "text",
+            "content": "Fig. 8. Challenging cases of Sem2NeRF on Semantic-to-NeRF translation "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        325,
+        782,
+        383
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "(left part), and different FOV (right part). It also allows changing the 3D scenes by editing the single-view semantic masks, e.g., changing the eye shape (left two rows). Multi-modal synthesis is also supported (right part in zigzag order). "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        439,
+        784,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Challenging Cases. Although Sem2NeRF addresses the Semantic-to-NeRF task in most cases, its advantages rely on an assumption, namely the generative capability of the pre-trained decoder. We show some challenging cases in Fig. 8. Accessories may have the wrong geometric shape (glasses in 1st case), or fail to render (earring in 2nd case), while masks with extreme poses might be converted to 3D scenes with abnormal texture or distorted contents (last two cases). "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        484,
+        785,
+        575
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 Conclusions "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        597,
+        367,
+        614
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We have presented an initial step of extending the 2D image-to-image task to the 3D space, and introduced a new task called Semantic-to-NeRF translation. It aims to reconstruct a NeRF-based 3D scene, by taking as input only one singleview semantic mask. We further proposed Sem2NeRF model, which addresses the task via encoding the semantic mask into the latent space of a pre-trained 3D generative model. More importantly, we intriguingly found the importance of regional awareness for this new task, and tamed Sem2NeRF with a region-aware learning strategy. We demonstrated the capability of Sem2NeRF regarding free viewpoint generation, mask editing and multi-modal synthesis on two benchmark datasets, and showcased the superiority of our framework compared to three strong baselines. Future work will include adding more scenarios to the new task, and supporting changing styles for specific regions. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        628,
+        787,
+        809
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Acknowledgements This research is partially supported by CRC Building 4.0 Project #44. "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        809,
+        785,
+        839
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "References "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        217,
+        143,
+        323,
+        159
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "1. Barron, J.T., Mildenhall, B., Tancik, M., Hedman, P., Martin-Brualla, R., Srinivasan, P.P.: Mip-nerf: A multiscale representation for anti-aliasing neural radiance fields. In: Int. Conf. Comput. Vis. pp. 5855–5864 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "2. Chan, E.R., Lin, C.Z., Chan, M.A., Nagano, K., Pan, B., De Mello, S., Gallo, O., Guibas, L., Tremblay, J., Khamis, S., et al.: Efficient geometry-aware 3d generative adversarial networks. IEEE Conf. Comput. Vis. Pattern Recog. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "3. Chan, E.R., Monteiro, M., Kellnhofer, P., Wu, J., Wetzstein, G.: pi-gan: Periodic implicit generative adversarial networks for 3d-aware image synthesis. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 5799–5809 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "4. Chen, A., Liu, R., Xie, L., Chen, Z., Su, H., Yu, J.: Sofgan: A portrait image generator with dynamic styling. ACM Trans. Graph. 41(1), 1–26 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "5. Chen, L.C., Papandreou, G., Kokkinos, I., Murphy, K., Yuille, A.L.: Deeplab: Semantic image segmentation with deep convolutional nets, atrous convolution, and fully connected crfs. IEEE Trans. Pattern Anal. Mach. Intell. 40(4), 834–848 (2017) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "6. Chen, W., Hays, J.: Sketchygan: Towards diverse and realistic sketch to image synthesis. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 9416–9425 (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "7. Chen, Y., Huang, J., Wang, J., Xie, X.: Edge prior augmented networks for motion deblurring on naturally blurry images. arXiv preprint arXiv:2109.08915 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "8. Chen, Z., Zhang, H.: Learning implicit fields for generative shape modeling. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 5939–5948 (2019) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "9. Choi, Y., Uh, Y., Yoo, J., Ha, J.W.: Stargan v2: Diverse image synthesis for multiple domains. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 8188–8197 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "10. Collins, E., Bala, R., Price, B., Susstrunk, S.: Editing in style: Uncovering the local semantics of gans. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 5771– 5780 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "11. Deng, J., Dong, W., Socher, R., Li, L.J., Li, K., Fei-Fei, L.: Imagenet: A largescale hierarchical image database. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 248–255. Ieee (2009) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "12. Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., et al.: An image is worth 16x16 words: Transformers for image recognition at scale. Int. Conf. Learn. Represent. (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "13. Goel, S., Kanazawa, A., Malik, J.: Shape and viewpoint without keypoints. In: Eur. Conf. Comput. Vis. pp. 88–104. Springer (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "14. Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., Courville, A., Bengio, Y.: Generative adversarial nets. Adv. Neural Inform. Process. Syst. 27 (2014) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "15. Gu, J., Liu, L., Wang, P., Theobalt, C.: Stylenerf: A style-based 3d-aware generator for high-resolution image synthesis. Int. Conf. Learn. Represent. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "16. Hao, Z., Mallya, A., Belongie, S., Liu, M.Y.: Gancraft: Unsupervised 3d neural rendering of minecraft worlds. In: Int. Conf. Comput. Vis. pp. 14072–14082 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "17. He, K., Zhang, X., Ren, S., Sun, J.: Deep residual learning for image recognition. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 770–778 (2016) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "18. Heusel, M., Ramsauer, H., Unterthiner, T., Nessler, B., Hochreiter, S.: Gans trained by a two time-scale update rule converge to a local nash equilibrium. Adv. Neural Inform. Process. Syst. 30 (2017) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "19. Huang, H.P., Tseng, H.Y., Lee, H.Y., Huang, J.B.: Semantic view synthesis. In: Eur. Conf. Comput. Vis. pp. 592–608. Springer (2020) "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        225,
+        176,
+        785,
+        839
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        116,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "20. Isola, P., Zhu, J.Y., Zhou, T., Efros, A.A.: Image-to-image translation with conditional adversarial networks. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 1125–1134 (2017) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "21. Johnson, J., Alahi, A., Fei-Fei, L.: Perceptual losses for real-time style transfer and super-resolution. In: Eur. Conf. Comput. Vis. pp. 694–711. Springer (2016) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "22. Kanazawa, A., Tulsiani, S., Efros, A.A., Malik, J.: Learning category-specific mesh reconstruction from image collections. In: Eur. Conf. Comput. Vis. pp. 371–386 (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "23. Karras, T., Aila, T., Laine, S., Lehtinen, J.: Progressive growing of gans for improved quality, stability, and variation. Int. Conf. Learn. Represent. (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "24. Karras, T., Laine, S., Aila, T.: A style-based generator architecture for generative adversarial networks. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 4401–4410 (2019) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "25. Karras, T., Laine, S., Aittala, M., Hellsten, J., Lehtinen, J., Aila, T.: Analyzing and improving the image quality of stylegan. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 8110–8119 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "26. Kingma, D.P., Ba, J.: Adam: A method for stochastic optimization. In: Int. Conf. Learn. Represent. (2014) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "27. Lee, C.H., Liu, Z., Wu, L., Luo, P.: Maskgan: Towards diverse and interactive facial image manipulation. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 5549–5558 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "28. Levoy, M.: Efficient ray tracing of volume data. ACM Trans. Graph. 9(3), 245–261 (1990) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "29. Ling, H., Kreis, K., Li, D., Kim, S.W., Torralba, A., Fidler, S.: Editgan: Highprecision semantic image editing. In: Adv. Neural Inform. Process. Syst. (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "30. Lira, W., Merz, J., Ritchie, D., Cohen-Or, D., Zhang, H.: Ganhopper: Multi-hop gan for unsupervised image-to-image translation. In: Eur. Conf. Comput. Vis. pp. 363–379. Springer (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "31. Liu, L., Gu, J., Zaw Lin, K., Chua, T.S., Theobalt, C.: Neural sparse voxel fields. Adv. Neural Inform. Process. Syst. 33, 15651–15663 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "32. Liu, X., Xu, Y., Wu, Q., Zhou, H., Wu, W., Zhou, B.: Semantic-aware implicit neural audio-driven video portrait generation. Eur. Conf. Comput. Vis. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "33. Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., Lin, S., Guo, B.: Swin transformer: Hierarchical vision transformer using shifted windows. In: Int. Conf. Comput. Vis. pp. 10012–10022 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "34. Liu, Z., Luo, P., Wang, X., Tang, X.: Deep learning face attributes in the wild. In: Int. Conf. Comput. Vis. pp. 3730–3738 (2015) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "35. Lombardi, S., Simon, T., Schwartz, G., Zollhoefer, M., Sheikh, Y., Saragih, J.: Mixture of volumetric primitives for efficient neural rendering. ACM Trans. Graph. 40(4), 1–13 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "36. Luo, S., Hu, W.: Diffusion probabilistic models for 3d point cloud generation. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 2837–2845 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "37. Mescheder, L., Geiger, A., Nowozin, S.: Which training methods for gans do actually converge? In: Int. Conf. Mach. Learn. pp. 3481–3490. PMLR (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "38. Mildenhall, B., Srinivasan, P.P., Tancik, M., Barron, J.T., Ramamoorthi, R., Ng, R.: Nerf: Representing scenes as neural radiance fields for view synthesis. In: Eur. Conf. Comput. Vis. pp. 405–421. Springer (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "39. Niemeyer, M., Geiger, A.: Giraffe: Representing scenes as compositional generative neural feature fields. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 11453–11464 (2021) "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        147,
+        784,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        127
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "40. Park, T., Liu, M.Y., Wang, T.C., Zhu, J.Y.: Semantic image synthesis with spatially-adaptive normalization. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 2337–2346 (2019) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "41. Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., et al.: Pytorch: An imperative style, highperformance deep learning library. Adv. Neural Inform. Process. Syst. 32 (2019) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "42. Perez, E., Strub, F., De Vries, H., Dumoulin, V., Courville, A.: Film: Visual reasoning with a general conditioning layer. In: AAAI. vol. 32 (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "43. Pumarola, A., Corona, E., Pons-Moll, G., Moreno-Noguer, F.: D-nerf: Neural radiance fields for dynamic scenes. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 10318–10327 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "44. Richardson, E., Alaluf, Y., Patashnik, O., Nitzan, Y., Azar, Y., Shapiro, S., Cohen-Or, D.: Encoding in style: a stylegan encoder for image-to-image translation. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 2287–2296 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "45. Salimans, T., Goodfellow, I., Zaremba, W., Cheung, V., Radford, A., Chen, X.: Improved techniques for training gans. Adv. Neural Inform. Process. Syst. 29 (2016) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "46. Schwarz, K., Liao, Y., Niemeyer, M., Geiger, A.: Graf: Generative radiance fields for 3d-aware image synthesis. Adv. Neural Inform. Process. Syst. 33, 20154–20166 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "47. Shi, Y., Yang, X., Wan, Y., Shen, X.: Semanticstylegan: Learning compositional generative priors for controllable image synthesis and editing. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 11254–11264 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "48. Sitzmann, V., Martel, J., Bergman, A., Lindell, D., Wetzstein, G.: Implicit neural representations with periodic activation functions. Adv. Neural Inform. Process. Syst. 33, 7462–7473 (2020) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "49. Song, G., Luo, L., Liu, J., Ma, W.C., Lai, C., Zheng, C., Cham, T.J.: Agilegan: stylizing portraits by inversion-consistent transfer learning. ACM Trans. Graph. 40(4), 1–13 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "50. Sun, C., Sun, M., Chen, H.T.: Direct voxel grid optimization: Super-fast convergence for radiance fields reconstruction. IEEE Conf. Comput. Vis. Pattern Recog. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "51. Sun, J., Wang, X., Zhang, Y., Li, X., Zhang, Q., Liu, Y., Wang, J.: Fenerf: Face editing in neural radiance fields. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 7672–7682 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "52. Szegedy, C., Vanhoucke, V., Ioffe, S., Shlens, J., Wojna, Z.: Rethinking the inception architecture for computer vision. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 2818–2826 (2016) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "53. Wang, T.C., Liu, M.Y., Zhu, J.Y., Tao, A., Kautz, J., Catanzaro, B.: Highresolution image synthesis and semantic manipulation with conditional gans. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 8798–8807 (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "54. Wu, J., Zhang, C., Xue, T., Freeman, B., Tenenbaum, J.: Learning a probabilistic latent space of object shapes via 3d generative-adversarial modeling. Adv. Neural Inform. Process. Syst. 29 (2016) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "55. Wu, Q., Liu, X., Chen, Y., Li, K., Zheng, C., Cai, J., Zheng, J.: Objectcompositional neural implicit surfaces. Eur. Conf. Comput. Vis. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "56. Wu, Z., Lischinski, D., Shechtman, E.: Stylespace analysis: Disentangled controls for stylegan image generation. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 12863–12872 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "57. Wu, Z., Nitzan, Y., Shechtman, E., Lischinski, D.: Stylealign: Analysis and applications of aligned stylegan models. Int. Conf. Learn. Represent. (2022) "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        787,
+        840
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "58. Xu, Y., Yin, Y., Jiang, L., Wu, Q., Zheng, C., Loy, C.C., Dai, B., Wu, W.: Transeditor: Transformer-based dual-space gan for highly controllable facial editing. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 7683–7692 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "59. Xu, Y., Peng, S., Yang, C., Shen, Y., Zhou, B.: 3d-aware image synthesis via learning structural and textural representations. IEEE Conf. Comput. Vis. Pattern Recog. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "60. Yen-Chen, L., Florence, P., Barron, J.T., Rodriguez, A., Isola, P., Lin, T.Y.: inerf: Inverting neural radiance fields for pose estimation. In: IEEE Int. Conf. Intell. Robots Syst. pp. 1323–1330. IEEE (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "61. Zhang, J., Sangineto, E., Tang, H., Siarohin, A., Zhong, Z., Sebe, N., Wang, W.: 3daware semantic-guided generative model for human synthesis. Eur. Conf. Comput. Vis. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "62. Zhang, R.: Making convolutional networks shift-invariant again. In: Int. Conf. Mach. Learn. pp. 7324–7334. PMLR (2019) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "63. Zhang, R., Isola, P., Efros, A.A., Shechtman, E., Wang, O.: The unreasonable effectiveness of deep features as a perceptual metric. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 586–595 (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "64. Zhang, X., Zheng, Z., Gao, D., Zhang, B., Pan, P., Yang, Y.: Multi-view consistent generative adversarial networks for 3d-aware image synthesis. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 18450–18459 (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "65. Zhang, Y., Ling, H., Gao, J., Yin, K., Lafleche, J.F., Barriuso, A., Torralba, A., Fidler, S.: Datasetgan: Efficient labeled data factory with minimal human effort. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 10145–10155 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "66. Zheng, C., Cham, T.J., Cai, J.: Pluralistic image completion. In: IEEE Conf. Comput. Vis. Pattern Recog. pp. 1438–1447 (2019) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "67. Zheng, C., Cham, T.J., Cai, J.: Tfill: Image completion via a transformer-based architecture. IEEE Conf. Comput. Vis. Pattern Recog. (2022) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "68. Zhi, S., Laidlow, T., Leutenegger, S., Davison, A.J.: In-place scene labelling and understanding with implicit scene representation. In: Int. Conf. Comput. Vis. pp. 15838–15847 (2021) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "69. Zhou, T., Tucker, R., Flynn, J., Fyffe, G., Snavely, N.: Stereo magnification: Learning view synthesis using multiplane images. ACM Trans. Graph. (2018) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "70. Zhu, J.Y., Park, T., Isola, P., Efros, A.A.: Unpaired image-to-image translation using cycle-consistent adversarial networks. In: Int. Conf. Comput. Vis. pp. 2223– 2232 (2017) "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "71. Zhu, J.Y., Zhang, R., Pathak, D., Darrell, T., Efros, A.A., Wang, O., Shechtman, E.: Toward multimodal image-to-image translation. Adv. Neural Inform. Process. Syst. 30 (2017) "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        146,
+        784,
+        674
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "18 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        127
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A Additional Technical Details "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        143,
+        532,
+        160
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1 Builders for Additional Inputs "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        176,
+        517,
+        193
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "As mentioned in Section 3.2, additional inputs, i.e., contour and distance field representation, are provided for the encoder of Sem2NeRF to further highlight the boundary information. In this subsection, we will detail how to build these data using the python package “cv2”3. Note that both of them are directly calculated from the semantic mask, without involving any extra labels. And each builder function can be done in "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\sim 2"
+          },
+          {
+            "type": "text",
+            "content": "milliseconds. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        202,
+        785,
+        292
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Contour is generally represented as a curve, joining all the continuous points that share the same intensity. It is widely used as a tool to help shape analysis, object detection, etc.. In our implementation, we build the contour from the given one-hot encoded semantic mask. Main python codes are given as below. An output example is shown in Figure 9 (middle). "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        294,
+        785,
+        369
+      ]
+    },
+    {
+      "type": "code",
+      "content": {
+        "code_caption": [],
+        "code_content": [
+          {
+            "type": "text",
+            "content": "1 # -- CONTOUR BUILDER\n2 def binary Masks_to_contourbinary Masks):\n3 '','INPUT:semantic mask in one-hot encoding form\n4 OUTPUT:a contour map of the given semantic mask'',\n5\n6 #initialize a black canvas\n7 mask = numpy.zeros((512,512,3),dtype=numpy uint8)\n8 #find contours for each label\n9 for binary_mask in binary Masks:\n10 cnts = cv2.findContours(binary_mask,\n11 cv2.RETR_EXTERNAL,\n12 cv2.CHAIN.ApproxSIMPLE)\n13 cnts = cnts[0] if len(cnts) == 2 else cnts[1]\n14 for c in cnts:\n15 #draw contour with white color on the canvas\n16 cv2.drawContours(mask,[c], -1,(255,255,255),\n17 thickness=3)\n18 contour = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)\n19 return contour\n20 #END "
+          }
+        ],
+        "code_language": "python"
+      },
+      "bbox": [
+        199,
+        377,
+        784,
+        652
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Distance field representation is a dense representation extracted from binary image via distance transformation. In the distance field, the grey intensity of each pixel indicates its distance to the nearest boundary. An unsigned Euclidean distance field representation is adopted in our experiments. Main python codes are given as below. An output example is shown in Figure 9 (right). "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        661,
+        785,
+        738
+      ]
+    },
+    {
+      "type": "code",
+      "content": {
+        "code_caption": [],
+        "code_content": [
+          {
+            "type": "text",
+            "content": "1 #--------- DISTANCE FIELD REPRESENTATION BUILDER   \n2 def contour_to_dist_filed(contour):   \n3 ' ', INPUT: contour, contour of the semantic mask   \n4 OUTPUT: dist_field, distance filed representation '   \n5 "
+          }
+        ],
+        "code_language": "python"
+      },
+      "bbox": [
+        199,
+        744,
+        784,
+        814
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        651,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "19 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        116,
+        784,
+        126
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "3 https://pypi.org/project/opencv-python/ "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        824,
+        537,
+        840
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/47bb47c8d411be5fc8e233a4bdaf56abc15fdff03c3b43d6e4b4013309409ce3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        233,
+        143,
+        370,
+        246
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ae5cb306b9c0b37ed786a62b44bff7cc463aaa5cc4da129d7f19b3590f198628.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        431,
+        143,
+        549,
+        244
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/780001d0f109b629bd7636270b035525207ec0bedb22ff21f9a0cf123bc28768.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 9. An example of the encoder input. Semantic mask is shown in color for better visualization, while the network takes one-hot encoded mask as input "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        604,
+        143,
+        782,
+        244
+      ]
+    },
+    {
+      "type": "code",
+      "content": {
+        "code_caption": [],
+        "code_content": [
+          {
+            "type": "text",
+            "content": "6 # invert background and foreground of contour to match\n7 the setting\n8 invert_contour = cv2 bitwise_not(contour)\n9 dist_field = cv2_distanceTransform(invert_contour, cv2.DOML2, 3)\n10 # normalize the distance filed to [0, 1]\n11 cv2normalize(dist_field, dist_field, 0, 1.0, cv2.NORM_MINMAX)\n12 dist_field = dist_field * 255.\n13 return dist_field\n14 END "
+          }
+        ],
+        "code_language": "python"
+      },
+      "bbox": [
+        197,
+        313,
+        784,
+        468
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2 CatMask Dataset Rendering "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        493,
+        503,
+        508
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To better demonstrate the introduced Semantic-to-NeRF translation task and evaluate the proposed Sem2NeRF framework, we develop a general solution to create datasets with pseudo labels using minimal human effort. In this work, we present an example by rendering a cat faces dataset, termed CatMask, which contains single-view cat faces generated by the pre-trained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN model, pseudo ground-truth viewing directions, and 6-classes semantic masks labelled by DatasetGAN [65]. Similar to CelebAMask-HQ, CatMask only varies on the yaw and pitch axis. And it contains 28,000 training images and 2,000 testing images. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        515,
+        787,
+        651
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cat faces from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN. As mentioned in Section 4.1, we assume the training data to have the viewing directions / poses of the single-view semantic-image pairs. However, different from human face, it is difficult to get the poses for cat faces. Considering that a pretrained "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN can generate photorealistic cat faces with given random poses, we choose to generate pseudo data for training our Sem2NeRF. Specifically, we randomly sample 30,000 vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z } \\in \\mathbb { R } ^ { 2 5 6 }"
+          },
+          {
+            "type": "text",
+            "content": "from the input distribution of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN to generate 30,000 corresponding cat faces by using the released pretrained model4. Each image comes with one viewing direction, randomly sampled from normal distributions, with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X \\sim \\mathcal { N } ( \\pi / 2 , 0 . 3 ^ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": "for the yaw axis, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "X \\sim \\mathcal { N } ( \\pi / 2 , 0 . 1 ^ { 2 } )"
+          },
+          {
+            "type": "text",
+            "content": "for the pitch axis, and 0 for the roll axis. Camera FOV is set to 18 to ensure the generated image covering the full cat face. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        652,
+        787,
+        818
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "20 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        126
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "4 https://github.com/marcoamonteiro/pi-GAN "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        823,
+        545,
+        840
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/11ba39183a4ff7469ddd803943a732772448736316fd4a44bcc88a0d02c838e2.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 10. CatMask dataset. Left: label legends of 6 semantic classes. Right: single-view cat faces rendered by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN (top row) and the corresponding semantic masks labelled by DatasetGAN (bottom row). Best view in high quality color image "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        143,
+        782,
+        234
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Ray sampling resolution is set to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 1 2 \\times 5 1 2"
+          },
+          {
+            "type": "text",
+            "content": ", with ray depth range [0.8, 1.2] and ray step size 72. Hierarchical sampling is enabled to improve image quality. We save the rendering viewing direction and the generated images for the CatMask dataset. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        319,
+        782,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Cat semantic by DatasetGAN. A suitable training dataset for Sem2NeRF should be able to be modelled by existing NeRF-based generator, while also comes with semantic labels. However, most datasets used by existing 3D-aware generative models, e.g., cat and car, do not contain component-level semantic masks. We further find out that DatasetGAN can create reasonable semantic masks labels for our task. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        378,
+        784,
+        469
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "DatasetGAN is introduced to automatically build datasets of high-quality semantically segmented images. Specifically, it proposes a MLP-based “Style Interpreter” that can be trained to decode the feature maps of a pretrained StyleGAN model to semantic labels, requiring only very few manually-labeled training samples, e.g., 30 labelled images for cat dataset. In this case, dataset can be automatically built by first randomly sampling images from StyleGAN, following by parsing with the trained style interpreter to obtain corresponding semantic labels. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        470,
+        784,
+        589
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We use the released5 pretrained style interpreter for cat to generate a dataset of 10,000 images-semantic pairs. Such a dataset is further leveraged to train a Deeplab-V3 [5] model, which takes a cat image as input and outputs the corresponding cat semantic mask. We then use the trained Deeplab-V3 to label our generated CatMask dataset. 6 classes are selected based on the label quality. Label legends and examples of the CatMask dataset are given in Figure 10. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        590,
+        784,
+        681
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3 Additional Implementation Details "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        702,
+        553,
+        718
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Style codes averages "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\overline { \\gamma } , \\beta )"
+          },
+          {
+            "type": "text",
+            "content": ". We randomly sample 10,000 vectors "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathbf { z } ~ \\in \\mathbb { R } ^ { 2 5 6 }"
+          },
+          {
+            "type": "text",
+            "content": "from a standard normal distribution, then feed them through the pretrained mapping network of the origianl "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN model, finally average the outputs over the batch dimension to obtain "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\overline { \\gamma } , \\overline { \\beta }"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        724,
+        782,
+        786
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Datasets. For CelebAMask-HQ [27], both images and semantic masks are loaded as resolution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "6 4 0 \\times 6 4 0"
+          },
+          {
+            "type": "text",
+            "content": ", then center cropped to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 1 2 \\times 5 1 2"
+          },
+          {
+            "type": "text",
+            "content": ". For CatMask, "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        786,
+        782,
+        816
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        767,
+        114,
+        782,
+        126
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "5 https://github.com/nv-tlabs/datasetGAN_release "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        823,
+        591,
+        839
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "images and semantic masks are directly loaded as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 1 2 \\times 5 1 2"
+          },
+          {
+            "type": "text",
+            "content": ". Semantic masks are transformed using one-hot encoding, augmented with the aforementioned contours and distance field representations. We do not apply any other data augmentation, e.g., random flip, to avoid harming the pose information. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        146,
+        782,
+        205
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Training. Patch discriminator with input size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 2 8 \\times 1 2 8"
+          },
+          {
+            "type": "text",
+            "content": "is adopted in our experiments, using the implementation provided by the GRAF [46] project6. Images are rendered via only the “coarse” network of the decoder, i.e., removing the hierarchical sampling. The sampling range of the scaling factor "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "of Eq. (2) is initialized as [0.9, 1.0], where the lower bound is exponentially annealed to 0.06 during training. Encoder is initialized with the ImageNet-1K [11] pretrained weights, decoder is initialized with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN pretrained weights, while the discriminator is randomly initialized. We freeze the parameters of the decoder, and set the learning rate of the encoder and discriminator to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "1 \\times 1 0 ^ { - 4 }"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 \\times 1 0 ^ { - 5 }"
+          },
+          {
+            "type": "text",
+            "content": ", respectively. Ranger optimizer7 is used for both encoder and discriminator. We set the training batch size to 8, and use V100 GPUs to train all related models for 200,000 iterations. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        207,
+        785,
+        385
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Inference. To render qualitative results, rays are cast with size "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 1 2 \\times 5 1 2"
+          },
+          {
+            "type": "text",
+            "content": "and depth step 72 in the inference. Besides, “fine” network is activated to enable hierarchical sampling. For GAN-inversion used by pix2pixHD as mentioned in Section 4.1, we adopt the implementation from the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "-GAN project8, and set the iteration number to 700 as suggested. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        388,
+        785,
+        464
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B Additional Visual Results "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        486,
+        504,
+        502
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In the following three pages, we will present additional visual results for the proposed Sem2NeRF regarding free-viewpoint image generation (see Section B.1), semantic mask editing (see Section B.2) and multi-modal synthesis (see Section B.3). Results are demonstrated on both CelebAMask-HQ and CatMask, and they are all best viewed in high quality color image. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        518,
+        785,
+        595
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "22 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        126
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "6 https://github.com/autonomousvision/graf 7 https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer 8 https://github.com/marcoamonteiro/pi-GAN "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        797,
+        691,
+        839
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B.1 Free-viewpoint Image Generation "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        146,
+        542,
+        161
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additional visual results of free-viewpoint image generation on CelebAMask-HQ and CatMask datasets are given in Figure 11 and Figure 12, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        214,
+        171,
+        785,
+        202
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/480dc3643f1a851cf4ffe68874ef2b1b818652bc13b7a39931b1bb55bb394569.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        227,
+        500,
+        393
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/cfbe36a3d38f1d255e6fd9fe82bb2f5da603d0a4f4ef71ff6aa68e0ebb343b31.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 11. Free-viewpoint image generation on CelebAMask-HQ. “Output” refers to the generated image that has the same viewing direction as the “Input”, and “Overlay” shows the results of overlaying “Output” with “Input”, so as to better demonstrate the mapping accuracy "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        227,
+        781,
+        393
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9e61301d16a70dcc6dfd61db86c15e4a7758488a45c690b1ee33afcd7a49aad3.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        220,
+        518,
+        500,
+        686
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bc65489d0528a5c491cd11eb7e45136a07f2416a0df64264f06be82f63cab251.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 12. Free-viewpoint image generation on CatMask. “Output” refers to the generated image that has the same viewing direction as the “Input”, and “Overlay” shows the results of overlaying “Output” with “Input”, so as to better demonstrate the mapping accuracy "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        501,
+        518,
+        781,
+        684
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "23 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        785,
+        126
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B.2 Semantic Mask Editing "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        146,
+        459,
+        162
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additional visual results of semantic mask editing on CelebAMask-HQ and Cat-Mask datasets are given in Figure 13 and Figure 14, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        215,
+        169,
+        784,
+        199
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/1728c04c28a227bc0bc39d78535f71aaa0833e4d45d48c6d7ad269203a7b38b6.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 13. Semantic mask editing on CelebAMask-HQ. The first row shows the results of the original semantic masks, while the following rows give the results of editing the mentioned area, highlighted with yellow-dash box. Three viewpoints are given for each group, with the first one having the same viewing direction as the input "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        217,
+        223,
+        781,
+        496
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/80290cfbe3334080b79a787cbfa5f88fdbc99910014b99d7fc0631c2368daccd.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 14. Semantic mask editing on CatMask. Edited regions are highlighted with yellow-dash box. The first viewpoint has the same pose as the input "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        217,
+        598,
+        781,
+        719
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "B.3 Multi-modal Synthesis "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        215,
+        787,
+        452,
+        801
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Additional visual results regarding multi-modal synthesis on CelebAMask-HQ and CatMask datasets are given in Figure 15 and Figure 16, respectively. "
+          }
+        ]
+      },
+      "bbox": [
+        212,
+        809,
+        785,
+        840
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "24 "
+          }
+        ]
+      },
+      "bbox": [
+        217,
+        114,
+        235,
+        126
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Y. Chen et al. "
+          }
+        ]
+      },
+      "bbox": [
+        271,
+        114,
+        367,
+        127
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/bdd95b6b6e95666564bb48779be86c183260f7f7c8b2faf34aabf2ba904a571c.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 15. Multi-modal synthesis on CelebAMask-HQ. Styles are linearly blended from left to right. The last viewpoint in each group has the same pose as the input "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        223,
+        157,
+        774,
+        481
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a6a4003fcd12f18c2b6095e1c5323cccb7d44b96b12deddad4ccf69f364a07dc.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Fig. 16. Multi-modal synthesis on CatMask. Left case shows the full version of Figure 7 (right part), where the selected images are highlighted in red-dash border. Images in the first row have the same viewing direction as the input "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        218,
+        539,
+        776,
+        785
+      ]
+    },
+    {
+      "type": "page_header",
+      "content": {
+        "page_header_content": [
+          {
+            "type": "text",
+            "content": "Sem2NeRF "
+          }
+        ]
+      },
+      "bbox": [
+        653,
+        114,
+        730,
+        126
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "25 "
+          }
+        ]
+      },
+      "bbox": [
+        767,
+        114,
+        784,
+        126
+      ]
+    }
+  ]
+]

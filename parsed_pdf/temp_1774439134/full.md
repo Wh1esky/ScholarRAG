@@ -1,0 +1,1037 @@
+# SIMBA: SIMPLICITY BIAS FOR SCALING UP PARAMETERS IN DEEP REINFORCEMENT LEARNING
+
+Hojoon Lee1,2∗† Dongyoon Hwang1,3∗ Donghu $\mathbf { K i m ^ { 1 } }$ Hyunseung $\mathbf { K i m ^ { 1 , 3 } }$ Jun Jet Tai2,4† Kaushik Subramanian2 Peter R.Wurman2 Jaegul Choo1 Peter Stone2,5 Takuma Seno2
+
+1KAIST 2Sony AI 3KRAFTON 4Coventry University 5UT Austin
+
+{joonleesky, godnpeter}@kaist.ac.kr
+
+# ABSTRACT
+
+Recent advances in CV and NLP have been largely driven by scaling up the number of network parameters, despite traditional theories suggesting that larger networks are prone to overfitting. These large networks avoid overfitting by integrating components that induce a simplicity bias, guiding models toward simple and generalizable solutions. However, in deep RL, designing and scaling up networks have been less explored. Motivated by this opportunity, we present SimBa, an architecture designed to scale up parameters in deep RL by injecting a simplicity bias. SimBa consists of three components: (i) an observation normalization layer that standardizes inputs with running statistics, (ii) a residual feedforward block to provide a linear pathway from the input to output, and (iii) a layer normalization to control feature magnitudes. By scaling up parameters with SimBa, the sample efficiency of various deep RL algorithms—including off-policy, onpolicy, and unsupervised methods—is consistently improved. Moreover, solely by integrating SimBa architecture into SAC, it matches or surpasses state-of-theart deep RL methods with high computational efficiency across DMC, MyoSuite, and HumanoidBench. These results demonstrate SimBa’s broad applicability and effectiveness across diverse RL algorithms and environments.
+
+Explore codes and videos at https://sonyresearch.github.io/simba
+
+![](images/b6d0e0d58ef2e4729e96ec007191a20d9707f2b593106b5669655bd02ec92450.jpg)
+
+![](images/43599fb33432bfbad15e9c70ae6b062b5727eb685869df9a6659c285026fb8e8.jpg)
+
+![](images/8640e8cff04c52ce8f58c98508c35f8b044adc201188ab09139582c2aa4fff2d.jpg)
+
+![](images/9298de147d7ddf6faf5110b4ce9e2c0d6eadcd6f84c8c669595adfb66b3983d9.jpg)
+
+![](images/d07610be13f1f9ffd52e5e9330f607631dc885caec6f9d26fe38536d652a02e1.jpg)
+
+![](images/c27097029a1b528da1f3ce6d713e8cd4d31b946f31f496fac91d82e302b608aa.jpg)
+
+![](images/d551fec4c7c6c74bf156ddd2a2c31a255732c019922065abfe7fa6fa6937c8ab.jpg)
+
+![](images/c2157011fa10cb52159b465c39be32fc39cd096e645af483952b5573d58b7d85.jpg)
+
+![](images/4358e2e28ff8247d16663c5d99767ee2e0b45fdac7c39944fc89f2660c88eaad.jpg)  
+Figure 1: Benchmark Summary. (a) Sample Efficiency: SimBa improves sample efficiency across various RL algorithms, including off-policy (SAC, TD-MPC2), on-policy (PPO), and unsupervised RL (METRA). (b) Compute Efficiency: When applying SimBa with SAC, it matches or surpasses state-of-the-art off-policy RL methods across 51 continuous control tasks, by only modifying the network architecture and scaling up the number of network parameters.
+
+# 1 INTRODUCTION
+
+Scaling up neural network sizes has been a key driver of recent advancements in computer vision (CV) (Dehghani et al., 2023) and natural language processing (NLP) (Google et al., 2023; Achiam et al., 2023). By increasing the number of parameters, neural networks gain enhanced expressivity, enabling them to cover diverse functions and discover effective solutions that smaller networks might miss. However, this increased capacity also heightens the risk of overfitting, as larger networks can fit intricate patterns in the training data that do not generalize well to unseen data.
+
+Despite this risk of overfitting, empirical evidence shows that neural networks tend to converge toward simpler functions that generalize effectively (Kaplan et al., 2020; Nakkiran et al., 2021). This phenomenon is attributed to a simplicity bias inherent in neural networks, where standard optimization algorithms and architectural components guide highly expressive models toward solutions representing simple, generalizable functions (Shah et al., 2020; Berchenko, 2024). For instance, gradient noise in stochastic gradient descent prevents models from converging on sharp local minima, helping them avoid overfitting (Chizat & Bach, 2020; Gunasekar et al., 2018; Pesme et al., 2021). Architectural components such as ReLU activations (Hermann et al., 2024), layer normalization (Ba et al., 2016), and residual connections (He et al., 2020) are also known to amplify simplicity bias. These components influence the types of functions that neural networks represent at initialization, where networks that represent simpler function at initialization are more likely to converge to simple functions (Valle-Perez et al., 2018; Mingard et al., 2019; Teney et al., 2024).
+
+While scaling up network parameters and leveraging simplicity bias have been successfully applied in CV and NLP, these principles have been underexplored in deep reinforcement learning (RL), where the focus has primarily been on algorithmic advancements (Hessel et al., 2018; Hafner et al., 2023; Fujimoto et al., 2023; Hansen et al., 2023). Motivated by this opportunity, we introduce the SimBa network, a novel architecture that explicitly embeds simplicity bias to effectively scale up parameters in deep RL. SimBa comprises of three key components: (i) an observation normalization layer that standardizes inputs by tracking the mean and variance of each dimension, reducing overfitting to high-variance features (Andrychowicz et al., 2020); (ii) a pre-layer normalization residual feedforward block (Xiong et al., 2020), which maintains a direct linear information pathway from input to output and applies non-linearity only when necessary; and (iii) a post-layer normalization before the output layer to stabilize activations, ensuring more reliable policy and value predictions.
+
+To verify whether SimBa amplifies simplicity bias, we compared it against the standard MLP architecture often employed in deep RL. Following Teney et al. (2024), we measured simplicity bias by (i) sampling random inputs from a uniform distribution; (ii) generating network outputs; and (iii) performing Fourier decomposition on these outputs. A smaller sum of the Fourier coefficients indicates that the neural network represents a low-frequency function, signifying greater simplicity. We define the simplicity score as the inverse of this sum, meaning a higher score corresponds to a stronger simplicity bias. As illustrated in Figure 2.(a), our analysis revealed that SimBa has a higher simplicity score than the MLP (Further details are provided in Section 2).
+
+To evaluate the benefit of leveraging simplicity bias on network scaling, we compared the performance of Soft Actor-Critic (Haarnoja et al., 2018, SAC) using both MLP and our SimBa architecture across 3 humanoid tasks from DMC benchmark (Tassa et al., 2018). We increased the width of both actor and critic networks, scaling from 0.1 to 17 million parameters. As shown in Figure 2.(b), SAC with MLP experiences performance degradation as the number of parameters increases. In contrast, SAC with the SimBa network consistently improves its performance as the number of parameter increases, highlighting the value of embedding simplicity bias when scaling deep RL networks.
+
+![](images/15e8afa8c3121ca256b20f0210268fd2748ef61c4795fdb97ad245274ba8fb29.jpg)  
+Figure 2: (a) SimBa exhibits higher simplicity bias than MLP. (b) SAC with SimBa improves its performance with increased parameters, whereas SAC with MLP degrades it. Each standard deviation is $9 5 \%$ CI.
+
+To further evaluate SimBa’s versatility, we applied it to various RL algorithms by only changing the network architecture and scaling up parameters. The algorithms included off-policy (SAC (Haarnoja et al., 2018), TD-MPC2 (Hansen et al., 2023)), on-policy model-free (PPO (Schulman et al., 2017)),
+
+and unsupervised RL (METRA (Park et al., 2023)). As illustrated in Figure 1.(a), SimBa consistently enhances the sample efficiency of these algorithms. Furthermore, as shown in Figure 1.(b), when SimBa is integrated into SAC, it matches or surpasses state-of-the-art off-policy methods across 51 tasks in DMC, MyoSuite (Caggiano et al., 2022), and HumanoidBench (Sferrazza et al., 2024). Despite the increased number of parameters, SAC with SimBa remains computationally efficient because it does not employ any computationally intensive components such as self-supervised objectives (Fujimoto et al., 2023), planning (Hansen et al., 2023), or replay ratio scaling (Nauman et al., 2024), which state-of-the-art methods rely on to achieve high performance.
+
+# 2 PRELIMINARY
+
+Simplicity bias refers to the tendency of neural networks to prioritize learning simpler patterns over capturing intricate details (Shah et al., 2020; Berchenko, 2024). In this section, we introduce metrics to quantify simplicity bias; in-depth definitions are provided in Appendix A.
+
+# 2.1 MEASURING FUNCTION COMPLEXITY
+
+We begin by defining a complexity measure $c : \mathcal { F }  [ 0 , \infty )$ to quantify the complexity of functions in ${ \mathcal { F } } = \{ f | f : \mathcal { X } \to \bar { \mathcal { Y } } \}$ where $\mathcal { X } \subseteq \mathbb { R } ^ { n }$ denote the input space and $\mathcal { V } \subseteq \mathbb { R } ^ { m }$ the output space.
+
+Traditional complexity measures, such as the Vapnik–Chervonenkis dimension (Blumer et al., 1989) and Rademacher complexity (Bartlett & Mendelson, 2002), are well-established but often intractable for deep neural networks. Therefore, we follow Teney et al. (2024) and adopt Fourier analysis as our primary complexity measure. Given $\begin{array} { r } { f ( \boldsymbol { x } ) : = ( 2 \bar { \pi } ) ^ { d / 2 } \int \tilde { f } ( \boldsymbol { k } ) e ^ { i \boldsymbol { k } \cdot \boldsymbol { x } } d \boldsymbol { k } } \end{array}$ where $\begin{array} { r } { \tilde { f } ( k ) : = \int f ( x ) e ^ { - i k \cdot x } d x } \end{array}$ is the Fourier transform, we perform a discrete Fourier transform by uniformly discretizing the frequency domain, $k \in \{ 0 , 1 , \ldots , K \}$ . The value of $K$ is chosen by the Nyquist-Shannon limit (Shannon, 1949) to ensure accurate function representation. Our complexity measure $c ( f )$ is then computed as the frequency-weighted average of the Fourier coefficients:
+
+$$
+c (f) = \Sigma_ {k = 0} ^ {K} \tilde {f} (k) \cdot k / \Sigma_ {k = 0} ^ {K} \tilde {f} (k). \tag {1}
+$$
+
+Intuitively, larger $c ( f )$ indicates higher complexity due to a dominance of high-frequency components such as rapid amplitude changes or intricate details. Conversely, lower $c ( f )$ implies a larger contribution from low-frequency components, indicating a lower complexity function.
+
+# 2.2 MEASURING SIMPLICITY BIAS
+
+In theory, simplicity bias can be measured by evaluating the complexity of the function to which the network converges after training. However, directly comparing simplicity bias across different architectures after convergence is challenging due to the randomness of the non-stationary optimization process, especially in RL, where the data distribution changes continuously.
+
+Empirical studies suggest that the initial complexity of a network strongly correlates with the complexity of the functions it converges to during training (Valle-Perez et al., 2018; De Palma et al., 2019; Mingard et al., 2019; Teney et al., 2024). Therefore, for a given network architecture $f$ with an initial parameter distribution $\Theta _ { 0 }$ , we define the simplicity bias score $s ( f ) : { \mathcal { F } } \to ( 0 , \infty )$ as:
+
+$$
+s (f) \approx \mathbb {E} _ {\theta \sim \Theta_ {0}} \left[ \frac {1}{c \left(f _ {\theta}\right)} \right] \tag {2}
+$$
+
+where $f _ { \theta }$ denotes the network architecture $f$ parameterized by $\theta$ .
+
+This measure indicates that networks with lower complexity at initialization are more likely to exhibit a higher simplicity bias, thereby converging to simpler functions during training.
+
+# 3 RELATED WORK
+
+# 3.1 SIMPLICITY BIAS
+
+Initially, simplicity bias was mainly attributed to the implicit regularization effects of the stochastic gradient descent (SGD) optimizer (Soudry et al., 2018; Gunasekar et al., 2018; Chizat & Bach, 2020;
+
+![](images/25f97cc1ab807d55d349f413320f58d5e0ea254b473dd544aa439848be3c7a5b.jpg)  
+Figure 3: SimBa architecture. The network integrates Running Statistics Normalization (RSNorm), Residual Feedforward Blocks, and Post-Layer Normalization to embed simplicity bias into deep RL.
+
+Pesme et al., 2021). During training, SGD introduces noise which prevents the model from converging to sharp minima, guiding it toward flatter regions of the loss landscape (Wu et al., 2022). Such flatter minima are associated with functions of lower complexity, thereby improving generalization.
+
+However, recent studies suggest that simplicity bias is also inherent in the network architecture itself (Valle-Perez et al., 2018; Mingard et al., 2019). Architectural components such as normalization layers, ReLU activations (Hermann et al., 2024), and residual connections (He et al., 2020) promote simplicity bias by encouraging smoother, less complex functions. Fourier analysis has shown that these components help models prioritize learning low-frequency patterns, guiding optimization toward flatter regions that generalize better (Teney et al., 2024). Consequently, architectural design plays a crucial role in favoring simpler solutions, enabling the use of overparameterized networks.
+
+# 3.2 DEEP REINFORCEMENT LEARNING
+
+For years, deep RL has largely focused on algorithmic improvements to enhance sample efficiency and generalization. Techniques like Double Q-learning (Van Hasselt et al., 2016; Fujimoto et al., 2018), and Distributional RL (Dabney et al., 2018) have improved the stability of value estimation by reducing overestimation bias. Regularization strategies—including periodic reinitialization (Nikishin et al., 2022; Lee et al., 2024), layer normalization (Lee et al., 2023; Gallici et al., 2024), batch normalization (Bhatt et al., 2024), and spectral normalization (Gogianu et al., 2021)—have been employed to prevent overfitting and enhance generalization. Incorporating self-supervised objectives with model-based learning (Fujimoto et al., 2023; Hafner et al., 2023; Hansen et al., 2023) has further improved representation learning and sample efficiency.
+
+Despite these advances, scaling up network architectures in deep RL remains underexplored, especially by leveraging the simplicity bias principle. Several recent studies have attempted to scale up network sizes—through ensembling (Chen et al., 2021; Obando-Ceron et al., 2024), widening (Schwarzer et al., 2023), residual connections (Espeholt et al., 2018) and deepening networks (Bjorck et al., 2021; Nauman et al., 2024). However, they often rely on computationally intensive layers such as spectral normalization (Bjorck et al., 2021) or require sophisticated training protocols (Nauman et al., 2024), limiting their applicability.
+
+In this work, we aim to design an architecture that amplifies simplicity bias, enabling us to effectively scale up parameters in RL, independent of using any other sophisticated training protocol.
+
+# 4 SIMBA
+
+This section introduces the SimBa network, an architecture designed to embed simplicity bias into deep RL. The architecture is composed of Running Statistics Normalization, Residual Feedforward Blocks, and Post-Layer Normalization. By amplifying the simplicity bias, SimBa allows the model to avoid overfitting for highly overparameterized configurations.
+
+Running Statistics Normalization (RSNorm). First, RSNorm standardizes input observations by tracking the running mean and variance of each input dimension during training, preventing features with disproportionately large values from dominating the learning process.
+
+Given an input observation $\mathbf { o } _ { t } \in \mathbb { R } ^ { d _ { o } }$ at timestep $t$ , we update the running observation mean $\mu _ { t } \in$ $\mathbb { R } ^ { d _ { o } }$ and variance $\sigma _ { t } ^ { 2 } \in \mathbb { R } ^ { d _ { o } }$ as follows:
+
+$$
+\mu_ {t} = \mu_ {t - 1} + \frac {1}{t} \delta_ {t}, \quad \sigma_ {t} ^ {2} = \frac {t - 1}{t} \left(\sigma_ {t - 1} ^ {2} + \frac {1}{t} \delta_ {t} ^ {2}\right) \tag {3}
+$$
+
+where $\delta _ { t } = \mathbf { o } _ { t } - \mu _ { t - 1 }$ and $d _ { o }$ denotes the dimension of the observation.
+
+Once $\mu _ { t }$ and $\sigma _ { t } ^ { 2 }$ are computed, each input observation $\mathbf { o } _ { t }$ is normalized as:
+
+$$
+\bar {\mathbf {o}} _ {t} = \operatorname {R S N o r m} \left(\mathbf {o} _ {t}\right) = \frac {\mathbf {o} _ {t} - \mu_ {t}}{\sqrt {\sigma_ {t} ^ {2} + \epsilon}} \tag {4}
+$$
+
+where $\bar { \mathbf { o } } _ { t } \in \mathbb { R } ^ { d _ { o } }$ is the normalized output, and $\epsilon$ is a small constant for numerical stability.
+
+While alternative observation normalization methods exist, RSNorm consistently demonstrates superior performance. A comprehensive comparison is provided in Section 7.1.
+
+Residual Feedforward Block. The normalized observation $\bar { \mathbf { o } } _ { i }$ is first embedded into a $d _ { h }$ - dimensional vector using a linear layer:
+
+$$
+\mathbf {x} _ {t} ^ {l} = \operatorname {L i n e a r} \left(\bar {\mathbf {o}} _ {t}\right). \tag {5}
+$$
+
+At each block, $l \in \{ 1 , . . . , L \}$ , the input $\mathbf { x } _ { t } ^ { l }$ passes through a pre-layer normalization residual feedforward block, introducing simplicity bias by allowing a direct linear pathway from the input to the output. This direct linear pathway enables the network to pass on the input unchanged throughout the entire network unless non-linear transformations are necessary. Each block is defined as:
+
+$$
+\mathbf {x} _ {t} ^ {l + 1} = \mathbf {x} _ {t} ^ {l} + \operatorname {M L P} \left(\operatorname {L a y e r N o r m} \left(\mathbf {x} _ {t} ^ {l}\right)\right). \tag {6}
+$$
+
+Following Vaswani (2017), the MLP is structured with an inverted bottleneck, where the hidden dimension is expanded to $4 \cdot d _ { h }$ and a ReLU activation is applied between the two linear layers.
+
+Post-Layer Normalization. To ensure that activations remain on a consistent scale before predicting the policy or value function, we apply layer normalization after the final residual block:
+
+$$
+\mathbf {z} _ {t} = \operatorname {L a y e r N o r m} \left(\mathbf {x} _ {t} ^ {L}\right). \tag {7}
+$$
+
+The normalized output $\mathbf { z } _ { t }$ is then processed through a linear layer, generating predictions for the actor’s policy or the critic’s value function.
+
+# 5 ANALYZING SIMBA
+
+In this section, we analyze whether each component of SimBa amplifies simplicity bias and allows scaling up parameters in deep RL. We conducted experiments on challenging environments in DMC involving Humanoid and Dog, collectively referred to as DMC-Hard. Throughout this section, we used Soft Actor Critic (Haarnoja et al., 2018, SAC) as the base algorithm.
+
+# 5.1 ARCHITECTURAL COMPONENTS
+
+To quantify simplicity bias in SimBa, we use Fourier analysis as described in Section 2. For each network $f$ , we estimate the simplicity bias score $s ( f )$ by averaging over 100 random initializations $\theta \sim \Theta _ { 0 }$ . Following Teney et al. (2024), the input space $\mathcal { X } = [ - \mathrm { 1 0 0 } , 1 0 0 ] ^ { 2 } \subset \mathbb { R } ^ { 2 }$ is divided into a grid of 90,000 points, and the network outputs a scalar value for each input which are represented as a grayscale image. By applying the discrete Fourier transform to these outputs, we compute the simplicity score $s ( f )$ defined in Equation 2 (see Appendix B for further details).
+
+Figure 4.(a) shows that SimBa’s key components—such as residual connections and layer normalization—increase the simplicity bias score $s ( f )$ , biasing the architecture toward simpler functional representations at initialization. When combined, these components induce a stronger preference for low-complexity functions (i.e., high simplicity score) than when used individually.
+
+Figure 4.(b) reveals a clear relationship between simplicity bias and performance: architectures with higher simplicity bias scores lead to enhanced performance. Specifically, compared to the MLP, adding residual connections increases the average return by 50 points, adding layer normalization adds 150 points, and combining all components results in a substantial improvement of 550 points.
+
+![](images/e2810c36ca590c95c1e6fd102efc0b17ffedb2807724c90f6cae8e89f7ff80da.jpg)  
+Figure 4: Component Analysis. (a) Simplicity bias scores estimated via Fourier analysis. Mean and $9 5 \%$ CI are computed over 100 random initializations. (b) Average return in DMC-Hard for 1M steps. Mean and $9 5 \%$ CI over 10 seeds, using SAC. Stronger simplicity bias correlates with higher returns for overparameterized networks.
+
+# 5.2 COMPARISON WITH OTHER ARCHITECTURES
+
+To assess SimBa’s scalability, we compared it to BroNet (Nauman et al., 2024), SpectralNet (Bjorck et al., 2021), and MLP. Detailed descriptions of each architecture are provided in Appendix F.
+
+The key differences between SimBa and other architectures lie in the placement of components that promote simplicity bias. SimBa maintains a direct linear residual pathway from the input to the output, applying non-linearity exclusively through residual connections. In contrast, other architectures introduce non-linearities within the input-to-output pathway, increasing functional complexity. Additionally, SimBa employs post-layer normalization to ensure consistent activation scales across all hidden dimensions, reducing variance in policy and value predictions. Conversely, other architectures omit normalization before the output layer, which can lead to high variance in their predictions.
+
+To ensure that performance differences were attributable to architectural design choices rather than varying input normalization, we uniformly applied RSNorm as the input normalization across all models. Our investigation focused on scaling up the critic network’s parameters by increasing the hidden dimension, as scaling up the actor network showed limited benefits (see Section 7.2).
+
+As illustrated in Figure 5.(a), SimBa achieves the highest simplicity bias score compared to the experimented architectures, demonstrating its strong preference for simpler solutions. In Figure 5.(b), while the MLP failed to scale with increasing network size, BroNet, SpectralNet, and SimBa all showed performance improvements.
+
+Importantly, the scalability of each architecture is correlated with its simplicity bias score, with a higher simplicity bias leading to better scalability. SimBa demonstrated the best scalability, supporting the hypothesis that simplicity bias plays a key role in scaling deep RL. Further analysis on this correlation is provided in Appendix D.
+
+![](images/477175b55959519bb8bbfbc8905dfd956be177d01dbbbf946488101fb6e0c179.jpg)  
+Figure 5: Architecture Comparison. (a) SimBa consistently exhibits a higher simplicity bias score. (b) SimBa demonstrates strong scaling performance in terms of average return for DMC-Hard compared to the other architectures. The results are from 5 random seeds.
+
+# 6 EXPERIMENTS
+
+This section evaluates SimBa’s applicability across various deep RL algorithms and environments. For each baseline, we either use the authors’ reported results or run experiments using their recommended hyperparameters. Detailed descriptions of the environments used in our evaluations are provided in Appendix H. In addition, we also include learning curves and final performance for each task in Appendix J and K, along with hyperparameters used in our experiments in Appendix I.
+
+# 6.1 OFF-POLICY RL
+
+Experimental Setup. We evaluate the algorithms on 51 tasks across three benchmarks: DMC (Tassa et al., 2018), MyoSuite (Caggiano et al., 2022), and HumanoidBench (Sferrazza et al., 2024). The
+
+![](images/f5401ad24df012069c1a13458e569a81fae3482c4dc9be7bf2e69796af8c0220.jpg)  
+(a) DMC
+
+![](images/f706912acf828fb56cab6294359753deafda17866168e577fdc8ff91819ba857.jpg)  
+(b) MyoSuite
+
+![](images/6aab7333f88a3378d74268aac81e55f5bdba8c6ebf727a4c5025a3c839ac0d55.jpg)  
+(c) HumanoidBench
+
+![](images/a57c0c01750098dc5d91f5d41c2f2ec9c61276c79d3c6821f510fc90098a2135.jpg)  
+(d) Craftax   
+Figure 6: Environment Visualizations. SimBa is evaluated across four diverse benchmark environments: DMC, MyoSuite, and HumanoidBench, which feature complex locomotion and manipulation tasks, and Craftax, which introduces open-ended tasks with varying complexity.
+
+![](images/80d7c66f0b13b9af5f2a59d010ea476ab66bc7fcd6383b7012b08d811e9f74e7.jpg)
+
+![](images/e5a12729235b3933e5f1a6655c1c4ec666678c72aebc9a2dd6c17a4eecbba5f2.jpg)
+
+![](images/bd3edef9532565521989c576aaaf4bb6569d0a27d6609fbd986947769effdaa1.jpg)
+
+![](images/7db39c4d86c801ba8f5b0b5da088ce9594d4feb2c19e881c0743477867f1ea2a.jpg)  
+Figure 8: Off-policy RL Benchmark. Average episode return for DMC and HumanoidBench and average success rate for MyoSuite across 51 continuous control tasks. SimBa (with SAC) achieves high computational efficiency by only changing the network architecture.
+
+DMC tasks are further categorized into DMC-Easy&Medium and DMC-Hard based on complexity. We vary the number of training steps per benchmark according to the complexity of the environment: 500K for DMC-Easy&Medium, 1M for DMC-Hard and MyoSuite, and 2M for HumanoidBench.
+
+Baselines. We compare SimBa against state-of-the-art off-policy RL algorithms. (i) SAC (Haarnoja et al., 2018), an actor-critic algorithm based on maximum entropy RL; (ii) DDPG (Lillicrap, 2015), a deterministic policy gradient algorithm with deep neural networks; (iii) TD7 (Fujimoto et al., 2023), an enhanced version of TD3 incorporating state-action representation learning; (iv) BRO (Nauman et al., 2024), which scales the critic network of SAC while integrating distributional Q-learning, optimistic exploration, and periodic resets. For a fair comparison, we use BRO-Fast, which is the most computationally efficient version; (v) TD-MPC2 (Hansen et al., 2023), which combines trajectory planning with long-return estimates using a learned world model; and (vi) DreamerV3 (Hafner et al., 2023), which learns a generative world model and optimizes a policy via simulated rollouts.
+
+Integrating SimBa into Off-Policy RL. The SimBa architecture is algorithm-agnostic and can be applied to any deep RL method. To demonstrate its applicability, we integrate SimBa into two model-free (SAC, DDPG) and one model-based algorithm (TD-MPC2), evaluating their performance on the DMC-Hard benchmark. For SAC and DDPG, we replace the standard MLP-based actor-critic networks with SimBa. For TD-MPC2, we substitute the shared encoder from MLP to SimBa while matching the number of parameters as the original implementation.
+
+Figure 7 shows consistent benefits across all algorithms: integrating SimBa increased the average return by 570, 480, and, 170 points for SAC, DDPG, and TD-MPC2 respectively. These results demonstrate that scaling up parameters with a strong simplicity bias significantly enhances performance in deep RL.
+
+![](images/6c6d1c0850092ee7c2396d38de10705fd6c1bd224c492a92e6bb4cb4cb4715e9.jpg)  
+Figure 7: Off-Policy RL with SimBa. Replacing MLP with SimBa leads to substantial performance improvements across various off-policy RL methods. Mean and $9 5 \%$ CI are averaged over 10 seeds for SAC and DDPG, and 3 seeds for TD-MPC2 in DMC-Hard.
+
+Comparisons with State-of-the-Art Methods. Here, we compare $\mathrm { S A C } + \mathrm { S i m B a }$ against state-ofthe-art off-policy deep RL algorithms, which demonstrated the most promising results in previous experiments. Throughout this section, we refer to $\mathrm { S A C } + \mathrm { S i m B a }$ as SimBa.
+
+Figure 8 presents the results, where the x-axis represents computation time using an RTX 3070 GPU, and the y-axis denotes performance. Points in the upper-left corner $( ^ { \infty } )$ indicate higher compute efficiency. Here, SimBa consistently outperforms most baselines across various environments while requiring less computational time. The only exception is TD-MPC2 on HumanoidBench; however, TD-MPC2 requires 2.5 times the computational resources of SimBa to achieve better performance, making SimBa the most efficient choice overall.
+
+The key takeaway is that SimBa achieves these remarkable results without the bells and whistles often found in state-of-the-art deep RL algorithms. It is easy to implement, which only requires modifying the network architecture into SimBa without additional changes to the loss functions (Schwarzer et al., 2020; Hafner et al., 2023) or using domain-specific regularizers (Fujimoto et al., 2023; Nauman et al., 2024). Its effectiveness stems from an architectural design that leverages simplicity bias and scaling up the number of parameters, thereby maximizing performance.
+
+![](images/0f14843d3f32ecbfb7f629e727f4ba5d679065365f18031f1b0445cf174aa21f.jpg)
+
+![](images/03b76bc99f72e968285a288848a5e5c67d6f2c34d401ba380b236e85ed37a817.jpg)
+
+![](images/c05c55e0f5745ffe009b1cdb9126f85d3bc52926cc23707bd4a2e6183fa9e290.jpg)
+
+![](images/858cee8c4bc8e125b2c78689c51d4fd5465644c4071e2de41dcf4433fe9f0806.jpg)
+
+![](images/1b9b2e3d973af9dfced17dfe73ce0a5fe5a93afca20b7b06df68050e8c8e5d25.jpg)
+
+![](images/fe98a939d5ff0a7a8b4bf9d629bdf087b8e182adb53444bee483880af1696506.jpg)  
+Figure 9: Impact of Input Dimension. Average episode return for DMC tasks plotted against increasing state dimensions. Results show that the benefits of using SimBa increase with higher input dimensions, effectively alleviating the curse of dimensionality.
+
+![](images/0d2662f898a74a504afa1dfd2f42e07bba76cdb05f5bbdaade05fd085487f368.jpg)
+
+![](images/e4f358c844c91ed3a0cc92c3149834b91f99bc58688df86ad0426fbaee90a28c.jpg)
+
+![](images/c8c05f83659952b0b759c1cc3f4fbb50aeadc299bdf8ef89fdb01879c565cab8.jpg)  
+PPO + SimBa — PPO   
+Figure 10: On-policy RL with SimBa. Average return of achievements and task success rate for three different tasks comparing PPO $^ +$ SimBa and PPO on Craftax. Integrating SimBa enables effective learning of complex behaviors.
+
+Impact of Input Dimension. To further identify in which cases SimBa offers significant benefits, we analyze its performance across DMC environments with varying input dimensions. As shown in Figure 9, the advantage of SimBa becomes more pronounced as input dimensionality increases. We hypothesize that higher-dimensional inputs exacerbate the curse of dimensionality, and the simplicity bias introduced by SimBa effectively mitigates overfitting in these high-dimensional settings.
+
+# 6.2 ON-POLICY RL
+
+Experimental Setup. We conduct our on-policy RL experiments in Craftax (Matthews et al., 2024), an open-ended environment inspired by Crafter (Hafner, 2022) and NetHack (Kuttler et al. ¨ , 2020). Craftax poses a unique challenge with its open-ended structure and compositional tasks. Following Matthews et al. (2024), we use Proximal Policy Optimization (Schulman et al., 2017, PPO) as the baseline algorithm. When integrating SimBa with PPO, we replace the standard MLP-based actorcritic networks with SimBa and train both PPO and PPO $^ +$ SimBa on 1024 parallel environments for a total of 1 billion environment steps.
+
+Results. As illustrated in Figure 10, integrating SimBa into PPO significantly enhances performance across multiple complex tasks. With SimBa, the agent learns to craft iron swords and pickaxes more rapidly, enabling the early acquisition of advanced tools. Notably, by using these advanced tools, the SimBa-based agent successfully defeats challenging adversaries like the Orc Mage using significantly fewer time steps than an MLP-based agent. These improvements arise solely from the architectural change, demonstrating the effectiveness of the SimBa approach for on-policy RL.
+
+# 6.3 UNSUPERVISED RL
+
+Experimental Setup. In our unsupervised RL study, we incorporate SimBa for online skill discovery, aiming to identify diverse behaviors without relying on task-specific rewards. We focus our experiments primarily on METRA (Park et al., 2023), which serves as the state-of-the-art algorithm in this domain. We evaluate METRA and METRA with SimBa on the Humanoid task from DMC, running 10M environment steps. For a quantitative comparison, we adopt state coverage as our main metric. Coverage is measured by discretizing the $x$ and $y$ axes into a grid and counting the number of grid cells covered by the learned behaviors at each evaluation epoch, following prior literature (Park et al., 2023; Kim et al., 2024a;b).
+
+Results. As illustrated in Figure 1.(a) and 11, integrating SimBa into METRA significantly enhances state coverage on the Humanoid task. The highdimensional input space makes it challenging for METRA to learn diverse skills. By injecting simplicity bias to manage high input dimensions and scaling up parameters to facilitate effective diverse skill acquisition, SimBa effectively leads to improved exploration and broader state coverage.
+
+![](images/9fecde38cbf148941542c141653bc059533a968f47763512b37b46353c2f01eb.jpg)  
+METRA + SimBa
+
+![](images/d9432b38b0caae7f160fd8d44aa00d63b856336d0af68437c7a7cabe947fb731.jpg)  
+METRA   
+Figure 11: URL with SimBa. Integrating SimBa to METRA enhances state coverage.
+
+# 7 ABLATIONS
+
+We conducted ablations on DMC-Hard with $\mathrm { S A C } + \mathrm { S i m B a }$ , running 5 seeds for each experiment.
+
+# 7.1 OBSERVATION NORMALIZATION
+
+A key factor in SimBa’s success is using RSNorm for observation normalization. To validate its effectiveness, we compare 6 alternative methods: (i) LayerNorm (Ba et al., 2016); (ii) RMSNorm (Zhang & Sennrich, 2019); (iii) BatchNorm (Ioffe & Szegedy, 2015); (iv) Env Wrapper RSNorm, which tracks running statistics for each dimension, normalizes observations upon receiving from the environment, and stores them in the replay buffer; (v) Initial N Steps, which fixes the statistics derived from the initially collected transition samples, where we used $N = 5 , 0 0 0$ ; and (vi) Oracle Statistics, which rely on pre-computed statistics from previously collected expert data.
+
+As illustrated in Figure 12, layer normalization and batch normalization offer little to no performance gains. While the env-wrapper RSNorm is somewhat effective, it falls short of RSNorm’s performance. Although widely used in deep RL frameworks (Dhariwal et al., 2017; Hoffman et al., 2020; Raffin et al., 2021), the env-wrapper introduces inconsistencies in off-policy settings by normalizing samples with different statistics based on their collection time. This causes identical observations to be stored with varying values in the replay buffer, reducing learning consistency. Fixed initial statistics also show slightly worse performance than RSNorm, potentially due to their inability to adapt to the evolving dynamics during training. Overall, only RSNorm matched the performance of Oracle statistics, making it the most practical observation normalization choice for deep RL.
+
+![](images/127d17d035f38b8b5478a3eae3e76f81fae723724ccd7da442569645415d8475.jpg)  
+Figure 12: Obs Normalization. RSNorm consistently outperforms alternative normalization methods. Mean and $9 5 \%$ CI over 5 seeds.
+
+# 7.2 SCALING THE NUMBER OF PARAMETERS
+
+Here, we investigate scaling parameters in the actor-critic architecture with SimBa by focusing on two aspects: (i) scaling the actor versus the critic network, and (ii) scaling network width versus depth. For width scaling, the actor and critic depths are set to 1 and 2 blocks, respectively. For depth scaling, the actor and critic widths are fixed at 128 and 512, respectively, following our default setup.
+
+As illustrated in Figure 13, scaling up the width or depth of the critic ${ \bf ( \omega ) }$ generally improves performance, while scaling up the actor’s width or depth ( ) tends to reduce performance. This contrast suggests that the target complexity of the actor may be lower than that of the critic, where scaling up the actor’s parameters might be ineffective. These findings align with previous study (Nauman et al., 2024), which highlights the benefits of scaling up the critic while showing limited advantages in scaling up the actor.
+
+![](images/c3e5d6bf3476be0d034387873e71e3b29a50f01ff4914087d94cd6428bda9352.jpg)  
+Figure 13: Scaling Actor and Critic Network. Performance of SAC with SimBa by varying width and depth for the actor and critic network.
+
+Furthermore, for the critic network, scaling up the width is generally more effective than scaling up the depth. While both approaches can enhance the network’s expressivity, scaling up the depth can decrease the simplicity bias as it adds more non-linear components within the network. Based on our findings, we recommend width scaling as the default strategy.
+
+# 7.3 SCALING REPLAY RATIO
+
+According to scaling laws (Kaplan et al., 2020), performance can be enhanced not only by scaling up the number of parameters but also by scaling up the computation time, which can be done by scaling up the number of gradient updates per collected sample (i.e., replay ratio) in deep RL.
+
+However, in deep RL, scaling up the replay ratio has been shown to decrease performance due to the risk of overfitting the network to the initially collected samples (Nikishin et al., 2022; D’Oro et al., 2022; Lee et al., 2023). To address this issue, recent research has proposed periodically reinitializing the network to prevent overfitting, demonstrating that performance can be scaled with respect to the replay ratio. In this section, we aim to assess whether the simplicity bias induced by SimBa can mitigate overfitting under increased computation time (i.e., higher replay ratios).
+
+To evaluate this, we trained SAC with SimBa using 2, 4, 8, and 16 replay ratios, both with and without periodic resets. For SAC with resets, we reinitialized the entire network and optimizer every 500,000 gradient steps. We also compared our results with BRO (Nauman et al., 2024), which incorporates resets.
+
+Surprisingly, as illustrated in Figure 14, SimBa’s performance consistently improves as the replay ratio increases, even without periodic resets. We have excluded results for BRO without resets, as it fails to learn meaningful behavior for all replay ratios (achieves lower than 300 points). Notably, when resets are included for SimBa, the performance gains become even more pronounced, with a replay ratio of 8 outperforming the most computationally intensive BRO algorithm (RR10).
+
+![](images/02cad1be553d17a6496e90b93f36a6217b1f1fef6217b6bb6b0157a648299f40.jpg)  
+Figure 14: Scaling Replay Ratio. Performance of SimBa with and without periodic resets for various replay ratios.
+
+# 8 LESSONS AND OPPORTUNITIES
+
+Lessons. Deep reinforcement learning has historically struggled with overfitting, requiring complex training protocols and tricks to mitigate these issues (Hessel et al., 2018; Fujimoto et al., 2023). These complexities can hinder practitioners with limited resources. In this paper, we improved performance solely by modifying the network architecture while keeping the underlying algorithms unchanged, simplifying SimBa’s implementation and making it easy to adopt. By incorporating simplicity bias through architectural design and scaling up parameters, our network converges to simpler, generalizable functions, matching or surpassing state-of-the-art methods. This aligns with Richard Sutton’s Bitter Lesson (Sutton, 2019): while task-specific designs may offer immediate gains, scalable approaches provide more sustainable long-term benefits.
+
+Opportunities. While our exploration has focused on network architecture, optimization techniques such as dropout (Hiraoka et al., 2021), data augmentation (Kostrikov et al., 2020), and advanced optimization algorithms (Foret et al., 2020) are also crucial for promoting convergence to simpler functions. Extending our insights to vision-based RL presents a promising direction; specifically, designing convolutional architectures guided by simplicity bias principles could substantially enhance learning efficiency in visual tasks. Furthermore, integrating SimBa with multi-task RL may improve performance across diverse tasks by facilitating the learning of shared, simple, and generalizable representations across tasks. Although our current work centers on model-free RL algorithms, model-based approaches have also demonstrated considerable success (Schwarzer et al., 2020; Hansen et al., 2023; Hafner et al., 2023). Our preliminary investigations applying SimBa to model-based RL, specifically TD-MPC2 (Hansen et al., 2023), have yielded promising results that warrant further exploration. We encourage the research community to pursue these directions to advance deep RL architectures and facilitate their successful application in real-world scenarios.
+
+# REPRODUCIBILITY
+
+To ensure the reproducibility of our experiments, we provide the complete source code to run SAC with SimBa. Moreover, we have included a Dockerfile to simplify the testing and replication of our results. The raw scores of each experiment including all baselines are also included. The code is available at https://github.com/SonyResearch/simba.
+
+# ACKNOWLEDGEMENT
+
+This work was supported by the Institute for Information & communications Technology Planning & Evaluation(IITP) grant funded by the Korea government(MSIT) (RS-2019-II190075, Artificial Intelligence Graduate School Program(KAIST)) and the National Research Foundation of Korea(NRF) grant funded by the Korea government(MSIT) (No. RS-2025-00555621). We would also like to express our gratitude to Craig Sherstan, Bram Grooten, Hanseul Cho, Kyungmin Lee, and Hawon Jeong for their invaluable discussions and insightful feedback, which have significantly contributed to this work.
+
+# REFERENCES
+
+Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. Gpt-4 technical report. arXiv preprint arXiv:2303.08774, 2023. (Cited on page 2)   
+Marcin Andrychowicz, Anton Raichuk, Piotr Stanczyk, Manu Orsini, Sertan Girgin, Raphael ´ Marinier, Leonard Hussenot, Matthieu Geist, Olivier Pietquin, Marcin Michalski, et al. What ´ matters in on-policy reinforcement learning? a large-scale empirical study. arXiv preprint arXiv:2006.05990, 2020. (Cited on page 2)   
+Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton. Layer normalization. arXiv preprint arXiv:1607.06450, 2016. (Cited on page 2, 9)   
+Peter L Bartlett and Shahar Mendelson. Rademacher and gaussian complexities: Risk bounds and structural results. Journal of Machine Learning Research, 3(Nov):463–482, 2002. (Cited on page 3)   
+Yakir Berchenko. Simplicity bias in overparameterized machine learning. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 38, pp. 11052–11060, 2024. (Cited on page 2, 3)   
+Aditya Bhatt, Daniel Palenicek, Boris Belousov, Max Argus, Artemij Amiranashvili, Thomas Brox, and Jan Peters. Crossq: Batch normalization in deep reinforcement learning for greater sample efficiency and simplicity. In The Twelfth International Conference on Learning Representations, 2024. URL https://openreview.net/forum?id=PczQtTsTIX. (Cited on page 4)   
+Nils Bjorck, Carla P Gomes, and Kilian Q Weinberger. Towards deeper deep reinforcement learning with spectral normalization. Advances in neural information processing systems, 34:8242–8255, 2021. (Cited on page 4, 6, 20)   
+Anselm Blumer, Andrzej Ehrenfeucht, David Haussler, and Manfred K Warmuth. Learnability and the vapnik-chervonenkis dimension. Journal of the ACM (JACM), 36(4):929–965, 1989. (Cited on page 3)   
+Vittorio Caggiano, Huawei Wang, Guillaume Durandau, Massimo Sartori, and Vikash Kumar. Myosuite–a contact-rich simulation suite for musculoskeletal motor control. arXiv preprint arXiv:2205.13600, 2022. (Cited on page 3, 6, 24)   
+Xinyue Chen, Che Wang, Zijian Zhou, and Keith Ross. Randomized ensembled double q-learning: Learning fast without a model. arXiv preprint arXiv:2101.05982, 2021. (Cited on page 4)   
+Lenaic Chizat and Francis Bach. Implicit bias of gradient descent for wide two-layer neural networks trained with the logistic loss. In Conference on learning theory, pp. 1305–1338. PMLR, 2020. (Cited on page 2, 3)
+
+Will Dabney, Mark Rowland, Marc Bellemare, and Remi Munos. Distributional reinforcement ´ learning with quantile regression. In Proceedings of the AAAI conference on artificial intelligence, volume 32, 2018. (Cited on page 4)   
+Giacomo De Palma, Bobak Kiani, and Seth Lloyd. Random deep neural networks are biased towards simple functions. Advances in Neural Information Processing Systems, 32, 2019. (Cited on page 3, 17)   
+Mostafa Dehghani, Josip Djolonga, Basil Mustafa, Piotr Padlewski, Jonathan Heek, Justin Gilmer, Andreas Peter Steiner, Mathilde Caron, Robert Geirhos, Ibrahim Alabdulmohsin, et al. Scaling vision transformers to 22 billion parameters. In International Conference on Machine Learning, pp. 7480–7512. PMLR, 2023. (Cited on page 2)   
+Prafulla Dhariwal, Christopher Hesse, Oleg Klimov, Alex Nichol, Matthias Plappert, Alec Radford, John Schulman, Szymon Sidor, Yuhuai Wu, and Peter Zhokhov. Openai baselines. https: //github.com/openai/baselines, 2017. (Cited on page 9)   
+Pierluca D’Oro, Max Schwarzer, Evgenii Nikishin, Pierre-Luc Bacon, Marc G Bellemare, and Aaron Courville. Sample-efficient reinforcement learning by breaking the replay ratio barrier. In Deep Reinforcement Learning Workshop NeurIPS 2022, 2022. (Cited on page 10)   
+Lasse Espeholt, Hubert Soyer, Remi Munos, Karen Simonyan, Vlad Mnih, Tom Ward, Yotam Doron, Vlad Firoiu, Tim Harley, Iain Dunning, et al. Impala: Scalable distributed deep-rl with importance weighted actor-learner architectures. In International conference on machine learning, pp. 1407–1416. PMLR, 2018. (Cited on page 4)   
+Pierre Foret, Ariel Kleiner, Hossein Mobahi, and Behnam Neyshabur. Sharpness-aware minimization for efficiently improving generalization. arXiv preprint arXiv:2010.01412, 2020. (Cited on page 10)   
+Scott Fujimoto, Herke Hoof, and David Meger. Addressing function approximation error in actorcritic methods. In International conference on machine learning, pp. 1587–1596. PMLR, 2018. (Cited on page 4)   
+Scott Fujimoto, Wei-Di Chang, Edward J Smith, Shixiang Shane Gu, Doina Precup, and David Meger. For sale: State-action representation learning for deep reinforcement learning. arXiv preprint arXiv:2306.02451, 2023. (Cited on page 2, 3, 4, 7, 10)   
+Matteo Gallici, Mattie Fellows, Benjamin Ellis, Bartomeu Pou, Ivan Masmitja, Jakob Nicolaus Foerster, and Mario Martin. Simplifying deep temporal difference learning. arXiv preprint arXiv:2407.04811, 2024. (Cited on page 4)   
+Florin Gogianu, Tudor Berariu, Mihaela C Rosca, Claudia Clopath, Lucian Busoniu, and Razvan Pascanu. Spectral normalisation for deep reinforcement learning: an optimisation perspective. In International Conference on Machine Learning, pp. 3734–3744. PMLR, 2021. (Cited on page 4)   
+Gemini Google, Rohan Anil, Sebastian Borgeaud, Yonghui Wu, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M Dai, Anja Hauth, et al. Gemini: a family of highly capable multimodal models. arXiv preprint arXiv:2312.11805, 2023. (Cited on page 2)   
+Suriya Gunasekar, Jason D Lee, Daniel Soudry, and Nati Srebro. Implicit bias of gradient descent on linear convolutional networks. Advances in neural information processing systems, 31, 2018. (Cited on page 2, 3)   
+Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, and Sergey Levine. Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor. In International conference on machine learning, pp. 1861–1870. PMLR, 2018. (Cited on page 2, 5, 7, 19)   
+Danijar Hafner. Benchmarking the spectrum of agent capabilities. In International Conference on Learning Representations, 2022. URL https://openreview.net/forum?id= 1W0z96MFEoH. (Cited on page 8, 24)   
+Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, and Timothy Lillicrap. Mastering diverse domains through world models. arXiv preprint arXiv:2301.04104, 2023. (Cited on page 2, 4, 7, 10)
+
+Nicklas Hansen, Hao Su, and Xiaolong Wang. Td-mpc2: Scalable, robust world models for continuous control. arXiv preprint arXiv:2310.16828, 2023. (Cited on page 2, 3, 4, 7, 10, 19, 24, 27, 28)   
+Fengxiang He, Tongliang Liu, and Dacheng Tao. Why resnet works? residuals generalize. IEEE transactions on neural networks and learning systems, 31(12):5349–5362, 2020. (Cited on page 2, 4)   
+Katherine L Hermann, Hossein Mobahi, Thomas Fel, and Michael C Mozer. On the foundations of shortcut learning. Proc. the International Conference on Learning Representations (ICLR), 2024. (Cited on page 2, 4)   
+Matteo Hessel, Joseph Modayil, Hado Van Hasselt, Tom Schaul, Georg Ostrovski, Will Dabney, Dan Horgan, Bilal Piot, Mohammad Azar, and David Silver. Rainbow: Combining improvements in deep reinforcement learning. In Proceedings of the AAAI conference on artificial intelligence, volume 32, 2018. (Cited on page 2, 10)   
+Takuya Hiraoka, Takahisa Imagawa, Taisei Hashimoto, Takashi Onishi, and Yoshimasa Tsuruoka. Dropout q-functions for doubly efficient reinforcement learning. arXiv preprint arXiv:2110.02034, 2021. (Cited on page 10)   
+Matthew W. Hoffman, Bobak Shahriari, John Aslanides, Gabriel Barth-Maron, Nikola Momchev, Danila Sinopalnikov, Piotr Stanczyk, Sabela Ramos, Anton Raichuk, Damien Vincent, L ´ eonard ´ Hussenot, Robert Dadashi, Gabriel Dulac-Arnold, Manu Orsini, Alexis Jacq, Johan Ferret, Nino Vieillard, Seyed Kamyar Seyed Ghasemipour, Sertan Girgin, Olivier Pietquin, Feryal Behbahani, Tamara Norman, Abbas Abdolmaleki, Albin Cassirer, Fan Yang, Kate Baumli, Sarah Henderson, Abe Friesen, Ruba Haroun, Alex Novikov, Sergio Gomez Colmenarejo, Serkan Cabi, Caglar ´ Gulcehre, Tom Le Paine, Srivatsan Srinivasan, Andrew Cowie, Ziyu Wang, Bilal Piot, and Nando de Freitas. Acme: A research framework for distributed reinforcement learning. arXiv preprint arXiv:2006.00979, 2020. URL https://arxiv.org/abs/2006.00979. (Cited on page 9)   
+Sergey Ioffe and Christian Szegedy. Batch normalization: Accelerating deep network training by reducing internal covariate shift. In International conference on machine learning, pp. 448–456. pmlr, 2015. (Cited on page 9)   
+Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei. Scaling laws for neural language models. arXiv preprint arXiv:2001.08361, 2020. (Cited on page 2, 10)   
+Hyunseung Kim, Byung Kun Lee, Hojoon Lee, Dongyoon Hwang, Sejik Park, Kyushik Min, and Jaegul Choo. Learning to discover skills through guidance. Advances in Neural Information Processing Systems, 36, 2024a. (Cited on page 8)   
+Hyunseung Kim, Byungkun Lee, Hojoon Lee, Dongyoon Hwang, Donghu Kim, and Jaegul Choo. Do’s and don’ts: Learning desirable skills with instruction videos. arXiv preprint arXiv:2406.00324, 2024b. (Cited on page 8)   
+Ilya Kostrikov, Denis Yarats, and Rob Fergus. Image augmentation is all you need: Regularizing deep reinforcement learning from pixels. arXiv preprint arXiv:2004.13649, 2020. (Cited on page 10)   
+Aviral Kumar, Rishabh Agarwal, Tengyu Ma, Aaron Courville, George Tucker, and Sergey Levine. DR3: Value-based deep reinforcement learning requires explicit regularization. In International Conference on Learning Representations, 2022. URL https://openreview.net/forum? id=POvMvLi91f. (Cited on page 21)   
+Heinrich Kuttler, Nantas Nardelli, Alexander H. Miller, Roberta Raileanu, Marco Selvatici, Edward ¨ Grefenstette, and Tim Rocktaschel. The NetHack Learning Environment. In ¨ Proceedings of the Conference on Neural Information Processing Systems (NeurIPS), 2020. (Cited on page 8, 24)
+
+Hojoon Lee, Hanseul Cho, Hyunseung Kim, Daehoon Gwak, Joonkee Kim, Jaegul Choo, Se-Young Yun, and Chulhee Yun. Plastic: Improving input and label plasticity for sample efficient reinforcement learning. In Thirty-seventh Conference on Neural Information Processing Systems, 2023. (Cited on page 4, 10)   
+Hojoon Lee, Hyeonseo Cho, Hyunseung Kim, Donghu Kim, Dugki Min, Jaegul Choo, and Clare Lyle. Slow and steady wins the race: Maintaining plasticity with hare and tortoise networks. arXiv preprint arXiv:2406.02596, 2024. (Cited on page 4, 21)   
+TP Lillicrap. Continuous control with deep reinforcement learning. arXiv preprint arXiv:1509.02971, 2015. (Cited on page 7)   
+Clare Lyle, Zeyu Zheng, Evgenii Nikishin, Bernardo Avila Pires, Razvan Pascanu, and Will Dabney. Understanding plasticity in neural networks. Proc. the International Conference on Machine Learning (ICML), 2023. (Cited on page 21)   
+Michael Matthews, Michael Beukman, Benjamin Ellis, Mikayel Samvelyan, Matthew Thomas Jackson, Samuel Coward, and Jakob Nicolaus Foerster. Craftax: A lightning-fast benchmark for open-ended reinforcement learning. In Forty-first International Conference on Machine Learning, 2024. URL https://openreview.net/forum?id=hg4wXlrQCV. (Cited on page 8, 24, 28)   
+Chris Mingard, Joar Skalse, Guillermo Valle-Perez, David Mart ´ ´ınez-Rubio, Vladimir Mikulik, and Ard A Louis. Neural networks are a priori biased towards boolean functions with low entropy. arXiv preprint arXiv:1909.11522, 2019. (Cited on page 2, 3, 4, 17)   
+Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, and Ilya Sutskever. Deep double descent: Where bigger models and more data hurt. Journal of Statistical Mechanics: Theory and Experiment, 2021, 2021. (Cited on page 2)   
+Michal Nauman, Mateusz Ostaszewski, Krzysztof Jankowski, Piotr Miłos, and Marek Cygan. Big- ´ ger, regularized, optimistic: scaling for compute and sample-efficient continuous control. arXiv preprint arXiv:2405.16158, 2024. (Cited on page 3, 4, 6, 7, 9, 10, 20)   
+Evgenii Nikishin, Max Schwarzer, Pierluca D’Oro, Pierre-Luc Bacon, and Aaron Courville. The primacy bias in deep reinforcement learning. Proc. the International Conference on Machine Learning (ICML), 2022. (Cited on page 4, 10, 21)   
+Johan Obando-Ceron, Ghada Sokar, Timon Willi, Clare Lyle, Jesse Farebrother, Jakob Foerster, Gintare Karolina Dziugaite, Doina Precup, and Pablo Samuel Castro. Mixtures of experts unlock parameter scaling for deep rl. arXiv preprint arXiv:2402.08609, 2024. (Cited on page 4)   
+Seohong Park, Oleh Rybkin, and Sergey Levine. Metra: Scalable unsupervised rl with metric-aware abstraction. arXiv preprint arXiv:2310.08887, 2023. (Cited on page 3, 8, 24, 28)   
+Scott Pesme, Loucas Pillaud-Vivien, and Nicolas Flammarion. Implicit bias of sgd for diagonal linear networks: a provable benefit of stochasticity. Advances in Neural Information Processing Systems, 34:29218–29230, 2021. (Cited on page 2, 4)   
+Antonin Raffin, Ashley Hill, Adam Gleave, Anssi Kanervisto, Maximilian Ernestus, and Noah Dormann. Stable-baselines3: Reliable reinforcement learning implementations. Journal of Machine Learning Research, 22(268):1–8, 2021. URL http://jmlr.org/papers/v22/ 20-1364.html. (Cited on page 9)   
+John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy optimization algorithms. arXiv preprint arXiv:1707.06347, 2017. (Cited on page 2, 8, 28)   
+Max Schwarzer, Ankesh Anand, Rishab Goel, R Devon Hjelm, Aaron Courville, and Philip Bachman. Data-efficient reinforcement learning with self-predictive representations. arXiv preprint arXiv:2007.05929, 2020. (Cited on page 7, 10)
+
+Max Schwarzer, Johan Samir Obando Ceron, Aaron Courville, Marc G Bellemare, Rishabh Agarwal, and Pablo Samuel Castro. Bigger, better, faster: Human-level atari with human-level efficiency. In International Conference on Machine Learning, pp. 30365–30380. PMLR, 2023. (Cited on page 4)   
+Carmelo Sferrazza, Dun-Ming Huang, Xingyu Lin, Youngwoon Lee, and Pieter Abbeel. Humanoidbench: Simulated humanoid benchmark for whole-body locomotion and manipulation. arXiv preprint arXiv:2403.10506, 2024. (Cited on page 3, 6, 24)   
+Harshay Shah, Kaustav Tamuly, Aditi Raghunathan, Prateek Jain, and Praneeth Netrapalli. The pitfalls of simplicity bias in neural networks. Advances in Neural Information Processing Systems, 33:9573–9585, 2020. (Cited on page 2, 3)   
+Claude Elwood Shannon. Communication in the presence of noise. Proceedings of the IRE, 37(1): 10–21, 1949. (Cited on page 3, 17)   
+Ghada Sokar, Rishabh Agarwal, Pablo Samuel Castro, and Utku Evci. The dormant neuron phenomenon in deep reinforcement learning. arXiv preprint arXiv:2302.12902, 2023. (Cited on page 21)   
+Daniel Soudry, Elad Hoffer, Mor Shpigel Nacson, Suriya Gunasekar, and Nathan Srebro. The implicit bias of gradient descent on separable data. Journal of Machine Learning Research, 19(70): 1–57, 2018. (Cited on page 3)   
+Richard Sutton. The bitter lesson. Incomplete Ideas (blog), 13(1):38, 2019. (Cited on page 10)   
+Yuval Tassa, Yotam Doron, Alistair Muldal, Tom Erez, Yazhe Li, Diego de Las Casas, David Budden, Abbas Abdolmaleki, Josh Merel, Andrew Lefrancq, et al. Deepmind control suite. arXiv preprint arXiv:1801.00690, 2018. (Cited on page 2, 6, 24)   
+Damien Teney, Armand Mihai Nicolicioiu, Valentin Hartmann, and Ehsan Abbasnejad. Neural redshift: Random networks are not random functions. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 4786–4796, 2024. (Cited on page 2, 3, 4, 5, 17, 18)   
+Guillermo Valle-Perez, Chico Q Camargo, and Ard A Louis. Deep learning generalizes because the parameter-function map is biased towards simple functions. arXiv preprint arXiv:1805.08522, 2018. (Cited on page 2, 3, 4, 17)   
+Hado Van Hasselt, Arthur Guez, and David Silver. Deep reinforcement learning with double qlearning. In Proceedings of the AAAI conference on artificial intelligence, volume 30, 2016. (Cited on page 4)   
+A Vaswani. Attention is all you need. Advances in Neural Information Processing Systems, 2017. (Cited on page 5)   
+Lei Wu, Mingze Wang, and Weijie Su. The alignment property of sgd noise and how it helps select flat minima: A stability analysis. Advances in Neural Information Processing Systems, 35:4680– 4693, 2022. (Cited on page 4)   
+Ruibin Xiong, Yunchang Yang, Di He, Kai Zheng, Shuxin Zheng, Chen Xing, Huishuai Zhang, Yanyan Lan, Liwei Wang, and Tieyan Liu. On layer normalization in the transformer architecture. In International Conference on Machine Learning, pp. 10524–10533. PMLR, 2020. (Cited on page 2)   
+Biao Zhang and Rico Sennrich. Root mean square layer normalization. Proc. the Advances in Neural Information Processing Systems (NeurIPS), 32, 2019. (Cited on page 9)
+
+# APPENDIX
+
+# A Definition of Simplicity Bias 17
+
+A.1 Complexity Measure 17   
+A.2 Simplicity Bias Score 17
+
+# B Measuring Simplicity Bias 18
+
+# C Additional Ablations 19
+
+C.1 Architectural Ablation 19   
+C.2 Extended Training . 19
+
+# D Correlation between Simplicity Bias and Performance 20
+
+# E Plasticity Analysis 21
+
+E.1 Metrics 21   
+E.2 Results . 21
+
+# F Comparison to Existing Architectures 23
+
+# G Computational Resources 23
+
+# H Environment Details 24
+
+H.1 DeepMind Control Suite 24   
+H.2 MyoSuite 24   
+H.3 HumanoidBench 24   
+H.4 Craftax 24
+
+# I Hyperparameters 27
+
+I.1 Off-Policy 27   
+I.2 On-Policy 28   
+I.3 Unsupervised RL 28
+
+# J Learning Curve 29
+
+# K Full Result 32
+
+# A DEFINITION OF SIMPLICITY BIAS
+
+This section provides more in-depth definition of simplicity bias for clarity.
+
+# A.1 COMPLEXITY MEASURE
+
+Let ${ \mathcal { X } } \subseteq \mathbb { R } ^ { n }$ denote the input space and $\mathcal { V } \subseteq \mathbb { R } ^ { m }$ the output space. Consider the function space $\mathcal { F } = \{ f | f : \mathcal { X } \to \mathcal { Y } \}$ . Given a training dataset $D = \{ ( x _ { i } , \bar { y _ { i } } ) \} _ { i = 1 } ^ { N ^ { - } }$ and a tolerance $\epsilon > 0$ , define the set of functions $\mathcal { T } \subseteq \mathcal { F }$ achieving a training loss below $\epsilon$ :
+
+$$
+\mathcal {I} = \left\{f \in \mathcal {F} \mid \mathcal {L} _ {\text {t r a i n}} (f) = \frac {1}{N} \sum_ {i = 1} ^ {N} \ell \left(f \left(x _ {i}\right), y _ {i}\right) <   \epsilon \right\}, \tag {8}
+$$
+
+where $\ell : \mathcal { V } \times \mathcal { V }  [ 0 , \infty )$ is a loss function such as mean squared error or cross-entropy.
+
+To quantify the complexity of functions within $\mathcal { F }$ , we adopt a Fourier-based complexity measure as described in Section 2. Specifically, for a function $f$ with a Fourier series representation:
+
+$$
+f (x) = (2 \pi) ^ {d / 2} \int \tilde {f} (k) e ^ {i k \cdot x} d k, \tag {9}
+$$
+
+where $\begin{array} { r } { \tilde { f } ( k ) = \int f ( x ) e ^ { - i k \cdot x } d x } \end{array}$ is the Fourier transform of $f$ .
+
+Given a Fourier series representation $\tilde { f }$ , we perform a discrete Fourier transform by uniformly discretizing the frequency domain. Specifically, we consider frequencies $k \in \{ 0 , 1 , \ldots , K \}$ , where $K$ is selected based on the Nyquist-Shannon sampling theorem (Shannon, 1949) to ensure an accurate representation of $f$ . This discretization transforms the continuous frequency domain into a finite set of frequencies suitable for computational purposes.
+
+Then, the complexity measure $c : \mathcal { F }  [ 0 , \infty )$ is defined as the weighted average of the Fourier coefficients from discretization:
+
+$$
+c (f) = \frac {\sum_ {k = 0} ^ {K} \tilde {f} (k) \cdot k}{\sum_ {k = 0} ^ {K} \tilde {f} (k)}. \tag {10}
+$$
+
+Equation 10 captures the intuition that higher complexity arises from the dominance of highfrequency components, which correspond to rapid amplitude changes or intricate details in the function $f$ . Conversely, a lower complexity measure indicates a greater contribution from low-frequency components, reflecting simpler, smoother functions.
+
+# A.2 SIMPLICITY BIAS SCORE
+
+Let $f$ be a neural network, and let alg ∈ A denote the optimization algorithm used for training, such as stochastic gradient descent. We quantify the simplicity bias score $s : \mathcal { F } \times \mathcal { A } \to ( 0 , \infty )$ as:
+
+$$
+s (f, \operatorname {a l g}) = \mathbb {E} _ {f ^ {*} \sim P _ {f, \mathrm {a l g}}} \left[ \frac {1}{c \left(f ^ {*}\right)} \right] \tag {11}
+$$
+
+where $P _ { f , \mathrm { a l g } }$ denotes the distribution over $\mathcal { T }$ induced by training $f$ with alg. A higher simplicity bias score indicates a stronger tendency to converge toward functions with lower complexity.
+
+Then, from equation 11, we can compute the simplicity bias score with respect to the architecture by marginalizing over the distribution of the algorithm as:
+
+$$
+s (f) = \mathbb {E} _ {\mathrm {a l g} \sim \mathbf {A}} \left[ \mathbb {E} _ {f ^ {*} \sim P _ {f, \mathrm {a l g}}} \left[ \frac {1}{c \left(f ^ {*}\right)} \right] \right]. \tag {12}
+$$
+
+Directly measuring this bias by analyzing the complexity of the converged function is challenging due to the non-stationary nature of training dynamics, especially in reinforcement learning where data distributions evolve over time. Empirical studies (Valle-Perez et al., 2018; De Palma et al., 2019; Mingard et al., 2019; Teney et al., 2024) suggest that the initial complexity of a network is strongly correlated with the complexity of the functions it learns after training.
+
+Therefore, as a practical proxy for simplicity bias, we define the approximate of the simplicity bias score $s ( f )$ for a network architecture $f$ with an initial parameter distribution $\Theta _ { 0 }$ as:
+
+$$
+s (f) \approx \mathbb {E} _ {\theta \sim \Theta_ {0}} \left[ \frac {1}{c \left(f _ {\theta}\right)} \right]. \tag {13}
+$$
+
+where $f _ { \theta }$ denotes the network $f$ parameterized by $\theta$ .
+
+A higher simplicity bias score indicates that, on average, the network initialized from $\Theta _ { 0 }$ represents simpler functions prior to training, suggesting a predisposition to converge to simpler solutions during optimization. This measure aligns with the notion that networks with lower initial complexity are more likely to exhibit a higher simplicity bias.
+
+# B MEASURING SIMPLICITY BIAS
+
+To quantify the simplicity bias defined in Equation 13, we adopt a methodology inspired by the Neural Redshift framework (Teney et al., 2024). We utilize the original codebase provided by the authors1 to assess the complexity of random neural networks. This approach evaluates the inherent complexity of the architecture before any optimization, thereby isolating the architectural effects from those introduced by training algorithms such as stochastic gradient descent.
+
+Following the methodology outlined in Teney et al. (2024), we perform the following steps to measure the simplicity bias score of a neural network $f _ { \theta } ( \cdot )$ :
+
+Sampling Initialization. For each network architecture $f$ , we generate $N$ random initializations $\theta \sim \Theta _ { 0 }$ . This ensemble of initial parameters captures the variability in complexity introduced by different random seeds. In this work, we used $N = 1 0 0$ .
+
+Sampling Input. We define the input space $\mathcal { X } = [ - 1 0 0 , 1 0 0 ] ^ { 2 } \subset \mathbb { R } ^ { 2 }$ and uniformly divide it into a grid of 90,000 points, achieving 300 divisions along each dimension. This dense sampling ensures comprehensive coverage of the input domain.
+
+Evaluating Function. For each sampled input point $x \in \mathcal { X }$ , we compute the corresponding output $f _ { \boldsymbol { \theta } } ( \boldsymbol { x } )$ . The collection of these output values forms a 2-D grid of scalars, effectively representing the network’s function as a grayscale image.
+
+Discrete Fourier Transform. We apply a discrete Fourier transform (DFT) to the grayscale image obtained from the function evaluations. This transformation decomposes $f _ { \theta } ( \cdot )$ into a sum of basis functions of varying frequencies.
+
+Measuring Function Complexity. Utilizing the Fourier coefficients obtained from the DFT, we compute the complexity measure $c ( f _ { \theta } )$ as defined in Equation 10. Specifically, we calculate the frequency-weighted average of the Fourier coefficients:
+
+$$
+c \left(f _ {\theta}\right) = \frac {\sum_ {k = 0} ^ {K} \tilde {f} _ {\theta} (k) \cdot k}{\sum_ {k = 0} ^ {K} \tilde {f} _ {\theta} (k)}, \tag {14}
+$$
+
+where $\tilde { f } _ { \theta } ( k )$ denotes the Fourier coefficient at frequency $k$ .
+
+Estimating Simplicity Bias Score. For each network $f$ , we estimate the simplicity bias score $s ( f )$ by averaging the inverse of the complexity measures over all $N$ random initializations:
+
+$$
+s (f) \approx \frac {1}{N} \sum_ {i = 1} ^ {N} \frac {1}{c \left(f _ {\theta_ {i}}\right)}, \tag {15}
+$$
+
+where $\theta _ { i }$ represents the $i$ -th random initialization.
+
+# C ADDITIONAL ABLATIONS
+
+# C.1 ARCHITECTURAL ABLATION
+
+Experimental Setup. Following the architectural component analysis in Section 5.1, we further conducted ablation studies by removing each key component from SimBa to assess its impact on the simplicity score and average return. We performed these experiments on DMC-Hard using the same training setup as in Section 5.1, training for 1M environment steps.
+
+Results. As shown in Figure 15.(a), we observe that, except for RSNorm, removing key components of SimBa—such as residual connections, pre-layer normalization, or post-layer normalization—leads to a reduction in the simplicity bias score. This indicates that the functional representation at initialization becomes biased toward more complex functions when these components are absent. This finding further emphasizes the critical role of each component in promoting simplicity bias within SimBa’s design. Additionally, Figure 15.(b) demonstrates that removing any key component significantly impacts SimBa’s performance, underscoring the necessity of each architectural component.
+
+![](images/be1333ec6d1a193368915de9951c148353d55b9f79a554535eb9f50ebf24efe8.jpg)  
+Figure 15: Additional Component Analysis. (a) Simplicity bias scores estimated via Fourier analysis. Mean and $9 5 \%$ CI are computed over 100 random initializations. (b) Average return in DMC-Hard for 1M steps. Mean and $9 5 \%$ CI over 10 seeds, using SAC.
+
+Regarding RSNorm, although its absence significantly impacts the agent’s performance negatively, the overall simplicity bias score of the architecture increases rather than decreases. We speculate that this discrepancy arises because our Fourier Transform based complexity measure relies on evaluating the network’s outputs over a uniformly distributed input space. RSNorm is designed to normalize activations based on the statistics of non-uniform or dynamically changing input distributions, excelling with inputs that exhibit variance and complexity not captured by a uniform distribution. Therefore, since our simplicity analysis measure is based on a uniform input distribution, it may not fully capture RSNorm’s practical contribution to promoting simplicity bias.
+
+# C.2 EXTENDED TRAINING
+
+Experimental Setup. We assess SimBa’s robustness by evaluating its performance on the Deep-Mind Control Suite (DMC) Hard tasks over an extended training period of 5 million timesteps. We compared three methods: SAC (Haarnoja et al., 2018), TD-MPC2 (Hansen et al., 2023), and SAC with SimBa. All models are trained under identical hyperparameters and configurations as in our main experiments to ensure a fair comparison.
+
+![](images/ab052e94fbeb8166a1fd2c2e119dc2c3287d81ede57dc7befb2a4a7c85c86dc7.jpg)  
+Figure 16: Per task learning curve for DMC Hard. Mean and $9 5 \%$ CI are computed over 5 seeds for SimBa, 3 seeds for TD-MPC2 and SAC.
+
+Results. Figure 16 presents the learning curve of each method for 5 million timesteps. The learning curves indicate that $\mathrm { S i m B a + S A C }$ not only learns faster but also maintains more stable and consistent performance improvements over time, demonstrating better sample efficiency and reduced variance compared to the baselines.
+
+# D CORRELATION BETWEEN SIMPLICITY BIAS AND PERFORMANCE
+
+To investigate the relationship between simplicity bias score and performance in deep reinforcement learning, we computed the correlation between simplicity bias scores and average returns for DMC-Hard across various architectures evaluated in our study. Our analysis includes 12 architectures: four baselines architectures-MLP, SimBa, BroNet (Nauman et al., 2024), and SpectralNet (Bjorck et al., 2021)-along with eight SimBa variants. These variants consists of four variants with component additions (Section 5.1) and four variants with component reductions (Appendix C.1), representing a gradual transition from MLP to SimBa.
+
+As discussed in Appendix F, the current simplicity bias measure may not accurately capture the influence of RSNorm. To address this limitation, we separately evaluated the correlation for architectures incorporating RSNorm. All twelve architectures have nearly identical parameter counts, approximately 4.5 million parameters each, with a maximum variation of $1 \%$ . Performance was assessed on the DMC-Hard benchmark, trained for one million steps.
+
+Results. As illustrated in Figure 17(a), architectures employing RSNorm exhibit a Pearson correlation coefficient of 0.79, indicating a strong positive correlation between simplicity bias score and average return in scaled architectures. In contrast, Figure 17(b) shows a Pearson correlation coefficient of 0.54, representing a moderate correlation across all architectures. We attribute the lower correlation in the broader set to the current limitations of the simplicity bias measure. We believe these findings support our hypothesis that higher simplicity bias scores are associated with better performance in deep reinforcement learning with scaled-up architectures.
+
+![](images/bd8cc0fea10da5482efae5bbe2b3a3c27ebc1324263015f43645aa6602b36d8f.jpg)  
+Figure 17: Correlation Analysis. Pearson correlation between simplicity bias score and average return on DMC-Hard. (a) Architectures incorporating RSNorm show a strong correlation, $\rho = 0 . 7 9$ . (b) All evaluated architectures exhibit a moderate correlation, $\rho = 0 . 5 4$ .
+
+# E PLASTICITY ANALYSIS
+
+Recent studies have identified the loss of plasticity as a significant challenge in non-stationary training scenarios, where neural networks gradually lose their ability to adapt to new data over time (Nikishin et al., 2022; Lyle et al., 2023; Lee et al., 2024). This phenomenon can severely impact the performance and adaptability of models in dynamic learning environments such as RL. To quantify and understand this issue, several metrics have been proposed, including stable-rank (Kumar et al., 2022), dormant ratio (Sokar et al., 2023), and L2-feature norm (Kumar et al., 2022).
+
+# E.1 METRICS
+
+The stable-rank assesses the rank of the feature matrix, reflecting the diversity and richness of the representations learned by the network. This is achieved by performing an eigen decomposition on the covariance matrix of the feature matrix and counting the number of singular values $\sigma _ { j }$ that exceed a predefined threshold $\tau$ :
+
+$$
+\mathrm {s} - \operatorname {R a n k} = \sum_ {j = 1} ^ {m} \mathbb {I} \left(\sigma_ {j} > \tau\right) \tag {16}
+$$
+
+where $F \in \mathbb { R } ^ { d \times m }$ is the feature matrix with $d$ samples and $m$ features, $\sigma _ { j }$ are the singular values, and $\mathbb { I } ( \cdot )$ is the indicator function.
+
+The dormant ratio measures the proportion of neurons with negligible activation. It is calculated as the number of neurons with activation norms below a small threshold $\epsilon$ divided by the total number of neurons $D$ :
+
+$$
+\text {D o r m a n t R a t i o} = \frac {\left| \left\{i \mid \| a _ {i} \| <   \epsilon \right\} \right|}{D} \tag {17}
+$$
+
+where $a _ { i }$ represents the activation of neuron $i$ .
+
+The L2-feature norm represents the average L2 norm of the feature vectors across all samples:
+
+$$
+\text {F e a t u r e N o r m} = \frac {1}{N} \sum_ {i = 1} ^ {N} \| F _ {i} \| _ {2} \tag {18}
+$$
+
+where $F _ { i }$ is the feature vector for the $i$ -th sample. Large feature norms can signal overactive neurons, potentially leading to numerical instability.
+
+# E.2 RESULTS
+
+To evaluate the impact of different architectures on network plasticity, we compared the Soft Actor-Critic (SAC) algorithm implemented with a standard Multi-Layer Perceptron (MLP) against SAC with the SimBa architecture on the DMC-Easy & Medium and DMC-Hard tasks. Additionally, we conducted an ablation study to analyze how each component of SimBa contributes to plasticity measures. Each configuration was evaluated across five random seeds.
+
+![](images/972a5b8b445cc6b05ee58b2bf724ceabe90e2fdebe43528d5131131ae3e6803c.jpg)
+
+![](images/c5834583a34841470349d8b31ffede785c3f2bd6369f297717fe7f3eeea88bc7.jpg)
+
+![](images/c3c26d21fa3762112336bd3842d9674ff9ce22c28e16291bd284a7507eeb7493.jpg)
+
+![](images/0c12902a3af7d707b14fb3197ba15b25b3e8ae1c2bf671bf30a4024680017add.jpg)
+
+![](images/cafe213c022b9772870f3acb8cef3a8490bf4b84a6a6bbbcdb63d7ab41bd7239.jpg)
+
+![](images/b3fbbf2d0df364e318a501c8dfd111c4ad086274b7b23b1a45316cd1ca9d0833.jpg)
+
+![](images/fd1f166d0912773c56df888e091efcebff7d8ac6d94b43f5a0cae865a8e02f4c.jpg)
+
+![](images/1a3eaafc26fa6c5e1d0f96b3e1002e5236c03dae9f53b3b4324cddd4a2c37dcd.jpg)  
+SimBa —MLP   
+Figure 18: Plasticity Analysis of SimBa versus MLP. Metrics include dormant ratio, s-rank, and feature norm. Figures (a) and (b) represent DMC-Easy & Medium and DMC-Hard environments, respectively. A higher dormant ratio and feature norm, along with a lower s-rank, indicate a greater loss of plasticity.
+
+As illustrated in Figures 18.(a) and (b), SAC with the MLP architecture exhibits high dormant ratios and large feature norms across both DMC-Easy & Medium and DMC-Hard tasks, indicating significant loss of plasticity. While MLP achieves higher s-rank values than SimBa in the DMC-Easy & Medium tasks, SimBa outperforms MLP in s-rank for the DMC-Hard tasks. Importantly, SimBa consistently maintains lower dormant ratios, balanced feature norms, and overall higher s-rank values in more complex environments.
+
+These findings indicate that SimBa effectively preserves plasticity, avoiding the degenerative trends observed with the MLP-based SAC.
+
+![](images/ec034a5f268e847bc0edc3d278023f68edd1ee9e82c145c56c1ac88974e10349.jpg)
+
+![](images/8b9f85467eda09a2ca3bd3140fc02316eb96dcca398779156b07c74fe242e69b.jpg)
+
+![](images/45fca9416f86d8656d4958d26d6518b1c7f652ff832b1228c4b5155a0d9b0f7b.jpg)
+
+![](images/aa100bff1e9abd68034f80f98389a1df63644e16b8e08402e5f929fe110f6c04.jpg)  
+SimBa SimBa - PreLN   
+SimBa - Residual   
+SimBa - PostLN   
+SimBa - RSNorm   
+Figure 19: Plasticity Analysis of SimBa Components. Metrics include dormant ratio, s-rank, and feature norm. Figures (a) and (b) represent DMC-Easy & Medium and DMC-Hard environments, respectively. A higher dormant ratio and feature norm, along with a lower s-rank, indicate a greater loss of plasticity.
+
+Furthermore, for the component ablation study (Figure 19), removing each component of SimBa individually shows diminished average returns. However, ablating each component does not significantly reduce plasticity measures, with only post-layer normalization showing an improved feature norm. This suggests that while individual components may not significantly impact plasticity measures with their sole use, their integrated use within the SimBa architecture is crucial for effectively mitigating plasticity loss.
+
+# F COMPARISON TO EXISTING ARCHITECTURES
+
+Here we provide a more in-depth discussion related to the architectural difference between SimBa, BroNet, and SpectralNet. As shown in Figure 20, SimBa differs from BroNet in three key aspects: (i) the inclusion of RSNorm, (ii) the implementation of pre-layer normalization, (iii) the utilization of a linear residual pathway, (iv) and the inclusion of a post-layer normalization layer. Similarly, compared to SpectralNet, SimBa incorporates RSNorm, employs a linear residual pathway, and leverages spectral normalization differently.
+
+![](images/027a61063287d98f0a5a2567a08faf21228c471251bf618aee97457807c85fd8.jpg)  
+Figure 20: Architecture Comparison. Illustration of SimBa, BroNet, and SpectralNet.
+
+# G COMPUTATIONAL RESOURCES
+
+The training was performed using NVIDIA RTX 3070, A100, or H100 GPUs for neural network computations and either a 16-core Intel i7-11800H or a 32-core AMD EPYC 7502 CPU for running simulators. Our software environment included Python 3.10, CUDA 12.2, and Jax 4.26.
+
+When benchmarking computation time, experiments were conducted on a same hardware equipped with an NVIDIA RTX 3070 GPU and 16-core Intel i7-11800H CPU.
+
+Table 1: Environment details. We list the episode length, action repeat for each domain, total environment steps, and performance metrics used for benchmarking SimBa.   
+
+<table><tr><td></td><td>DMC</td><td>MyoSuite</td><td>HumanoidBench</td><td>Craftax</td></tr><tr><td>Episode length</td><td>1,000</td><td>100</td><td>500 - 1,000</td><td>-</td></tr><tr><td>Action repeat</td><td>2</td><td>2</td><td>2</td><td>1</td></tr><tr><td>Effective length</td><td>500</td><td>50</td><td>250 - 500</td><td>-</td></tr><tr><td>Total env. steps</td><td>500K-1M</td><td>1M</td><td>2M</td><td>1B</td></tr><tr><td>Performance metric</td><td>Average Return</td><td>Average Success</td><td>Average Return</td><td>Average Score</td></tr></table>
+
+# H ENVIRONMENT DETAILS
+
+This section details the benchmark environments used in our evaluation. We list all tasks from each benchmark along with their observation and action dimensions. Visualizations of each environment are provided in Figure 6, and detailed environment information is available in Table 1.
+
+# H.1 DEEPMIND CONTROL SUITE
+
+DeepMind Control Suite (Tassa et al., 2018, DMC) is a standard benchmark for continuous control, featuring a range of locomotion and manipulation tasks with varying complexities, from simple low-dimensional tasks ${ \bf \Phi } ( s \in \mathbb { R } ^ { 3 } .$ ) to highly complex ones $( s \in \mathbb { R } ^ { 2 2 3 }$ ). We evaluate 27 DMC tasks, categorized into two groups: DMC-Easy&Medium and DMC-Hard. All Humanoid and Dog tasks are classified as DMC-Hard, while the remaining tasks are grouped under DMC-Easy&Medium. The complete lists of DMC-Easy&Medium and DMC-Hard are provided in Tables 2 and 3, respectively.
+
+For our URL experiments, we adhere to the protocol in Park et al. (2023), using an episode length of 400 steps and augmenting the agent’s observations with its x, y, and $z$ coordinates. For the representation function $\phi$ (i.e., reward network) in METRA, we only used x, y, and $z$ positions as input. This approach effectively replaces the colored floors used in the pixel-based humanoid setting of METRA with state-based inputs.
+
+# H.2 MYOSUITE
+
+MyoSuite (Caggiano et al., 2022) simulates musculoskeletal movements with high-dimensional state and action spaces, focusing on physiologically accurate motor control. It includes benchmarks for complex object manipulation using a dexterous hand. We evaluate 10 MyoSuite tasks, categorized as ”easy” when the goal is fixed and ”hard” when the goal is randomized, following Hansen et al. (2023). The full list of MyoSuite tasks is presented in Table 4.
+
+# H.3 HUMANOIDBENCH
+
+HumanoidBench (Sferrazza et al., 2024) is a high-dimensional simulation benchmark designed to advance humanoid robotics research. It features the Unitree H1 humanoid robot with dexterous hands, performing a variety of challenging locomotion and manipulation tasks. These tasks range from basic locomotion to complex activities requiring precise manipulation. The benchmark facilitates algorithm development and testing without the need for costly hardware by providing a simulated platform. In our experiments, we focus on 14 locomotion tasks, simplifying the setup by excluding the dexterous hands. This reduces the complexity associated with high degrees of freedom and intricate dynamics. All HumanoidBench scores are normalized based on each task’s target success score as provided by the authors. A complete list of tasks is available in Table 5.
+
+# H.4 CRAFTAX
+
+Craftax (Matthews et al., 2024) is an open-ended RL environment that combines elements from Crafter (Hafner, 2022) and NetHack (Kuttler et al. ¨ , 2020). It presents a challenging scenario requiring the sequential completion of numerous tasks. A key feature of Craftax is its support for vectorized parallel environments and a full end-to-end GPU learning pipeline, enabling a large number
+
+of environment steps at low computational cost. The original baseline performance in Craftax is reported as a percentage of the maximum score (226). In our experiments, we report agents’ raw average scores instead.
+
+Table 2: DMC Easy & Medium. We consider a total of 20 continuous control tasks for the DMC Easy & Medium benchmark. We list all considered tasks below and baseline performance for each task is reported at 500K environment steps.   
+
+<table><tr><td>Task</td><td>Observation dim</td><td>Action dim</td></tr><tr><td>Acrobot Swingup</td><td>6</td><td>1</td></tr><tr><td>Cartpole Balance</td><td>5</td><td>1</td></tr><tr><td>Cartpole Balance Sparse</td><td>5</td><td>1</td></tr><tr><td>Cartpole Swingup</td><td>5</td><td>1</td></tr><tr><td>Cartpole Swingup Sparse</td><td>5</td><td>1</td></tr><tr><td>Cheetah Run</td><td>17</td><td>6</td></tr><tr><td>Finger Spin</td><td>9</td><td>2</td></tr><tr><td>Finger Turn Easy</td><td>12</td><td>2</td></tr><tr><td>Finger Turn Hard</td><td>12</td><td>2</td></tr><tr><td>Fish Swim</td><td>24</td><td>5</td></tr><tr><td>Hopper Hop</td><td>15</td><td>4</td></tr><tr><td>Hopper Stand</td><td>15</td><td>4</td></tr><tr><td>Pendulum Swingup</td><td>3</td><td>1</td></tr><tr><td>Quadruped Run</td><td>78</td><td>12</td></tr><tr><td>Quadruped Walk</td><td>78</td><td>12</td></tr><tr><td>Reacher Easy</td><td>6</td><td>2</td></tr><tr><td>Reacher Hard</td><td>6</td><td>2</td></tr><tr><td>Walker Run</td><td>24</td><td>6</td></tr><tr><td>Walker Stand</td><td>24</td><td>6</td></tr><tr><td>Walker Walk</td><td>24</td><td>6</td></tr></table>
+
+Table 3: DMC Hard. We consider a total of 7 continuous control tasks for the DMC Hard benchmark.We list all considered tasks below and baseline performance for each task is reported at 1M environment steps.   
+
+<table><tr><td>Task</td><td>Observation dim</td><td>Action dim</td></tr><tr><td>Dog Run</td><td>223</td><td>38</td></tr><tr><td>Dog Trot</td><td>223</td><td>38</td></tr><tr><td>Dog Stand</td><td>223</td><td>38</td></tr><tr><td>Dog Walk</td><td>223</td><td>38</td></tr><tr><td>Humanoid Run</td><td>67</td><td>24</td></tr><tr><td>Humanoid Stand</td><td>67</td><td>24</td></tr><tr><td>Humanoid Walk</td><td>67</td><td>24</td></tr></table>
+
+Table 4: MyoSuite. We consider a total of 10 continuous control tasks for the MyoSuite benchmark, which encompasses both fixed-goal (’Easy’) and randomized-goal (’Hard’) settings. We list all considered tasks below and baseline performance for each task is reported at 1M environment steps.   
+
+<table><tr><td>Task</td><td>Observation dim</td><td>Action dim</td></tr><tr><td>Key Turn Easy</td><td>93</td><td>39</td></tr><tr><td>Key Turn Hard</td><td>93</td><td>39</td></tr><tr><td>Object Hold Easy</td><td>91</td><td>39</td></tr><tr><td>Object Hold Hard</td><td>91</td><td>39</td></tr><tr><td>Pen Twirl Easy</td><td>83</td><td>39</td></tr><tr><td>Pen Twirl Hard</td><td>83</td><td>39</td></tr><tr><td>Pose Easy</td><td>108</td><td>39</td></tr><tr><td>Pose Hard</td><td>108</td><td>39</td></tr><tr><td>Reach Easy</td><td>115</td><td>39</td></tr><tr><td>Reach Hard</td><td>115</td><td>39</td></tr></table>
+
+Table 5: HumanoidBench. We consider a total of 14 continuous control locomotion tasks for the UniTree H1 humanoid robot from the HumanoidBench domain. We list all considered tasks below and baseline performance for each task is reported at 2M environment steps.   
+
+<table><tr><td>Task</td><td>Observation dim</td><td>Action dim</td></tr><tr><td>Balance Hard</td><td>77</td><td>19</td></tr><tr><td>Balance Simple</td><td>64</td><td>19</td></tr><tr><td>Crawl</td><td>51</td><td>19</td></tr><tr><td>Hurdle</td><td>51</td><td>19</td></tr><tr><td>Maze</td><td>51</td><td>19</td></tr><tr><td>Pole</td><td>51</td><td>19</td></tr><tr><td>Reach</td><td>57</td><td>19</td></tr><tr><td>Run</td><td>51</td><td>19</td></tr><tr><td>Sit Simple</td><td>51</td><td>19</td></tr><tr><td>Sit Hard</td><td>64</td><td>19</td></tr><tr><td>Slide</td><td>51</td><td>19</td></tr><tr><td>Stair</td><td>51</td><td>19</td></tr><tr><td>Stand</td><td>51</td><td>19</td></tr><tr><td>Walk</td><td>51</td><td>19</td></tr></table>
+
+Table 6: Craftax. We consider the symbolic version of Craftax. Baseline performance is reported at 1B environment steps.   
+
+<table><tr><td>Task</td><td>Observation dim</td><td>Action dim</td></tr><tr><td>Craftax-Symbolic-v1</td><td>8268</td><td>43</td></tr></table>
+
+# I HYPERPARAMETERS
+
+# I.1 OFF-POLICY
+
+Table 7: SAC+SimBa hyperparameters. The hyperparameters listed below are used consistently across all tasks when integrating SimBa with SAC. For the discount factor, we set it automatically using heuristics used by TD-MPC2 (Hansen et al., 2023).   
+
+<table><tr><td>Hyperparameter</td><td>Value</td></tr><tr><td>Critic block type</td><td>SimBa Residual</td></tr><tr><td>Critic num blocks</td><td>2</td></tr><tr><td>Critic hidden dim</td><td>512</td></tr><tr><td>Critic learning rate</td><td>1e-4</td></tr><tr><td>Target critic momentum (τ)</td><td>5e-3</td></tr><tr><td>Actor block type</td><td>SimBa Residual</td></tr><tr><td>Actor num blocks</td><td>1</td></tr><tr><td>Actor hidden dim</td><td>128</td></tr><tr><td>Actor learning rate</td><td>1e-4</td></tr><tr><td>Initial temperature (α0)</td><td>1e-2</td></tr><tr><td>Temperature learning rate</td><td>1e-4</td></tr><tr><td>Target entropy (H*)</td><td>|A|/2</td></tr><tr><td>Batch size</td><td>256</td></tr><tr><td>Optimizer</td><td>AdamW</td></tr><tr><td>Optimizer momentum (β1, β2)</td><td>(0.9, 0.999)</td></tr><tr><td>Weight decay (λ)</td><td>1e-2</td></tr><tr><td>Discount (γ)</td><td>Heuristic</td></tr><tr><td>Replay ratio</td><td>2</td></tr><tr><td>Clipped Double Q</td><td>HumanoidBench: True</td></tr><tr><td></td><td>Other Envs: False</td></tr></table>
+
+Table 8: DDPG+SimBa hyperparameters. The hyperparameters listed below are used consistently across all tasks when integrating SimBa with DDPG. For the discount factor, we set it automatically using heuristics used by TD-MPC2 (Hansen et al., 2023).   
+
+<table><tr><td>Hyperparameter</td><td>Value</td></tr><tr><td>Critic block type</td><td>SimBa Residual</td></tr><tr><td>Critic num blocks</td><td>2</td></tr><tr><td>Critic hidden dim</td><td>512</td></tr><tr><td>Critic learning rate</td><td>1e-4</td></tr><tr><td>Target critic momentum (τ)</td><td>5e-3</td></tr><tr><td>Actor block type</td><td>SimBa Residual</td></tr><tr><td>Actor num blocks</td><td>1</td></tr><tr><td>Actor hidden dim</td><td>128</td></tr><tr><td>Actor learning rate</td><td>1e-4</td></tr><tr><td>Exploration noise</td><td>N(0,0.12)</td></tr><tr><td>Batch size</td><td>256</td></tr><tr><td>Optimizer</td><td>AdamW</td></tr><tr><td>Optimizer momentum (β1, β2)</td><td>(0.9, 0.999)</td></tr><tr><td>Weight decay (λ)</td><td>1e-2</td></tr><tr><td>Discount (γ)</td><td>Heuristic</td></tr><tr><td>Replay ratio</td><td>2</td></tr></table>
+
+Table 9: TDMPC2+SimBa hyperparameters. We provide a detailed list of the hyperparameters used for the shared encoder module in TD-MPC2 (Hansen et al., 2023). Aside from these, we follow the hyperparameters specified in the original TD-MPC2 paper. The listed hyperparameters are applied uniformly across all tasks when integrating SimBa with TD-MPC2.   
+
+<table><tr><td>Hyperparameter</td><td>Value</td></tr><tr><td>Encoder block type</td><td>SimBa Residual</td></tr><tr><td>Encoder num blocks</td><td>2</td></tr><tr><td>Encoder hidden dim</td><td>256</td></tr><tr><td>Encoder learning rate</td><td>1e-4</td></tr><tr><td>Encoder weight decay</td><td>1e-1</td></tr></table>
+
+# I.2 ON-POLICY
+
+Table 10: PPO+SimBa hyperparameters. We provide a detailed list of the hyperparameters when integrating SimBa with PPO (Schulman et al., 2017). Aside from these, we follow the hyperparameters specified in the Craftax paper (Matthews et al., 2024).   
+
+<table><tr><td>Hyperparameter</td><td>Value</td></tr><tr><td>Critic block type</td><td>SimBa Residual</td></tr><tr><td>Critic num blocks</td><td>2</td></tr><tr><td>Critic hidden dim</td><td>512</td></tr><tr><td>Critic learning rate</td><td>1e-4</td></tr><tr><td>Actor block type</td><td>SimBa Residual</td></tr><tr><td>Actor num blocks</td><td>1</td></tr><tr><td>Actor hidden dim</td><td>256</td></tr><tr><td>Actor learning rate</td><td>1e-4</td></tr><tr><td>Optimizer</td><td>AdamW</td></tr><tr><td>Optimizer momentum (β1, β2)</td><td>(0.9, 0.999)</td></tr><tr><td>Optimizer eps</td><td>1e-8</td></tr><tr><td>Weight decay (λ)</td><td>1e-2</td></tr></table>
+
+# I.3 UNSUPERVISED RL
+
+Table 11: METRA+SimBa hyperparameters. We provide a detailed list of the hyperparameters when integrating SimBa with METRA (Park et al., 2023). Aside from these, we follow the hyperparameters specified in the original METRA paper.   
+
+<table><tr><td>Hyperparameter</td><td>Value</td></tr><tr><td>Critic block type</td><td>SimBa Residual</td></tr><tr><td>Critic num blocks</td><td>2</td></tr><tr><td>Critic hidden dim</td><td>512</td></tr><tr><td>Actor block type</td><td>SimBa Residual</td></tr><tr><td>Actor num blocks</td><td>1</td></tr><tr><td>Actor hidden dim</td><td>128</td></tr></table>
+
+# J LEARNING CURVE
+
+![](images/e9fb738c6b537d32b94d606b5797309c9cfce6cabec14cb4aca306728d802a60.jpg)  
+Figure 21: Per task learning curve for DMC Easy&Medium. Mean and $9 5 \%$ CI over 10 seeds for SimBa and BRO, 5 seeds for TD7 and SAC, 3 seeds for TD-MPC2 and DreamerV3.
+
+![](images/bfddaccd45795cce74b8832b0241658d09cc152b3344bfae0339142933dcfd06.jpg)  
+Figure 22: Per task learning curve for DMC Hard. Mean and $9 5 \%$ CI over 10 seeds for SimBa and BRO, 5 seeds for TD7 and SAC, 3 seeds for TD-MPC2 and DreamerV3.
+
+![](images/9c70df2a70fd6c379878d5a479ce8887a0169c32f438a05d5d7184981e39b5d0.jpg)  
+Figure 23: Per task learning curve for MyoSuite. Mean and $9 5 \%$ CI over 10 seeds for SimBa and BRO, 5 seeds for TD7 and SAC, 3 seeds for TD-MPC2 and DreamerV3.
+
+![](images/7452da753eaf149eac2bb5a3c7a4d7943eb3ff1c640e09516234f8e5eb9172ea.jpg)  
+Figure 24: Per task learning curve for HumanoidBench. Mean and $9 5 \%$ CI over 10 seeds for SimBa, 5 seeds for BRO, TD7, and SAC, 3 seeds for TD-MPC2 and DreamerV3. We no
+
+![](images/a3e9f89e06ffa3a53c079a53db3b2d092e5688e503bfefbdc11c6d246024dc78.jpg)
+
+![](images/072f6d4eb97c8c83ae5ed39c8ed8a846989408da4584bacabcd1f66a583963a9.jpg)
+
+![](images/6417182d93140200a10f395cf07a786413591aa978d0926f3138e94df6e57fdb.jpg)
+
+![](images/abe0ac2893b5bd6d5698193d2b7f6546ecabbde8e4d73c27fc50da4a31960cce.jpg)
+
+![](images/79553660bea29ec86b87629c95b6e987f24d1127505d5f36e6974a03ef9bacdf.jpg)
+
+![](images/95190f5c87d768abb9ab4dfa8dc50f29547b4b865bfaef9c458dc5e0455280af.jpg)
+
+![](images/fa7052eb8fb0c381d447cfe8e6771b6baf2b143de314e7bd9fea79b32de677f9.jpg)
+
+![](images/a13b5ad85e4454d77332a8a9fafa7cffbca83224ae372c1abc80d7610dd4b0b7.jpg)
+
+![](images/3f45c6ca6def60c3034fe50e56931abe02774f081ead9cbd14b2ddea8fb59aac.jpg)
+
+![](images/abf195a2e2c0184ef29b2120e09584a63a7003529df59711a2fc5d1befa1a282.jpg)
+
+![](images/2be311f3275aaca6627892993d2c7712870c297b42f7185d5be34e60a29d505f.jpg)
+
+![](images/866cb42bb9d33d2ba2a790e5d0e2a7b351d9c084cc1b1a808f9d4a9dbcae49cf.jpg)
+
+![](images/104bdd56ad226c152c2e8da6a34e354b8a1476f48acd87a239e929f42d21ad45.jpg)
+
+![](images/657f0777962002bcf551a71adab54be13012e72ed711267ac46573928c2dc59e.jpg)
+
+![](images/7cd245d501deec3a74581060ab08b55f31319a98399b04123a1f9f46913dbbe1.jpg)
+
+![](images/439eeb686b581457869516b8d9b521dca0b7a499e306747df9ac7a1b1c1ff686.jpg)
+
+![](images/811c53fa470f0bc44aef277cf6d6c9b13ecda1a18a6f3a428b0ef884e6386492.jpg)
+
+![](images/27c6808b0012bb0468dfab370e2820f8e005c0a2e5445addccd175f65a02d1ee.jpg)
+
+![](images/50fd37912107d5931e146663b6656cb3cfa5d997c3f66e1304761047fa8f70b9.jpg)
+
+![](images/04a9b73e27cd4fe652524f47b0294f9ec8774e4c433a0c8be7707d9f8e6f87e5.jpg)
+
+![](images/db770ec1196a2397a2b941f26b4c37eaca907ce8f614c3e793d46b6e403154f7.jpg)
+
+![](images/b9d58c24230326099e9e53b46370ef65c2dc8a0476a148364b668d4ec9eddbd5.jpg)
+
+![](images/c4820c0126fd729e064661d23f3dd98fa10fa3339e8d34829dbd30d4f8add881.jpg)
+
+![](images/3f157f51cf2206f138fd8eb28055dc48e244ece217a0915ecdf1c538812b3ca1.jpg)
+
+![](images/4e247a90cfefcdd95595b7909de7487db9a6b67fadb8f243182515b54f48bdc3.jpg)
+
+![](images/e468de2adf8647a80f967ac9837df5a06c12e83158a9405033e6cc560719b018.jpg)
+
+![](images/2592f11d6f26c0c98486afe335877235fd7bb4a31d3d329bca2e6e51b043a982.jpg)
+
+![](images/5d5241aec8eb34352537d098a0e1aecc9fbba774bc93e9caef7728b8f4e30a55.jpg)
+
+![](images/ce442562146803279534a912e0a789b496defa13702a71d21f303621abd683da.jpg)
+
+![](images/c6357443250fd599f81937b8b31b0eb3ea4a5a05bb9e81ca63f4c667ed1bcb71.jpg)
+
+![](images/102881920e37da418c44542173feaa9176593bb7fc5ebfc970ede7ffecf4f779.jpg)
+
+![](images/9363e2840282ad31851bac42889fcd760112245eac37f406f8d9315e9266af0d.jpg)
+
+![](images/29d8273cbbd13fbe936cffb3dda2f30f7f8338d3f1ce497bada7a05ede0637fd.jpg)
+
+![](images/311901e77994320e49230b176800bb55960e30dc144dbbac918127c11c50e2b8.jpg)
+
+![](images/8d3234a177340260fc8a154ecef899bd42d21ebc9a6984a2c7ccf0be64fc80af.jpg)
+
+![](images/4fe38391e7ba94070afc8daad9bc982a19022bb7c4c07589e300e878b7b76dec.jpg)
+
+![](images/cf2363a0b5160847db8d5f29b966cd6d69dba65ecddc720e08d608a57f0a2848.jpg)
+
+![](images/0a27d9315da14d81418f99593995f14c77642f04debeaa10cfa3bc9d9a0289a2.jpg)
+
+![](images/69f6d81ed1f8a60e105c7fdee6db0d6205b2da41f3c5654e87cdfef8c7f460fa.jpg)
+
+![](images/c35a89c0777137fe5b14e2f954e945786c2e667ee9fcb489675b11f03c2b5e71.jpg)
+
+![](images/f519ecd5a5acdaf938773b403153f50ab868efad1d6f76115bed3966124d38cb.jpg)
+
+![](images/4234365ec2fe676a9d70ac97d0a436bf8a3b8135ae4ae90382a49beb775ba23b.jpg)
+
+![](images/a22ed8c5a1ff3fddf32fdcbe8fabde2aed6fedeb6264c5e5f7f12dd333dff69d.jpg)
+
+![](images/4a89ab218cace062f2739598103a41b8ab42b7c712de8f4d4ec79be975ec3f87.jpg)
+
+![](images/66ef0f70470df94f52908e9107bffe1a9d6101c6133cf2d08be9e071f5d2b6e6.jpg)
+
+![](images/ca6c3a41df281487402aea9244248166be84c615b6b72d87848b0e931fdbcf63.jpg)
+
+![](images/b208a0b702d12f2e451172d5d32fa24d888be39290bbacc9c9b4debe1814c6af.jpg)
+
+![](images/a0e7f9997987ccd4100a4c844ed7923a73a9b3a7939d5fb04dadbc6da95f983a.jpg)
+
+![](images/17582cf70a1dfe0af9f8ff89d4abe8fdecfd33e22cb67b0b75c3b9d8661b64da.jpg)
+
+![](images/f735adc5d49925e0b91d20dd7c34b1d7e933ccbca850b01eadea296641c5e597.jpg)
+
+![](images/4bf791874363aff57ecd9e56fe68f63929be3b1dab3aa4eb515181f47b50342b.jpg)
+
+![](images/3f7ab5dd809d23e995c764a2997c81dcd1badeaf6937f555e58e93bc91499c11.jpg)
+
+![](images/6165a5319a67e39fe974198c73d547ffffa7e6bfc164f871f81f9fe187919251.jpg)
+
+![](images/9c9f45961596601de29035434274fef64a37dad6001c4b62a929e55f2bb269f3.jpg)
+
+![](images/4f14b4821fd9e24cf4515d64cad02d3810dccd16f6ba024175f0a6102ba834c0.jpg)
+
+![](images/667d3b06c9bd368b7aa7576e2a13440af333318a0d6defb024cce490bae88cc2.jpg)
+
+![](images/dad205db9ad42485b6b4e5b0783530bc85b2a9adc7730703cbd3317748fdf033.jpg)
+
+![](images/e51c990f612568d47a3dbf0829a1360d1305de865194f52fca4cc513e38b7a16.jpg)
+
+![](images/7de8b2771059b876d30b8dc2df1db45062e0d80e74c49fe476d04bb63e744cff.jpg)
+
+![](images/fc974825ff74af03519195cd18c27c1cf99a85a1ed1bba41a8d36dc8d2c8eeb4.jpg)
+
+![](images/8f62bfaddf02df305bd6777a2a7ac49426686bbd9fdf87b77151230023c4341d.jpg)
+
+![](images/2a85b2b8681d914e5f1fb967d9f3fd1f107f094bbb1757cbd29f2bd12cfb33d0.jpg)
+
+![](images/fadd39a4c63509442d60d16ed8762666745fbf29a029aa567013456a9a7cea5b.jpg)
+
+![](images/70e1e91f672d918e10d4eb55cc3e75db96e35e19961d82334e9244abff3f827b.jpg)
+
+![](images/50b5e029f693a0a48d6c164cec1396573fadd00827c16c9e279a37d8163629e3.jpg)
+
+![](images/8db3b7be4435f03c982dea43a81af602c95b7c3219614bbb266ab4bf4fe13ace.jpg)
+
+![](images/edb4b09e3d5b9bc71923e064112bb9283d80b9f39bbd4c77e86cff583749b03c.jpg)
+
+![](images/3ac8e067671f877556a86c57bf23017ae03d7527359ae656e739084b45173cdf.jpg)
+
+![](images/ea8fa95b9b572eadb2f220bb5029a3dd382a904ed54496e075f378b3b0fc0399.jpg)
+
+![](images/3079d9ec9aaa339956684be9db82a87e2948a47ec960f25242185c8ae6a13642.jpg)
+
+![](images/993fe27d41bbd9e74a82738f4dc26b410e6dbfd493943fcec9cf987e1fabe845.jpg)
+
+![](images/0d6b3ca8b97ac538d485354f33e66191148fe75dce6f14bf3873a98a3f20126e.jpg)
+
+![](images/aba1be7a5d3ea54d79296d897acb84219252e3efb5d81a4b459952c6a34eb2f1.jpg)
+
+![](images/9bc5f24bf0d36c85309539a76f0e01d3513b84303b3ffd557164af6dd1eeb20b.jpg)
+
+![](images/57121ab4c7ad3d8ed2d709d4be4d55021da5ac8241d3d34bd31ec45b4ad07f24.jpg)
+
+![](images/32f65ffe9fc51c51ade55fb480569cb4a0633e8d50b56be4de72e55f104bcfe0.jpg)
+
+![](images/b099e86f0360e1b1aa8f08218cf1afa960e9a9ee7ed1b9278fb4dd78d09f24fb.jpg)
+
+![](images/cd7f3a6d4e185c7a2899b17448448268946297cfa701bba1a12e50e6e98cbbdc.jpg)
+
+![](images/19f1c375df7f54ea3dee936cb1cebb426baa8c52584f774ef3db894448f3b3b6.jpg)
+
+![](images/db2d2ca4fa612bbacb2327c74bea54a6ba1d91dedd9ef7ddda466e976c7743fc.jpg)
+
+![](images/c5c3918555bf2d9bf53edac086678683d3f9312a48dfb3e879b5a58fe1eb3ffd.jpg)
+
+![](images/91e8abe42d6f3f369a0aca724344d39bb430c9223c2b7ca497eea9b1a20e4295.jpg)
+
+![](images/cd6f3141bf864e3c2961db815cd6b592afbe170317deb4cbaaa17100ced98620.jpg)
+
+![](images/25b3c81252d145e9caeb945eb4ecb51b9aa1dac711bc7b247d99f5c339123d32.jpg)
+
+![](images/9115a7ac12ce3eb80b2b8ae03e768f95d5915de822f4ab2b4c54579e7284db93.jpg)
+
+![](images/7e8111949b7d5cd1e82a612b79a44ef2d79c4b628acbd4ec8db23dc414ca6349.jpg)
+
+![](images/ce726a02c957333114ef74f91bc8cdf70b70333f1368724e944b76f11da9233e.jpg)
+
+![](images/e128395f720f5cf2d39f1932444d176781ab26d957348e8caec62361650975c6.jpg)
+
+![](images/d887b2efb326518f9b9785ec5b07730d4e21d26b423ce69b19e9fcec25fe0db6.jpg)
+
+![](images/45a2ea037448b815e018e696c09cc2308d43650b395ffcc54bf7aad0a395ebc8.jpg)
+
+![](images/f588f446e8243d21a29bc3f08f78f11ce8675aae1918dd1c919fb72a18e87636.jpg)
+
+![](images/46c6eec4c874ecff5ef96e6721d66effa6076709df869aa17cc567abb0922585.jpg)
+
+![](images/91e030fabb996eb31496ce9a016d6970cf3163ed5425d2bfe1181b0534e6adc8.jpg)
+
+![](images/4ecc2baf61f2725cdf072b17b8499c6ead601228a4f42842fd59b6e50c5df529.jpg)
+
+![](images/5692a8253f72c0703e5bc0ee2ca780f08682915e5faf6f4a69bd46e5777302a0.jpg)
+
+![](images/b125cd517d078290a7effcc7b36483c7085013f8816967be6fb428153ab590a3.jpg)
+
+![](images/cc7b7ae75889162029c5158bb76eec6f15ddd0b2e6cfdea8fa602ccd3631c1a8.jpg)
+
+![](images/c159aaade03271e0650e4478645234f120c65b8ee9008d3a804cf2ebc5a735c0.jpg)
+
+![](images/4c896a1c668ac817147796ff1b6fcd5775f7d9178000fabf20a2d7db5e4859fb.jpg)
+
+![](images/3743aafb84c4976532216c6380688981e357b0de4c026be5355647d58c499fd5.jpg)
+
+![](images/327b8130c82ee61ce227f89420c21455dc58b7198389415419c362813dd39c6c.jpg)
+
+![](images/7723d33066ca386c5493d15f7915a4669e20af8f9e78a27de7ea66fd3437b070.jpg)
+
+![](images/59c7ecf4998288d5cc68857eee0abad6ed8c43ff70a32e1adb09992e8cce5aa0.jpg)
+
+![](images/f95d0169f64747c324908976f9769520aa7e556996e3adcadc783951184dc504.jpg)
+
+![](images/3fa44ff46c8c4819d0e919be591ee887c600d9ca9cc593b5e61e498d538eea08.jpg)
+
+![](images/3392efcf85fdb074e033e016f942abc1700d64b6691faca659f0fcbc85e7c420.jpg)
+
+![](images/cf7e3a6241e9380437f2aede26b0ab707800ab1554336fda425e2a1f9dd50c5f.jpg)
+
+![](images/e3da8ac897fc4d50f443bba3736dda1b6c63574b87ee92b968e14afe719aeb18.jpg)
+
+![](images/cf31c250800779bc8cf8deec1e4f5818bdb09c7db17d82b6c54c212480cfa596.jpg)
+
+![](images/75c2bf6e977233dd9ddb93490cde44dcc94bf96825589da7765a6034ff2aa9e9.jpg)
+
+![](images/98fb7b525bd70ebf2c3ffcdadfdf349d7473ef4f48b3f22b341c4f9c49c7d54a.jpg)
+
+![](images/e0511df840c9372bc90d8388c890f4512cf7b98a880cbd5d27024a603a3c629d.jpg)
+
+![](images/12c5cc88767632d96ea486a46cf0fae1c8ae5da3fd70cce7bfbf8fb3072602ba.jpg)
+
+![](images/d5d42c7b0749001bc43ef7ec9977ba368e68400e9950d84028dbca0e36f0aa97.jpg)
+
+![](images/6d8ae5fa96a4e6bb2e9a141f8d5d7eeee9b1cd624b0a62db8f814610ea38d84e.jpg)
+
+![](images/8edb1aa4bfbb3cdd31f4689a3dcf1853e6c45ed412c1415c78a7076461d43956.jpg)
+
+![](images/57e547525bda91c40e2dcc134454a9b939eecb7aa48358dddb82b9e7836d4322.jpg)
+
+![](images/0144ed112c8efb3ce65744bbd9f7c80d465d4e4df16d0790b6fa661a216335f5.jpg)
+
+![](images/9c7c1478f5e2ff9e20756ec0d872a25d554005a587604555a51d8cf5a449936a.jpg)
+
+![](images/b2912861ab42f3858a1df7514c8e99200d425aed3091720eb7be28a1ad56733c.jpg)
+
+![](images/7c7bc52abb09ab80d78690220771ff70e2da1b7f7020973d9fdaf515fc6652a3.jpg)
+
+![](images/85d58442d0cccb4b90a3281f2b1756c1addb26a03f36abf862375a5ae83e8ab6.jpg)
+
+![](images/54812cb06bdfb224fdf67642165b5c075894b21bfe3c3e4955b3ef972d31ecde.jpg)
+
+![](images/f78c04c16a773ee0467cee1dad3451c3d980ae9ab9e88efbc1ae0bd3285ccbe7.jpg)
+
+![](images/ca6a6242735be229aff23b7848f74e96cec1e0ef89dba4fc6394db095c4ac376.jpg)
+
+![](images/d4366a9a183071f78c099816061797cc99a58af46da2d6c3a05429347c39c1d1.jpg)
+
+![](images/a6443db84ddef83ca8a7a9145badafd1315d74618d9e3cd9aa72c65448eb8294.jpg)
+
+![](images/8cf298a93a662d121b62341390906a2834122fbde6471571b7fce3e0a9c6c1df.jpg)
+
+![](images/781e8eaa530483b0263ab5887ff9ea4692ea123926a839dde3ecf45f6a440a91.jpg)
+
+![](images/3328e9a070a1d7048a7120e06a9401cc63a2bbd1a863b49ffbcbe52931800dfd.jpg)
+
+![](images/344c94e61283d51ee92d95373c8c89f2f3a6061fafb6377b5dd3daaca49ed19e.jpg)
+
+![](images/6e783165c4a6218d4d8b2f49e57e91b34f985c3a4b403affe5c53d278fbe637d.jpg)
+
+![](images/2c3663e1df2ab374212425d2974606f523f2aed9f038e6d5fca23557122e2eeb.jpg)
+
+![](images/a1463ef4dd8d9debed698b6aa6e2b2a507378f26df2ba1dd24b1112b0e2b70e7.jpg)
+
+![](images/71ebc12175251098e9233d4e3613093c959357a5cd518ecb7f559bb34eba9aaa.jpg)
+
+![](images/f52b5b139bac06592e4794f118e5c5089dc0b1fde209eb646f2aeb8b27eecd0e.jpg)
+
+![](images/5970cabe2a5b7f5aaf5ac9815fc861c97aa7a1caa310fa5c934e940c7c519968.jpg)
+
+![](images/e7f34720cfd5373d9c6da05c4e150a5c1f47dc0f1f757d36c0da83a47a013867.jpg)
+
+![](images/e8e4645d07e93c8e85810d22bb690b2a8552e033df26e9fbc94badbf006f61c7.jpg)
+
+![](images/4fd729e2e564e7be899185d141933792c94f854fe34f05281fc17f927361828a.jpg)
+
+![](images/6ca246a0d50b49d586f8fab119c83e7ed0df4dbfd28bab12cd3751c02026d7f3.jpg)
+
+![](images/70d3e0b692e9b200d34b0ac0e466f85480fb5e6abb11d573b6a0ddc34a7c79c9.jpg)  
+Figure 25: Per task learning curve for Craftax. We visualize the success rate 66 tasks in Craftax. Mean and $9 5 \%$ CI over 5 seeds for PPO + SimBa and PPO.
+
+# K FULL RESULT
+
+Table 12: Per task results for DMC Easy&Medium. Results for SimBa and BRO are averaged over 10 seeds, for TD7 and SAC over 5 seeds, and for TD-MPC2 and DreamerV3 over 3 seeds.   
+
+<table><tr><td>Method</td><td>SimBa</td><td>BRO</td><td>TD7</td><td>SAC</td><td>TD-MPC2</td><td>DreamerV3</td></tr><tr><td>Acrobot Swingup</td><td>331.57</td><td>390.78</td><td>39.83</td><td>57.56</td><td>361.07</td><td>360.46</td></tr><tr><td>Cartpole Balance</td><td>999.05</td><td>998.66</td><td>998.79</td><td>998.79</td><td>993.93</td><td>994.95</td></tr><tr><td>Cartpole Balance Sparse</td><td>940.53</td><td>954.21</td><td>988.58</td><td>1000.00</td><td>1000.00</td><td>800.25</td></tr><tr><td>Cartpole Swingup</td><td>866.53</td><td>878.69</td><td>878.09</td><td>863.24</td><td>876.07</td><td>863.90</td></tr><tr><td>Cartpole Swingup Sparse</td><td>823.97</td><td>833.18</td><td>480.74</td><td>779.99</td><td>844.77</td><td>262.69</td></tr><tr><td>Cheetah Run</td><td>814.97</td><td>739.67</td><td>897.76</td><td>716.43</td><td>757.60</td><td>686.25</td></tr><tr><td>Finger Spin</td><td>778.83</td><td>987.45</td><td>592.74</td><td>814.69</td><td>984.63</td><td>434.06</td></tr><tr><td>Finger Turn Easy</td><td>881.33</td><td>905.85</td><td>485.66</td><td>903.07</td><td>854.67</td><td>851.11</td></tr><tr><td>Finger Turn Hard</td><td>860.22</td><td>905.30</td><td>596.32</td><td>775.21</td><td>876.27</td><td>769.86</td></tr><tr><td>Fish Swim</td><td>786.73</td><td>680.34</td><td>108.84</td><td>462.67</td><td>610.23</td><td>603.34</td></tr><tr><td>Hopper Hop</td><td>326.69</td><td>315.04</td><td>110.27</td><td>159.43</td><td>303.27</td><td>192.70</td></tr><tr><td>Hopper Stand</td><td>811.75</td><td>910.88</td><td>445.50</td><td>845.89</td><td>936.47</td><td>722.42</td></tr><tr><td>Pendulum Swingup</td><td>824.53</td><td>816.20</td><td>461.40</td><td>476.58</td><td>841.70</td><td>825.17</td></tr><tr><td>Quadruped Run</td><td>883.68</td><td>818.62</td><td>515.13</td><td>116.91</td><td>939.63</td><td>471.25</td></tr><tr><td>Quadruped Walk</td><td>952.96</td><td>936.06</td><td>910.55</td><td>147.83</td><td>957.17</td><td>472.31</td></tr><tr><td>Reacher Easy</td><td>972.23</td><td>933.77</td><td>920.38</td><td>951.80</td><td>919.43</td><td>888.36</td></tr><tr><td>Reacher Hard</td><td>965.96</td><td>956.52</td><td>549.50</td><td>959.59</td><td>913.73</td><td>935.25</td></tr><tr><td>Walker Run</td><td>687.16</td><td>754.43</td><td>782.32</td><td>629.44</td><td>820.40</td><td>620.13</td></tr><tr><td>Walker Stand</td><td>983.02</td><td>986.58</td><td>984.63</td><td>972.59</td><td>957.17</td><td>963.28</td></tr><tr><td>Walker Walk</td><td>970.73</td><td>973.41</td><td>976.58</td><td>956.67</td><td>978.70</td><td>925.46</td></tr><tr><td>IQM</td><td>885.70</td><td>888.02</td><td>740.19</td><td>799.75</td><td>895.47</td><td>748.58</td></tr><tr><td>Median</td><td>816.78</td><td>836.62</td><td>623.18</td><td>676.59</td><td>836.93</td><td>684.18</td></tr><tr><td>Mean</td><td>823.12</td><td>833.78</td><td>636.18</td><td>679.42</td><td>836.34</td><td>682.16</td></tr><tr><td>OG</td><td>0.1769</td><td>0.1662</td><td>0.3638</td><td>0.3206</td><td>0.1637</td><td>0.3178</td></tr></table>
+
+Table 13: Per task results for DMC Hard. Results for SimBa and BRO are averaged over 10 seeds, for TD7 and SAC over 5 seeds, and for TD-MPC2 and DreamerV3 over 3 seeds.   
+
+<table><tr><td>Method</td><td>SimBa</td><td>BRO</td><td>TD7</td><td>SAC</td><td>TD-MPC2</td><td>DreamerV3</td></tr><tr><td>Dog Run</td><td>544.86</td><td>374.63</td><td>127.48</td><td>36.86</td><td>169.87</td><td>15.72</td></tr><tr><td>Dog Stand</td><td>960.38</td><td>966.97</td><td>753.23</td><td>102.04</td><td>798.93</td><td>55.87</td></tr><tr><td>Dog Trot</td><td>824.69</td><td>783.12</td><td>126.00</td><td>29.36</td><td>500.03</td><td>10.19</td></tr><tr><td>Dog Walk</td><td>916.80</td><td>931.46</td><td>280.87</td><td>38.14</td><td>493.93</td><td>23.36</td></tr><tr><td>Humanoid Run</td><td>181.57</td><td>204.96</td><td>79.32</td><td>116.97</td><td>184.57</td><td>0.91</td></tr><tr><td>Humanoid Stand</td><td>846.11</td><td>920.11</td><td>389.80</td><td>352.72</td><td>663.73</td><td>5.12</td></tr><tr><td>Humanoid Walk</td><td>668.48</td><td>672.55</td><td>252.72</td><td>273.67</td><td>628.23</td><td>1.33</td></tr><tr><td>IQM</td><td>773.28</td><td>771.50</td><td>216.04</td><td>69.03</td><td>527.11</td><td>9.63</td></tr><tr><td>Median</td><td>706.39</td><td>694.20</td><td>272.62</td><td>159.36</td><td>528.26</td><td>17.13</td></tr><tr><td>Mean</td><td>706.13</td><td>693.40</td><td>287.06</td><td>135.68</td><td>491.33</td><td>16.07</td></tr><tr><td>OG</td><td>0.2939</td><td>0.3066</td><td>0.7129</td><td>0.8643</td><td>0.5087</td><td>0.9839</td></tr></table>
+
+Table 14: Per task results for MyoSuite. Results for SimBa and BRO are averaged over 10 seeds, for TD7 and SAC over 5 seeds, and for TD-MPC2 and DreamerV3 over 3 seeds.   
+
+<table><tr><td>Method</td><td>SimBa</td><td>BRO</td><td>TD7</td><td>SAC</td><td>TD-MPC2</td><td>DreamerV3</td></tr><tr><td>Key Turn Easy</td><td>100.00</td><td>100.00</td><td>100.00</td><td>100.00</td><td>100.00</td><td>88.89</td></tr><tr><td>Key Turn Hard</td><td>7.00</td><td>42.00</td><td>0.00</td><td>10.00</td><td>0.00</td><td>0.00</td></tr><tr><td>Object Hold Easy</td><td>90.00</td><td>90.00</td><td>20.00</td><td>90.00</td><td>100.00</td><td>33.33</td></tr><tr><td>Object Hold Hard</td><td>96.00</td><td>42.00</td><td>10.00</td><td>96.00</td><td>56.67</td><td>9.44</td></tr><tr><td>Pen Twirl Easy</td><td>80.00</td><td>90.00</td><td>100.00</td><td>50.00</td><td>70.00</td><td>96.67</td></tr><tr><td>Pen Twirl Hard</td><td>77.00</td><td>76.00</td><td>12.00</td><td>55.00</td><td>40.00</td><td>53.33</td></tr><tr><td>Pose Easy</td><td>100.00</td><td>100.00</td><td>0.00</td><td>90.00</td><td>100.00</td><td>100.00</td></tr><tr><td>Pose Hard</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr><tr><td>Reach Easy</td><td>100.00</td><td>100.00</td><td>100.00</td><td>100.00</td><td>100.00</td><td>100.00</td></tr><tr><td>Reach Hard</td><td>93.00</td><td>74.00</td><td>14.00</td><td>16.00</td><td>83.33</td><td>0.00</td></tr><tr><td>IQM</td><td>95.20</td><td>87.60</td><td>22.31</td><td>71.40</td><td>77.50</td><td>46.56</td></tr><tr><td>Median</td><td>77.00</td><td>72.00</td><td>34.00</td><td>62.50</td><td>65.00</td><td>47.00</td></tr><tr><td>Mean</td><td>74.30</td><td>71.40</td><td>35.60</td><td>60.70</td><td>65.00</td><td>48.17</td></tr><tr><td>OG</td><td>99.93</td><td>99.93</td><td>99.96</td><td>99.94</td><td>99.94</td><td>99.95</td></tr></table>
+
+Table 15: Per task results for HumanoidBench. Results for SimBa are averaged over 10 seeds, for BRO, TD7 and SAC over 5 seeds, and for TD-MPC2 and DreamerV3 over 3 seeds.   
+
+<table><tr><td>Method</td><td>SimBa</td><td>BRO</td><td>TD7</td><td>SAC</td><td>TD-MPC2</td><td>DreamerV3</td></tr><tr><td>Balance Hard</td><td>137.20</td><td>145.95</td><td>79.90</td><td>69.02</td><td>64.56</td><td>16.07</td></tr><tr><td>Balance Simple</td><td>816.38</td><td>246.57</td><td>132.82</td><td>113.38</td><td>50.69</td><td>14.09</td></tr><tr><td>Crawl</td><td>1370.51</td><td>1373.83</td><td>868.63</td><td>830.56</td><td>1384.40</td><td>906.66</td></tr><tr><td>Hurdle</td><td>340.60</td><td>128.60</td><td>200.28</td><td>31.89</td><td>1000.12</td><td>18.78</td></tr><tr><td>Maze</td><td>283.58</td><td>259.03</td><td>179.23</td><td>254.38</td><td>198.65</td><td>114.90</td></tr><tr><td>Pole</td><td>1036.70</td><td>915.89</td><td>830.72</td><td>760.78</td><td>1269.57</td><td>289.18</td></tr><tr><td>Reach</td><td>523.10</td><td>317.99</td><td>159.37</td><td>347.92</td><td>505.61</td><td>341.62</td></tr><tr><td>Run</td><td>741.16</td><td>429.74</td><td>196.85</td><td>168.25</td><td>1130.94</td><td>85.93</td></tr><tr><td>Sit Hard</td><td>783.95</td><td>989.07</td><td>293.96</td><td>345.65</td><td>1027.47</td><td>9.95</td></tr><tr><td>Sit Simple</td><td>1059.73</td><td>1151.84</td><td>1183.26</td><td>994.58</td><td>1074.96</td><td>40.53</td></tr><tr><td>Slide</td><td>577.87</td><td>653.17</td><td>197.07</td><td>208.46</td><td>780.82</td><td>24.43</td></tr><tr><td>Stair</td><td>527.49</td><td>249.86</td><td>77.19</td><td>65.53</td><td>398.21</td><td>49.04</td></tr><tr><td>Stand</td><td>906.94</td><td>780.52</td><td>1005.54</td><td>1029.78</td><td>1020.59</td><td>280.99</td></tr><tr><td>Walk</td><td>1202.91</td><td>1080.63</td><td>143.86</td><td>412.21</td><td>1165.42</td><td>125.59</td></tr><tr><td>IQM</td><td>747.43</td><td>558.03</td><td>256.77</td><td>311.46</td><td>885.67</td><td>72.30</td></tr><tr><td>Median</td><td>733.09</td><td>632.93</td><td>385.41</td><td>399.93</td><td>796.18</td><td>160.49</td></tr><tr><td>Mean</td><td>736.30</td><td>623.05</td><td>396.33</td><td>402.31</td><td>787.64</td><td>165.55</td></tr><tr><td>OG</td><td>0.3197</td><td>0.4345</td><td>0.6196</td><td>0.6016</td><td>0.2904</td><td>0.8352</td></tr></table>

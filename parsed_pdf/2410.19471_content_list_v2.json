@@ -1,0 +1,4810 @@
+[
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "IMPROVING INVERSE FOLDING FOR PEPTIDE DE-SIGN WITH DIVERSITY-REGULARIZED DIRECT PREF-ERENCE OPTIMIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        98,
+        823,
+        170
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Ryan Park∗1,2, Darren J. Hsu2, C. Brian Roland2, Chen Tessler2, Maria Korshunova2, Shie Mannor2,3, Olivia Viessmann4, Bruno Trentini2,5† "
+          }
+        ]
+      },
+      "bbox": [
+        179,
+        199,
+        818,
+        229
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "1Stanford University 2NVIDIA 3Technion - Israel Institute of Technology 4Flagship Pioneering 5University of Oxford "
+          }
+        ]
+      },
+      "bbox": [
+        184,
+        239,
+        812,
+        270
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "ABSTRACT "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        450,
+        311,
+        545,
+        325
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Inverse folding models play an important role in structure-based design by predicting amino acid sequences that fold into desired reference structures. Models like ProteinMPNN, a message-passing encoder-decoder model, are trained to reliably produce new sequences from a reference structure. However, when applied to peptides, these models are prone to generating repetitive sequences that do not fold into the reference structure. To address this, we fine-tune ProteinMPNN to produce diverse and structurally consistent peptide sequences via Direct Preference Optimization (DPO). We derive two enhancements to DPO: online diversity regularization and domain-specific priors. Additionally, we develop a new understanding on improving diversity in decoder models. When conditioned on Open-Fold generated structures, our fine-tuned models achieve state-of-the-art structural similarity scores, improving base ProteinMPNN by at least "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". Compared to standard DPO, our regularized method achieves up to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "20 \\%"
+          },
+          {
+            "type": "text",
+            "content": "higher sequence diversity with no loss in structural similarity score. "
+          }
+        ]
+      },
+      "bbox": [
+        228,
+        343,
+        767,
+        539
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "1 INTRODUCTION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        566,
+        336,
+        583
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Engineering biopolymers that fold into desired 3D structures, a computational challenge known as inverse protein folding problem, has broad applications in drug discovery and material science (Yang et al., 2023; Dill et al., 2008; Abascal & Regan, 2018). Several approaches for inverse folding have been adopted over the past decades, from molecular dynamics simulations to machine learning approaches (Dauparas et al., 2022b; Shanker et al., 2023; Hsu et al., 2022a; Yi et al., 2023; Correa, 1990). In the standard machine learning approach, a molecular backbone chain serves as input, and a model generates sequences that adopt folding topologies compatible with the reference backbone. Sequences do not necessarily share sequence homology, as multiple diverse sequences can fold into similar structures (Hsu et al., 2022a; Yue & Dill, 1992; Godzik et al., 1993). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        599,
+        826,
+        726
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Peptides, which are small biopolymers comprising 2-50 residues, are interesting targets for inverse folding given their role in diverse biological functions, acting as hormones, neurotransmitters, signalling molecules, or nanostructures assemblers (Chockalingam et al., 2007; Torres et al., 2019; Copolovici et al., 2014; Ulijn & Smith, 2008). Only about 225,000 protein structures have been experimentally determined1 and made available via the Protein Data Bank (PDB). Training inversefolding machine learning models in a supervised fashion is a challenging task, due to the complexity of the problem and the limited amount of experimental data. The challenge is aggravated in the peptide domain as fewer than "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 . 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "PDB structures contain 50 residues or less. In fact, applying the SCOP classification filter in the PDB to display structures labelled as “Peptide” reveals only 509 entries, circa "
+          },
+          {
+            "type": "equation_inline",
+            "content": "0 . 2 \\%"
+          },
+          {
+            "type": "text",
+            "content": "of all experimentally determined structures available. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        731,
+        826,
+        872
+      ]
+    },
+    {
+      "type": "page_aside_text",
+      "content": {
+        "page_aside_text_content": [
+          {
+            "type": "text",
+            "content": "arXiv:2410.19471v1 [cs.LG] 25 Oct 2024 "
+          }
+        ]
+      },
+      "bbox": [
+        22,
+        265,
+        57,
+        705
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "∗Work developed during summer internship at NVIDIA "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        882,
+        524,
+        896
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "†Corresponding authors: rpark@stanford.edu and brunod@nvidia.com "
+          }
+        ]
+      },
+      "bbox": [
+        192,
+        896,
+        681,
+        909
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "1Updated figures available at https://www.rcsb.org/stats/growth/growth-released-structures. "
+          }
+        ]
+      },
+      "bbox": [
+        192,
+        909,
+        728,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "1 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In addition to the lack of data, sequences are subject to composition bias. The incidence of certain amino acids may differ depending on the sequence length , as longer proteins have more options for accommodating multiple secondary structures and folding loops (Tiessen et al., 2012). Popular models like ProteinMPNN (Dauparas et al., 2022b), PiFold (Gao et al., 2022) and ESM-IF1 (Hsu et al., 2022b) are primarily trained on data derived from longer proteins, leading to poor performance for peptide design tasks. Additionally, shorter sequences fold into simpler structures. Indeed, Milner-White & Russell (2008) argue that short peptides are notoriously “structureless” and tend to flicker between conformations. For example, a structural conformation of a single alpha helix or beta sheet – or a combination of two or three of them – is not necessarily stable and can fluctuate. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        229
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Existing inverse folding models optimize sequence residue-recovery accuracy and structural similarity via template modeling (TM) score (Zhang & Skolnick, 2004). However, they often suffer from low sampling diversity (Gao et al., 2023b). Ideally, the inverse folding model generates maximally diverse candidate sequences, as additional design filters, such as synthesizability and thermal stability, reduce the number of potential hits downstream of the design process. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        236,
+        823,
+        306
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To address these issues, we apply Direct Preference Optimization (DPO) (Rafailov et al., 2023), a fine-tuning method, to improve inverse-folding methods for peptide design. To the authors’ knowledge, we are the first to apply DPO to this task. We propose several enhancements to DPO to address specific problems that arise in inverse folding. Particularly, we forward fold generated sequences and derive an online regularized algorithm for optimizing structural similarity to the reference and sequence diversity simultaneously. We show empirically that this algorithm targets the differential entropy in log-probability space. Furthermore, we present a simple reward scaling approach to incorporate scalar reward information, showing that reward scaling adaptively selects a KL divergence penalty (Kullback, S. and Leibler, R. A., 1951) to improve performance on harder structures. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        311,
+        826,
+        439
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "2 PRELIMINARIES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        469,
+        341,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Inverse folding is the problem of inferring the sequence of amino acids "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": "that fold into a given protein structure. This protein structure is represented by a set of coordinates "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x \\quad ="
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\bar { ( } x _ { i } , y _ { i } , \\bar { z } _ { i } ) \\mid i = 1 , \\ldots , n \\in \\mathbb { R } ^ { 3 n }"
+          },
+          {
+            "type": "text",
+            "content": ",where each "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x _ { i } , y _ { i } , z _ { i } )"
+          },
+          {
+            "type": "text",
+            "content": "represents the 3D position of a backbone atom and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "n"
+          },
+          {
+            "type": "text",
+            "content": "the number of atoms. The inverse folding problem is underconstrained; there may be many solutions "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": "that fold into structures similar to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": "(Koehl & Levitt, 1999). Prior research is primarily concerned with recovering the ”ground-truth” sequence "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { x }"
+          },
+          {
+            "type": "text",
+            "content": "from the experimental (reference) structure (Dauparas et al., 2022a; Hsu et al., 2022b; Jing et al., 2021b;a). Recently, forward folding models like AlphaFold (Jumper et al., 2021), ESMFold (Lin et al., 2022), and OpenFold (Ahdritz et al., 2022), have made it possible to estimate the structural similarity between generated sequences and the reference structure. In this work, we focus on measuring structural similarity of generated sequences to the reference structure via the self-consistency TM-score (sc-TM) (Gao et al., 2023b). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        507,
+        823,
+        660
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "ProteinMPNN (Dauparas et al., 2022a) is a popular inverse-folding method that produces full protein sequences from backbone features (distances and orientations between backbone atoms, backbone dihedral angles, accounting for a virtual "
+          },
+          {
+            "type": "equation_inline",
+            "content": "C \\beta"
+          },
+          {
+            "type": "text",
+            "content": "atom). ProteinMPNN is a 6-layer encoder-decoder message-passing neural network based on the ’Structured Transformer’ (Ingraham et al., 2019). Unlike autoregressive methods like ESM-IF1 (Hsu et al., 2022b), ProteinMPNN decodes residues in a random decoding order, as opposed to a fixed left-to-right order from N-terminus to the C-terminus. ProteinMPNN is trained on examples from the Protein Data Bank (PDB) to determine the most likely residues for a given protein backbone. On native protein backbones, it achieves a sequence recovery of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 2 . 4 \\%"
+          },
+          {
+            "type": "text",
+            "content": ", compared to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "3 2 . 9 \\%"
+          },
+          {
+            "type": "text",
+            "content": "for Rosetta (Leman et al., 2020). In this work we build upon ProteinMPNN by proposing methods for adapting it to peptide design. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        666,
+        823,
+        806
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "DPO for inverse folding. Direct Preference Optimization (DPO) is a popular method for aligning Large Language Models to a dataset of human-produced preference assignments, that discriminate amongst the responses grouped by prompt (Rafailov et al., 2023). We adapt DPO to fine-tune inverse-folding models by replacing human preference labels on generated sentences with TM-score rankings on generated sequences. Specifically, we generate a dataset of sequences conditioned on a set of reference structures, and score each sequence with the TM-score computed between its predicted structure and the reference structure. These scores define preference pairs over the generated sequences, for each reference structure. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        811,
+        823,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "2 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r ( x , y )"
+          },
+          {
+            "type": "text",
+            "content": "be the TM-score between structure "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": "and the predicted fold of sequence "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { \\mathrm { r e f } }"
+          },
+          {
+            "type": "text",
+            "content": "be a conditional distribution over "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": "given "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": ". Given a dataset "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D"
+          },
+          {
+            "type": "text",
+            "content": "mapping structures (“prompts”) to "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "generated sequences per structure (“responses”), DPO is derived within the KL-constrained reward-maximization objective (Ouyang et al., 2022; Rafailov et al., 2023): "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        161
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\max  _ {\\pi_ {\\theta}} \\mathbb {E} _ {x \\sim D, y \\sim \\pi_ {\\theta} (y | x)} [ r (x, y) ] - \\beta \\mathbb {D} _ {\\mathrm {K L}} \\left[ \\pi_ {\\theta} (y \\mid x) \\right| | \\pi_ {\\text {r e f}} (y \\mid x) ] \\tag {1}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/24152232d9f64bf95be11ede228e63bcaa029ac3bfcf27463d386efa47753ebf.jpg"
+        }
+      },
+      "bbox": [
+        294,
+        180,
+        823,
+        203
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "controls the trade-off between reward maximization and deviation from the base model. The solution to Equation 1 is well-known (Ouyang et al., 2022; Rafailov et al., 2023): "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        214,
+        823,
+        244
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\pi_ {r} = \\frac {1}{Z (x)} \\pi_ {\\text {r e f}} (y \\mid x) \\exp \\left(\\frac {1}{\\beta} r (x, y)\\right) \\tag {2}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/09eaf55ce017bc6cc7ca41572e9fb84f97fd2c898f53170f76354607de3cec7e.jpg"
+        }
+      },
+      "bbox": [
+        367,
+        260,
+        825,
+        294
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "Z ( x )"
+          },
+          {
+            "type": "text",
+            "content": "is the partition function to normalize "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ". Therefore, for any policy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { r }"
+          },
+          {
+            "type": "text",
+            "content": ", there is a corresponding reward function (DPO ”implicit reward”) for which "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { r }"
+          },
+          {
+            "type": "text",
+            "content": "is optimal: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        306,
+        823,
+        335
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "r (x, y) = \\beta \\log \\frac {\\pi_ {r} (y | x)}{\\pi_ {\\operatorname {r e f}} (y | x)} + \\beta \\log Z (x). \\tag {3}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/7c3ec51d00cb768acd5fc76613927f7db52541b53ad7514ebde54778f0e3419b.jpg"
+        }
+      },
+      "bbox": [
+        362,
+        353,
+        825,
+        386
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Substituting Equation 3 into the Bradley-Terry preference model (Bradley & Terry, 1952) and optimizing the policy under a maximum likelihood objective produces the DPO loss, typically solved via gradient descent: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        396,
+        825,
+        439
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {L} _ {\\mathrm {D P O}} \\left(\\pi_ {\\theta}; \\pi_ {\\text {r e f}}\\right) = - \\mathbb {E} _ {\\left(x, y _ {w}, y _ {l}\\right) \\sim \\mathcal {D}} \\left[ \\log \\sigma \\left(\\beta \\log \\frac {\\pi_ {\\theta} \\left(y _ {w} \\mid x\\right)}{\\pi_ {\\text {r e f}} \\left(y _ {w} \\mid x\\right)} - \\beta \\log \\frac {\\pi_ {\\theta} \\left(y _ {l} \\mid x\\right)}{\\pi_ {\\text {r e f}} \\left(y _ {l} \\mid x\\right)}\\right) \\right] \\tag {4}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/d02cb2b648127ea69e988397d3b9607c55a6276fac703785ed069a4f0e19fe5d.jpg"
+        }
+      },
+      "bbox": [
+        210,
+        455,
+        825,
+        491
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { w }"
+          },
+          {
+            "type": "text",
+            "content": "represents the sequence that is preferred or considered better, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { l }"
+          },
+          {
+            "type": "text",
+            "content": "represents the sequence that is less preferred or considered worse according to TM-score ranking. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        501,
+        823,
+        531
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3 PREFERENCE OPTIMIZATION FOR PEPTIDE DESIGN "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        550,
+        624,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we consider designing fine-tuning methods well-suited for peptide design. While DPO in its original formulation is useful for fine-tuning in biology (Park et al., 2023; Widatalla et al., 2024; Mistani & Mysore, 2024), we consider how it may be improved to tackle specific problems arising in inverse-folding for peptides (i.e., poor generation diversity and lack of peptide data in initial training). First, we derive a diversity-optimized DPO loss by incorporating an online diversity penalty directly into the top-level Reinforcement Learning objective. Next, we propose an ad-hoc modification to the DPO reward that incorporates scalar TM-scores instead of solely preference pairs, and address the distribution shift between peptides and longer-length proteins. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        582,
+        823,
+        695
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.1 ONLINE DIVERSITY OPTIMIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        710,
+        455,
+        724
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "To encourage diversity in generated sequences while simultaneously maximizing reward (TMscore), we consider a modified DPO objective incorporating an auxiliary diversity reward: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        737,
+        823,
+        766
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\max _ {\\pi_ {\\theta}} \\mathbb {E} _ {x \\sim D, y \\sim \\pi_ {\\theta} (y | x)} [ r (x, y) ] - \\beta \\mathbb {D} _ {\\mathrm {K L}} [ \\pi_ {\\theta} (y \\mid x) | | \\pi_ {\\mathrm {r e f}} (y \\mid x) ] + \\alpha \\Gamma_ {\\gamma} (\\pi_ {\\theta}) \\\\ = \\max  _ {\\pi_ {\\theta}} \\mathbb {E} _ {x \\sim D, y \\sim \\pi_ {\\theta} (y | x)} \\left[ r (x, y) - \\beta \\log \\left(\\frac {\\pi_ {\\theta} (y \\mid x)}{\\pi_ {\\operatorname {r e f}} (y \\mid x)}\\right) - \\alpha \\mathbb {E} _ {y ^ {\\prime} \\sim \\pi_ {\\theta} \\left(y ^ {\\prime} \\mid x\\right)} [ \\gamma (y, y ^ {\\prime}) ] \\right] \\tag {5} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/2eff653352beced3bb94a1fdc9cb1f879b2936dcfec0a4edb56acd43a9cbed07.jpg"
+        }
+      },
+      "bbox": [
+        220,
+        794,
+        825,
+        854
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "controls the strength of diversity regularization, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": "is a pairwise distance between sequences, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Gamma ( \\pi _ { \\theta } )"
+          },
+          {
+            "type": "text",
+            "content": "is the diversity of policy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { \\theta }"
+          },
+          {
+            "type": "text",
+            "content": "under the distance "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": ", i.e. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Gamma ( \\pi ) = \\mathbb { E } _ { y , y ^ { \\prime } \\sim \\pi } \\left[ \\gamma ( y , y ^ { \\prime } ) \\right]"
+          },
+          {
+            "type": "text",
+            "content": ". In practice, we let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": "be the fraction of pairwise different tokens in equal-length sequences "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": ". This is equivalent to the diversity metric defined in (Gao et al., 2023b). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        868,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "3 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "This is similar in form to the auxiliary reward objective proposed by Park et al. (2024) and Zhou et al. (2024), but the auxiliary reward (diversity) depends on the policy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { \\theta }"
+          },
+          {
+            "type": "text",
+            "content": ". As a result, the standard analytic solution to Eq. 1 (Ziebart et al., 2008; Ouyang et al., 2022; Rafailov et al., 2023) is no longer valid. Instead, we consider an approximate objective, leveraging the fact that the DPO loss is solved via iterative gradient descent. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { \\pi } = \\pi _ { \\theta } ^ { ( t - 1 ) }"
+          },
+          {
+            "type": "text",
+            "content": "be an approximation of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { \\theta } ^ { ( t ) }"
+          },
+          {
+            "type": "text",
+            "content": ". That is, we will use the policy from a previous iteration to estimate diversity, while updating the policy in the current iteration. Then, let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\bar { r } ( \\bar { \\boldsymbol { x } } , \\boldsymbol { y } ) = r ( \\boldsymbol { x } , \\boldsymbol { y } ) - \\alpha \\mathbb { E } _ { \\boldsymbol { y } ^ { \\prime } \\sim \\tilde { \\pi } ( \\boldsymbol { y } | \\boldsymbol { x } ) } \\left[ \\gamma ( \\boldsymbol { y } , \\boldsymbol { \\dot { y } } ^ { \\prime } ) \\right]"
+          },
+          {
+            "type": "text",
+            "content": ". We can approximate Eq. 5 as: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        205
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\left. \\max  _ {\\pi_ {\\theta}} \\mathbb {E} _ {x \\sim D, y \\sim \\pi_ {\\theta} (y \\mid x)} \\left[ \\tilde {r} (x, y) - \\beta \\log \\left(\\frac {\\pi_ {\\theta} (y \\mid x)}{\\pi_ {\\operatorname {r e f}} (y \\mid x)}\\right) \\right]. \\right. \\tag {6}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/78988b99803a806ea359f4f3ab2f6a0d89a8ba3a48a161bf65dcdfb25e529423.jpg"
+        }
+      },
+      "bbox": [
+        315,
+        220,
+        823,
+        256
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The rest of the derivation follows from Rafailov et al. (2023). We produce the diversity-regularized implicit reward after writing the "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { r }"
+          },
+          {
+            "type": "text",
+            "content": "-optimal policy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\begin{array} { r } { \\pi _ { \\tilde { r } } = \\frac { 1 } { Z ( x ) } \\pi _ { \\mathrm { r e f } } ( y \\mid x ) \\exp \\left( \\frac { 1 } { \\beta } \\tilde { r } ( x , y ) \\right) } \\end{array}"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        266,
+        823,
+        305
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "r (x, y) = \\beta \\log \\frac {\\pi_ {r} (y | x)}{\\pi_ {\\text {r e f}} (y | x)} - \\alpha \\mathbb {E} _ {y ^ {\\prime} \\sim \\tilde {\\pi} \\left(y ^ {\\prime} \\mid x\\right)} [ \\gamma (y, y ^ {\\prime}) ] + \\beta \\log Z (x) \\tag {7}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/5098531034e9bd3076ecf474949807fefe6e62f851f2930c4cb4c22d81d36c34.jpg"
+        }
+      },
+      "bbox": [
+        279,
+        316,
+        823,
+        349
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The resulting MLE loss under the Bradley-Terry preference model is: "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        359,
+        629,
+        376
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {\\mathrm {D P O}} \\left(\\pi_ {\\theta}; \\pi_ {\\text {r e f}}\\right) = - \\mathbb {E} _ {(x, y _ {w}, y _ {l}) \\sim \\mathcal {D}} \\left[ \\log \\sigma \\left(\\beta \\log \\frac {\\pi_ {\\theta} (y _ {w} \\mid x)}{\\pi_ {\\text {r e f}} (y _ {w} \\mid x)} - \\beta \\log \\frac {\\pi_ {\\theta} (y _ {l} \\mid x)}{\\pi_ {\\text {r e f}} (y _ {l} \\mid x)} \\right. \\right. \\\\ + \\alpha \\mathbb {E} _ {y ^ {\\prime} \\sim \\tilde {\\pi} (y ^ {\\prime} \\mid x)} [ \\gamma (y _ {l}, y ^ {\\prime}) ] \\\\ \\left. - \\alpha \\mathbb {E} _ {y ^ {\\prime} \\sim \\tilde {\\pi} \\left(y ^ {\\prime} \\mid x\\right)} \\left[ \\gamma \\left(y _ {w}, y ^ {\\prime}\\right) \\right]\\right) \\Bigg ] \\tag {8} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f80ce34facfec58ed8b037341dcaf1a50d6363f933f75acf8b943d336a199357.jpg"
+        }
+      },
+      "bbox": [
+        225,
+        401,
+        823,
+        483
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "-weighted scalar penalties require sampling from the approximate policy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { \\pi }"
+          },
+          {
+            "type": "text",
+            "content": "to compute the expectation. In practice, we only update "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { \\pi }"
+          },
+          {
+            "type": "text",
+            "content": "a few times during training to minimize the cost of sampling. See Appendix A.2 for a detailed description of the diversity-regularized algorithm. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        496,
+        823,
+        539
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Unlike prior methods incorporating auxiliary rewards into DPO (Park et al., 2024; Zhou et al., 2024), ours includes an online sampling term. Empirically, we show that this online term is crucial. In the middle part of Fig. 1, we show that diversity of samples from the static dataset (the auxiliary reward prescribed in an offline approach) does not correlate with the diversity of samples from the trained policy (our auxiliary reward). That is, to accurately estimate – and therefore encourage – diversity over the course of training, online sampling is required. By optimizing the approximate objective in Equation 6, we provide principled motivation for including this online sampling term. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        545,
+        823,
+        643
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "3.2 LEVERAGING DOMAIN-SPECIFIC PRIORS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        660,
+        493,
+        674
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Aligning train set and base model. Supervised fine-tuning (SFT) is a standard part of the DPO pipeline (Rafailov et al., 2023),where a gradient-based optimizer maximizes the log-probability of a target sequence prior to applying DPO. The left part of Fig. 1 shows that the distribution of tokens sampled from base ProteinMPNN and the peptide training dataset differs significantly. SFT assuages the token distribution problem by improving alignment with training distribution, and ensures consistency with previous research, where DPO has been applied to related biological tasks (Park et al., 2023; Widatalla et al., 2024; Mistani & Mysore, 2024). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        686,
+        823,
+        785
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Incorporating scalar rewards. Given multiple responses from a single prompt, DPO is derived assuming access to pairwise preferences. However, since we measure the reward of a sequence generation by the TM-score between the original structure and the generated sequence’s predicted structure, we have access to a total ordering over generations through scalar rewards for each response. Widatalla et al. (2024) derives weighted DPO to incorporate scalar rewards, but it does not substantially outperform standard DPO. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        790,
+        823,
+        875
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We consider a simple ad-hoc method to incorporate these scalar scores. Given a structure "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "generated sequences "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y _ { k } \\mid x"
+          },
+          {
+            "type": "text",
+            "content": ", and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "corresponding TM-scores "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r _ { k } \\left| x \\right."
+          },
+          {
+            "type": "text",
+            "content": ", we scale the log-probabilities of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { \\mathrm { r e f } }"
+          },
+          {
+            "type": "text",
+            "content": "by the average of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r _ { k } \\mid x"
+          },
+          {
+            "type": "text",
+            "content": ". To see the effect of this scaling, consider the modified implicit reward: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        881,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "4 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        504,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/3981fd40a998ba5dd6a182f373550062f26d01c3fba3ea02b0ec90c1d668be73.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        183,
+        102,
+        390,
+        224
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/89cfa42a15237b8dbedfd72e6f77508bd8c0b2c0b0866c836b6b9136cdd2cdf7.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        395,
+        102,
+        596,
+        224
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5aaacb7f02915f5af304538dfae85736a0bcdec2a2eab4f8ecff9f0ceeeb3d5b.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 1: Motivation for DPO design choices. Left. Frequency of amino acid across ProteinMPNN generations conditioned on the peptide train set, vs. frequency over the peptide sequences. Middle. When conditioned on the same structure, the diversity of sequences generated by base ProteinMPNN does not correlate with the diversity of sequences generated by fine-tuned ProteinMPNN. Right. Distribution of rank correlation coefficient between model log-probabilities and TM-score. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        606,
+        102,
+        807,
+        224
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} r _ {\\text {s c a l e}} (x, y) = \\beta \\left[ \\log \\pi_ {\\theta} (y \\mid x) - R (x) \\cdot \\log \\pi_ {\\text {r e f}} (y \\mid x) \\right] + \\beta \\log Z (x) \\\\ = \\beta R (x) [ \\log \\pi_ {\\theta} (y \\mid x) - \\log \\pi_ {\\text {r e f}} (y \\mid x) ] + (\\beta - \\beta R (x)) \\log \\pi_ {\\theta} (y \\mid x) + \\beta \\log Z (x) \\\\ = \\underbrace {\\left[ \\beta R (x) \\right] r (x , y)} _ {\\text {R e w e i g h t e d s t a n d a r d r e w a r d}} + \\underbrace {\\left[ \\beta - \\beta R (x) \\right] \\log \\pi_ {\\theta} (y \\mid x)} _ {\\text {M a x i m u m e n t r o p y b o u n s}} + \\underbrace {\\beta \\log Z (x)} _ {\\text {P a r t i t i o n f u n c t i o n}}. \\tag {9} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/dd4172053476b54c036f42f17d2eacf0b8d9fec3a542f2c9c119926bbb68af9f.jpg"
+        }
+      },
+      "bbox": [
+        187,
+        345,
+        823,
+        416
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R ( x )"
+          },
+          {
+            "type": "text",
+            "content": "is large, the first term (mirroring the standard DPO reward, Eq. 3) has larger weight, and the second term (a penalty on the entropy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { \\bar { H } } ( \\pi _ { \\theta } ) = - \\mathbb { E } \\left[ \\log \\pi _ { \\theta } ( \\boldsymbol { y } \\mid \\boldsymbol { x } ) \\right] )"
+          },
+          {
+            "type": "text",
+            "content": "has smaller weight. Since the weight on the DPO reward controls the strength of KL divergence regularization (Rafailov et al., 2023), large "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R ( x )"
+          },
+          {
+            "type": "text",
+            "content": "corresponds to less aggressive optimization and a lower-entropy policy. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        433,
+        823,
+        491
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "When "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R ( x )"
+          },
+          {
+            "type": "text",
+            "content": "is near 1.0, the data-generating policy (i.e., base ProteinMPNN) already produces highquality sequences on structure "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": ". Therefore, we perform less aggressive optimization when "
+          },
+          {
+            "type": "equation_inline",
+            "content": "R ( x )"
+          },
+          {
+            "type": "text",
+            "content": "is large, and vice versa. Effectively, per structure, this reward scaling adapts the KL divergence penalty to the strength of the dataset-generating policy. The right part of Fig. 1 shows that this reward scaling method indeed helps ProteinMPNN accurately recover the total ordering over generated sequences. Scaling log-probabilities improves their ability to rank sequences by TM-score, which provides a more accurate reference model for DPO to start with. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        496,
+        823,
+        594
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4 RESULTS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        616,
+        282,
+        630
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here we present results on benchmarks across a suite of inverse folding models evaluated on peptide design tasks, as well as an exploration into the behavior of the two proposed algorithm enhancements (diversity regularization and reward scaling). We find that diversity regularization is effective in improving sampling diversity, and provide justification as to how this improvement happens. Additionally, we find reward scaling produces a small improvement in TM-score, enabling fine-tuned ProteinMPNN to reach SOTA performance in some situations. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        647,
+        823,
+        731
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.1 EXPERIMENTAL OVERVIEW "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        750,
+        403,
+        762
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Datasets. We fine-tune trained ProteinMPNN from Dauparas et al. (2022a) on a set of 211,402 deduplicated peptide structures with length up to 50 amino acids, derived from the ColabFold database (Mirdita et al., 2022) by filtering for predicted local distance difference test (pLDDT) "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\geq 8 0"
+          },
+          {
+            "type": "text",
+            "content": ". Each structure was used to generate 4 candidate sequences using pretrained ProteinMPNN with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": ". Each sequence, including the true reference sequence from the structure, was folded with OpenFold (Ahdritz et al., 2022). TM-scores were computed to create a ranking over generated sequences for every structure prompt. Each structure therefore contributed "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\binom { 4 } { 2 } } = 6"
+          },
+          {
+            "type": "text",
+            "content": "chosen-rejected pairs for DPO, for a total of 1,268,412 training pairs. Details of the folding process can be found in Appendix A.1. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        775,
+        823,
+        888
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Benchmarks. We consider two non-overlapping benchmarks. First, we take 50 sequences from the OpenFold set, enforcing a sequence identity threshold of 0.4 from the train set and filtering for "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "5 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "sequence length "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L \\leq 5 0"
+          },
+          {
+            "type": "text",
+            "content": ". Next, we take the CATH 4.3 test split, as used in Hsu et al. (2022b), filter for sequence identity threshold of 0.4 and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L \\leq 6 0"
+          },
+          {
+            "type": "text",
+            "content": ", and use the resulting 173 peptides as a second benchmark. The OpenFold set contains structures resolved via OpenFold, while the CATH split has structures from the PDB. For evaluation, we sample 4 sequences per benchmark structure at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T = 0"
+          },
+          {
+            "type": "text",
+            "content": ". We compute diversity, TM-score, and recovery metrics as in Gao et al. (2023b). Following Section 3.1, we define diversity as the average fraction of non-identical amino acids, computed pairwise across all sampled sequences for the same structure. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        103,
+        823,
+        202
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Hyperparameters. Supervised fine-tuning was run for 2 epochs with Adam through the PyTorch implementation (Paszke et al., 2019; Kingma & Ba, 2014), with structures’ true sequence as the target. DPO was run for 20 epochs with default Adam hyperparameters on pairs of generated sequences. We vary "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "based on the method used to facilitate a fair comparison across similar KL budgets. For more details, see Appendix A.1. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        208,
+        823,
+        279
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Sweeps. We run DPO with diversity penalties "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = \\{ 0 . 0 , 0 . 1 , 0 . 2 , 0 . 5 \\}"
+          },
+          {
+            "type": "text",
+            "content": "and DPO with/without reward scaling, all on the same training set. All training is done with per-GPU batch size of 32 on a single node with 8xA100 80GB GPUs. Each run takes about 8 hours wall-clock time. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        284,
+        823,
+        327
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.2 BENCHMARK SWEEPS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        352,
+        367,
+        364
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We benchmark our trained models against standard inverse-folding methods (Jing et al., 2021a;b; Hsu et al., 2022b; Dauparas et al., 2022a) across both the OpenFold and CATH benchmarks, filtered for peptide-length proteins. We consider TM-score to be the most important metric, as unlike sequence recovery, it can more accurately reflect the quality of generated sequences at high diversities. As shown in Table 1, on OpenFold structures, all DPO methods outperform base ProteinMPNN and other models by at least "
+          },
+          {
+            "type": "equation_inline",
+            "content": "8 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". Diversity-regularized DPO "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": ") achieves state-of-the-art (SOTA) diversity, improving base DPO by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "20 \\%"
+          },
+          {
+            "type": "text",
+            "content": "and even exceeding the diversity of base ProteinMPNN. This is notable, as fine-tuning tend to decrease generation diversity (Wang et al., 2023). Combining reward scaling with diversity regularization does not have a strong beneficial effect, with similar performance compared to the regularized method. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        381,
+        823,
+        521
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/3f9c9fd749d253c51e01bf2d360a82a8fc8da5538c0ee40ab6838c173574b461.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 1: Comparison of models on TM-score, sampled sequence diversity, and native sequence recovery for the OpenFold benchmark. The best results are bolded, and the second-best results are underlined. Means and standard errors are reported in each cell. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Models</td><td colspan=\"3\">OpenFold benchmark (n = 50)</td></tr><tr><td>TM-Score ↑</td><td>Diversity ↑</td><td>Recovery ↑</td></tr><tr><td>GVP-GNN (Jing et al., 2021b)</td><td>0.62 ± 0.02</td><td>0.19 ± 0.01</td><td>0.27 ± 0.01</td></tr><tr><td>ProteinMPNN (Dauparas et al., 2022a)</td><td>0.62 ± 0.01</td><td>0.31 ± 0.01</td><td>0.23 ± 0.01</td></tr><tr><td>ESM-IF1 (Hsu et al., 2022b)</td><td>0.61 ± 0.01</td><td>0.00 ± 0.00</td><td>0.31 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO</td><td>0.66 ± 0.02</td><td>0.27 ± 0.01</td><td>0.33 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO (scaled)</td><td>0.67 ± 0.02</td><td>0.28 ± 0.01</td><td>0.31 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO (α = 0.1)</td><td>0.67 ± 0.02</td><td>0.32 ± 0.01</td><td>0.31 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO (scaled, α = 0.1)</td><td>0.67 ± 0.02</td><td>0.31 ± 0.01</td><td>0.32 ± 0.01</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        210,
+        594,
+        792,
+        742
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "On the CATH benchmark, DPO does not help much (Table 2). This is likely due to the fact that our training method leveraged OpenFold structure predictions, while the CATH benchmark contains experimentally resolved protein structures. However, diversity regularization and reward scaling allow fine-tuned ProteinMPNN to nearly reach the performance of ESM-IF1, which was trained on experimentally resolved structures and is a much larger model. Diversity regularization is still effective in promoting diversity, beating base ProteinMPNN and improving standard DPO by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "7 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        763,
+        823,
+        849
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We find that both reward scaling and diversity regularization are effective in improving TM-score over base DPO, achieving SOTA performance on the OpenFold benchmark. Diversity regularization is particularly effective in improving diversity across both benchmarks. Despite CATH structures being out-of-distribution from the train set, given that they were not produced by OpenFold, our DPO enhancements allow ProteinMPNN to approach the performance of ESM-IF1. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "6 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/e1b492635b52dd7e88320519e437e4b8c6383a8cbf89f02c064118c962abf090.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 2: Comparison of models on TM-score, sampled sequence diversity, and native sequence recovery for the CATH 4.3 benchmark. The best results are bolded, and the second-best results are underlined. Means and standard errors are reported in each cell. Since all values are rounded to 2 decimals, standard errors are not actually zero. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Models</td><td colspan=\"3\">CATH 4.3 benchmark (n = 173)</td></tr><tr><td>TM-Score ↑</td><td>Diversity ↑</td><td>Recovery ↑</td></tr><tr><td>GVP-GNN (Jing et al., 2021b)</td><td>0.69 ± 0.01</td><td>0.21 ± 0.00</td><td>0.35 ± 0.01</td></tr><tr><td>ProteinMPNN (Dauparas et al., 2022a)</td><td>0.68 ± 0.01</td><td>0.30 ± 0.00</td><td>0.32 ± 0.01</td></tr><tr><td>ESM-IF1 (Hsu et al., 2022b)</td><td>0.72 ± 0.01</td><td>0.00 ± 0.00</td><td>0.34 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO</td><td>0.70 ± 0.01</td><td>0.28 ± 0.00</td><td>0.32 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO (scaled)</td><td>0.71 ± 0.01</td><td>0.29 ± 0.00</td><td>0.32 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO (α = 0.1)</td><td>0.70 ± 0.01</td><td>0.31 ± 0.01</td><td>0.32 ± 0.01</td></tr><tr><td>ProteinMPNN + DPO (scaled, α = 0.1)</td><td>0.71 ± 0.01</td><td>0.30 ± 0.00</td><td>0.32 ± 0.01</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        209,
+        167,
+        792,
+        316
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/dfd5e245f99da66bd21c2bc9888e40e700f8b655b67eb8e8ef692336bcd9ff91.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        338,
+        393,
+        463
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/46f6c673abd270a55a310473917789c65950961d9849b8b00853e03d587cad78.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        398,
+        337,
+        604,
+        463
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/c934989409ec310c5922f5341a35810b37cf36011d7738db50eee89c66429e6e.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 2: Exploring the effect of online diversity optimization. Left. Improvement in diversity across temperatures 0, 0.5, and 1.0, with and without random decoding order. Middle. Sampling distribution entropy (average negative log-probability over samples) over various "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "values. Right. Entropy of log-probability distribution over validation reference sequences across "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "sweep. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        609,
+        338,
+        815,
+        463
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.3 PARETO FRONT WITH DIVERSITY REGULARIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        554,
+        571,
+        568
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we consider the impact of diversity regularization on DPO. We train four DPO models on top of fine-tuned ProteinMPNN "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\alpha = \\{ 0 . 0 , 0 . 1 , 0 . 2 , 0 . 5 \\} )"
+          },
+          {
+            "type": "text",
+            "content": ", and generate sequences across a range of temperatures on the OpenFold test split. As temperature increases, the diversity of generated sequences increases, but the average TM-score (reward) decreases. We consider this reward-diversity tradeoff on the left side of Figure 3. At sufficiently low "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "values, diversity-regularized DPO produces a new Pareto frontier. With "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": ", regularized DPO consistently achieves higher reward at the same diversity, indicating this regularization provides a strictly favorable reward-diversity tradeoff compared to simply increasing temperature. At temperature 0.0, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": "yields a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "20 \\%"
+          },
+          {
+            "type": "text",
+            "content": "relative improvement in diversity along with a small increase in TM-score "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( 1 . 5 \\% )"
+          },
+          {
+            "type": "text",
+            "content": "over standard DPO. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        583,
+        823,
+        708
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "However, at high "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "values, diversity regularization hurts both diversity and reward. We see symptoms of this in the KL divergences between trained DPO policies and initial fine-tuned Protein-MPNN (middle of Fig. 3). While for "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = \\{ 0 . 0 , 0 . 1 , 0 . 2 \\}"
+          },
+          {
+            "type": "text",
+            "content": ", KL divergence trajectories are similar during training, DPO with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": "produces much higher divergences (i.e., the trained policy deviates significantly more from base ProteinMPNN). In this case, aggressive diversity optimization led to a collapse in model capacity via excessive deviation from the initial policy. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        715,
+        823,
+        800
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.4 DIVERSITY REGULARIZATION TARGETS DIFFERENTIAL ENTROPY "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        825,
+        663,
+        838
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We consider the mechanism behind diversity regularization, showing that diversity improves due to randomness in the token decoding order during sampling. Naively, we would expect diversity regularization to improve the entropy of the sampling distribution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } ( \\pi ) = - \\mathbb { E } _ { x \\sim \\mathcal { D } , y \\sim \\pi } \\left[ \\log \\pi ( y | x ) \\right]"
+          },
+          {
+            "type": "text",
+            "content": ". In the middle part of Fig. 2, we show that this is not the case. Apart from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": "(an outlier as discussed in Section 4.3), increasing diversity does not increase entropy, which seems contradictory. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        854,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "7 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/12ca8ae40f7c671f33f05726edd9f759819fb409fe88912e377e31f7ac0fbf69.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        104,
+        385,
+        229
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/19efacf7c902acd75c42398789dc9f259d4be2315465fd3ab4843f49f5c08c4a.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        392,
+        102,
+        602,
+        231
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/612ae126ae975780ccaabf5ae5a546cb817aff9e32e3654c525b4d8cdb4ba8a1.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 3: Pareto front and KL divergences. Left. Pareto front for various "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "values over temperature sweep. Middle. KL divergence from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi _ { \\mathrm { r e f } }"
+          },
+          {
+            "type": "text",
+            "content": "for various "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "values. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0"
+          },
+          {
+            "type": "text",
+            "content": "has "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": ", all other have "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": ". Right. KL divergence for DPO with reward scaling ( "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": ") and without "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": "). "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        607,
+        102,
+        815,
+        231
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We develop a new understanding of ProteinMPNN to explain this. ProteinMPNN performs randomorder token decoding during sampling and all forward passes. So, for a fixed policy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": ", sequence "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": "structure "
+          },
+          {
+            "type": "equation_inline",
+            "content": "x"
+          },
+          {
+            "type": "text",
+            "content": ", we highlight that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\bar { \\log { \\pi ( y \\mid x ) } }"
+          },
+          {
+            "type": "text",
+            "content": "is a random variable, depending on a distribution over token decoding orders. Let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { ( \\pi , x , y ) } = \\log \\pi ( y \\mid x )"
+          },
+          {
+            "type": "text",
+            "content": "denote this random variable, and let "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { \\pi } ( d )"
+          },
+          {
+            "type": "text",
+            "content": "be a function parameterized by "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "that takes decoding orders "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "to log-probabilities "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s"
+          },
+          {
+            "type": "text",
+            "content": ". In practice, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "f _ { \\pi }"
+          },
+          {
+            "type": "text",
+            "content": "is a forward pass through ProteinMPNN, and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": "is a uniformly chosen permutation over indices "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ 1 , 2 , \\ldots , | y | \\}"
+          },
+          {
+            "type": "text",
+            "content": ". For a decoding order "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d \\sim u"
+          },
+          {
+            "type": "text",
+            "content": "sampled from the uniform decoding order distribution "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { U }"
+          },
+          {
+            "type": "text",
+            "content": ", we can compute a log-probability "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s = f _ { \\pi } ( d )"
+          },
+          {
+            "type": "text",
+            "content": ". For this s, "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { ( \\pi , x , y ) } ( s )"
+          },
+          {
+            "type": "text",
+            "content": "gives the probability, over all possible "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": ", that the log-probability of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y | x"
+          },
+          {
+            "type": "text",
+            "content": "under "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi"
+          },
+          {
+            "type": "text",
+            "content": "is "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s"
+          },
+          {
+            "type": "text",
+            "content": ". "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        301,
+        823,
+        429
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Revisiting training with random log-probabilities. This new viewpoint allows us to re-evaluate the training of random-order decoder models, like ProteinMPNN. The implicit rewards in Eqs.3 and 7, from which a MLE loss is derived, hide the stochastic nature of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\log \\pi ( y | x )"
+          },
+          {
+            "type": "text",
+            "content": ". In the explicit decoding order notation, we can write Eq. 3 as "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        435,
+        823,
+        492
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "r (x, y) = \\beta \\left[ \\log \\left(f _ {\\pi_ {r}} (d)\\right) - \\log \\left(f _ {\\pi_ {\\text {r e f}}} (d)\\right) \\right] + \\beta \\log Z (x), \\quad d \\sim \\mathcal {U} \\tag {10}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f1f3b99c791e8f4c88f0a73afb6f304bee939a612acddaff527a095831447540.jpg"
+        }
+      },
+      "bbox": [
+        281,
+        512,
+        823,
+        529
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "with a similar substitution for Eq. 7. This applies to SFT as well, as the loss function has a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\log \\pi ( y | x )"
+          },
+          {
+            "type": "text",
+            "content": "term to which we can apply the same substitution. Note that Eq. 10 is computed over a single sample "
+          },
+          {
+            "type": "equation_inline",
+            "content": "d"
+          },
+          {
+            "type": "text",
+            "content": ". That is, training random-order decoders usually involves computing losses with a single-sample estimate of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\log \\pi ( \\breve { y } | x ) = \\mathbb { E } _ { d \\sim \\mathcal { U } } \\left[ \\ell _ { ( \\pi , x , y ) } ( f _ { \\pi } ( d ) ) \\right] ^ { \\cdot }"
+          },
+          {
+            "type": "text",
+            "content": ". While not explored here, a simple approach to improving the quality of this estimate is to compute log-probabilities over multiple decoding orders, though this would linearly scale training time as well. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        540,
+        823,
+        625
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Explaining diversity with differential entropy. This view also offers insight into how diversity increases without token entropy increasing as well. Within the random log-probability view, there is another source of entropy to account for: the differential entropy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "of the distribution over log-probabilities, defined separately for each tuple "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( \\pi , x , y )"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        631,
+        823,
+        686
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\mathcal {H} _ {d} \\left(\\ell_ {(\\pi , x, y)}\\right) = \\mathbb {E} _ {d \\sim \\mathcal {U}} \\left[ - \\log \\left[ \\ell_ {(\\pi , x, y)} \\left(f _ {\\pi} (d)\\right) \\right] \\right] = - \\int_ {- \\infty} ^ {0} \\ell_ {(\\pi , x, y)} (s) \\log \\left[ \\ell_ {(\\pi , x, y)} (s) \\right] d s \\tag {11}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/f66b23e54b39c6caf7257465956c687c5214945abcb0b587e3ad6199051bd4cb.jpg"
+        }
+      },
+      "bbox": [
+        192,
+        713,
+        823,
+        750
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We claim that optimizing for diversity increases differential entropy in the continuous logprobability space, rather than increasing discrete entropy in token space. To test this, we draw 128 samples from "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { ( \\pi , x , y ) }"
+          },
+          {
+            "type": "text",
+            "content": "for all "
+          },
+          {
+            "type": "equation_inline",
+            "content": "( x , y )"
+          },
+          {
+            "type": "text",
+            "content": "structure-sequence test pairs, i.e., compute log-probabilities with 128 different decoding orders. In the right part of Fig. 2, we show that the estimated "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "increases with larger "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": ", as expected under this theory. This agrees with our intuition, since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "controls variability in model log-probabilities, which decide the next token during sampling. That is, larger "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "leads to greater log-probability variability, leading to greater diversity. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        763,
+        823,
+        862
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Effects at higher temperatures. In the left half of Fig. 2, we conduct a small ablation study to isolate the effect of random decoding order across temperatures. We find that at low temperatures, random decoding order is necessary for diversity. This is because the next token is chosen deterministically at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T = 0"
+          },
+          {
+            "type": "text",
+            "content": ", so entropy in the log-probabilities is the sole contributor to diversity. However, "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        867,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "8 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b28085b5e209362e7b483fef4afc28a10149d5055e0b74b36107ae3727b1ab81.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        178,
+        102,
+        380,
+        224
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/ac335c35bfe709f22f224ca77d6a97996ae95d2e08450139716bfddb121d8467.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        388,
+        101,
+        604,
+        224
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/5329fcbb13ade166bf7a1b19a57e8c305c341a7508e2ce2f0a720b6971b6c0f4.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 4: Sequence recovery with diversity optimization. Left. Stronger diversity regularization seems to hurt sequence recovery, though all fine-tuned models improve over ProteinMPNN. Middle. Diversity does not hurt the correlation between log-probabilities and TM-score. Right. Best-of-N sampling allows diverse models to achieve sequence recoveries comparable to standard models. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        609,
+        101,
+        815,
+        224
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "at higher temperatures, the influence of using random decoding orders is less pronounced, i.e., temperature has a larger effect on next-token sampling compared to an increasing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": ". Therefore, this analysis applies only for random decoding order models at "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T = 0"
+          },
+          {
+            "type": "text",
+            "content": ". For example, left-to-right autoregressive methods have fixed decoding orders, meaning "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\ell _ { ( \\pi , y , x ) }"
+          },
+          {
+            "type": "text",
+            "content": "collapses around a single scalar and the differential entropy is zero. At "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T = 0"
+          },
+          {
+            "type": "text",
+            "content": ", this means that we cannot improve diversity by boosting "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": ", and at higher "
+          },
+          {
+            "type": "equation_inline",
+            "content": "T"
+          },
+          {
+            "type": "text",
+            "content": ", "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } _ { d }"
+          },
+          {
+            "type": "text",
+            "content": "does not empirically affect diversity much anyways. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        308,
+        823,
+        393
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Increased token entropy does not help diversity. We also try optimizing for discrete token-level entropy, and achieve around a "
+          },
+          {
+            "type": "equation_inline",
+            "content": "15 \\%"
+          },
+          {
+            "type": "text",
+            "content": "increase in this entropy. However, in line with the differential entropy formulation, this method does not improve sample diversity at temperature 0. See Appendix A.3 for more details and a complete derivation of the token-entropy regularized algorithm. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        398,
+        823,
+        455
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.5 SEQUENCE RECOVERY WITH DIVERSITY-REGULARIZED MODELS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        470,
+        658,
+        484
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In this section, we consider how diversity optimization affects ProteinMPNN’s ability to recover native sequences from structures, and accurately predict the quality of generated sequences. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        497,
+        823,
+        527
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "First, we explore whether sequence recovery (i.e., the ability to recover the conditioning structure’s sequence) is still possible with diversity-regularized fine-tuning. Intuitively, it may seem that models with higher sampling diversity have lower native sequence recovery rate. In the left half of Fig. 4, it seems like this is the case, with sequence recovery rates decreasing as "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": "increases across all temperatures. However, for small alpha "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathit { \\Pi } _ { \\alpha } = 0 . 1 "
+          },
+          {
+            "type": "text",
+            "content": "), the drop in sequence recovery compared to standard DPO is small. Additionally, this recovery gap disappears if we allow for more compute during inference time. In the right side of Fig. 4, we take "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "samples from each model and compute the best-of- "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "sequence recovery rate. As "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "grows, the gap between standard DPO recovery rate and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": "recovery rate shrinks to nearly zero. Therefore, optimizing for diversity does not significantly impact sequence recovery rate, particularly as more sequences are sampled. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        532,
+        826,
+        672
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Gao et al. (2023b) claims that log-probabilities may correlate with sequence quality, e.g. TM-score. Given that diversity regularization increases log-probability entropy as shown in Section 4.4, one might expect this correlation to be less strong under more diverse models. As shown in the middle of Fig. 4, this is not the case. Indeed, across all models, log-probabilities do not correlate with TM-score. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        678,
+        823,
+        748
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "4.6 REWARD SCALING REINFORCES BIOLOGICAL PRIORS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        765,
+        581,
+        779
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Next, we consider the effect of reward scaling on DPO’s behavior. On the left side of Fig. 5, the reward-diversity curves for DPO and reward-scaled DPO are computed across "
+          },
+          {
+            "type": "equation_inline",
+            "content": "{ \\cal T } ="
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\{ 0 . 0 , 0 . 1 , 0 . 2 , \\ldots , 1 . 0 \\}"
+          },
+          {
+            "type": "text",
+            "content": ". Reward-scaled DPO achieves consistently higher reward at the same diversity, indicating it is a Pareto improvement over standard DPO. Moreover, as in the right side of Fig. 3, reward-scaled DPO operates on a slightly smaller KL divergence budget compared to standard DPO. Despite maintaining a smaller deviation from pretrained ProteinMPNN, the policy trained with reward-scaled DPO is still strictly better than the policy trained with standard DPO. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        790,
+        823,
+        888
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The motivation for reward scaling, as presented in Eq. 9, is dynamic "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "selection based on the strength of the initial policy (or equivalently, the difficulty of the prompt), where "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "controls the KL divergence "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "9 "
+          }
+        ]
+      },
+      "bbox": [
+        493,
+        948,
+        503,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/b73530ac6202a47589b60866c96bcc40ce8e019a44ec6292e133d1d82422dfbc.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        176,
+        102,
+        380,
+        224
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a518f002e15e3c359dabdab5a6ee69bf5a387601308ce959a4cf615866739cfd.jpg"
+        },
+        "image_caption": [],
+        "image_footnote": []
+      },
+      "bbox": [
+        388,
+        102,
+        602,
+        224
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/907ef675b11e972874cf215ed13c816dfcdab218f285d0669b63c4cc6c9ab8d0.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 5: Reward scaling improves DPO. Left. Reward-scaled DPO is a Pareto improvement over standard DPO over a temperature sweep. Middle. Left axis is the KL divergence between the token frequencies in the peptide train set vs. model samples (lower is better), right axis is the fraction of non-repeating tokens (higher is better). Right. TM-score improvement over base DPO. Lower TMscore buckets contain structures for which base ProteinMPNN generated low-quality sequences. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        607,
+        102,
+        812,
+        224
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "from the reference model. On the right side of Fig. 5, we show the empirical effect of reward scaling matches this intuition. For structure prompts whose ProteinMPNN-generated sequences had low reward (i.e., where the base model performed poorly), reward-scaled DPO outperforms standard DPO by around "
+          },
+          {
+            "type": "equation_inline",
+            "content": "5 \\%"
+          },
+          {
+            "type": "text",
+            "content": ". However, as the average TM-score of the generated sequences increases, the performance gain from reward scaling drops to nearly 0. Therefore, reward-scaled DPO targets hard examples where the data-generating policy is weak, agreeing with the motivation in Section 3.2. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        323,
+        823,
+        407
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "5 LIMITATIONS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        428,
+        316,
+        441
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "While we illustrate an empirical connection between diversity optimization and differential entropy, we do not establish a mathematical framework for how this optimization happens. Furthermore, during the derivation of diversity-regularized DPO, we approximate "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi ^ { \\star }"
+          },
+          {
+            "type": "text",
+            "content": "with the latest iteration of gradient descent. Exploring the bounds on this approximation, and establishing a theory-first perspective for the differential entropy framework, are promising directions for future research. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        459,
+        823,
+        530
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Since DPO and the variants proposed here are model-agnostic, they can be used to fine-tune any inverse-folding model. Applying DPO to other inverse-folding models may produce even better results compared to ProteinMPNN Gao et al. (2023b). For example, it may be possible to further push the frontier of peptide sequence design by fine-tuning stronger base models like PiFold (Gao et al., 2022) or KW-Design (Gao et al., 2023a). "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        536,
+        823,
+        606
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "6 CONCLUSION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        627,
+        318,
+        642
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "We fine-tuned ProteinMPNN, a widely adopted inverse folding model, for diverse and structurally consistent peptide sequence generation and proposed diversity-regularized DPO with an online sampling term to accurately estimate and encourage diversity. Domain-specific priors were also incorporated into our methodology to account for peptides’ residue distribution and dynamically control the strength of KL divergence regularization. Our approach results in improvements on sampling diversity, sequence recovery and structural similarity of the generated peptide sequences. Furthermore, we give additional intuition on the impact of diversity regularization on differential and discrete entropy. While our results are reported using ProteinMPNN as a base model for fine-tuning, our proposed methods are agnostic to the inverse folding model, setting the grounds for future research in peptide design via fine-tuning. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        657,
+        823,
+        799
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "REFERENCES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        819,
+        285,
+        833
+      ]
+    },
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Nadia C. Abascal and Lynne Regan. The past, present and future of protein-based materials. Open Biology, 8(10), October 2018. ISSN 2046-2441. doi: 10.1098/rsob.180113. URL http://dx. doi.org/10.1098/rsob.180113. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Gustaf Ahdritz, Nazim Bouatta, Christina Floristean, Sachin Kadyan, Qinghui Xia, William Gerecke, Timothy J O’Donnell, Daniel Berenberg, Ian Fisk, Niccolo Zanichelli, Bo Zhang, Arka- ` "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        843,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "10 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "diusz Nowaczynski, Bei Wang, Marta M Stepniewska-Dziubinska, Shang Zhang, Adegoke Ojewole, Murat Efe Guney, Stella Biderman, Andrew M Watkins, Stephen Ra, Pablo Ribalta Lorenzo, Lucas Nivon, Brian Weitzner, Yih-En Andrew Ban, Peter K Sorger, Emad Mostaque, Zhao Zhang, Richard Bonneau, and Mohammed AlQuraishi. OpenFold: Retraining AlphaFold2 yields new insights into its learning mechanisms and capacity for generalization. bioRxiv, 2022. doi: 10.1101/2022.11.20.517210. URL https://www.biorxiv.org/content/10.1101/ 2022.11.20.517210. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ralph Allan Bradley and Milton E. Terry. Rank analysis of incomplete block designs: I. the method of paired comparisons. Biometrika, 39(3/4):324–345, 1952. ISSN 00063444, 14643510. URL http://www.jstor.org/stable/2334029. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Karuppiah Chockalingam, Mark Blenner, and Scott Banta. Design and application of stimulusresponsive peptide systems. Protein Engineering, Design & Selection, 20(4):155–161, 2007. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Dana Maria Copolovici, Kent Langel, Elo Eriste, and Ulo Langel. Cell-penetrating peptides: design, synthesis, and applications. ACS nano, 8(3):1972–1994, 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Paul E. Correa. The building of protein structures from alpha-carbon coordinates. Proteins: Structure, Function, and Bioinformatics, 7(4):366–377, 1990. doi: https://doi.org/10.1002/ prot.340070408. URL https://onlinelibrary.wiley.com/doi/abs/10.1002/ prot.340070408. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "J. Dauparas, I. Anishchenko, N. Bennett, H. Bai, R. J. Ragotte, L. F. Milles, B. I. M. Wicky, A. Courbet, R. J. de Haas, N. Bethel, P. J. Y. Leung, T. F. Huddy, S. Pellock, D. Tischer, F. Chan, B. Koepnick, H. Nguyen, A. Kang, B. Sankaran, A. K. Bera, N. P. King, and D. Baker. Robust deep learning–based protein sequence design using proteinmpnn. Science, 378(6615):49–56, 2022a. doi: 10.1126/science.add2187. URL https://www.science.org/doi/abs/10. 1126/science.add2187. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Justas Dauparas, Ivan Anishchenko, Nathaniel Bennett, Hua Bai, Robert J Ragotte, Lukas F Milles, Basile IM Wicky, Alexis Courbet, Rob J de Haas, Neville Bethel, et al. Robust deep learning– based protein sequence design using proteinmpnn. Science, 378(6615):49–56, 2022b. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ken A. Dill, S. Banu Ozkan, M. Scott Shell, and Thomas R. Weikl. The protein folding problem. Annual Review of Biophysics, 37(1):289–316, June 2008. ISSN 1936-1238. doi: 10.1146/annurev.biophys.37.092707.153558. URL http://dx.doi.org/10.1146/ annurev.biophys.37.092707.153558. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhangyang Gao, Cheng Tan, Pablo Chacon, and Stan Z Li. Pifold: Toward effective and efficient ´ protein inverse folding. arXiv preprint arXiv:2209.12643, 2022. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhangyang Gao, Cheng Tan, and Stan Z. Li. Knowledge-design: Pushing the limit of protein design via knowledge refinement, 2023a. URL https://arxiv.org/abs/2305.15151. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhangyang Gao, Cheng Tan, Yijie Zhang, Xingran Chen, Lirong Wu, and Stan Z. Li. Proteininvbench: Benchmarking protein inverse folding on diverse tasks, models, and metrics. In Thirtyseventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track, 2023b. URL https://openreview.net/forum?id "
+              },
+              {
+                "type": "equation_inline",
+                "content": "="
+              },
+              {
+                "type": "text",
+                "content": "bqXduvuW5E. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "A Godzik, A Kolinski, and J Skolnick. De novo and inverse folding predictions of protein structure and dynamics. J. Comput. Aided Mol. Des., 7(4):397–438, August 1993. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chloe Hsu, Robert Verkuil, Jason Liu, Zeming Lin, Brian Hie, Tom Sercu, Adam Lerer, and Alexander Rives. Learning inverse folding from millions of predicted structures. ICML, April 2022a. doi: 10.1101/2022.04.10.487779. URL http://dx.doi.org/10.1101/2022.04.10. 487779. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chloe Hsu, Robert Verkuil, Jason Liu, Zeming Lin, Brian Hie, Tom Sercu, Adam Lerer, and Alexander Rives. Learning inverse folding from millions of predicted structures. bioRxiv, 2022b. doi: 10.1101/2022.04.10.487779. URL https://www.biorxiv.org/content/early/ 2022/04/10/2022.04.10.487779. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        103,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": []
+      },
+      "bbox": [
+        490,
+        948,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "John Ingraham, Vikas Garg, Regina Barzilay, and Tommi Jaakkola. Generative models for graphbased protein design. In H. Wallach, H. Larochelle, A. Beygelzimer, F. d'Alche-Buc, E. Fox, ´ and R. Garnett (eds.), Advances in Neural Information Processing Systems, volume 32. Curran Associates, Inc., 2019. URL https://proceedings.neurips.cc/paper_files/ paper/2019/file/f3a4ff4839c56a5f460c88cce3666a2b-Paper.pdf. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bowen Jing, Stephan Eismann, Pratham N Soni, and Ron O Dror. Equivariant graph neural networks for 3d macromolecular structure. arXiv preprint arXiv:2106.03843, 2021a. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Bowen Jing, Stephan Eismann, Patricia Suriana, Raphael John Lamarre Townshend, and Ron Dror. Learning from protein structure with geometric vector perceptrons. In International Conference on Learning Representations, 2021b. URL https://openreview.net/forum?id= 1YLJDvSx6J4. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "John Jumper, Richard Evans, Alexander Pritzel, Tim Green, Michael Figurnov, Olaf Ronneberger, Kathryn Tunyasuvunakool, Russ Bates, Augustin Zˇ ´ıdek, Anna Potapenko, Alex Bridgland, Clemens Meyer, Simon A. A. Kohl, Andrew J. Ballard, Andrew Cowie, Bernardino Romera-Paredes, Stanislav Nikolov, Rishub Jain, Jonas Adler, Trevor Back, Stig Petersen, David Reiman, Ellen Clancy, Michal Zielinski, Martin Steinegger, Michalina Pacholska, Tamas Berghammer, Sebastian Bodenstein, David Silver, Oriol Vinyals, Andrew W. Senior, Koray Kavukcuoglu, Pushmeet Kohli, and Demis Hassabis. Highly accurate protein structure prediction with alphafold. Nature, 596(7873):583–589, 2021. ISSN 1476-4687. doi: 10.1038/s41586-021-03819-2. URL https://doi.org/10.1038/s41586-021-03819-2. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Diederik P Kingma and Jimmy Ba. Adam: A method for stochastic optimization. 2014. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Patrice Koehl and Michael Levitt. De novo protein design. i. in search of stability and specificity11edited by f. e. cohen. Journal of Molecular Biology, 293(5):1161–1181, 1999. ISSN 0022- 2836. doi: https://doi.org/10.1006/jmbi.1999.3211. URL https://www.sciencedirect. com/science/article/pii/S0022283699932114. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kullback, S. and Leibler, R. A. On information and sufficiency. The Annals of Mathematical Statistics, 22(1):79–86., 1951. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Julia Koehler Leman, Brian D Weitzner, Steven M Lewis, Jared Adolf-Bryfogle, Nawsad Alam, Rebecca F Alford, Melanie Aprahamian, David Baker, Kyle A Barlow, Patrick Barth, Benjamin Basanta, Brian J Bender, Kristin Blacklock, Jaume Bonet, Scott E Boyken, Phil Bradley, Chris Bystroff, Patrick Conway, Seth Cooper, Bruno E Correia, Brian Coventry, Rhiju Das, Rene M´ De Jong, Frank DiMaio, Lorna Dsilva, Roland Dunbrack, Alexander S Ford, Brandon Frenz, Darwin Y Fu, Caleb Geniesse, Lukasz Goldschmidt, Ragul Gowthaman, Jeffrey J Gray, Dominik Gront, Sharon Guffy, Scott Horowitz, Po-Ssu Huang, Thomas Huber, Tim M Jacobs, Jeliazko R Jeliazkov, David K Johnson, Kalli Kappel, John Karanicolas, Hamed Khakzad, Karen R Khar, Sagar D Khare, Firas Khatib, Alisa Khramushin, Indigo C King, Robert Kleffner, Brian Koepnick, Tanja Kortemme, Georg Kuenze, Brian Kuhlman, Daisuke Kuroda, Jason W Labonte, Jason K Lai, Gideon Lapidoth, Andrew Leaver-Fay, Steffen Lindert, Thomas Linsky, Nir London, Joseph H Lubin, Sergey Lyskov, Jack Maguire, Lars Malmstrom, Enrique Marcos, Orly Marcu, ¨ Nicholas A Marze, Jens Meiler, Rocco Moretti, Vikram Khipple Mulligan, Santrupti Nerli, Christoffer Norn, Shane O’Conch ´ uir, Noah Ollikainen, Sergey Ovchinnikov, Michael S Pacella, ´ Xingjie Pan, Hahnbeom Park, Ryan E Pavlovicz, Manasi Pethe, Brian G Pierce, Kala Bharath Pilla, Barak Raveh, P Douglas Renfrew, Shourya S Roy Burman, Aliza Rubenstein, Marion F Sauer, Andreas Scheck, William Schief, Ora Schueler-Furman, Yuval Sedan, Alexander M Sevy, Nikolaos G Sgourakis, Lei Shi, Justin B Siegel, Daniel-Adriano Silva, Shannon Smith, Yifan Song, Amelie Stein, Maria Szegedy, Frank D Teets, Summer B Thyme, Ray Yu-Ruei Wang, Andrew Watkins, Lior Zimmerman, and Richard Bonneau. Macromolecular modeling and design in rosetta: recent methods and frameworks. Nat. Methods, 17(7):665–680, July 2020. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zeming Lin, Halil Akin, Roshan Rao, Brian Hie, Zhongkai Zhu, Wenting Lu, Nikita Smetanin, Robert Verkuil, Ori Kabeli, Yaniv Shmueli, Allan dos Santos Costa, Maryam Fazel-Zarandi, Tom Sercu, Salvatore Candido, and Alexander Rives. Evolutionary-scale prediction of atomic level protein structure with a language model. July 2022. doi: 10.1101/2022.07.20.500902. URL http://dx.doi.org/10.1101/2022.07.20.500902. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        103,
+        825,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "12 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "E James Milner-White and Michael J Russell. Predicting the conformations of peptides and proteins in early evolution. a review article submitted to biology direct. Biol. Direct, 3(1):3, January 2008. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Milot Mirdita, Konstantin Schutze, Yoshitaka Moriwaki, Lim Heo, Sergey Ovchinnikov, and Martin¨ Steinegger. Colabfold: making protein folding accessible to all. Nature Methods, 19(6):679– 682, June 2022. doi: 10.1038/s41592-022-01488-1. URL https://doi.org/10.1038/ s41592-022-01488-1. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Pouria Mistani and Venkatesh Mysore. Preference optimization of protein language models as a multi-objective binder design paradigm, 2024. URL https://arxiv.org/abs/2403. 04187. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Long Ouyang, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll L. Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, John Schulman, Jacob Hilton, Fraser Kelton, Luke Miller, Maddie Simens, Amanda Askell, Peter Welinder, Paul Christiano, Jan Leike, and Ryan Lowe. Training language models to follow instructions with human feedback, 2022. URL https://arxiv.org/abs/2203.02155. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ryan Park, Ryan Theisen, Navriti Sahni, Marcel Patek, Anna Cichonska, and Rayees Rahman. ´ Preference optimization for molecular language models, 2023. URL https://arxiv.org/ abs/2310.12304. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Ryan Park, Rafael Rafailov, Stefano Ermon, and Chelsea Finn. Disentangling length from quality in direct preference optimization, 2024. URL https://arxiv.org/abs/2403.19159. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison, Andreas Kopf, Ed- ¨ ward Yang, Zach DeVito, Martin Raison, Alykhan Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu Fang, Junjie Bai, and Soumith Chintala. PyTorch: An imperative style, high-performance deep learning library. 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, and Chelsea Finn. Direct preference optimization: Your language model is secretly a reward model. ArXiv, abs/2305.18290, 2023. URL https://api.semanticscholar.org/ CorpusID:258959321. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Varun R. Shanker, Theodora U.J. Bruun, Brian L. Hie, and Peter S. Kim. Inverse folding of protein complexes with a structure-informed language model enables unsupervised antibody evolution. December 2023. doi: 10.1101/2023.12.19.572475. URL http://dx.doi.org/10.1101/ 2023.12.19.572475. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Martin Steinegger and Johannes Soeding. Mmseqs2 enables sensitive protein sequence searching for the analysis of massive data sets. Nature Biotechnology, 35(11):1026–1028, 2017. doi: 10. 1038/nbt.3988. URL https://doi.org/10.1038/nbt.3988. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Axel Tiessen, Paulino Perez-Rodr ´ ´ıguez, and Luis Jose Delaye-Arredondo. Mathematical modeling ´ and comparison of protein size distribution in different plant, animal, fungal and microbial species reveals a negative correlation between protein size and protein number, thus providing insight into the evolution of proteomes. BMC Res. Notes, 5(1):85, February 2012. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Marcelo DT Torres, Shanmugapriya Sothiselvam, Timothy K Lu, and Cesar de la Fuente-Nunez. Peptide design principles for antimicrobial applications. Journal of molecular biology, 431(18): 3547–3567, 2019. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Rein V Ulijn and Andrew M Smith. Designing peptide based nanomaterials. Chemical Society Reviews, 37(4):664–675, 2008. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Chaoqi Wang, Yibo Jiang, Chenghao Yang, Han Liu, and Yuxin Chen. Beyond reverse kl: Generalizing direct preference optimization with diverse divergence constraints, 2023. URL https://arxiv.org/abs/2309.16240. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        102,
+        825,
+        924
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "13 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        506,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "list",
+      "content": {
+        "list_type": "reference_list",
+        "list_items": [
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Talal Widatalla, Rafael Rafailov, and Brian Hie. Aligning protein generative models with experimental fitness via direct preference optimization. bioRxiv, 2024. doi: 10.1101/2024.05.20. 595026. URL https://www.biorxiv.org/content/early/2024/05/21/2024. 05.20.595026. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhenyu Yang, Xiaoxi Zeng, Yi Zhao, and Runsheng Chen. Alphafold2 and its applications in the fields of biology and medicine. Signal Transduction and Targeted Therapy, 8(1), March 2023. ISSN 2059-3635. doi: 10.1038/s41392-023-01381-z. URL http://dx.doi.org/ 10.1038/s41392-023-01381-z. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kai Yi, Bingxin Zhou, Yiqing Shen, Pietro Lio, and Yu Guang Wang. Graph denoising diffusion for ` inverse protein folding. 2023. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Kaizhi Yue and Ken A Dill. Inverse protein folding problem: designing polymer sequences. Proceedings of the National Academy of Sciences, 89(9):4163–4167, 1992. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Yang Zhang and Jeffrey Skolnick. Scoring function for automated assessment of protein structure template quality. Proteins: Structure, Function, and Bioinformatics, 57(4):702–710, 2004. ISSN 1097-0134. doi: 10.1002/prot.20264. URL http://bioinformatics.buffalo.edu/ TM-score. Copyright 2004 Wiley-Liss, Inc. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Zhanhui Zhou, Jie Liu, Jing Shao, Xiangyu Yue, Chao Yang, Wanli Ouyang, and Yu Qiao. Beyond one-preference-fits-all alignment: Multi-objective direct preference optimization, 2024. URL https://arxiv.org/abs/2310.03708. "
+              }
+            ]
+          },
+          {
+            "item_type": "text",
+            "item_content": [
+              {
+                "type": "text",
+                "content": "Brian D. Ziebart, Andrew Maas, J. Andrew Bagnell, and Anind K. Dey. Maximum entropy inverse reinforcement learning. In Proceedings of the 23rd National Conference on Artificial Intelligence - Volume 3, AAAI’08, pp. 1433–1438. AAAI Press, 2008. ISBN 9781577353683. "
+              }
+            ]
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        103,
+        825,
+        489
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A APPENDIX "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        520,
+        299,
+        534
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.1 ADDITIONAL EXPERIMENTAL DETAILS "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        173,
+        553,
+        483,
+        566
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Folding peptide sequences. Folding of peptides was done with the OpenFold module in NVIDIA BioNeMo Framework2, version 1.8, with default settings. We used mmseqs2(Steinegger & Soeding, 2017) to generate multiple sequence alignments (MSAs), referencing against UniRef90, Small BFD and MGnify datasets, as the input. For template searches, hhsearch was used with the PDB70 database. OpenFold inferencing was performed with a single set of weights, converted from an AlphaFold2 (Jumper et al., 2021) model checkpoint params-model-4; typically AlphaFold2 is run with five checkpoints. Folding was run on 8 to 32 NVIDIA A100-SXM4-80GB GPUs, with the overall folding throughput around 1.4 seconds per sequence per GPU. We did not perform structural relaxation after folding. For model checkpoint download scripts, and database download scripts, see github.com/aqlaboratory/openfold. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        578,
+        825,
+        718
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Choosing "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "fairly. Since "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "is a proxy for specifying the amount of allowable deviation from the base (reference) policy (Rafailov et al., 2023), we ensure fair comparison between DPO and its variants by modifying "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": "so that all methods operate on a similar same KL divergence budget. For the diversity-regularized and reward-scaled methods, we choose "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 1"
+          },
+          {
+            "type": "text",
+            "content": "; for base DPO, we choose "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta = 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": ". In the middle and left parts of Fig. 3, we show that these choices allow all models to deviate from the base policy by around the same amount, with standard DPO still dominating the other model’s KL divergences. DPO with "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha = 0 . 5"
+          },
+          {
+            "type": "text",
+            "content": "is an exception, but we consider this model to be an outlier as described in Section 4.3. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        724,
+        825,
+        835
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Method evaluations. While recent inverse-folding methods like PiFold and KW-Design show strong performance compared to ProteinMPNN (Gao et al., 2023b) and ESM-IF1 Hsu et al. (2022b), we were unable to get their implementation working on the necessary timeline. As a result, we did not include them in our benchmarks. "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        842,
+        825,
+        898
+      ]
+    },
+    {
+      "type": "page_footnote",
+      "content": {
+        "page_footnote_content": [
+          {
+            "type": "text",
+            "content": "2https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/bionemo-framework "
+          }
+        ]
+      },
+      "bbox": [
+        189,
+        909,
+        707,
+        922
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "14 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.2 DETAILS OF ONLINE DIVERSITY REGULARIZATION "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        104,
+        568,
+        118
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Algorithm 1 we present the full online diversity-regularized DPO algorithm. Note that "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": "computes the pairwise diversity between a sequence "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y"
+          },
+          {
+            "type": "text",
+            "content": "and "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "other sequences "
+          },
+          {
+            "type": "equation_inline",
+            "content": "y ^ { \\prime }"
+          },
+          {
+            "type": "text",
+            "content": ", so it returns an "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": "-length vector. "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { \\pi }"
+          },
+          {
+            "type": "text",
+            "content": "is updated only once every "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "epochs, so in practice we only have to sample once every "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": "epochs. Between these updates, samples are cached and take up only a few megabytes of GPU memory. The modifications compared to base DPO (Rafailov et al., 2023) are highlighted in blue. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        128,
+        826,
+        202
+      ]
+    },
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 1 Diversity-regularized DPO "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "Require: Dataset  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D = \\{(x^{(i)},y_w^{(i)},y_l^{(i)})\\}"
+          },
+          {
+            "type": "text",
+            "content": " , base policy  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi_{\\mathrm{ref}}"
+          },
+          {
+            "type": "text",
+            "content": " , KL deviation penalty  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta"
+          },
+          {
+            "type": "text",
+            "content": " , diversity inc.   \ncentive  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\alpha"
+          },
+          {
+            "type": "text",
+            "content": " , max steps  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": " , sample frequency  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "text",
+            "content": " , sequence distance  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\gamma"
+          },
+          {
+            "type": "text",
+            "content": " , number of samples  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "M"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi_{\\theta}^{(0)}\\gets \\pi_{\\mathrm{ref}}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde{\\pi}\\gets \\pi_{\\mathrm{ref}}"
+          },
+          {
+            "type": "text",
+            "content": "   \nfor  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": " do if  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          },
+          {
+            "type": "text",
+            "content": " mod  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K = 0"
+          },
+          {
+            "type": "text",
+            "content": " then  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde{\\pi}\\gets \\pi_{\\theta}^{(t - 1)}"
+          },
+          {
+            "type": "text",
+            "content": "   \nend if   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(x,y_w,y_l)\\gets"
+          },
+          {
+            "type": "text",
+            "content": " Minibatch(D)  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\triangleright"
+          },
+          {
+            "type": "text",
+            "content": " Batch size  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "B"
+          },
+          {
+            "type": "text",
+            "content": " , sequence length  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "L"
+          },
+          {
+            "type": "equation_inline",
+            "content": "r(y_w,x)\\gets \\beta \\log \\frac{\\pi_\\theta^{(t - 1)}(y_w|x)}{\\pi_{\\mathrm{ref}}(y_w|x)}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\triangleright"
+          },
+          {
+            "type": "text",
+            "content": " Chosen reward   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r(y_l,x)\\gets \\beta \\log \\frac{\\pi_\\theta^{(t - 1)}(y_l|x)}{\\pi_{\\mathrm{ref}}(y_l|x)}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\triangleright"
+          },
+          {
+            "type": "text",
+            "content": " Rejected reward   \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "s\\gets"
+          },
+          {
+            "type": "text",
+            "content": " Sample  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(\\tilde{\\pi},x,M)"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\triangleright"
+          },
+          {
+            "type": "text",
+            "content": " Shape  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(B,M,L)"
+          },
+          {
+            "type": "equation_inline",
+            "content": "d(\\tilde{\\pi},y_w,x)\\gets"
+          },
+          {
+            "type": "text",
+            "content": " Average  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(\\gamma (y_w,s))"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\triangleright"
+          },
+          {
+            "type": "text",
+            "content": " Shape  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(B,)"
+          },
+          {
+            "type": "equation_inline",
+            "content": "d(\\tilde{\\pi},y_l,x)\\gets"
+          },
+          {
+            "type": "text",
+            "content": " Average  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(\\gamma (y_l,s))"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\triangleright"
+          },
+          {
+            "type": "text",
+            "content": " Shape  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(B,)"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi_{\\theta}^{(t)}\\gets \\underset {\\theta}{\\mathrm{argmin}} - \\mathbb{E}_{(x,y_w,y_l)\\sim \\mathcal{D}}[\\log \\sigma (r(y_w,x) - r(y_l,x) + \\alpha d(\\tilde{\\pi},y_w,x) - \\alpha d(\\tilde{\\pi},y_l,x))]"
+          },
+          {
+            "type": "text",
+            "content": "   \nend for "
+          }
+        ]
+      },
+      "bbox": [
+        173,
+        234,
+        825,
+        496
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.3 ENTROPY-REGULARIZED DPO "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        523,
+        429,
+        537
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Here, we consider optimizing for discrete entropy over the sequences sampled from ProteinMPNN. The derivation is the same as in Section 3.1, but with the entropy "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\mathcal { H } ( \\pi ) = - \\mathbb { E } _ { y \\sim \\pi } \\left[ \\log \\pi ( y ) \\right]"
+          },
+          {
+            "type": "text",
+            "content": "as the diversity penalty instead of "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\Gamma ( \\pi )"
+          },
+          {
+            "type": "text",
+            "content": ". The objective is: "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        549,
+        823,
+        593
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\max  _ {\\pi_ {\\theta}} \\mathbb {E} _ {x \\sim D, y \\sim \\pi_ {\\theta} (y | x)} [ r (x, y) ] - \\beta \\mathbb {D} _ {\\mathrm {K L}} [ \\pi_ {\\theta} (y \\mid x) | | \\pi_ {\\mathrm {r e f}} (y \\mid x) ] + \\alpha \\mathcal {H} (\\pi_ {\\theta}) \\\\ = \\max  _ {\\pi_ {\\theta}} \\mathbb {E} _ {x \\sim D, y \\sim \\pi_ {\\theta} (y | x)} \\left[ r (x, y) - \\beta \\log \\left(\\frac {\\pi_ {\\theta} (y \\mid x)}{\\pi_ {\\mathrm {r e f}} (y \\mid x)}\\right) - \\alpha \\log \\pi_ {\\theta} (y \\mid x) \\right] \\tag {12} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/bb71e15961894cad30d7de03fd5ec69c81567ad4aaa200da8227fe22712ec687.jpg"
+        }
+      },
+      "bbox": [
+        256,
+        619,
+        825,
+        679
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "With the same approximation "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { \\pi }"
+          },
+          {
+            "type": "text",
+            "content": "and modified reward "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde { r } ( x , y ) = r ( x , y ) - \\alpha \\log \\tilde { \\pi } ( y \\mid x )"
+          },
+          {
+            "type": "text",
+            "content": ": "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        691,
+        753,
+        708
+      ]
+    },
+    {
+      "type": "equation_interline",
+      "content": {
+        "math_content": "\\begin{array}{l} \\mathcal {L} _ {\\mathrm {D i v P O}} \\left(\\pi_ {\\theta}; \\pi_ {\\mathrm {r e f}}\\right) = - \\mathbb {E} _ {(x, y _ {w}, y _ {l}) \\sim \\mathcal {D}} \\left[ \\log \\sigma \\left(\\beta \\log \\frac {\\pi_ {\\theta} (y _ {w} \\mid x)}{\\pi_ {\\mathrm {r e f}} (y _ {w} \\mid x)} - \\beta \\log \\frac {\\pi_ {\\theta} (y _ {l} \\mid x)}{\\pi_ {\\mathrm {r e f}} (y _ {l} \\mid x)} + \\right. \\right. \\\\ \\left. \\left. \\alpha \\log \\tilde {\\pi} \\left(y _ {l} \\mid x\\right) - \\alpha \\log \\tilde {\\pi} \\left(y _ {w} \\mid x\\right)\\right) \\right] \\tag {13} \\\\ \\end{array}",
+        "math_type": "latex",
+        "image_source": {
+          "path": "images/dcf68622533eeb3e7bcab0e066c9722e86c89e1dce47b8da7a16d46589aeb4a3.jpg"
+        }
+      },
+      "bbox": [
+        215,
+        731,
+        823,
+        792
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "The full algorithm is described in Algorithm 2, with deviations from base DPO (Rafailov et al., 2023) highlighted in blue. We find that this algorithm does not produce diversity gains (Table 4) or TMscore gains (Table 3). After entropy regularization, sample entropy does increase by around "
+          },
+          {
+            "type": "equation_inline",
+            "content": "2 5 \\%"
+          },
+          {
+            "type": "text",
+            "content": "compared to standard DPO; however, diversity does not improve at temperature 0. This supports the differential entropy theory from Section 4.4, since explicitly increasing discrete entropy does not help improve diversity. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        804,
+        823,
+        888
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "Interestingly, as shown in Table 4, at higher temperatures, entropy-regularized DPO does slightly increase diversity. This again aligns with the analysis in Section 4.4, as at higher temperatures, the "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        895,
+        823,
+        925
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "15 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "algorithm",
+      "content": {
+        "algorithm_caption": [
+          {
+            "type": "text",
+            "content": "Algorithm 2 Entropy-regularized DPO "
+          }
+        ],
+        "algorithm_content": [
+          {
+            "type": "text",
+            "content": "Require: Dataset  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "D = \\{(x^{(i)},y_w^{(i)},y_l^{(i)})\\}"
+          },
+          {
+            "type": "text",
+            "content": " , base policy  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi_{\\mathrm{ref}}"
+          },
+          {
+            "type": "text",
+            "content": " , hyperparameters  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\beta ,\\alpha"
+          },
+          {
+            "type": "text",
+            "content": " , max steps  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde{\\pi}"
+          },
+          {
+            "type": "text",
+            "content": " update frequency  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi_{\\theta}^{(0)}\\gets \\pi_{\\mathrm{ref}}"
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde{\\pi}\\gets \\pi_{\\mathrm{ref}}"
+          },
+          {
+            "type": "text",
+            "content": "   \nfor  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t = 1"
+          },
+          {
+            "type": "text",
+            "content": " to  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "N"
+          },
+          {
+            "type": "text",
+            "content": " do  \nif  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "t"
+          },
+          {
+            "type": "text",
+            "content": " mod  "
+          },
+          {
+            "type": "equation_inline",
+            "content": "K = 0"
+          },
+          {
+            "type": "text",
+            "content": " then  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\tilde{\\pi}\\gets \\pi_{\\theta}^{(t - 1)}"
+          },
+          {
+            "type": "text",
+            "content": "   \nend if  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "(x,y_w,y_l)\\gets"
+          },
+          {
+            "type": "text",
+            "content": " Minibatch(D)  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r(y_w,x)\\gets \\beta \\log \\frac{\\pi_\\theta^{(t - 1)}(y_w|x)}{\\pi_{\\mathrm{ref}}(y_w|x)}"
+          },
+          {
+            "type": "text",
+            "content": " ▷ Chosen reward  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "r(y_l,x)\\gets \\beta \\log \\frac{\\pi_\\theta^{(t - 1)}(y_l|x)}{\\pi_{\\mathrm{ref}}(y_l|x)}"
+          },
+          {
+            "type": "text",
+            "content": " ▷ Rejected reward  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat{H} (y_w,x)\\gets -\\alpha \\log \\tilde{\\pi} (y_w|x)"
+          },
+          {
+            "type": "text",
+            "content": " ▷ No gradient computation  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\hat{H} (y_l,x)\\gets -\\alpha \\log \\tilde{\\pi} (y_l|x)"
+          },
+          {
+            "type": "text",
+            "content": " ▷ No gradient computation  \n "
+          },
+          {
+            "type": "equation_inline",
+            "content": "\\pi_{\\theta}^{(t)}\\gets \\underset {\\theta}{\\mathrm{argmin}} - \\mathbb{E}_{(x,y_w,y_l)\\sim \\mathcal{D}}\\left[\\log \\sigma \\left(r(y_w,x) - r(y_l,x) + \\hat{H} (y_w,x) - \\hat{H} (y_l,x)\\right)\\right]"
+          },
+          {
+            "type": "text",
+            "content": "   \nend for "
+          }
+        ]
+      },
+      "bbox": [
+        171,
+        121,
+        825,
+        378
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "randomness introduced by the token sampling distribution dominates the randomness introduced by log-probability variations due to random decoding orders. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        405,
+        823,
+        436
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/dc5cbcb3956e7cba7e193b6a4dc55a2bb8bb695cc9fd258489a111858115e41c.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 3: Comparison of TM-Score for ProteinMPNN, standard DPO, and DPO with entropy regularization across different temperatures (T). Same evaluation setting as the OpenFold benchmark. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Method</td><td colspan=\"10\">TM-Score</td></tr><tr><td>T=0.0</td><td>T=0.1</td><td>T=0.2</td><td>T=0.3</td><td>T=0.4</td><td>T=0.5</td><td>T=0.6</td><td>T=0.7</td><td>T=0.8</td><td>T=0.9</td></tr><tr><td>ProteinMPNN</td><td>0.62</td><td>0.61</td><td>0.62</td><td>0.61</td><td>0.62</td><td>0.61</td><td>0.60</td><td>0.57</td><td>0.56</td><td>0.56</td></tr><tr><td>Standard DPO</td><td>0.66</td><td>0.66</td><td>0.65</td><td>0.66</td><td>0.65</td><td>0.65</td><td>0.65</td><td>0.64</td><td>0.63</td><td>0.61</td></tr><tr><td>DPO (α = 0.1)</td><td>0.66</td><td>0.67</td><td>0.66</td><td>0.66</td><td>0.65</td><td>0.64</td><td>0.63</td><td>0.63</td><td>0.61</td><td>0.60</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        176,
+        488,
+        828,
+        571
+      ]
+    },
+    {
+      "type": "table",
+      "content": {
+        "image_source": {
+          "path": "images/70027a80b31e2a30ed1a65684fa045e5d67f846f72ff0afbd4ceb6e87ed45845.jpg"
+        },
+        "table_caption": [
+          {
+            "type": "text",
+            "content": "Table 4: Comparison of diversity for ProteinMPNN, standard DPO, and DPO with entropy regularization across different temperatures (T). Same evaluation setting as the OpenFold benchmark. "
+          }
+        ],
+        "table_footnote": [],
+        "html": "<table><tr><td rowspan=\"2\">Method</td><td colspan=\"10\">Diversity</td></tr><tr><td>T=0.0</td><td>T=0.1</td><td>T=0.2</td><td>T=0.3</td><td>T=0.4</td><td>T=0.5</td><td>T=0.6</td><td>T=0.7</td><td>T=0.8</td><td>T=0.9</td></tr><tr><td>ProteinMPNN</td><td>0.31</td><td>0.35</td><td>0.39</td><td>0.47</td><td>0.54</td><td>0.59</td><td>0.65</td><td>0.71</td><td>0.74</td><td>0.78</td></tr><tr><td>Standard DPO</td><td>0.27</td><td>0.29</td><td>0.35</td><td>0.42</td><td>0.50</td><td>0.56</td><td>0.62</td><td>0.67</td><td>0.71</td><td>0.75</td></tr><tr><td>DPO (α = 0.1)</td><td>0.26</td><td>0.30</td><td>0.38</td><td>0.46</td><td>0.53</td><td>0.60</td><td>0.65</td><td>0.70</td><td>0.73</td><td>0.77</td></tr></table>",
+        "table_type": "complex_table",
+        "table_nest_level": 1
+      },
+      "bbox": [
+        176,
+        631,
+        828,
+        714
+      ]
+    },
+    {
+      "type": "title",
+      "content": {
+        "title_content": [
+          {
+            "type": "text",
+            "content": "A.4 SAMPLED SEQUENCE EXAMPLE STRUCTURES "
+          }
+        ],
+        "level": 1
+      },
+      "bbox": [
+        171,
+        738,
+        532,
+        752
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": {
+        "paragraph_content": [
+          {
+            "type": "text",
+            "content": "In Figures 7 and 6, we present some sequence samples conditioned on structures from both the OpenFold and CATH 4.3 benchmarks. We select pairs where reward scaled DPO and diversityregularized DPO outperform base ProteinMPNN for visualization. "
+          }
+        ]
+      },
+      "bbox": [
+        169,
+        763,
+        823,
+        806
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "16 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ],
+  [
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/a4146faf8ffa35119a0a697ea7d9027498d3136dd93f43878c3e9dfa74646369.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 6: Sequence samples on three randomly chosen structures from the CATH 4.3 peptide benchmark, all folded with OpenFold. Gray is the reference structure (OpenFold), red is a sample from base ProteinMPNN, blue is from diversity-regularized DPO, and green is from reward-scaled DPO. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        267,
+        99,
+        730,
+        460
+      ]
+    },
+    {
+      "type": "image",
+      "content": {
+        "image_source": {
+          "path": "images/9c6bce4f04b73279898008cb91ad348948d68e080e994fc14e1a2c78d4641383.jpg"
+        },
+        "image_caption": [
+          {
+            "type": "text",
+            "content": "Figure 7: Sequence samples on three randomly chosen structures from the OpenFold peptide benchmark, all folded with OpenFold. Gray is the reference structure (OpenFold), red is a sample from base ProteinMPNN, blue is from diversity-regularized DPO, and green is from reward-scaled DPO. "
+          }
+        ],
+        "image_footnote": []
+      },
+      "bbox": [
+        261,
+        556,
+        736,
+        876
+      ]
+    },
+    {
+      "type": "page_number",
+      "content": {
+        "page_number_content": [
+          {
+            "type": "text",
+            "content": "17 "
+          }
+        ]
+      },
+      "bbox": [
+        490,
+        946,
+        508,
+        959
+      ]
+    }
+  ]
+]

@@ -1,0 +1,706 @@
+[
+  {
+    "question": "What makes DNC and FWP less effective in handling some POPGym tasks despite their advanced architectures?",
+    "answer": "The context does not contain explicit information explaining why DNC and FWP are less effective in handling some POPGym tasks despite their advanced architectures.",
+    "url": "https://arxiv.org/abs/2410.10132",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.48
+    }
+  },
+  {
+    "question": "What role did cross-validation play in evaluating the performance of the mmPLRNN model on left-out test sets from 21 subjects?",
+    "answer": "The cross-validation protocol played a crucial role in evaluating the mmPLRNN model's performance on left-out test sets from 21 subjects. Specifically, a 5-fold cross-validation was conducted where each 20% segment of the time series was left out for testing while the remaining 80% was used for training. This process was repeated iteratively, ensuring that each segment had its turn as the test set. The results were aggregated across all test sets by summing them and normalizing by total counts, yielding a confusion matrix that summarized the model's performance. This systematic approach allowed for a reliable assessment of the model's generalizability and ensured that the findings were robust against overfitting to any particular segment of data.",
+    "url": "https://arxiv.org/abs/2111.02922",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 4
+      },
+      "score": 0.68
+    }
+  },
+  {
+    "question": "How do the developed methods contribute to broader advancements in AI model interpretability and safety?",
+    "answer": "The developed methods contribute to broader advancements in AI model interpretability and safety by introducing Activation Transport (ACT), a framework that steers activations using optimal transport theory. ACT is modality-agnostic, providing fine-grained control over model behavior with minimal computational overhead while preserving internal activation distributions. This approach avoids moving activations out-of-distribution, enhancing robustness and reliability. By using a bounded parameter λ for explicit control, ACT offers interpretable adjustments to model conditioning. Its effectiveness across large language models and text-to-image diffusion models demonstrates versatility in ensuring consistent performance without relying on extensive fine-tuning or adapters, thus advancing both interpretability and safety in AI systems.",
+    "url": "https://arxiv.org/abs/2410.23054",
+    "label": "motivation",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 4,
+        "step_complexity": 4
+      },
+      "score": 0.76
+    }
+  },
+  {
+    "question": "In dynamic scene modeling, what trade-offs exist between training time and rendering quality improvements using methods like FPO?",
+    "answer": "In dynamic scene modeling, methods like Fourier PlenOctree (FPO) achieve significant improvements in both training time and rendering quality. Our approach is 3000 times faster than the original NeRF implementation and achieves over an order of magnitude acceleration over state-of-the-art techniques while preserving high visual quality for free-viewpoint rendering of unseen dynamic scenes. This shows that FPO enables compact memory overload to handle dynamic objects and supports efficient fine-tuning. Furthermore, our experimental results demonstrate the effectiveness and efficiency of FPO for high-quality dynamic scene modeling. However, the method still requires dense inputs for static or dynamic scenes, and the capturing settings are expensive and hard to construct. Additionally, compared with implicit representations such as MLP-based representation for static or dynamic scenes, Fourier PlenOctree still needs larger storage and GPU memory requirement. When the motion of the dynamic scene is faster or the frame number of the multi-view videos is more extended, a higher dimension of Fourier coefficients is needed to keep a high quality of rendered results, which requires higher storage and GPU memory. Finally, we cannot handle large movements of entities like walking performers on the street, as our approach is inefficient when using the union of visual hulls to initialize Fourier PlenOctrees.",
+    "url": "https://arxiv.org/abs/2202.08614",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 3,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.84
+    }
+  },
+  {
+    "question": "How does this particular research domain relate to broader academic disciplines?",
+    "answer": "The research domain relates to broader academic disciplines in several key ways:\n\n- **Computer Vision**: The study focuses on multi-label zero-shot learning (ZSL) and generalized ZSL (GZSL), utilizing techniques like region-based features and attention mechanisms, which are fundamental in computer vision. It builds upon works that explore CNNs, texture vs. shape bias, and context-aware object recognition.\n\n- **Machine Learning**: The framework employs attention modules and transformer-like architectures, drawing from advancements in neural networks and deep learning. The use of ranking loss for training aligns with machine learning practices for model optimization.\n\n- **Natural Language Processing (NLP)**: Incorporation of GloVe embeddings for attribute vectors bridges the gap between vision and language processing, demonstrating an interdisciplinary approach.\n\n- **Data Science**: Evaluation on large-scale datasets like NUS-WIDE and Open Images contributes to benchmarking efforts in AI research, emphasizing dataset curation and standardization.\n\n- **Cognitive Science**: The emphasis on context-aware learning connects to theories of human perception and cognition, suggesting implications beyond technical advancements for understanding contextual processing.\n\nThis integration of techniques from computer vision, machine learning, NLP, and cognitive science highlights the interdisciplinary nature of the research, contributing to broader efforts in developing robust AI models.",
+    "url": "https://arxiv.org/abs/2108.09301",
+    "label": "research domain",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.68
+    }
+  },
+  {
+    "question": "How do InteL-VAEs differ from standard VAEs in terms of incorporating inductive biases into generative models?",
+    "answer": "InteL-VAEs differ from standard VAEs by introducing an intermediary latent space \\( Y \\) that separates the stochastic encoding process from the structured representation. In InteL-VAEs, data is first encoded into \\( Y \\) using a conventional Gaussian encoder, and then transformed into the final latent representation \\( Z \\) through a non-stochastic mapping \\( g_\\psi \\). This mapping \\( g_\\psi \\) directly enforces desired inductive biases on \\( Z \\), such as sparsity or clustering. Unlike standard VAEs, which rely solely on the prior to indirectly influence the structure of \\( Z \\), InteL-VAEs ensure that the representations in \\( Z \\) have the desired properties by design. Additionally, while standard VAEs can struggle with non-Gaussian priors due to encoder-prior mismatches and training complexities, InteL-VAEs maintain a simple Gaussian prior on \\( Y \\), avoiding these issues and allowing for more flexible and effective incorporation of inductive biases.",
+    "url": "https://arxiv.org/abs/2106.13746",
+    "label": "findings/assumptions",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.8
+    }
+  },
+  {
+    "question": "What methods were used to analyze early visual models and their sensitivity to distortions?",
+    "answer": "The methods used to analyze early visual models and their sensitivity to distortions included generating principal distortions through the Fisher information matrix (FIM) to characterize local stimulus sensitivity. The FIM was computed by assuming additive Gaussian noise, resulting in \\( I(s) = J_f(s)^\\top J_f(s) \\), where \\( J_f(s) \\) is the Jacobian of the model at input \\( s \\). Additionally, extremal eigenvectors of the FIM, termed eigen-distortions, were used to predict the most- and least-noticeable distortions. Parameters for each model were optimized to match human ratings from the TID-2008 database, ensuring accurate prediction of human distortion thresholds.",
+    "url": "https://arxiv.org/abs/2410.15433",
+    "label": "previous methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.8
+    }
+  },
+  {
+    "question": "How were the K-function vectors computed during training, including details about radius ranges and normalization?",
+    "answer": "The K-function vectors were computed during training by considering a local patch of size 180 × 180 pixels centered at each cell. The K-functions were calculated using uniform sampling at radii r = 15, 30, 45, ..., up to 90 pixels, resulting in six dimensions per class. For three classes (inflammatory, epithelial, and stromal), this yielded an 18-dimensional vector. The ground truth K-functions were generated using an R-package with border correction, with radii ranging from [0, 90] pixels in steps of 15. Normalization was performed by multiplying the K-function by the number of cells in the region area times n_max, set to 100.",
+    "url": "https://arxiv.org/abs/2110.04886",
+    "label": "experimental settings",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 4,
+        "step_complexity": 4
+      },
+      "score": 0.72
+    }
+  },
+  {
+    "question": "How do Algorithms 1 and 2 differ in their approach to generating heterophilous graphs?",
+    "answer": "Algorithm 1 and Algorithm 2 differ in their approach to generating heterophilous graphs primarily through the introduction of a noise parameter, γ. \n\nAlgorithm 1 strictly follows predefined target distributions D_c when adding cross-label edges. It samples nodes uniformly from V, selects labels according to D_{y_i}, and adds edges based on these structured patterns, ensuring that nodes of the same class maintain similar neighborhood distributions.\n\nIn contrast, Algorithm 2 introduces randomness through γ, which controls the probability of adding edges randomly rather than adhering strictly to D_c. As γ increases, more edges are added without following the target distributions, leading to less distinguishable neighborhood patterns between different classes and thus introducing noise into the graph structure. This results in graphs where the neighborhood distributions become more indistinct across classes as γ increases.\n\nIn summary, Algorithm 1 generates heterophilous graphs by adding edges based on predefined distributions, while Algorithm 2 introduces controlled randomness (via γ) to create varying levels of noise in the edge addition process.",
+    "url": "https://arxiv.org/abs/2106.06134",
+    "label": "methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "Can you explain the semantic-aware localization scheme used in ContrastiveCrop and its role in reducing false positives?",
+    "answer": "The semantic-aware localization scheme in ContrastiveCrop is designed to reduce false positives by guiding crop generation based on semantic information. It operates by first applying RandomCrop at the early training stage to collect whole-image semantic information. Then, it uses an indicator function on heatmaps derived from the last convolutional layer's features to obtain a bounding box of the object. This bounding box is calculated as \\( B = L(1[M > k]) \\), where \\( M \\) is the normalized heatmap and \\( k \\) is a threshold. Crops are then generated by constraining their centers within this bounding box, which helps avoid false positives by focusing on regions containing the object rather than background. This approach effectively reduces false positive pairs as shown in Figure 3, where RandomCrop with semantic-aware localization significantly decreases such occurrences compared to standard RandomCrop.",
+    "url": "https://arxiv.org/abs/2202.03278",
+    "label": "methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.76
+    }
+  },
+  {
+    "question": "How do these methods ensure global optimality and convergence guarantees for reinforcement learning problems?",
+    "answer": "The methods ensure global optimality and convergence guarantees for reinforcement learning problems through several key components:\n\n1. **Convergence of Mean-field PPO**: Theorem 4.1 establishes that MF-PPO converges to the globally optimal policy at a rate of \\( O(T^{-1}) \\) up to the policy evaluation error. This theorem implies the global optimality and convergence of a double-loop AC algorithm, where the critic is solved to high precision.\n\n2. **Two-timescale Updates**: The actor updates via PPO, closely related to replicator dynamics, while the critic updates faster through TD learning, captured by a semigradient flow in Wasserstein space. This separation allows analyzing each component's convergence separately before combining results for global guarantees.\n\n3. **Restarting Mechanism**: Ensures the critic's parameter distribution stays within a bounded distance from its initial state, maintaining representational capabilities and preventing divergence.\n\n4. **Policy Evaluation Error**: Theorem 4.6 shows that with restarting, the time-averaged suboptimality gap converges to zero at a sublinear rate, ensuring global optimality.\n\nThese elements collectively ensure the algorithm's stability and convergence towards optimal policies.",
+    "url": "https://arxiv.org/abs/2112.13530",
+    "label": "methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 3,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 5
+      },
+      "score": 0.88
+    }
+  },
+  {
+    "question": "Can you explain how the cumulative sum tables Σ j are constructed and used for efficient sampling?",
+    "answer": "The cumulative sum tables Σ j are constructed to facilitate efficient sampling by leveraging precomputed values. For each dimension j ∈ [d], a vector -→ E j is computed as the sum of Q kj · D O k, : across all k, which takes O(nd²) time. These vectors are then used to build cumulative sums (Σ j ) ℓ for each ℓ ∈ [n], where (Σ j ) ℓ = ∑ s=1 ℓ Q sj · D O s, : . \n\nDuring the sampling process, these precomputed Σ j tables enable efficient probability calculations. When sampling according to Y(i):j + M, a uniform variable x_ij is drawn and a binary search is performed. For each candidate ℓ during the binary search, the cumulative sum up to ℓ is computed as kM + ⟨V_i, :, (Σ j ) ℓ ⟩. This allows each step of the binary search to be completed in O(d) time, ensuring that the overall sampling process remains efficient with a complexity of O(d log n) per sample after preprocessing.\n\nThis method significantly reduces the computational burden by avoiding repeated calculations and enables sublinear time sampling, making it suitable for large datasets where direct computation would be prohibitive.",
+    "url": "https://arxiv.org/abs/2411.04013",
+    "label": "experimental settings",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 5
+      },
+      "score": 0.84
+    }
+  },
+  {
+    "question": "Can you describe how the 290 syntactic equation templates were derived from the Cognitive Tutor Algebra dataset for generating problems in the equations environment?",
+    "answer": "The 290 syntactic equation templates were derived by collecting all equations from the logs in the Cognitive Tutor Algebra dataset and replacing their numerical constants with placeholders. This process allowed for the generation of problems by independently substituting each placeholder with an integer between -10 and 10, inclusive, ensuring a wide variety of problem instances while maintaining the structural integrity of the original equations.",
+    "url": "https://arxiv.org/abs/2106.09146",
+    "label": "experimental settings",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 1,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.44
+    }
+  },
+  {
+    "question": "What was the effectiveness of the three-stage training setup in improving the quality of synthetic point clouds and multi-view images generated by X-DRIVE?",
+    "answer": "The effectiveness of X-DRIVE's three-stage training setup is demonstrated through its ability to generate high-quality synthetic data. The first stage involved training the VAE for range images from scratch with a batch size of 96 and learning rate of 4e-4 for 200 epochs. In the second stage, the LiDAR latent diffusion model was trained without cross-modality conditions using a batch size of 96 and learning rate of 1e-4 for 2000 epochs. The final stage combined all components in an end-to-end manner with a smaller batch size of 24 and lower learning rate of 8e-5 for 250 epochs, resulting in comparable or superior performance to single-modality methods like MagicDrive and RangeLDM. This approach ensured cross-modality consistency, as evidenced by the improved Depth Alignment Score (DAS) and View Consistency Score (VSC), highlighting better alignment between synthetic point clouds and multi-view images.",
+    "url": "https://arxiv.org/abs/2411.01123",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 3
+      },
+      "score": 0.72
+    }
+  },
+  {
+    "question": "What effect does the number of gallery samples (K=1, 2, 5) have on user-to-user verification accuracy using the proposed methods?",
+    "answer": "The number of gallery samples (K=1, 2, 5) significantly impacts user-to-user verification accuracy. As K increases, the system's ability to accurately verify users enhances due to the averaging of features from multiple samples, leading to more robust and stable representations. This results in improved True Acceptance Rates (TAR) at specific False Acceptance Rates (FAR) and reduced errors in both authentication and presentation attack detection. Thus, higher K values contribute to better overall performance in the proposed methods.",
+    "url": "https://arxiv.org/abs/2112.11610",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 1,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.44
+    }
+  },
+  {
+    "question": "In what ways does DVNC enhance systematic generalization compared to continuous communication methods?",
+    "answer": "Discrete-Valued Neural Communication (DVNC) enhances systematic generalization compared to continuous communication methods in several ways:\n\n1. **Noise Robustness**: DVNC improves noise robustness by making communication invariant to noise within the same category. This is because discretization reduces sensitivity to noise, as demonstrated by theoretical bounds that show the error due to noise disappears with discretization.\n\n2. **Dimensionality Reduction**: The process lowers the underlying dimensionality of the model. Without discretization, the dimensionality scales with \\( m \\ln(4 \\sqrt{m}) \\), whereas with DVNC, it scales with \\( G \\ln(L) \\). This reduction is nearly always the case as long as \\( G \\ln(L) < m \\).\n\n3. **Improved Out-of-Distribution (OOD) Generalization**: Empirical experiments across various architectures, such as Transformers, Graph Neural Networks (GNNs), and Modular Recurrent Neural Networks (RIMs), show that DVNC improves OOD generalization. For example, in RIMs applied to a numeric reasoning task, DVNC significantly outperformed baseline methods.\n\n4. **Systematic Generalization through Shared Discrete Symbols**: The use of shared discrete symbols promotes systematic generalization by ensuring consistent communication among different components, similar to how humans communicate through discrete language tokens despite individual differences in internal representations.\n\n5. **Expressiveness and Sample Efficiency**: DVNC achieves a balance between expressiveness and sample efficiency. While continuous signals are expressive but prone to poor systematic generalization, multi-head discrete values maintain high expressiveness while being more sample-efficient.\n\nThese advantages make DVNC particularly effective for tasks requiring robust and systematic generalization across different neural architectures.",
+    "url": "https://arxiv.org/abs/2107.02367",
+    "label": "motivation",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.8
+    }
+  },
+  {
+    "question": "How does FreCaS perform across different diffusion models such as SD2.1, SDXL, and SD3 at varying scales?",
+    "answer": "FreCaS demonstrates superior performance across different diffusion models and varying scales. On SD2.1 and SDXL, it achieves the best FIDb scores in all experiments, outperforming competitors while maintaining significantly faster inference speeds—showing more than 2× speedup on ×4 generation and over 3.6× on ×16 generation. For SD3, FreCaS is compared with DirectInference and DemoDiffusion, though specific results are detailed in Appendix D. Across these models, FreCaS consistently maintains coherent image contents and layout, generating clearer details while avoiding duplicated objects, as shown in visual comparisons.",
+    "url": "https://arxiv.org/abs/2410.18410",
+    "label": "research domain",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.72
+    }
+  },
+  {
+    "question": "What gaps remain in the ability of current methods to balance sequence diversity and reward optimization effectively?",
+    "answer": "The context highlights several gaps in balancing sequence diversity and reward optimization:\n\n1. **Trade-off Challenges**: At high α values (e.g., 0.5), diversity regularization can negatively impact both diversity and reward performance, leading to a collapse in model capacity via excessive deviation from the initial policy.\n\n2. **Sequence Recovery Trade-offs**: While higher α values may reduce native sequence recovery rates compared to standard DPO, this gap can be mitigated by sampling more sequences during inference, though this requires additional computational resources.\n\n3. **Computational Efficiency**: The method involves caching samples and updating the approximate policy ˜π only every K epochs to minimize computational cost, which may limit responsiveness to diversity changes during training.\n\nThese points underscore the need for careful parameter tuning and balancing of computational demands when optimizing for both sequence diversity and reward.",
+    "url": "https://arxiv.org/abs/2410.19471",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "What are the key components of the evaluation protocol for 3D reconstruction using the IMC dataset?",
+    "answer": "The key components of the evaluation protocol for 3D reconstruction using the IMC dataset include:\n\n- **2048 keypoints**: The number of features considered based on the protocol proposed in [60].\n- **Geometric verification with DEGENSAC**: Used to filter false-positive matches.\n- **First-to-second nearest-neighbour ratio**: Applied for filtering purposes.\n- **Scale correction methods (ScaleNet and D-ScaleNet)**: ScaleNet corrects scale differences before feature extraction, while D-ScaleNet optimizes the process by selecting maximum scale through hard-assignment.\n- **Evaluation metrics**: Including registered images, number of observations, track length, and reprojection error, as detailed in tables such as Table 4 and Table 5.\n- **Multi-scene testing**: The protocol is applied across ten different scenes from the IMC dataset, each containing 100 images.",
+    "url": "https://arxiv.org/abs/2112.04846",
+    "label": "experimental settings",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "How does DEEPCTRL improve sales forecasting accuracy by incorporating economic principles about price-sales correlation in retail data?",
+    "answer": "DEEPCTRL improves sales forecasting accuracy by incorporating economic principles about price-sales correlation through several mechanisms:\n\n1. **Perturbation-Based Objective**: DEEPCTRL applies a positive perturbation to the item's price and uses a rule loss function \\( L_{\\text{rule}}(\\hat{y}, \\hat{y}_p) = \\text{ReLU}(\\hat{y}_p - \\hat{y}) \\). This setup enforces a negative correlation between price changes and sales changes, aligning with economic principles.\n\n2. **Group-Specific Training**: Items are split into groups based on their price-sales correlation (NEG0.1, NEG0.2, NEG0.3). DEEPCTRL is trained on each group, demonstrating superior performance compared to TASKONLY in terms of lower Mean Absolute Error (MAE) for stronger correlations (NEG0.2 and NEG0.3).\n\n3. **Optimal Rule Strength Adjustment**: The optimal α value shifts to larger values as the correlation between price and sales strengthens, indicating that DEEPCTRL can adjust how much it relies on the economic principle based on the data.\n\n4. **Adaptation to Distribution Shifts**: When applied to target domains with different correlations, DEEPCTRL can adjust α without retraining. For example, when moving from NEG0.2 to POS0.2 or POS0.3 groups where the rule isn't as strong, the optimal α decreases, sometimes to zero, showing that DEEPCTRL can recognize when the rule isn't beneficial and scales back its influence.\n\nBy balancing data-driven learning with rule-based insights through adjustable parameters like α, DEEPCTRL maintains or improves accuracy across different scenarios without needing retraining each time.",
+    "url": "https://arxiv.org/abs/2106.07804",
+    "label": "findings/assumptions",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.8
+    }
+  },
+  {
+    "question": "What is the key performance metric used to evaluate cooperation efficiency in the C-WAH framework?",
+    "answer": "The key performance metric used to evaluate cooperation efficiency in the C-WAH framework is **Average Steps to complete all tasks**.",
+    "url": "https://arxiv.org/abs/2411.04679",
+    "label": "research domain",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 4,
+        "step_complexity": 1
+      },
+      "score": 0.48
+    }
+  },
+  {
+    "question": "How did the Jacobian matrix columns for JL1-VAE reflect better separation of individual dot motions in the three-dots dataset compared to β-VAE?",
+    "answer": "The Jacobian matrix columns for JL1-VAE reflected better separation of individual dot motions in the three-dots dataset compared to β-VAE. When evaluating the generator Jacobian of the JL1-VAE, individual dot motions were separated into different latent components, whereas the β-VAE did not exhibit this behavior. This demonstrates that the L1 regularization encourages sparse changes to the image space, allowing each latent direction to correspond to specific, localized movements of individual dots without affecting others.",
+    "url": "https://arxiv.org/abs/2106.02923",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 3,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 3
+      },
+      "score": 0.76
+    }
+  },
+  {
+    "question": "How does DQ outperform VQ in reconstruction loss on datasets like MNIST and CelebA according to the ablation study?",
+    "answer": "According to the ablation study, on MNIST, DQ outperforms VQ with an L2 reconstruction loss of 1.92e-04 compared to 3.41e-04 for VQ. Similarly, on CelebA, DQ achieves a lower L2 reconstruction loss of 9.57e-03 compared to 3.70e-02 for VQ.",
+    "url": "https://arxiv.org/abs/2203.08080",
+    "label": "findings/assumptions",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 1,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.44
+    }
+  },
+  {
+    "question": "What challenges in existing knowledge distillation methods led to the creation of SKD?",
+    "answer": "The challenges in existing knowledge distillation methods that led to the creation of Speculative Knowledge Distillation (SKD) were primarily twofold. First, supervised KD suffered from a distribution mismatch between training on static datasets and inference over dynamic student-generated outputs. Second, on-policy KD faced issues with low-quality student-generated samples, which were often unfamiliar to the teacher model, resulting in inaccurate feedback. These limitations motivated the development of SKD, which addresses both by interactively sampling tokens based on the teacher's likelihood, ensuring high-quality training data aligned with the student's inference distribution.",
+    "url": "https://arxiv.org/abs/2410.11325",
+    "label": "motivation",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 2
+      },
+      "score": 0.6
+    }
+  },
+  {
+    "question": "In the qualitative results, how did the attention maps generated by the proposed approach focus on desired classes like 'zebra' or 'vehicle'?",
+    "answer": "In qualitative results, the attention maps generated by the proposed approach focus reasonably well on desired classes such as 'zebra' in (a) and 'vehicle' in (b). These maps demonstrate promising class-specific attention for these classes.",
+    "url": "https://arxiv.org/abs/2108.09301",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.48
+    }
+  },
+  {
+    "question": "How do the memory requirements of these methods compare when handling large graphs with many vertices and edges?",
+    "answer": "The memory requirements of these methods are as follows:\n\nFor handling large graphs with many vertices and edges, the methods initially use **O(n + |E|) memory**. This is because the algorithms store only the necessary edges and vertices without requiring additional storage proportional to the number of constraints in the SDP relaxation.\n\nHowever, for dense graphs arriving in a stream, the methods can be combined with spectral sparsification techniques. This approach reduces the memory requirement to **O(n log n / τ²)**, where τ is a spectral closeness parameter. The sparsified graph maintains similar spectral properties to the original dense graph while significantly reducing the number of edges stored.\n\nThis shows that the memory usage can be made more efficient for dense graphs by leveraging sparsification, although it comes at the cost of slightly worse approximation guarantees.",
+    "url": "https://arxiv.org/abs/2110.00779",
+    "label": "previous methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "How do the choices of assumptions like RSI- and EB+ impact the theoretical optimality of first-order algorithms?",
+    "answer": "The choices of assumptions like RSI- and EB+ significantly impact the theoretical optimality of first-order algorithms. For instance, Theorem 2 establishes a lower bound on the worst-case convergence rate of any first-order algorithm under these conditions, showing that gradient descent (GD) achieves exact optimality. This means GD's convergence guarantees match the derived lower bounds precisely without additional constant factors. \n\nFurthermore, the analysis reveals that when the condition number \\( L/\\mu \\geq \\sqrt{2} \\), using a larger step size on the first iteration can improve worst-case convergence speed by a constant factor. However, if \\( L/\\mu < \\sqrt{2} \\), the optimal tuning remains consistent with standard GD.\n\nThe framework of RSI- and EB+ ensures that no algorithm can achieve better asymptotic convergence rates than GD on these classes of functions, confirming the impossibility of acceleration. This highlights how the choice of assumptions directly influences the theoretical limits of first-order algorithms' performance, providing a foundation for tight and realistic convergence guarantees.",
+    "url": "https://arxiv.org/abs/2203.00342",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 3,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.84
+    }
+  },
+  {
+    "question": "What role do vision transformers play in the framework developed for video scene understanding?",
+    "answer": "Vision transformers play a crucial role in the proposed framework for video scene understanding. They enable the development of a scene encoder that can handle variable-length multi-shot inputs through the incorporation of positional embedding interpolation. This allows the framework to effectively process long-form videos without requiring additional tuning, as seen with models like TimeSformer, ViViT, and MViT. The use of vision transformers facilitates capturing inter-shot relationships and provides more general-purpose scene representations compared to other architectures such as ResNet-based models. Furthermore, vision transformers offer improved efficiency and scalability, making them suitable for large-scale datasets while maintaining performance.",
+    "url": "https://arxiv.org/abs/2202.10650",
+    "label": "research domain",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "How do first-order methods perform in high-dimensional spaces under RSI- and EB+ conditions?",
+    "answer": "First-order methods achieve optimal performance under the RSI- and EB+ conditions in high-dimensional spaces. Theorem 2 establishes that any first-order algorithm has a lower bound on its worst-case convergence rate, which is tight and matched by gradient descent's guarantees. Specifically, for functions in RSI-(µ) ∩ EB(+L), gradient descent with a learning rate of α = µ/L² achieves a convergence rate of ‖x_i - x∗‖² ≤ (1 - 2µ/(L + µ))²i ‖x₀ - x∗‖². Furthermore, when L/µ ≥ √2, using an initial step size of α₀ = ½µ leads to a better worst-case convergence rate. These results demonstrate that gradient descent is exactly optimal on this class of functions, and no algorithm can achieve a better worst-case convergence rate than gradient descent under these conditions. Additionally, the PEP experiment in Section 5.2 confirms that first-order methods like Heavy Ball with optimal tuning also achieve linear convergence rates on RSI-∩EB+ functions, although momentum does not improve performance in this setting.",
+    "url": "https://arxiv.org/abs/2203.00342",
+    "label": "research domain",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 3,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 5
+      },
+      "score": 0.88
+    }
+  },
+  {
+    "question": "How does the research address ethical considerations, such as bias mitigation and transparency, in developing AI systems for economic policymaking?",
+    "answer": "The research emphasizes the importance of rigorously evaluating any existent biases imparted by developers or training data. Furthermore, defining social welfare in the real world will be an involved task and should likely be multifaceted, unlike our naive implementation. The continued development of this field should involve a diverse set of people from different backgrounds, professions, and viewpoints. Progress should be fully transparent, and made digestible to those outside of technical research. For this reason, we will be publishing an open-access website with a simplified summary of this work upon publication, as well as all source code.",
+    "url": "https://arxiv.org/abs/2410.08345",
+    "label": "methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 3,
+        "step_complexity": 3
+      },
+      "score": 0.6
+    }
+  },
+  {
+    "question": "What led the researchers to explore combining strong and normal data augmentations instead of using a single strategy?",
+    "answer": "The researchers explored combining strong and normal data augmentations instead of using a single strategy because simply adopting strong augmentation in SiTraining did not improve performance; on the contrary, it hurt the training process, resulting in worse performance than using normal augmentation. This shows that while strong augmentation alone was detrimental, the mixed data augmentation strategy alleviated the training difficulty associated with strong augmentation and improved performance by 0.8 points compared to normal augmentation alone.",
+    "url": "https://arxiv.org/abs/2111.03056",
+    "label": "motivation",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.52
+    }
+  },
+  {
+    "question": "What role did large language models like GPT-3 and Codex play in the research?",
+    "answer": "Large language models like GPT-3 and Codex played a significant role in the research by demonstrating their potential to connect natural language intent with computer actions. They were shown to be fast and flexible learners for a variety of language understanding tasks due to their pretraining on vast amounts of human-generated text. Specifically, Codex highlighted the ability to fine-tune models on publicly available code, enabling them to translate human language into actionable steps on digital devices. This capability was crucial in advancing the research towards creating agents that could effectively perform tasks specified through natural language instructions.",
+    "url": "https://arxiv.org/abs/2202.08137",
+    "label": "previous methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.52
+    }
+  },
+  {
+    "question": "How were hyperparameters such as learning rates, batch sizes, and weight decay chosen for each experiment?",
+    "answer": "The hyperparameters such as learning rates, batch sizes, and weight decay were chosen based on specific settings for each experiment without explicit details on their selection rationale. For instance:\n\n- **Figure 2**: Experiments used gradient descent with a learning rate of 0.1, momentum of 0.9, and weight decay set to 0.\n- **Figure 8**: Adam optimizer was employed with default parameters for 100 epochs, weight decay at 0.\n- Other experiments like those in Figures 4, 5, and 6 used varying epoch counts (50 or 100) with learning rates of 0.1 or 0.2, batch size consistently at 128, and weight decay set to 5 × 10⁻⁴ for Tables 1 and 2.\n\nThe selection process for these hyperparameters isn't detailed in the context provided.",
+    "url": "https://arxiv.org/abs/2410.12025",
+    "label": "experimental settings",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 3,
+        "conceptual_depth": 2,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 2,
+        "step_complexity": 2
+      },
+      "score": 0.44
+    }
+  },
+  {
+    "question": "What are the key limitations of variance-reduced policy gradient methods in reinforcement learning?",
+    "answer": "The key limitations of variance-reduced policy gradient methods in reinforcement learning are:\n\n1. **Unrealistic and uncheckable assumption on importance weight variance**: All discussed variance-reduced policy gradient methods heavily rely on the stringent and uncheckable assumption that the importance weights have bounded variance for every iteration of the algorithms. To enforce this indirectly, very small values of the stepsize are needed, resulting in a dramatic slowdown of the convergence rate.\n\n2. **Extreme sensitivity to hyperparameters**: The benchmarks suggest an extreme sensitivity to the hyperparameters, especially the choice of the step-size. Time-consuming and resource-expensive tuning procedures are required to select a proper configuration of hyperparameters.\n\n3. **Noise annealing strategies**: Empirical evidence suggests that in the presence of complex non-concave landscapes, exploration in the form of noise injection is critical in the early stages of training to prevent convergence to spurious local maximizers. However, adding a regularizer changes the optimal policy, and alternative approaches like increasing batch size or adjusting the probability of switching updates might be needed.",
+    "url": "https://arxiv.org/abs/2202.00308",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.8
+    }
+  },
+  {
+    "question": "What are the primary limitations of ScaleNet when applied to large collections of images for tasks like 3D reconstruction?",
+    "answer": "The primary limitations of ScaleNet when applied to large collections of images for tasks like 3D reconstruction are that it works with pairs of images, hence features cannot be stored but need to be computed every time a new image is presented, increasing the feature extraction time as seen in table 5. Furthermore, ScaleNet requires detectors and descriptors to be recomputed every time the scale is corrected before feature extraction, which increases computational time. To mitigate this, D-ScaleNet was proposed as a more efficient variant.",
+    "url": "https://arxiv.org/abs/2112.04846",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "What is the effect of varying the quantile threshold q TB on the true positive rates in the gene perturbation experiment?",
+    "answer": "The effect of varying the quantile threshold \\( q_{TB} \\) on the true positive rates in the gene perturbation experiment is as follows:\n\nIn Section 6.3, the authors analyze the impact of changing \\( q_{TB} \\), which determines when a gene pair is considered a true positive. For the main results, they use \\( q_{TB} = 1\\% \\), meaning a pair (gene X, gene Y) is a true positive if gene Y's value under intervention on gene X lies outside the 0.01- and 0.99-quantiles of its observational distribution.\n\nIn Figure 11, the authors plot the true positive rates for several \\( q_{TB} \\) choices. They observe that while increasing \\( q_{TB} \\) increases the true positive rate for their method, it also comparably increases the true positive rate for random guessing. This indicates that changing \\( q_{TB} \\) does not substantially alter the excess true positive rate of their method compared to random guessing.\n\nThis suggests that although the true positives are inferred from data, the conclusions drawn in Figure 5 are robust with respect to some modeling choices of \\( q_{TB} \\).",
+    "url": "https://arxiv.org/abs/2202.00913",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "How do the visualizations of prior queries and learned parameters in Figures 9 and 10 demonstrate the advantages of TAPE-Net over other methods like IPT?",
+    "answer": "Figures 9 and 10 demonstrate the advantages of TAPE-Net over other methods like IPT through their visualizations. \n\nIn Figure 9, the predicted results of PLM (c) show that with pre-training, the PLM module can correlate similar textures or patches from long distances, enabling the transformer decoder to effectively restore images. This capability highlights how TAPE-Net leverages distant information for better restoration.\n\nFigure 10 reveals that TAPE's learned parameters focus on farther distances and exhibit richer patterns compared to IPT's position embeddings. For instance, some patches in TAPE focus on image corners or oblique directions, showcasing a diversity not present in IPT. These rich feature maps indicate that TAPE captures more varied and distant information, enhancing its restoration performance.\n\nThus, the visualizations illustrate that TAPE-Net effectively uses long-distance correlations and diverse features, providing superior image restoration compared to IPT.",
+    "url": "https://arxiv.org/abs/2203.06074",
+    "label": "findings/assumptions",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "What are the roles of parameters N and L in adjusting the inference schedule for FreCaS?",
+    "answer": "The parameters **N** and **L** play crucial roles in adjusting the inference schedule for FreCaS:\n\n- **N** represents the number of additional stages used during the inference process. It was found that setting **N = 1** achieves better FID scores compared to **N = 0** and **N = 2**, as a larger **N** introduces more transition steps, leading to information loss, while a smaller **N** reduces the effectiveness of FreCaS. Thus, **N = 1** was chosen for SDXL experiments.\n\n- **L** denotes the timestep of the last latent in each stage. A smaller **L** improves FID b scores but deteriorates FID p scores because details generated at lower resolutions conflict with those at higher resolutions. To balance this, **L** was set to 200 to avoid generating excessive unwanted details early on.\n\nThese settings ensure an optimal balance between image quality and detail preservation in the inference process.",
+    "url": "https://arxiv.org/abs/2410.18410",
+    "label": "experimental settings",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.64
+    }
+  },
+  {
+    "question": "In what ways have Bootstrapping Learning strategies been applied to optimize shared weights in transformer models?",
+    "answer": "Bootstrapping Learning strategies have been applied to optimize shared weights in transformer models through mutual knowledge distillation between the vision Transformer (ViT) and an agent CNN. This involves the predicted probabilities of both models learning from each other under a mutual learning framework. Additionally, gradients computed from each network are aligned using a gradient alignment function to jointly update the shared weights. The training process employs weight sharing between the ViT and agent, with private weights updated separately before aligning gradients for shared weight optimization. Furthermore, intermediate features of the agent supervise the ViT, transferring inductive biases to enhance optimization without pre-training.",
+    "url": "https://arxiv.org/abs/2112.03552",
+    "label": "previous methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 5,
+        "linguistic_complexity": 4,
+        "prior_knowledge": 5,
+        "step_complexity": 4
+      },
+      "score": 0.8
+    }
+  },
+  {
+    "question": "What limitations exist in current mutual learning frameworks for knowledge distillation between Vision Transformers and CNNs?",
+    "answer": "The context highlights several limitations of current mutual learning frameworks for knowledge distillation between Vision Transformers (ViTs) and CNNs:\n\n1. **Reliance on Pre-training**: Many existing approaches still require pre-training on mid-sized datasets like ImageNet-1k, which is time-consuming and resource-intensive. For instance, Dosovitskiy et al. spent thousands of TPU days to pre-train a ViT with 303M images.\n\n2. **Optimization Challenges Without Pre-training**: Without large-scale pre-training or strong data augmentation strategies, ViTs perform poorly due to the dense connections in their multi-head self-attention (MHSA) layers, making them hard to optimize from scratch.\n\n3. **Need for Heuristic Modifications**: Current methods often involve heuristic modifications such as sparse attention or token aggregation, which require complex hyperparameter tuning and can complicate the training process.\n\n4. **Inefficiency on Small Datasets**: Approaches like SAM optimizer help but still may not be optimal for small datasets like CIFAR, indicating that mutual learning frameworks alone may not suffice without additional strategies to address these scenarios.\n\nThese limitations underscore the need for innovative approaches, such as the proposed method using an agent CNN with adaptive intermediate supervision and bootstrapping learning, to enhance ViTs' performance without relying heavily on pre-training or extensive modifications.",
+    "url": "https://arxiv.org/abs/2112.03552",
+    "label": "existing challenges",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 4,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 4,
+        "step_complexity": 4
+      },
+      "score": 0.68
+    }
+  },
+  {
+    "question": "How did different values of L influence the balance between FID b and FID p scores in the experiments?",
+    "answer": "From Table 5, we can see that a smaller L improves FID b score but deteriorates FID p. This is because the details generated at lower resolutions conflict with those at higher resolutions.",
+    "url": "https://arxiv.org/abs/2410.18410",
+    "label": "findings/assumptions",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 4,
+        "step_complexity": 3
+      },
+      "score": 0.56
+    }
+  },
+  {
+    "question": "How does the detection F-score of MCSpatNet differ from other methods in the SEER-Lung dataset?",
+    "answer": "The detection F-score of MCSpatNet on the SEER-Lung dataset is 0.860, which is higher than other methods such as U-Net (0.856), Faster-RCNN (0.616), Cascade RCNN (0.759), PointSeg (0.848), and HoverNet-Weakly (0.846). This shows that MCSpatNet performs slightly better in detection compared to these baseline methods on this dataset.",
+    "url": "https://arxiv.org/abs/2110.04886",
+    "label": "experimental results",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 1,
+        "conceptual_depth": 2,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.4
+    }
+  },
+  {
+    "question": "Can you describe the evaluation metrics used for assessing model performance on content-creation tasks?",
+    "answer": "The evaluation metrics used for assessing model performance on content-creation tasks are based on four principal aspects: relevance, faithfulness, creativity, and instruction following. These evaluations employ a metric called GSB (Good, Same, Bad), where each model's performance is measured by calculating the percentage of 'Good' and 'Same' ratings relative to all questions, specifically using the formula (G + S) / (G + S + B). To ensure reliability, both automatic evaluation using advanced MLLMs like GPT-4V and manual evaluations on subsets of data are conducted.",
+    "url": "https://arxiv.org/abs/2410.11538",
+    "label": "previous methods",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 2,
+        "conceptual_depth": 2,
+        "linguistic_complexity": 2,
+        "prior_knowledge": 2,
+        "step_complexity": 2
+      },
+      "score": 0.4
+    }
+  },
+  {
+    "question": "What motivated researchers to develop the Communicative Watch-And-Help (C-WAH) framework for multi-agent cooperation?",
+    "answer": "The Communicative Watch-And-Help (C-WAH) framework was developed to address the limitations of previous methods in multi-agent cooperation, particularly their focus on short-term planning without sufficient discussion among agents. This led to redundant actions, inefficiencies, and potential failures in complex tasks requiring coordinated effort. By incorporating communication, C-WAH enables agents to create long-term strategic plans and adapt dynamically, enhancing their ability to handle intricate environments effectively.",
+    "url": "https://arxiv.org/abs/2411.04679",
+    "label": "motivation",
+    "difficulty": {
+      "dimension_scores": {
+        "ambiguity": 1,
+        "conceptual_depth": 3,
+        "linguistic_complexity": 3,
+        "prior_knowledge": 3,
+        "step_complexity": 2
+      },
+      "score": 0.48
+    }
+  }
+]

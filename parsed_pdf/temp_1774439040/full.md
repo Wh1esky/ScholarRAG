@@ -1,0 +1,1330 @@
+# Wasserstein Flow Meets Replicator Dynamics: A Mean-Field Analysis of Representation Learning in Actor-Critic
+
+Yufeng Zhang $^ { 1 , \dag }$ , Siyu Chen $^ { 2 , \dag }$ , Zhuoran Yang3, Michael I. Jordan4, and Zhaoran Wang1
+
+$^ { 1 }$ Department of Industrial Engineering and Management Sciences, Northwestern University $^ 2$ Department of Statistics and Data Science, Yale University
+
+$^ 3$ Department of Operations Research and Financial Engineering, Princeton University $^ 4$ Department of EECS and Statistics, University of California, Berkeley
+
+April 2, 2024
+
+# Abstract
+
+Actor-critic (AC) algorithms, empowered by neural networks, have had significant empirical success in recent years. However, most of the existing theoretical support for AC algorithms focuses on the case of linear function approximations, or linearized neural networks, where the feature representation is fixed throughout training. Such a limitation fails to capture the key aspect of representation learning in neural AC, which is pivotal in practical problems. In this work, we take a mean-field perspective on the evolution and convergence of feature-based neural AC. Specifically, we consider a version of AC where the actor and critic are represented by overparameterized two-layer neural networks and are updated with two-timescale learning rates. The critic is updated by temporal-difference (TD) learning with a larger stepsize while the actor is updated via proximal policy optimization (PPO) with a smaller stepsize. In the continuous-time and infinite-width limiting regime, when the timescales are properly separated, we prove that neural AC finds the globally optimal policy at a sublinear rate. Additionally, we prove that the feature representation induced by the critic network is allowed to evolve within a neighborhood of the initial one.
+
+# 1 Introduction
+
+In reinforcement learning (RL) (Sutton and Barto, 2018), an agent aims to learn the optimal policy that maximizes the expected total reward obtained from interactions with an environment.
+
+Policy-based RL algorithms achieve such a goal by directly optimizing the expected total reward as a function of the policy, which often involves two components: policy evaluation and policy improvement. Specifically, policy evaluation refers to estimating the value function of the current policy, which characterizes the performance of the current policy and reveals the updating direction for finding a better policy, which is known as policy improvement. Algorithms that explicitly incorporate these two ingredients are called actor-critic (AC) methods (Konda and Tsitsiklis, 2000), where the actor and the critic refer to the policy and its corresponding value function, respectively.
+
+Recently, in RL applications with large state spaces, actor-critic methods have achieved striking empirical successes when empowered by expressive function approximators such as neural networks (Agostinelli et al., 2019; Akkaya et al., 2019; Berner et al., 2019; Duan et al., 2016; Silver et al., 2016, 2017; Vinyals et al., 2019). These successes benefit from the data-dependent representations learned by neural networks. Unfortunately, however, the theoretical understanding of this datadependent benefit is very limited. The classical theory of AC focuses on the case of linear function approximation, where the actor and critic are represented using linear functions with the feature mapping fixed throughout learning (Bhatnagar et al., 2008, 2009; Konda and Tsitsiklis, 2000). Meanwhile, a few recent works establish convergence and optimality of AC with overparameterized neural networks (Fu et al., 2020; Liu et al., 2019; Wang et al., 2019), where the neural network training is captured by the Neural Tangent Kernel (NTK) (Jacot et al., 2018). Specifically, with properly designed parameter initialization and stepsizes, and sufficiently large network widths, the neural networks employed by both actor and critic can be assumed to be well approximated by linear functions of a random feature vector. In other words, from the point of view of representation learning, the features induced by these algorithms are by assumption infinitesimally close to the initial featural representation, which is data-independent.
+
+In this work, we make initial steps towards understanding how representation learning comes into play in neural AC. Specifically, we address the following questions:
+
+Going beyond the NTK regime, does neural $A C$ provably find the globally optimal policy? How does the feature representation associated with the neural network evolve along with neural AC?
+
+We focus on a version of AC where the critic performs temporal-difference (TD) learning (Sutton, 1988) for policy evaluation and the actor improves its policy via proximal policy optimization (PPO) (Schulman et al., 2017), which corresponds to a Kullback-Leibler (KL) divergence regularized optimization problem, with the critic providing the update direction. Moreover, we utilize twotimescale updates where both the actor and critic are updated at each iteration but with the critic having a much larger stepsize. In other words, the critic is updated at a faster timescale. Meanwhile, we represent the critic explicitly as a two-layer overparameterized neural network and parameterize the actor implicitly via the critic and PPO updates. To examine convergence, we study the evolution of the actor and critic in a continuous-time limit with the network width going to infinity. In such a regime, the actor update is closely connected to replicator dynamics (B¨orgers
+
+and Sarin, 1997; Hennes et al., 2020; Schuster and Sigmund, 1983) and the critic update is captured by a semigradient flow in the Wasserstein space (Villani, 2008). Moreover, the semigradient flow runs at a faster timescale according to the two-timescale mechanism.
+
+It turns out that the separation of timescales plays an important role in the convergence analysis. In particular, the continuous-time limit enables us to separately analyze the evolution of actor and critic and then combine these results to get final theoretical guarantees. Specifically, focusing solely on the actor, we prove that the time-averaged suboptimality of the actor converges sublinearly to zero up to the time-averaged policy evaluation error associated with critic updates. Moreover, for the critic, under regularity conditions, we connect the Bellman error to the Wasserstein distance and show that the time-averaged policy evaluation error also converges sublinearly to zero. Therefore, we show that neural AC provably achieves global optimality at a sublinear rate. Furthermore, regarding representation learning, we show that the critic induces a data-dependent feature representation within an $O ( 1 / \alpha )$ neighborhood of the initial representation in terms of the Wasserstein distance, where $\alpha$ is a sufficiently large scaling parameter.
+
+The key to our technical analysis reposes on three ingredients: (i) infinite-dimensional variational inequalities with a one-point monotonicity (Harker and Pang, 1990), (ii) a mean-field perspective on neural networks (Chizat and Bach, 2018b; Mei et al., 2019, 2018; Sirignano and Spiliopoulos, 2020a,b), and (iii) the two-timescale stochastic approximation (Borkar, 2009; Kushner and Yin, 2003). In particular, in the infinite-width limit, the neural network and its induced feature representation are identified with a distribution over the parameter space. The mean-field perspective enables us to characterize the evolution of such a distribution within the Wasserstein space via a certain partial differential equation (PDE) (Ambrosio and Gigli, 2013; Ambrosio et al., 2008; Villani, 2003, 2008). For policy evaluation, this PDE is given by the semigradient flow induced by TD learning. We characterize the error of policy evaluation by showing that mean-field Bellman error satisfies a version of one-point monotonicity tailored to the Wasserstein space. Moreover, our actor analysis utilizes the geometry of policy optimization, which shows that the expected total reward, as a function of the policy, also enjoys the property of one-point monotonicity in the policy space. Finally, the actor and critic errors are connected via two-timescale stochastic approximation. To the best of our knowledge, this is the first time that convergence and global optimality guarantees have been obtained for neural AC.
+
+Related Work. AC with linear function approximation has been studied extensively in the literature. In particular, using a two-timescale stochastic approximation via ordinary differential equations, Konda and Tsitsiklis (2000); Bhatnagar et al. (2008) and Bhatnagar et al. (2009) establish asymptotic convergence guarantees in the continuous-time limiting regime. More recently, using more sophisticated optimization techniques, various works (Wu et al., 2020; Xu et al., 2020b,a; Hong et al., 2020; Khodadadian et al., 2021) have established discrete-time convergence guarantees that show that linear AC converges sublinearly to either a stationary point or the globally optimal policy. Furthermore, when overparameterized neural networks are employed, Liu et al. (2019);
+
+Wang et al. (2019) and Fu et al. (2020) prove that neural AC converges to the global optimum at a sublinear rate. In these works, the initial value of the network parameters and the learning rates are chosen such that both actor and critic updates are captured by the NTK. In other words, when the network width is sufficiently large, such a version of neural AC is well approximated by its linear counterpart via the neural tangent feature. In comparison, we establish a mean-field analysis that has a different scaling than the NTK regime. We also establish finite-time convergence to global optimality, and more importantly, the feature representation induced by the critic is data-dependent and allowed to evolve within a much larger neighborhood around the initial one.
+
+Our work is also related to a recent line of research on understanding stochastic gradient descent (SGD) for supervised learning problems involving an overparameterized two-layer neural network under the mean-field regime. See, e.g., Chizat and Bach (2018b); Mei et al. (2018, 2019); Javanmard et al. (2019); Wei et al. (2019); Fang et al. (2019b,a); Chen et al. (2020a); Sirignano and Spiliopoulos (2020b,a); Lu et al. (2020) and the references therein. In the continuous-time and infinite-width limit, these works show that SGD for neural network training is captured by a Wasserstein gradient flow (Villani, 2008; Ambrosio et al., 2008; Ambrosio and Gigli, 2013) of an energy function that corresponds to the objective function in supervised learning. In contrast, our analysis combines such a mean-field analysis with TD learning and two-timescale stochastic approximation, which are tailored specifically to AC. Moreover, our critic is updated via TD learning, which is a semigradient algorithm and there is no objective functional making TD learning a gradient-based algorithm. Thus, in the mean-field regime, our critic is given by a Wasserstein semigradient flow, which also differs from these existing works.
+
+Additionally, our work is closely related to Zhang et al. (2020) and Agazzi and Lu (2019), who provide mean-field analyses for neural TD-learning and Q-learning (Watkins and Dayan, 1992). In comparison, we focus on AC, which is a two-timescale policy optimization algorithm. Finally, Agazzi and Lu (2020) study softmax policy gradient with neural network policies in the mean-field regime, where policy gradient is cast as a Wasserstein gradient flow with respect to the expected total reward. The algorithm assumes that the critic directly gets the desired value function and thus the algorithm is single-timescale. Moreover, the convergence guarantee in Agazzi and Lu (2020) is asymptotic. In comparison, our AC is two-timescale and we establish non-asymptotic sublinear convergence guarantees to global optimality.
+
+Notation. We denote by $\mathcal { P } ( \mathcal { X } )$ the set of probability measures over the measurable space $\mathcal { X }$ . Given a curve $\rho : \mathbb { R }  \mathcal { X }$ , we denote by $\dot { \rho } _ { s } = \partial _ { t } \rho _ { t } \mid _ { t = s }$ its derivative with respect to time. For an operator $F ^ { \prime } : \mathcal { X }  \mathcal { X }$ and a measure $\mu \in { \mathcal { P } } ( { \mathcal { X } } )$ , we denote by $F _ { \sharp } \mu = \mu \circ F ^ { - 1 }$ the push forward of $\mu$ through $F ^ { \prime }$ . We denote by $\chi ^ { 2 } ( \rho \| \mu )$ the chi-squared divergence between probability measures $\rho$ and $\mu$ , which is defined as $\chi ^ { 2 } ( \rho \| \mu ) = \textstyle \int ( \rho / \mu - 1 ) ^ { 2 } \mathrm { d } \mu$ . Given two probability measures $\rho$ and $\mu$ , we denote the Kullback-Leibler divergence or the relative entropy from $\mu$ to $\rho$ by $\operatorname { K L } ( \rho \| \mu ) =$ $\int \log ( \rho / \mu ) \mathrm { d } \rho$ . For $\nu _ { 1 } , \nu _ { 2 } , \mu \in \mathcal { P } ( \mathcal { X } )$ , we define the $\dot { H } ^ { - 1 } ( \mu )$ weighted homogeneous Sobolev norm as $\begin{array} { r } { \| \nu _ { 1 } - \nu _ { 2 } \| _ { \dot { H } ^ { - 1 } ( \mu ) } = \operatorname* { s u p } \left\{ | \langle f , \nu _ { 1 } - \nu _ { 2 } \rangle | | | f \rVert _ { \dot { H } ^ { 1 } ( \mu ) } \leq 1 \right\} } \end{array}$ . We denote by $\begin{array} { r } { \| f ( x ) \| _ { p , \mu } = ( \int | f ( x ) | ^ { p } \mu ( \mathrm { d } x ) ) ^ { 1 / p } } \end{array}$
+
+the $\ell _ { p }$ -norm with respect to probability measure $\mu$ . We denote by $\otimes$ the semidirect product, i.e., $\mu \otimes K = K ( y | x ) \mu ( x )$ for $\mu \in \mathcal { P } ( \mathcal { X } )$ and transition kernel $K : \mathcal { X }  \mathcal { P } ( \mathcal { Y } )$ . For a function $f : \mathcal { X } \to \mathbb { R }$ , we denote by $\begin{array} { r } { \mathrm { L i p } ( f ) = \operatorname* { s u p } _ { x , y \in \mathcal { X } , x \neq y } | f ( x ) - f ( y ) | / \| x - y \| } \end{array}$ its Lipschitz constant. We denote a normal distribution on $\mathbb { R } ^ { D }$ by $N ( \mu , \Sigma )$ , where $\mu$ is the mean value and $\Sigma$ is the covariance matrix.
+
+# 2 Background
+
+In this section, we first introduce the policy optimization problem and the actor-critic method. We then present the definition of the Wasserstein space.
+
+# 2.1 Policy Optimization and Actor-Critic
+
+We consider a Markov decision process (MDP) given by $( S , A , \gamma , P , r , \mathcal { D } _ { 0 } )$ , where $S \subseteq \mathbb { R } ^ { d _ { 1 } }$ is the state, $\mathcal { A } \subseteq \mathbb { R } ^ { d _ { 2 } }$ is the action space, $\gamma \in ( 0 , 1 )$ is the discount factor, $P : \mathcal { S } \times \mathcal { A }  \mathcal { P } ( \mathcal { S } )$ is the transition kernel, $r : S \times \mathcal { A } \to \mathbb { R } _ { + }$ is the reward function, and ${ \mathcal { D } } _ { 0 } \in { \mathcal { P } } ( S )$ is the initial state distribution. Without loss of generality, we assume that $S \times \mathcal { A } \subseteq \mathbb { R } ^ { d }$ and $\| ( s , a ) \| _ { 2 } \leq 1$ , where $d = d _ { 1 } + d _ { 2 }$ . We remark that as long as the state-action space is bounded, we can normalize the space to be within the unit sphere. Given a policy $\pi : { \mathcal { S } } \times { \mathcal { A } } \to { \mathcal { P } } ( S )$ , at the $m$ th step, the agent takes an action $a _ { m }$ at state $s _ { m }$ according to $\pi ( \cdot \mid s _ { m } )$ and observes a reward $r _ { m } = r ( s _ { m } , a _ { m } )$ . The environment then transits to the next state $s _ { m + 1 }$ according to the transition kernel $\textstyle P ( \cdot \mid s _ { m } , a _ { m } )$ . Note that the policy $\pi$ induces Markov chains on both $\boldsymbol { S }$ and $S \times A$ . Considering the Markov chain on $\boldsymbol { S }$ , we denote the induced Markov transition kernel by $P ^ { \pi } : S  { \mathcal { P } } ( S )$ , which is defined as $\begin{array} { r } { P ^ { \pi } ( s ^ { \prime } \mid s ) = \int _ { \mathcal { A } } P ( s ^ { \prime } \mid s , a ) \pi ( \mathrm { d } a \mid s ) } \end{array}$ . Likewise, we denote the Markov transition kernel on $S \times \mathcal { A }$ by $\widetilde P ^ { \pi } : S \times { \mathcal { A } } \to { \mathcal { P } } ( S \times { \mathcal { A } } )$ , which is defined as ${ \widetilde P } ^ { \pi } ( s ^ { \prime } , a ^ { \prime } | s , a ) = \pi ( a ^ { \prime } | s ^ { \prime } ) P ( s ^ { \prime } | s , a )$ . Let $\widetilde { \mathcal { D } }$ be a probability measure on $S \times A$ . We then define the visitation measure induced by policy $\pi$ and starting from $\widetilde { \mathcal { D } }$ as
+
+$$
+\widetilde {\mathcal {E}} _ {\widetilde {\mathcal {D}}} ^ {\pi} \big (\mathrm {d} (s, a) \big) = (1 - \gamma) \cdot \sum_ {m \geq 0} \gamma^ {m} \cdot \mathbb {P} \big ((s _ {m}, a _ {m}) \in \mathrm {d} (s, a) \mid (s _ {0}, a _ {0}) \sim \widetilde {\mathcal {D}} \big), \tag {2.1}
+$$
+
+where $( s _ { m } , a _ { m } )$ is the trajectory generated by starting from $( s _ { 0 } , a _ { 0 } ) \sim \tilde { \mathcal { D } }$ and following policy $\pi$ thereafter. If $\tilde { \mathcal { D } } = \mathcal { D } \otimes \boldsymbol { \pi }$ holds, we then denote such a visitation measure by $\tilde { \mathcal { E } } _ { \mathcal { D } } ^ { \pi }$ . Furthermore, we denote by $\begin{array} { r } { \mathcal { E } ( \mathrm { d } s ) = \int _ { \mathcal { A } } \widetilde { \mathcal { E } } ( \mathrm { d } s , \mathrm { d } a ) } \end{array}$ the marginal distribution of visitation measure $\bar { \mathcal { E } }$ with respect to $\boldsymbol { S }$ . In particular, when $( s _ { 0 } , a _ { 0 } ) \sim \mathcal { D } \otimes \pi$ holds in (2.1), it follows that $\widetilde { \mathcal { E } } _ { \mathcal { D } } ^ { \pi } = \mathcal { E } _ { \mathcal { D } } ^ { \pi } \otimes \pi$ . In policy optimization, we aim to maximize the expected total reward $J ( \pi )$ defined as follows,
+
+$$
+J (\pi) = \mathbb {E} ^ {\pi} \left[ \sum_ {m \geq 0} \gamma^ {m} \cdot r (s _ {m}, a _ {m}) \mid s _ {0} \sim \mathcal {D} _ {0} \right],
+$$
+
+where we denote by $\mathbb { E } ^ { \pi }$ the expectation with respect to $a _ { m } \sim \pi ( \cdot | s _ { m } )$ and $s _ { m + 1 } \sim P ( \cdot \mid s _ { m } , a _ { m } )$ for $m \geq 0$ . We define the action value function $Q ^ { \pi } : S \times \mathcal { A }  \mathbb { R }$ and the state value function
+
+$V ^ { \pi } : S  \mathbb { R }$ as follows,
+
+$$
+Q ^ {\pi} (s, a) = \mathbb {E} ^ {\pi} \left[ \sum_ {m \geq 0} \gamma^ {m} \cdot r \left(s _ {m}, a _ {m}\right) \mid s _ {0} = s, a _ {0} = a \right], \quad V ^ {\pi} (s) = \left\langle Q ^ {\pi} (s, \cdot), \pi (\cdot \mid s) \right\rangle_ {\mathcal {A}}, \tag {2.2}
+$$
+
+where we denote by $\langle \cdot , \cdot \rangle _ { A }$ the inner product on the action space $\mathcal { A }$ . Correspondingly, the advantage function $A ^ { \pi } : S \times \mathcal { A }  \mathbb { R }$ is defined as
+
+$$
+A ^ {\pi} (s, a) = Q ^ {\pi} (s, a) - V ^ {\pi} (s).
+$$
+
+The action value function $Q ^ { \pi }$ corresponds to the minimizer of the following mean-squared Bellman error (MSBE),
+
+$$
+\operatorname {M S B E} (Q; \pi) = \frac {1}{2} \mathbb {E} _ {(s, a) \sim \widetilde {\Phi} ^ {\pi}} \left[ \left(Q (s, a) - r (s, a) - \gamma \mathbb {E} _ {\left(s ^ {\prime}, a ^ {\prime}\right) \sim \widetilde {P} ^ {\pi} (\cdot | s, a)} [ Q \left(s ^ {\prime}, a ^ {\prime}\right) ]\right) ^ {2} \right], \tag {2.3}
+$$
+
+where $\widetilde { \Phi } ^ { \pi }$ is the sampling distribution depending on policy $\pi$ , which will be defined by (4.8) in §4.2. Note that when $\widetilde { \Phi } ^ { \pi }$ is with full support, i.e., $\operatorname { s u p p } ( \widetilde { \Phi } ^ { \pi } ) = \mathcal { S } \times \mathcal { A }$ , $Q ^ { \pi }$ is the unique global minimizer to the MSBE. Consequently, the policy optimization problem can be written as the following bilevel optimization problem,
+
+$$
+\max  _ {\pi} J (\pi) = \mathbb {E} _ {s \sim \mathcal {D} _ {0}} \left[ \left\langle Q ^ {\pi} (s, \cdot), \pi (\cdot \mid s) \right\rangle_ {\mathcal {A}} \right], \quad \text {s u b j e c t t o} Q ^ {\pi} = \underset {Q} {\operatorname {a r g m i n}} \operatorname {M S B E} (Q; \pi). \tag {2.4}
+$$
+
+The inner problem in (2.4) is known as a policy evaluation subproblem, while the outer problem is the policy improvement subproblem. One of the most popular way to solve the policy optimization problem is actor-critic (AC) methods (Sutton and Barto, 2018), where the job of the critic is to evaluate current policy and then the actor updates its policy according to the critic’s evaluation.
+
+# 2.2 Wasserstein Space
+
+Let $\Theta \subseteq \mathbb { R } ^ { D }$ be a Polish space. We denote by ${ \mathcal { P } } _ { 2 } ( \Theta ) \subseteq { \mathcal { P } } ( \Theta )$ the set of probability measures with finite second moments. Then, the Wasserstein-2 distance between $\mu , \nu \in \mathcal { P } _ { 2 } ( \Theta )$ is defined as follows,
+
+$$
+W _ {2} (\mu , \nu) = \inf  \left\{\mathbb {E} \left[ \| X - Y \| ^ {2} \right] ^ {1 / 2} \Big | \operatorname {l a w} (X) = \mu , \operatorname {l a w} (Y) = \nu \right\},
+$$
+
+where the infimum is taken over the random variables $X$ and $Y$ on $\Theta$ and we denote by $\operatorname { l a w } ( X )$ the distribution of a random variable $X$ . We call $\mathcal { M } = \left( \mathcal { P } _ { 2 } ( \Theta ) , W _ { 2 } \right)$ the Wasserstein ( $W _ { 2 }$ ) space, which is an infinite-dimensional manifold (Villani, 2008). See §A.1 for more details.
+
+# 3 Algorithm
+
+Two-timescale actor-critic. We consider a two-timescale actor-critic (AC) algorithm (Kakade, 2002; Peters and Schaal, 2008) for the policy optimization problem in (2.4). For policy evaluation, we parameterize the critic $Q$ with a neural network and update the parameter via temporaldifference (TD) learning (Sutton, 1988). For policy improvement, we update the actor policy $\pi$ via proximal policy optimization (PPO) (Schulman et al., 2017). Our algorithm is two-timescale
+
+since both the actor and critic are updated at each iteration with different stepsizes. Specifically, we parameterize the critic $Q$ by the following neural network with width $M$ and parameter $\widehat { \pmb { \theta } } = ( \widehat { \pmb { \theta } } ^ { ( 1 ) } , \cdots , \widehat { \pmb { \theta } } ^ { ( M ) } ) \in \mathbb { R } ^ { D \times M }$ ,
+
+$$
+Q _ {\widehat {\boldsymbol {\theta}}} (s, a) = \frac {\alpha}{M} \sum_ {i = 1} ^ {M} \sigma (s, a; \widehat {\boldsymbol {\theta}} ^ {(i)}). \tag {3.1}
+$$
+
+Here $\sigma ( s , a ; \theta ) : S \times A \times \mathbb { R } ^ { D } \to \mathbb { R }$ is the activation function and $\alpha > 0$ is the scaling parameter. Such a structure also appears in Chizat and Bach (2018a); Mei et al. (2019) and Chen et al. (2020b). In a descrete-time finite-width (DF) scenario, at the $k$ th iteration, the critic and actor are updated as follows,
+
+$$
+\text {D F - T D :} \quad \widehat {\theta} _ {k + 1} ^ {(i)} = \widehat {\theta} _ {k} ^ {(i)} - \frac {\varepsilon^ {\prime}}{\alpha} \left(Q _ {\widehat {\boldsymbol {\theta}} _ {k}} \left(s _ {k}, a _ {k}\right) - r \left(s _ {k}, a _ {k}\right) - \gamma Q _ {\widehat {\boldsymbol {\theta}} _ {k}} \left(s _ {k} ^ {\prime}, a _ {k} ^ {\prime}\right)\right) \nabla_ {\theta} \sigma (s, a; \widehat {\theta} _ {k} ^ {(i)}), \tag {3.2}
+$$
+
+$$
+\text {D F - P P O :} \widehat {\pi} _ {k + 1} (\cdot | s) = \underset {\pi} {\operatorname {a r g m a x}} \left\{\left\langle Q _ {\widehat {\boldsymbol {\theta}} _ {k}} (s, \cdot), \pi (\cdot | s) \right\rangle_ {\mathcal {A}} - \varepsilon^ {- 1} \cdot \mathrm {K L} \big (\pi (\cdot | s) \| \widehat {\pi} _ {k} (\cdot | s) \big) \right\}, \tag {3.3}
+$$
+
+where $( s _ { k } , a _ { k } ) \sim \widetilde \Phi ^ { \widehat \pi _ { k } }$ and $( s _ { k } ^ { \prime } , a _ { k } ^ { \prime } ) \sim \tilde { P } ^ { \widehat { \pi } _ { k } } ( \cdot \mid s _ { k } , a _ { k } )$ . Here $\widehat { \pi } _ { k }$ is the policy for the actor at the $k$ th iteration, $\widetilde { \Phi } ^ { \widehat { \pi } _ { k } }$ is the corresponding weighting distribution, $\varepsilon$ and $\varepsilon ^ { \prime }$ are the stepsizes for the DF-PPO update and the DF-TD update, respectively. In (3.2), the scaling of $\alpha ^ { - 1 }$ arises since our update falls into the lazy-training regime (Chizat and Bach, 2018a). In the sequel, we denote by $\eta = \varepsilon ^ { \prime } / \varepsilon$ the relative TD timescale. Note that in a double-loop AC algorithm, the critic can usually be solved with high precision. In the two-timescale AC however, even with the KL-divergence term in (3.3) which regularizes the policy update and helps to improve the local estimation quality of the TD update, the critic $Q _ { \widehat { \theta } _ { k } }$ for updating the actor’s policy $\widehat { \pi } _ { k }$ can still be far from the true action value function $Q ^ { \widehat { \pi } _ { k } }$ . Since the policy evaluation problem is not fully solved at each iteration, the two-timescale AC can be more efficient in computation while more challenging to characterize theoretically.
+
+Mean-field (MF) Limit. To analyze the convergence of the two-timescale AC with neural networks, we employ an analysis that studies the mean-field limit regime (Mei et al., 2018, 2019). Here, by saying the mean-field limit, we refer to an infinite-width limit, i.e., $M \to \infty$ for the neural network width $M$ in (3.1), and a continuous-time limit, i.e., $t = k \varepsilon$ where $\varepsilon  0$ for the stepsize in (3.2) and (3.3). For $\widehat { \pmb { \theta } } = \{ \widehat { \theta } ^ { ( i ) } \} _ { i = 1 } ^ { M }$ independently sampled from a distribution $\rho$ , we can write the infinite-width limit of (3.1) as
+
+$$
+Q (s, a; \rho) = \alpha \int \sigma (s, a; \theta) \rho (\mathrm {d} \theta). \tag {3.4}
+$$
+
+In the sequel, we denote by $\widehat { \rho } _ { k }$ the distribution of $\widehat { \theta } _ { k } ^ { \left( i \right) }$ for the infinite-width limit of the neural network at the $k$ th iteration. We further let $\rho _ { t }$ and $\boldsymbol { \mathit { 1 } } ( \mathit { 1 } _ { t }$ be the continuous-time limits of $\widehat { \rho } _ { k }$ and $\widehat { \pi } _ { k }$ , respectively. The existence of $\pi _ { t }$ will be shown shortly after. As derived in Zhang et al. (2020), the mean-field limit of the DF-TD update in (3.2) is
+
+$$
+\mathrm {M F - T D :} \partial_ {t} \rho_ {t} = - \eta \operatorname {d i v} \big (\rho_ {t} \cdot g (\cdot ; \rho_ {t}, \pi_ {t}) \big), \tag {3.5}
+$$
+
+where $\eta$ is the relative TD timescale and
+
+$$
+g (\theta ; \rho , \pi) = - \mathbb {E} _ {\Phi^ {\pi}} ^ {\pi} \left\{\left[ Q (s, a; \rho) - r (s, a) - \gamma \cdot Q \left(s ^ {\prime}, a ^ {\prime}; \rho\right) \right] \cdot \alpha^ {- 1} \nabla_ {\theta} \sigma (s, a; \theta) \right\} \tag {3.6}
+$$
+
+is a vector field. Here $\mathbb { E } _ { \widetilde { \Phi } ^ { \pi } } ^ { \pi }$ is taken with respect to $( s , a ) \sim \widetilde { \Phi } ^ { \pi }$ and $( s ^ { \prime } , a ^ { \prime } ) \sim \widetilde { P } ^ { \pi } ( \cdot \mid s , a )$ . It remains to characterize the mean-field limit of the DF-PPO update in (3.3). By solving the maximization problem in (3.3), the infinite-width limit of DF-PPO update can be written in closed form as
+
+$$
+\varepsilon^ {- 1} \cdot \left\{\log \left[ \widehat {\pi} _ {k + 1} (a \mid s) \right] - \log \left[ \widehat {\pi} _ {k} (a \mid s) \right] \right\} = Q (s, a; \widehat {\rho} _ {k}) - \widehat {Z} _ {k} (s),
+$$
+
+where $\widehat { Z } _ { k } ( s )$ is the normalizing factor such that $\textstyle \int { \widehat { \pi } } _ { k } ( \mathrm { d } a \vert s ) = 1$ for any $s \in S$ . By letting $t = k \varepsilon$ and $\varepsilon  0$ , such a result directly shows that the limit of $\widehat { \pi } _ { k }$ exists. Therefore, in the mean-field limit, we have $\partial _ { t } \log \pi _ { t } = Q _ { t } - Z _ { t }$ , which can be further written as $\partial _ { t } \pi _ { t } = \pi _ { t } \cdot ( Q _ { t } - Z _ { t } )$ . Here we have $Q _ { t } ( a , s ) = Q ( a , s ; \rho _ { t } )$ and $Z _ { t }$ is the continuous-time limit of $\widehat { Z } _ { k }$ . Furthermore, noting that $\begin{array} { r } { \partial _ { t } \int \pi _ { t } ( \mathrm { d } a \vert s ) = 0 } \end{array}$ , the mean-field limit of the DF-PPO update in (3.3) is
+
+$$
+\text {M F - P P O :} \quad \frac {\mathrm {d}}{\mathrm {d} t} \pi_ {t} = \pi_ {t} \cdot A _ {t}, \quad \text {w h e r e} A _ {t} (s, a) = Q _ {t} (s, a) - \int Q _ {t} (s, a) \pi_ {t} (\mathrm {d} a \mid s). \tag {3.7}
+$$
+
+The two updates (3.5) and (3.7) correspond to the mean-field limits of (3.2) and (3.3), respectively, and together serve as the mean-field limit of the two-timescale AC. In particular, we remark that the MF-TD update in (3.5) for the critic is captured by a semigradient flow in the Wasserstein space (Villani, 2008) while the MF-PPO update in (3.7) for the actor resembles the replicator dynamics (Schuster and Sigmund, 1983; B¨orgers and Sarin, 1997; Hennes et al., 2020). See §A.2 for more discussion of the replicator dynamics. Note that such a framework is applicable to continuous state and action spaces. In this paper, we aim to provide a theoretical analysis of the mean-field limit of the two-timescale AC.
+
+# 4 Main Result
+
+In this section, we first establish the convergence of the MF-PPO update in §4.1. Then, under additional assumptions, we establish the optimality and convergence of the mean-field two-timescale AC in §4.2.
+
+# 4.1 Convergence of Mean-field PPO
+
+For the MF-PPO update in (3.7), we establish the following theorem on global optimality and convergence rate.
+
+Theorem 4.1 (Convergence of MF-PPO). Let $\pi ^ { * } = \operatorname { a r g m a x } _ { \pi } J ( \pi )$ be the optimal policy and $\pi _ { 0 }$ be the initial policy. Then, it holds that
+
+$$
+\frac {1}{T} \int_ {0} ^ {T} \left(J \left(\pi^ {*}\right) - J \left(\pi_ {t}\right)\right) \mathrm {d} t \leq \frac {\zeta}{T} + 4 \kappa \cdot \underbrace {\frac {1}{T} \int_ {0} ^ {T} \| Q _ {t} - Q ^ {\pi_ {t}} \| _ {2 , \widetilde {\phi} ^ {\pi_ {t}}} \mathrm {d} t} _ {\text {p o l i c y e v a l u a t i o n e r r o r}}, \tag {4.1}
+$$
+
+where $\widetilde { \phi } ^ { \pi _ { t } } \in \mathcal { P } ( S \times \mathcal { A } )$ is an evaluation distribution for the policy evaluation error and $\zeta =$ $\begin{array} { r } { \mathbb { E } _ { s \sim \mathcal { E } _ { D _ { 0 } } ^ { \pi ^ { * } } } \Big [ \mathrm { K L } \big ( \pi ^ { * } ( \cdot \mid s ) \| \pi _ { 0 } ( \cdot \mid s ) \big ) \Big ] } \end{array}$ is the expected KL-divergence between $\pi ^ { * }$ and . Furthermore, $\pi _ { 0 }$ letting $\begin{array} { r } { \tilde { \phi } ^ { \pi _ { t } } = \frac { 1 } { 2 } \tilde { \phi } _ { 0 } + \frac { 1 } { 2 } \phi _ { 0 } \otimes \pi _ { t } } \end{array}$ , where $\widetilde { \phi } _ { 0 } \in { \mathcal { P } } ( S \times { \mathcal { A } } )$ is a base distribution and $\begin{array} { r } { \phi _ { 0 } = \int _ { \mathcal { A } } \widetilde { \phi } _ { 0 } ( \cdot , \mathrm { d } a ) } \end{array}$ , the concentrability coefficient $\kappa$ is given by
+
+$$
+\kappa = \left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} _ {0}} \right\| _ {\infty}.
+$$
+
+Proof. See §B.1 for a detailed proof.
+
+![](images/43875558a77ca087a6eaf235701c705ef18c9eace3d5cfecaa85c5d7e1f8667b.jpg)
+
+The concentrability coefficient commonly appears in the reinforcement learning literature (Szepesv´ari and Munos, 2005; Munos and Szepesv´ari, 2008; Antos et al., 2008; Farahmand et al., 2010; Scherrer et al., 2015; Farahmand et al., 2016; Lazaric et al., 2016; Liu et al., 2019; Wang et al., 2019). In contrast to a more standard concentrability coefficient form, note that $\kappa$ is irrelevant to the update of the algorithm. To show the convergence of the MF-PPO, our condition here is much weaker since we only need to specify a base distribution $\widetilde { \phi } _ { 0 }$ such that $\kappa < \infty$ .
+
+Theorem 4.1 shows that the MF-PPO converges to the globally optimal policy at a rate of $O ( T ^ { - 1 } )$ up to the policy evaluation error. Such a theorem implies the global optimality and convergence of a double-loop AC algorithm, where the critic $Q _ { t }$ is solved to high precision and the policy evaluation error is sufficiently small. In the sequel, we consider a more challenging setting, where the critic $Q _ { t }$ is updated simultaneously along with the update of the actor’s policy $\boldsymbol { \mathscr { u } } _ { t }$ .
+
+# 4.2 Global Optimality and Convergence of Two-timescale AC
+
+In this section, we aim to provide an upper bound on the policy evaluation error when the critic and the actor are updated simultaneously. Specifically, the actor is updated via MF-PPO in (3.7) and the critic $Q _ { t } = Q ( \cdot ; \rho _ { t } )$ is updated via the MF-TD in (3.5). The smooth function $\sigma$ in the parameterization of the Q function in (3.4) is taken to be the following two-layer neural network,
+
+$$
+\sigma (s, a; \theta) = B _ {\beta} \cdot \beta (b) \cdot \widetilde {\sigma} \left(w ^ {\top} (s, a, 1)\right), \tag {4.2}
+$$
+
+where $\widetilde { \sigma } : \mathbb { R }  \mathbb { R }$ is the activation function, $\theta = ( b , w )$ is the parameter, and $\beta : \mathbb { R }  ( - 1 , 1 )$ is an odd and invertible function with scaling hyper-parameter $B _ { \beta } > 0$ . It then holds that $D = d + 2$ , where $d$ and $D$ are the dimensions of $( s , a )$ and $\theta$ , respectively. It is worth noting that the function class of $\begin{array} { r } { \int \sigma ( s , a ; \theta ) \rho ( \mathrm { d } \theta ) } \end{array}$ for $\rho \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ is the same as
+
+$$
+\mathcal {F} = \left\{\int \beta^ {\prime} \cdot \widetilde {\sigma} \left(w ^ {\top} (s, a, 1)\right) \nu (\mathrm {d} \beta^ {\prime}, \mathrm {d} w) \mid \nu \in \mathscr {P} _ {2} \left(\left(- B _ {\beta}, B _ {\beta}\right) \times \mathbb {R} ^ {d + 1}\right) \right\}, \tag {4.3}
+$$
+
+which captures a vast function class because of the universal function approximation theorem (Barron, 1993; Pinkus, 1999). We remark that we introduce the rescaling function $\beta$ in (4.2) to avoid the study of the space of probability measures over $( - B _ { \beta } , B _ { \beta } ) \times \mathbb { R } ^ { d + 1 }$ in (4.3), which has a boundary and thus lacks the regularity in the study of optimal transport. Furthermore, note that we introduce a hyper-parameter $\alpha > 1$ in the Q function in (3.4). Thus, we are using $\alpha \cdot { \mathcal { F } }$ to
+
+represent $\mathcal { F }$ , which causes an “over-representation” when $\alpha > 1$ . Such over-representation appears to be essential for our analysis. To anticipate briefly, we note that $\alpha$ controls the gap in the average total reward over time when the relative time-scale $\eta$ is properly selected according to Theorem 4.6. Furthermore, such an influence is imposed through Lemma 4.4, which shows that the Wasserstein distance between $\rho _ { 0 }$ and $\rho _ { \pi _ { t } }$ is upper bounded by $O ( 1 / \alpha )$ . In what follows, we consider the initialization of the TD update to be $\rho _ { 0 } = N ( 0 , I _ { D } )$ , which implies that $Q ( s , a ; \rho _ { 0 } ) = 0$ . We next impose a regularity assumption on the two-layer neural network $\sigma$ .
+
+Assumption 4.2 (Regularity of the Neural Network). For the two-layer neural network $\sigma$ defined in (4.2), we assume that the following properties hold.
+
+(i) The rescaling function $\beta : \mathbb { R }  ( - 1 , 1 )$ is odd, $\boldsymbol { L } _ { 0 , \beta }$ -Lipschitz continuous, $\boldsymbol { L } _ { 1 , \beta }$ -smooth, and invertible. Meanwhile, the inverse $\beta ^ { - 1 }$ is locally Lipschitz continuous. In particular, we assume that $\beta ^ { - 1 }$ is $\ell _ { \beta }$ -Lipschitz continuous in $[ - 2 / 3 , 2 / 3 ]$ .   
+(ii) The activation function $\widetilde { \sigma } : \mathbb { R }  \mathbb { R }$ is odd, $B _ { \widetilde { \sigma } }$ -bounded, $\boldsymbol { L } _ { 0 , \widetilde { \boldsymbol { \sigma } } }$ -Lipschitz continuous, and $\boldsymbol { L } _ { 1 , \widetilde { \boldsymbol { \sigma } } }$ smooth.
+
+We remark that Assumption 4.2 is not restrictive and is satisfied by a large family of neural networks, e.g., $\widetilde { \sigma } ( x ) = \operatorname { t a n h } ( x )$ and $\beta ( b ) = \operatorname { t a n h } ( b )$ . Noting that $\| ( s , a ) \| _ { 2 } \leq 1$ , Assumption 4.2 implies that the function $\sigma ( s , a ; \theta )$ in (4.2) is odd with respect to $w$ and $b$ and is also bounded, Lipschitz continuous, and smooth in the parameter domain, that is,
+
+$$
+\left| \nabla_ {\theta} \sigma (s, a; \theta) \right| <   B _ {1}, \quad \left| \nabla_ {\theta \theta} ^ {2} \sigma (s, a; \theta) \right| <   B _ {2}. \tag {4.4}
+$$
+
+We then impose the following assumption on the MDP.
+
+Assumption 4.3 (Regularity of the MDP). For the MDP $( S , A , \gamma , P , r , \mathcal { D } _ { 0 } )$ , we assume the following properties hold.
+
+(i) The reward function $r$ and the transition kernel $P$ admit the following representations with respect to the activation function $\widetilde { \sigma }$ ,
+
+$$
+r (s, a) = B _ {r} \cdot \int \widetilde {\sigma} \big ((s, a, 1) ^ {\top} w \big) \mu (\mathrm {d} w), \tag {4.5}
+$$
+
+$$
+P \left(s ^ {\prime} \mid s, a\right) = \int \widetilde {\sigma} \left(\left(s, a, 1\right) ^ {\top} w\right) \varphi \left(s ^ {\prime}\right) \psi \left(s ^ {\prime}; \mathrm {d} w\right), \tag {4.6}
+$$
+
+where $\mu$ and $\psi ( s ^ { \prime } ; \cdot )$ are probability measures in $\mathcal { P } _ { 2 } ( \mathbb { R } ^ { d + 1 } )$ for any $s ^ { \prime } \in \boldsymbol { S }$ , $B _ { r }$ is a positive scaling parameter, and $\varphi ( s ^ { \prime } ) : S  \mathbb { R } _ { + }$ is a nonnegative function.
+
+(ii) The reward function $r$ satisfies that $r ( s , a ) \geq 0$ for any $( s , a ) \in S \times \mathcal { A }$ . For the representation of $r$ in (4.5) and the representation of the transition kernel $P$ in (4.6), we assume that
+
+$$
+\chi^ {2} (\mu \parallel \rho_ {w, 0}) <   M _ {\mu}, \qquad \chi^ {2} \big (\psi (s; \cdot) \parallel \rho_ {w, 0} \big) <   M _ {\psi}, \quad \forall s \in \mathcal {S},
+$$
+
+$$
+\int \varphi (s) \mathrm {d} s \leq M _ {1, \varphi}, \quad \int \varphi (s) ^ {2} \mathrm {d} s \leq M _ {2, \varphi},
+$$
+
+where $\rho _ { w , 0 }$ is the marginal distribution of $\rho _ { 0 }$ with respect to $w$ , i.e., $\begin{array} { r } { \rho _ { w , 0 } = \int \rho _ { 0 } ( \mathrm { d } \boldsymbol { b } , \cdot ) } \end{array}$ , $\chi ^ { 2 }$ is the chi-squared divergence, and $M _ { \mu }$ , $M _ { \psi }$ , $M _ { 1 , \varphi }$ , $M _ { 2 , \varphi }$ are absolute constants.
+
+(iii) We assume that there exists an absolute constant $\mathcal { G }$ such that
+
+$$
+\left\| \psi (s; \cdot) - \psi \left(s ^ {\prime}; \cdot\right) \right\| _ {\dot {H} ^ {- 1} (\mu)} <   \mathcal {G}, \quad \left\| \psi (s; \cdot) - \mu \right\| _ {\dot {H} ^ {- 1} (\mu)} <   \mathcal {G},
+$$
+
+$$
+\left\| \psi (s; \cdot) - \mu \right\| _ {\dot {H} ^ {- 1} (\psi (s ^ {\prime}; \cdot))} <   \mathcal {G}, \quad \left\| \psi (s; \cdot) - \psi (s ^ {\prime}; \cdot) \right\| _ {\dot {H} ^ {- 1} (\psi (s ^ {\prime \prime}; \cdot))} <   \mathcal {G}, \quad \forall s, s ^ {\prime}, s ^ {\prime \prime} \in \mathcal {S},
+$$
+
+where $\| \cdot \| _ { \dot { H } ^ { - 1 } ( \cdot ) }$ is the weighted homogeneous Sobolev norm.
+
+We remark that by assuming $\psi$ to be a probability measure and that $\varphi ( s ^ { \prime } ) \geq 0$ in (4.6), the representation of the transition kernel does not lose generality. Specifically, the function class of (4.6) is the same as
+
+$$
+\mathcal {P} = \Big \{\int \widetilde {\sigma} ((s, a, 1) ^ {\top} w) \widetilde {\psi} (s ^ {\prime}; \mathrm {d} w) \Big | \widetilde {\psi} (s ^ {\prime}; \cdot) \text {i s a s i g n e d m e a s u r e f o r a n y} s ^ {\prime} \in \mathcal {S} \Big \}.
+$$
+
+See §C.1 for a detailed proof. Assumption 4.3 generalizes the linear MDP in Yang and Wang (2019b,a); Cai et al. (2019a) and Jin et al. (2020). In contrast, our representation of the reward function and the transition kernel benefits from the universal function approximation theorem and is thus not as restrictive as the original linear MDP assumption. Note that the infinite-width neural network has a two-layer structure by (4.2). We establish the following lemma on the regularity of the representation of the action value function $Q ^ { \pi }$ by such a neural network.
+
+Lemma 4.4 (Regularity of Representation of $Q ^ { \pi }$ ). Suppose that Assumptions 4.2 and 4.3 hold. For any policy $\pi$ , there exists a probability measure $\rho _ { \pi } \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ for the representation of $Q ^ { \pi }$ with the following properties.
+
+(i) For function $Q ( s , a ; \rho _ { \pi } )$ defined by (3.4) with $\rho = \rho _ { \pi }$ and the action value function $Q ^ { \pi } ( s , a )$ defined by (2.2), we have $Q ( s , a ; \rho _ { \pi } ) = Q ^ { \pi } ( s , a )$ for any $( s , a ) \in S \times \mathcal { A }$ .   
+(ii) By letting $B _ { \beta } \geq 2 ( B _ { r } + \gamma ( 1 - \gamma ) ^ { - 1 } B _ { r } M _ { 1 , \varphi } ) $ for the neural network defined in (4.2) and $\rho _ { 0 } \sim N ( 0 , I _ { D } )$ for the initial distribution, we have $\widetilde { W } _ { 2 } ( \rho _ { \pi } , \rho _ { 0 } ) \le \bar { D }$ for any policy $\pi$ , where we define $\widetilde { W } _ { 2 } ( \cdot , \cdot ) = \alpha W _ { 2 } ( \cdot , \cdot )$ as the scaled $W _ { 2 }$ metric. Here the constant $D$ depends on the discount factor $\gamma$ and the absolute constants $L _ { 0 , \beta } , L _ { 1 , \beta } , l _ { \beta } , B _ { r } , M _ { \mu } , M _ { \psi } , M _ { 1 , \varphi } , M _ { 2 , \varphi }$ defined in Assumptions 4.2 and 4.3.
+
+Proof. See §B.2 for a detailed proof.
+
+Property (i) of Lemma 4.4 shows that the action value function $Q ^ { \pi }$ can be parameterized with the infinite-width two-layer neural network $Q ( \cdots \rho _ { \pi } )$ in (3.4). Note that a larger $B _ { \beta }$ captures a larger function class in (4.3). Without loss of generality, we assume that $B _ { \beta } \geq 2 ( B _ { r } + \gamma ( 1 - \gamma ) ^ { - 1 } B _ { r } M _ { 1 , \varphi } )$ holds in the sequel. Hence, by Property (ii), we have that $\widetilde { W } _ { 2 } ( \rho _ { \pi } , \rho _ { 0 } ) \le { \cal O } ( 1 )$ for any policy $\pi$ . In particular, it holds by Property (i) of Lemma 4.4 that $\| Q _ { t } - Q ^ { \pi _ { t } } \| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } } = \| Q ( \cdot ; \rho _ { t } ) - Q ( \cdot ; \rho _ { \pi _ { t } } ) \| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } }$ and we have the following theorem to characterize such an error with regard to the $W _ { 2 }$ space.
+
+Theorem 4.5 (Upper Bound of Policy Evaluation Error). Suppose that Assumptions 4.2 and 4.3 hold and $\rho _ { 0 } \sim N ( 0 , I _ { D } )$ is the initial distribution. We specify the weighting distribution $\widetilde { \Phi } ^ { \pi _ { t } }$ in MF-TD (3.5) as $\widetilde { \Phi } ^ { \pi _ { t } } = \widetilde { \mathcal { E } } _ { \widetilde { \phi } ^ { \pi _ { t } } } ^ { \pi _ { t } }$ , where $\widetilde { \phi } ^ { \pi _ { t } } \in { \mathcal { P } } ( S \times { \mathcal { A } } )$ is the evaluation distribution for the policy evaluation error in Theorem 4.1. Then, it holds that
+
+$$
+(1 - \sqrt {\gamma}) \cdot \| Q _ {t} - Q ^ {\pi_ {t}} \| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} ^ {2} \leq - \frac {\mathrm {d}}{\mathrm {d} t} \frac {\widetilde {W} _ {2} ^ {2} \left(\rho_ {t} , \rho_ {\pi_ {t}}\right)}{2 \eta} + \Delta_ {t}, \tag {4.7}
+$$
+
+where
+
+$$
+\begin{array}{l} \Delta_ {t} = 2 \alpha^ {1 / 2} \eta^ {- 1} \mathcal {B} B _ {1} \cdot \widetilde {W} _ {2} \left(\rho_ {t}, \rho_ {0}\right) \widetilde {W} _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right) \\ + \alpha^ {- 1} B _ {2} \cdot \left(4 B _ {1} \max  \left\{\widetilde {W _ {2}} \left(\rho_ {\pi_ {t}}, \rho_ {0}\right), \widetilde {W _ {2}} \left(\rho_ {t}, \rho_ {0}\right) \right\} + B _ {r}\right) \widetilde {W _ {2}} \left(\rho_ {t}, \rho_ {\pi}\right) ^ {2}. \\ \end{array}
+$$
+
+Here $B _ { 1 }$ and $B _ { 2 }$ are defined in (4.4) of Assumption 4.2, $\eta$ is the relative TD timescale, $\alpha$ is the scaling parameter of the neural network, and $\widetilde { W } _ { 2 } = \alpha W _ { 2 }$ is the scaled $W _ { 2 }$ metric. Moreover, the constant $\boldsymbol { B }$ depends on the discount factor $\gamma$ , the scaling parameter $B _ { \beta }$ in (4.2), and the absolute constants $l _ { \beta } , B _ { r } , M _ { 1 , \varphi } , \mathcal { G }$ defined in Assumptions 4.2 and 4.3.
+
+Proof. See §B.3 for a detailed proof.
+
+![](images/074cff42bdd6ca7066c19e8da4d3105edd3c4a25cd1fb56641501e054555bf2a.jpg)
+
+Here we give a nonrigorous discussion on how to upper bound $\Delta _ { t }$ in (4.7). If $\widetilde { W } _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) \le { \cal O } ( 1 )$ holds for any $t \in [ 0 , T ]$ , by $\widetilde { W } _ { 2 } ( \rho _ { \pi _ { t } } , \rho _ { 0 } ) \ : \le \ : O ( 1 )$ in Lemma 4.4 and the triangle inequality of $W _ { 2 }$ distance (Villani, 2008), it follows that $\widetilde { W } _ { 2 } ( \rho _ { t } , \rho _ { \pi _ { t } } ) \le { \cal O } ( 1 )$ and $\Delta _ { t } \le { \cal O } ( \alpha ^ { 1 / 2 } \eta ^ { - 1 } + \alpha ^ { - 1 } )$ . Taking a time average of integration on both sides of (4.7), the policy evaluation error $\begin{array} { r } { \frac { 1 } { T } \int _ { 0 } ^ { T } \lVert Q _ { t } - Q ^ { \pi _ { t } } \rVert _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } } \mathrm { d } t } \end{array}$ is then upper bounded by $O ( \eta ^ { - 1 } T ^ { - 1 } + \alpha ^ { 1 / 2 } \eta ^ { - 1 } + \alpha ^ { - 1 } )$ . Inspired by such a fact, we introduce the following restarting mechanism to ensure $\widetilde { W } _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) \le { \cal O } ( 1 )$ .
+
+Restarting Mechanism. Let $\widetilde { W } _ { 0 } = \lambda \bar { D }$ be a threshold, where $D$ is the upper bound for $\widetilde { W } _ { 2 } ( \rho _ { \pi } , \rho _ { 0 } )$ by Lemma 4.4, $\lambda \geq 3$ is a constant scaling parameter for the restarting threshold, $\rho _ { t }$ is the distribution of the parameters in the neural network at time $t$ , and $\rho _ { 0 }$ is the initial distribution. Whenever we detect that $\widetilde { W } _ { 2 } ( \rho _ { t } , \rho _ { 0 } )$ reaches $\widetilde { W _ { 0 } }$ in the update, we pause and reset $\rho _ { t }$ to $\rho _ { 0 }$ by resampling the parameters from $\rho _ { 0 }$ . Then, we reset the critic with the newly sampled parameters while keeping the actor’s policy $\pi _ { t }$ unchanged and continue the update.
+
+The restarting mechanism guarantees $\widetilde { W } _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) \leq \lambda \bar { D }$ by restricting the distribution $\rho _ { t }$ of the parameters to be close to $\rho _ { 0 }$ . Moreover, by letting $\lambda \geq 3$ , we ensure that $\rho _ { \pi _ { t } }$ is realizable by $\rho _ { t }$ since $\widetilde { W } _ { 2 } ( \rho _ { \pi _ { t } } , \rho _ { 0 } ) \leq \bar { D } \leq \lambda \bar { D }$ , which means that the neural network is capable of capturing the representation of the action value function $Q ^ { \pi _ { t } }$ . We remark that by letting $\widetilde { W } _ { 0 } = O ( 1 )$ , we allow $\rho _ { t }$ to deviate from $\rho _ { 0 }$ up to $W _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) \le { \cal O } ( \alpha ^ { - 1 } )$ in the restarting mechanism. In contrast, the NTK regime (Cai et al., 2019b) which corresponds to letting $\alpha = \sqrt { M }$ in (3.1) only allows $\rho _ { t }$ to deviate from $\rho _ { 0 }$ by the chi-squared divergence $\chi ^ { 2 } ( \rho _ { t } \parallel \rho _ { 0 } ) \le { \cal O } ( M ^ { - 1 } ) = o ( 1 )$ . That is, the NTK regime fails to induce a feature representation significantly different from the initial one. Before moving on, we
+
+summarize the construction of the weighting distribution $\widetilde { \Phi } ^ { \pi _ { t } }$ in Theorem 4.1 and 4.5 as follows,
+
+$$
+\widetilde {\Phi} ^ {\pi_ {t}} = \widetilde {\mathcal {E}} _ {\widetilde {\phi} ^ {\pi_ {t}}} ^ {\pi_ {t}}, \quad \widetilde {\phi} ^ {\pi_ {t}} = \frac {1}{2} \widetilde {\phi} _ {0} + \frac {1}{2} \phi_ {0} \otimes \pi_ {t}, \quad \phi_ {0} = \int_ {\mathcal {A}} \widetilde {\phi} _ {0} (\cdot , \mathrm {d} a), \tag {4.8}
+$$
+
+where $\bar { \phi } _ { 0 }$ is the base distribution. Now we have the following theorem that characterizes the global optimality and convergence of the two-timescale AC with restarting mechanism.
+
+Theorem 4.6 (Global Optimality and Convergence Rate of Two-timescale AC with Restarting Mechanism). Suppose that (4.8) and Assumptions 4.2 and 4.3 hold. With the restarting mechanism, it holds that
+
+$$
+\frac {1}{T} \int_ {0} ^ {T} \left(J \left(\pi^ {*}\right) - J \left(\pi_ {t}\right)\right) \mathrm {d} t \leq \underbrace {\frac {\zeta}{T}} _ {\text {(a)}} + \underbrace {4 \kappa \sqrt {\alpha^ {- 1} S _ {1} + \alpha^ {1 / 2} \eta^ {- 1} S _ {2} + \frac {\eta^ {- 1} \bar {D} ^ {2}}{2 T \left(1 - \sqrt {\gamma}\right)}}} _ {\text {(b)}}, \tag {4.9}
+$$
+
+where we have
+
+$$
+\zeta = \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \Big [ \mathrm {K L} \big (\pi^ {*} (\cdot | s) \| \pi_ {0} (\cdot | s) \big) \Big ], \quad \kappa = \left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} _ {0}} \right\| _ {\infty},
+$$
+
+$$
+S _ {1} = \frac {(1 + \lambda) ^ {2} \bar {D} ^ {2} B _ {2} (4 B _ {1} \lambda \bar {D} + B _ {r})}{1 - \sqrt {\gamma}}, S _ {2} = \frac {2 \mathcal {B} B _ {1} \lambda (1 + \lambda) \bar {D} ^ {2}}{1 - \sqrt {\gamma}}.
+$$
+
+Here $B _ { r }$ , $B _ { 1 }$ and $B _ { 2 }$ are defined in Assumption 4.2 and 4.3, $D$ is the upper bound for $\widetilde { W } _ { 2 } ( \rho _ { \pi } , \rho _ { 0 } )$ in Lemma 4.4, $\boldsymbol { B }$ depends on the discount factor $\gamma$ and the absolute constants defined in Assumption 4.2 and 4.3, and $\lambda$ is the scaling parameter for the restarting threshold. Additionally, the total restarting number $N$ satisfies the following inequality,
+
+$$
+N \leq (\lambda - 2) ^ {- 1} \big ((\alpha^ {- 1} \eta S _ {1} + \alpha^ {1 / 2} S _ {2}) 2 T \bar {D} ^ {- 2} (1 - \sqrt {\gamma}) + 1 \big).
+$$
+
+Proof. See §B.4 for a detailed proof.
+
+Note that for a given MDP with starting distribution $\mathcal { D } _ { 0 }$ , the expected KL-divergence $\zeta$ and the concentrability coefficient $\kappa$ are both independent of the two-timescale update. We remark that our condition for (4.9) to be bounded is not restrictive. Specifically, we only need a given $\pi _ { 0 }$ and $\widetilde { \phi } _ { 0 }$ such that the KL-divergence $\zeta < \infty$ and the concentrability coefficient $\kappa < \infty$ , which is a weakening relative to the standard usage of the concentrability coefficient in the literature (Szepesv´ari and Munos, 2005; Munos and Szepesv´ari, 2008; Antos et al., 2008; Farahmand et al., 2010; Scherrer et al., 2015; Farahmand et al., 2016; Lazaric et al., 2016; Liu et al., 2019; Wang et al., 2019).
+
+The first term (a) on the right-hand side of (4.9) diminishes as $T \to \infty$ . The second term (b) corresponds to the policy evaluation error. We give an example to demonstrate the convergence of the two-timescale AC. We let the scaling parameter $\lambda = 3$ for the restarting threshold. By letting $\eta = \alpha ^ { 3 / 2 }$ , it holds that $\begin{array} { r } { { \frac { 1 } { T } } \int _ { 0 } ^ { T } \bigl ( J ( \pi ^ { * } ) - J ( \pi _ { t } ) \bigr ) \mathrm { d } t } \end{array}$ decreases at a rate of ${ \cal O } ( T ^ { - 1 } + { \cal O } ( \alpha ^ { - 1 / 2 } ) +$ $O ( \alpha ^ { - 3 / 4 } T ^ { - 1 / 2 } ) )$ as $\alpha  \infty$ and $T \to \infty$ . Note that $\eta = \alpha ^ { 3 / 2 }$ shows that the critic has a larger relative TD timescale in (3.5). As for the total number of restartings $N$ , it holds that $N \leq O ( \alpha ^ { 1 / 2 } T )$
+
+as $\alpha  \infty$ , which induces a tradeoff, i.e., a larger $\alpha$ guarantees a smaller gap in $\begin{array} { r } { { \frac { 1 } { T } } \int _ { 0 } ^ { T } \left( J ( \pi ^ { * } ) - \right. } \end{array}$ ${ \cal J } ( \pi _ { t } ) ) \mathrm { d } t$ but yields more restartings and potentially requires a larger relative TD timescale.
+
+# 5 Acknowledgement
+
+Zhaoran Wang acknowledges National Science Foundation (Awards 2048075, 2008827, 2015568, 1934931), Simons Institute (Theory of Reinforcement Learning), Amazon, J.P. Morgan, and Two Sigma for their supports.
+
+# References
+
+Agazzi, A. and Lu, J. (2019). Temporal-difference learning for nonlinear value function approximation in the lazy training regime. arXiv preprint arXiv:1905.10917.   
+Agazzi, A. and Lu, J. (2020). Global optimality of softmax policy gradient with single hidden layer neural networks in the mean-field regime. arXiv preprint arXiv:2010.11858.   
+Agostinelli, F., McAleer, S., Shmakov, A. and Baldi, P. (2019). Solving the Rubik’s cube with deep reinforcement learning and search. Nature Machine Intelligence, 1 356–363.   
+Akkaya, I., Andrychowicz, M., Chociej, M., Litwin, M., McGrew, B., Petron, A., Paino, A., Plappert, M., Powell, G., Ribas, R. et al. (2019). Solving Rubik’s cube with a robot hand. arXiv preprint arXiv:1910.07113.   
+Ambrosio, L. and Gigli, N. (2013). A user’s guide to optimal transport. In Modelling and Optimisation of Flows on Networks. Springer, 1–155.   
+Ambrosio, L., Gigli, N. and Savar´e, G. (2008). Gradient Flows: In Metric Spaces and in the Space of Probability Measures. Springer.   
+Antos, A., Szepesv´ari, C. and Munos, R. (2008). Learning near-optimal policies with Bellmanresidual minimization based fitted policy iteration and a single sample path. Machine Learning, 71 89–129.   
+Barron, A. R. (1993). Universal approximation bounds for superpositions of a sigmoidal function. IEEE Transactions on Information Theory, 39 930–945.   
+Berner, C., Brockman, G., Chan, B., Cheung, V., Debiak, P., Dennison, C., Farhi, D., Fischer, Q., Hashme, S., Hesse, C. et al. (2019). Dota 2 with large scale deep reinforcement learning. arXiv preprint arXiv:1912.06680.   
+Bhatnagar, S., Ghavamzadeh, M., Lee, M. and Sutton, R. S. (2008). Incremental natural actorcritic algorithms. In Advances in Neural Information Processing Systems.
+
+Bhatnagar, S., Sutton, R. S., Ghavamzadeh, M. and Lee, M. (2009). Natural actor-critic algorithms. Automatica, 45 2471–2482.   
+B¨orgers, T. and Sarin, R. (1997). Learning through reinforcement and replicator dynamics. Journal of Economic Theory, 77 1–14.   
+Borkar, V. S. (2009). Stochastic Approximation: A Dynamical Systems Viewpoint. Springer.   
+Cai, Q., Yang, Z., Jin, C. and Wang, Z. (2019a). Provably efficient exploration in policy optimization. arXiv preprint arXiv:1912.05830.   
+Cai, Q., Yang, Z., Lee, J. D. and Wang, Z. (2019b). Neural temporal-difference learning converges to global optima. In Advances in Neural Information Processing Systems.   
+Chen, M., Wang, Y., Liu, T., Yang, Z., Li, X., Wang, Z. and Zhao, T. (2020a). On computation and generalization of generative adversarial imitation learning. arXiv preprint arXiv:2001.02792.   
+Chen, Z., Cao, Y., Gu, Q. and Zhang, T. (2020b). Mean-field analysis of two-layer neural networks: Non-asymptotic rates and generalization bounds. arXiv preprint arXiv:2002.04026.   
+Chizat, L. and Bach, F. (2018a). A note on lazy training in supervised differentiable programming. arXiv preprint arXiv:1812.07956.   
+Chizat, L. and Bach, F. (2018b). On the global convergence of gradient descent for overparameterized models using optimal transport. In Advances in Neural Information Processing Systems.   
+Duan, Y., Chen, X., Houthooft, R., Schulman, J. and Abbeel, P. (2016). Benchmarking deep reinforcement learning for continuous control. In International Conference on Machine Learning.   
+Fang, C., Dong, H. and Zhang, T. (2019a). Over parameterized two-level neural networks can learn near optimal feature representations. arXiv preprint arXiv:1910.11508.   
+Fang, C., Gu, Y., Zhang, W. and Zhang, T. (2019b). Convex formulation of overparameterized deep neural networks. arXiv preprint arXiv:1911.07626.   
+Farahmand, A.-m., Ghavamzadeh, M., Szepesv´ari, C. and Mannor, S. (2016). Regularized policy iteration with nonparametric function spaces. The Journal of Machine Learning Research, 17 4809–4874.   
+Farahmand, A.-m., Szepesv´ari, C. and Munos, R. (2010). Error propagation for approximate policy and value iteration. In Advances in Neural Information Processing Systems.   
+Friedrichs, K. O. (1944). The identity of weak and strong extensions of differential operators. Transactions of the American Mathematical Society, 55 132–151.
+
+Fu, Z., Yang, Z. and Wang, Z. (2020). Single-timescale actor-critic provably finds globally optimal policy. arXiv preprint arXiv:2008.00483.   
+Harker, P. T. and Pang, J.-S. (1990). Finite-dimensional variational inequality and nonlinear complementarity problems: A survey of theory, algorithms and applications. Mathematical Programming, 48 161–220.   
+Hennes, D., Morrill, D., Omidshafiei, S., Munos, R., Perolat, J., Lanctot, M., Gruslys, A., Lespiau, J.-B., Parmas, P., Du´e˜nez-Guzm´an, E. et al. (2020). Neural replicator dynamics: Multiagent learning via hedging policy gradients. In International Conference on Autonomous Agents and MultiAgent Systems.   
+Hong, M., Wai, H.-T., Wang, Z. and Yang, Z. (2020). A two-timescale framework for bilevel optimization: Complexity analysis and application to actor-critic. arXiv preprint arXiv:2007.05170.   
+Jacot, A., Gabriel, F. and Hongler, C. (2018). Neural tangent kernel: Convergence and generalization in neural networks. In Advances in Neural Information Processing Systems.   
+Javanmard, A., Mondelli, M. and Montanari, A. (2019). Analysis of a two-layer neural network via displacement convexity. arXiv preprint arXiv:1901.01375.   
+Jin, C., Yang, Z., Wang, Z. and Jordan, M. I. (2020). Provably efficient reinforcement learning with linear function approximation. In Conference on Learning Theory.   
+Kakade, S. and Langford, J. (2002). Approximately optimal approximate reinforcement learning. In International Conference on Machine Learning, vol. 2.   
+Kakade, S. M. (2002). A natural policy gradient. In Advances in Neural Information Processing Systems.   
+Khodadadian, S., Doan, T. T., Maguluri, S. T. and Romberg, J. (2021). Finite sample analysis of two-time-scale natural actor-critic algorithm. arXiv preprint arXiv:2101.10506.   
+Konda, V. R. and Tsitsiklis, J. N. (2000). Actor-critic algorithms. In Advances in Neural Information Processing Systems.   
+Kushner, H. and Yin, G. G. (2003). Stochastic Approximation and Recursive Algorithms and Applications. Springer.   
+Lazaric, A., Ghavamzadeh, M. and Munos, R. (2016). Analysis of classification-based policy iteration algorithms. The Journal of Machine Learning Research, 17 583–612.   
+Liu, B., Cai, Q., Yang, Z. and Wang, Z. (2019). Neural proximal/trust region policy optimization attains globally optimal policy. arXiv preprint arXiv:1906.10306.
+
+Lu, Y., Ma, C., Lu, Y., Lu, J. and Ying, L. (2020). A mean field analysis of deep resnet and beyond: Towards provably optimization via overparameterization from depth. In International Conference on Machine Learning. PMLR.   
+Mei, S., Misiakiewicz, T. and Montanari, A. (2019). Mean-field theory of two-layers neural networks: dimension-free bounds and kernel limit. In Conference on Learning Theory. PMLR.   
+Mei, S., Montanari, A. and Nguyen, P.-M. (2018). A mean field view of the landscape of two-layer neural networks. Proceedings of the National Academy of Sciences, 115 E7665–E7671.   
+Munos, R. and Szepesv´ari, C. (2008). Finite-time bounds for fitted value iteration. The Journal of Machine Learning Research, 9 815–857.   
+Otto, F. and Villani, C. (2000). Generalization of an inequality by Talagrand and links with the logarithmic Sobolev inequality. Journal of Functional Analysis, 173 361–400.   
+Peters, J. and Schaal, S. (2008). Natural actor-critic. Neurocomputing, 71 1180–1190.   
+Peyre, R. (2011). Comparison between $w _ { 2 }$ distance and $\dot { H } ^ { - 1 }$ norm, and localisation of wasserstein distance. arXiv preprint arXiv:1104.4631.   
+Pinkus, A. (1999). Approximation theory of the MLP model in neural networks. Acta Numerica, 8 143–195.   
+Scherrer, B., Ghavamzadeh, M., Gabillon, V., Lesner, B. and Geist, M. (2015). Approximate modified policy iteration and its application to the game of Tetris. The Journal of Machine Learning Research, 16 1629–1676.   
+Schulman, J., Wolski, F., Dhariwal, P., Radford, A. and Klimov, O. (2017). Proximal policy optimization algorithms. arXiv preprint arXiv:1707.06347.   
+Schuster, P. and Sigmund, K. (1983). Replicator dynamics. Journal of Theoretical Biology, 100 533–538.   
+Silver, D., Huang, A., Maddison, C. J., Guez, A., Sifre, L., Van Den Driessche, G., Schrittwieser, J., Antonoglou, I., Panneershelvam, V., Lanctot, M. et al. (2016). Mastering the game of Go with deep neural networks and tree search. Nature, 529 484–489.   
+Silver, D., Schrittwieser, J., Simonyan, K., Antonoglou, I., Huang, A., Guez, A., Hubert, T., Baker, L., Lai, M., Bolton, A. et al. (2017). Mastering the game of Go without human knowledge. Nature, 550 354.   
+Sirignano, J. and Spiliopoulos, K. (2020a). Mean field analysis of neural networks: A central limit theorem. Stochastic Processes and their Applications, 130 1820–1852.
+
+Sirignano, J. and Spiliopoulos, K. (2020b). Mean field analysis of neural networks: A law of large numbers. SIAM Journal on Applied Mathematics, 80 725–752.   
+Sutton, R. S. (1988). Learning to predict by the methods of temporal differences. Machine Learning, 3 9–44.   
+Sutton, R. S. and Barto, A. G. (2018). Reinforcement Learning: An Introduction. MIT press.   
+Szepesv´ari, C. and Munos, R. (2005). Finite time bounds for sampling based fitted value iteration. In International Conference on Machine Learning. ACM.   
+Villani, C. (2003). Topics in Optimal Transportation. American Mathematical Society.   
+Villani, C. (2008). Optimal Transport: Old and New. Springer.   
+Vinyals, O., Babuschkin, I., Czarnecki, W. M., Mathieu, M., Dudzik, A., Chung, J., Choi, D. H., Powell, R., Ewalds, T., Georgiev, P. et al. (2019). Grandmaster level in StarCraft II using multiagent reinforcement learning. Nature, 575 350–354.   
+Wang, L., Cai, Q., Yang, Z. and Wang, Z. (2019). Neural policy gradient methods: Global optimality and rates of convergence. arXiv preprint arXiv:1909.01150.   
+Watkins, C. and Dayan, P. (1992). Q-learning. Machine Learning, 8 279–292.   
+Wei, C., Lee, J. D., Liu, Q. and Ma, T. (2019). Regularization matters: Generalization and optimization of neural nets vs their induced kernel. In Advances in Neural Information Processing Systems.   
+Wu, Y., Zhang, W., Xu, P. and Gu, Q. (2020). A finite time analysis of two time-scale actor critic methods. arXiv preprint arXiv:2005.01350.   
+Xu, T., Wang, Z. and Liang, Y. (2020a). Improving sample complexity bounds for actor-critic algorithms. arXiv preprint arXiv:2004.12956.   
+Xu, T., Wang, Z. and Liang, Y. (2020b). Non-asymptotic convergence analysis of two time-scale (natural) actor-critic algorithms. arXiv preprint arXiv:2005.03557.   
+Yang, L. F. and Wang, M. (2019a). Reinforcement learning in feature space: Matrix bandit, kernels, and regret bound. arXiv preprint arXiv:1905.10389.   
+Yang, L. F. and Wang, M. (2019b). Sample-optimal parametric q-learning using linearly additive features. arXiv preprint arXiv:1902.04779.   
+Zhang, Y., Cai, Q., Yang, Z., Chen, Y. and Wang, Z. (2020). Can temporal-difference and Qlearning learn representation? A mean-field theory. arXiv preprint arXiv:2006.04761.
+
+# A Supplement to the Background
+
+In this section, we present some background on Wasserstein space and replicator dynamics.
+
+# A.1 Wasserstein Space
+
+Let $\Theta \subseteq \mathbb { R } ^ { D }$ be a Polish space. We denote by ${ \mathcal { P } } _ { 2 } ( \Theta ) \subseteq { \mathcal { P } } ( \Theta )$ the set of probability measures with finite second moments. Then, the Wasserstein-2 ( $W _ { 2 }$ ) distance between $\mu , \nu \in \mathcal { P } _ { 2 } ( \Theta )$ is defined as follows,
+
+$$
+W _ {2} (\mu , \nu) = \inf  \left\{\mathbb {E} \left[ \| X - Y \| ^ {2} \right] ^ {1 / 2} \mid \operatorname {l a w} (X) = \mu , \operatorname {l a w} (Y) = \nu \right\}, \tag {A.1}
+$$
+
+where the infimum is taken over the random variables $X$ and $Y$ on $\Theta$ and we denote by $\operatorname { l a w } ( X )$ the distribution of a random variable $X$ . We call $\mathcal { M } = ( \mathcal { P } _ { 2 } ( \Theta ) , W _ { 2 } )$ the Wasserstein space, which is an infinite-dimensional manifold (Villani, 2008). In particular, we define the tangent vector at $\mu \in \mathcal { M }$ as $\dot { \rho } _ { 0 }$ for the corresponding curve $\rho : \lfloor 0 , 1 \rfloor \to \mathcal { P } _ { 2 } ( \Theta )$ with $\rho _ { 0 } ~ = ~ \mu$ . Under certain regularity conditions, the continuity equation $\partial _ { t } \rho _ { t } ~ = ~ - \operatorname { d i v } ( \rho _ { t } v _ { t } )$ corresponds to a vector field $v : [ 0 , 1 ] \times \Theta \to \mathbb { R } ^ { D }$ , which endows the infinite-dimensional manifold $\mathcal { P } _ { 2 } ( \Theta )$ with a weak Riemannian structure in the following sense (Villani, 2008). Given any tangent vectors $u$ and $\widetilde { u }$ at $\mu \in \mathcal { M }$ and the corresponding vector fields $v , \widetilde { v }$ , which satisfy $u + \mathrm { d i v } ( \mu v ) = 0$ and $\widetilde { u } + \mathrm { d i v } ( \mu \widetilde { v } ) = 0$ , respectively, we define the inner product of $u$ and $\widetilde { u }$ as follows,
+
+$$
+\langle u, \widetilde {u} \rangle_ {\mu , W _ {2}} = \int v \cdot \widetilde {v} \mathrm {d} \mu = \langle v, \widetilde {v} \rangle_ {\mu}, \tag {A.2}
+$$
+
+which yields a Riemannian metric. Such a Riemannian metric further induces a norm $\| u \| _ { \mu , W _ { 2 } } =$ $\left. u , u \right. _ { \mu , W _ { 2 } } ^ { 1 / 2 }$ for any tangent vector $u \in T _ { \mu } { \mathcal { M } }$ at any $\mu \in \mathcal { M }$ , which allows us to write the Wasserstein-2 distance defined in (A.1) as follows,
+
+$$
+W _ {2} (\mu , \nu) = \inf  \left\{\left(\int_ {0} ^ {1} \| \dot {\rho} _ {t} \| _ {\rho_ {t}, W _ {2}} ^ {2} \mathrm {d} t\right) ^ {1 / 2} \mid \rho : [ 0, 1 ] \rightarrow \mathcal {M}, \rho_ {0} = \mu , \rho_ {1} = \nu \right\}. \tag {A.3}
+$$
+
+Here $\dot { \rho } _ { s }$ denotes $\partial _ { t } \rho _ { t } \mid _ { t = s }$ for any $s \in \lbrack 0 , 1 \rbrack$ . In particular, the infimum in (A.3) is attained by the geodesic $\widetilde { \rho } : [ 0 , 1 ] \to \mathcal { P } _ { 2 } ( \Theta )$ connecting $\mu , \nu \in \mathcal { M }$ . Moreover, the geodesics on $\mathcal { M }$ are constant-speed, that is,
+
+$$
+\left\| \dot {\widetilde {\rho}} _ {t} \right\| _ {\widetilde {\rho} _ {t}, W _ {2}} = W _ {2} (\mu , \nu), \quad \forall t \in [ 0, 1 ]. \tag {A.4}
+$$
+
+In Wasserstein space $\mathcal { M }$ , a curve $\rho : \vert 0 , 1 \vert  \mathcal { P } _ { 2 } ( \Theta )$ is defined to be absolutely continous if there exists $m \in L ^ { 1 } ( a , b )$ , i.e., $\begin{array} { r } { \int _ { a } ^ { b } | \dot { m } ( t ) | \mathrm { d } t < \infty } \end{array}$ , such that
+
+$$
+W _ {2} \left(\rho_ {s}, \rho_ {t}\right) \leq \int_ {s} ^ {t} m (r) \mathrm {d} r, \quad \forall a <   s \leq t <   b.
+$$
+
+Such an absolutely continuous curve $\rho _ { t }$ allows us to define the metric derivative in $\mathcal { M }$ as follows,
+
+$$
+| \dot {\rho} _ {t} | _ {W _ {2}} = \lim  _ {s \rightarrow t} \frac {W _ {2} \left(\rho_ {s} , \rho_ {t}\right)}{| s - t |}. \tag {A.5}
+$$
+
+By Ambrosio et al. (2008), the metric derivative $| \dot { \rho } _ { t } | _ { W _ { 2 } }$ is connected to the norm of the tangent vector by
+
+$$
+| \dot {\rho} _ {t} | _ {W _ {2}} = \| \dot {\rho} _ {t} \| _ {\rho_ {t}, W _ {2}}. \tag {A.6}
+$$
+
+Furthermore, we introduce the Wasserstein-1 distance, which is defined as
+
+$$
+W _ {1} (\mu^ {1}, \mu^ {2}) = \inf  \left\{\mathbb {E} \left[ \| X - Y \| \right] \mid \operatorname {l a w} (X) = \mu^ {1}, \operatorname {l a w} (Y) = \mu^ {2} \right\}
+$$
+
+for any $\mu ^ { 1 } , \mu ^ { 2 } \in \mathcal { P } ( \mathbb { R } ^ { D } )$ with finite first moments. The Wasserstein-1 distance has the following dual representation (Ambrosio et al., 2008),
+
+$$
+W _ {1} \left(\mu^ {1}, \mu^ {2}\right) = \sup  \left\{\int f (x) \mathrm {d} \left(\mu^ {1} - \mu^ {2}\right) (x) \mid \text {c o n t i n u o u s} f: \mathbb {R} ^ {D} \rightarrow \mathbb {R}, \operatorname {L i p} (f) \leq 1 \right\}. \tag {A.7}
+$$
+
+# A.2 Replicator Dynamics
+
+The replicator dynamics originally arises in the study of evolutionary game theory (Schuster and Sigmund, 1983). For a function $f$ , the replicator dynamics is given by the differential equation
+
+$$
+\frac {\mathrm {d}}{\mathrm {d} t} x _ {t} (a) = x _ {t} (a) [ f (a, x _ {t}) - \phi (x) ],
+$$
+
+where $\begin{array} { r } { \phi ( x ) = \int x ( a ) f ( a , x ) } \end{array}$ . As for the PPO update in (3.7), for a fixed $s$ , let $x ( a ) = \pi ( a \mid s )$ and $f ( a , x ) = Q ^ { \pi } ( s , a )$ , we see that (3.7) corresponds to a replicator dynamics if $Q _ { t } = Q ^ { \pi _ { t } }$ . Note that in the simultaneous update of both the critic and actor, we do not have access to the true action value function $Q ^ { \pi }$ . Thus, we use the estimator $Q _ { t }$ calculated by the critic step to guide the update of the actor in the PPO update, which takes the form of a replicator dynamics in the continuous-time limit.
+
+# B Proofs of Main Results
+
+In this section, we give detailed proof of the theorems and present a detailed statement of Lemma 4.4.
+
+# B.1 Proof of Theorem 4.1
+
+Proof. Following from the performance difference lemma (Kakade and Langford, 2002), we have
+
+$$
+J (\pi^ {*}) - J (\pi_ {t}) = (1 - \gamma) ^ {- 1} \cdot \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \big [ \langle A ^ {\pi_ {t}} (s, \cdot), \pi^ {*} (\cdot | s) - \pi_ {t} (\cdot | s) \rangle_ {\mathcal {A}} \big ],
+$$
+
+where $\mathcal { E } _ { D _ { 0 } } ^ { \pi ^ { * } }$ is the visitation measure induced by $\pi ^ { * }$ from $\mathcal { D } _ { 0 }$ and $A ^ { \pi _ { t } }$ is the advantage function. Note that the continuous PPO dynamics in (3.7) can be equivalently written as $\dot { o } _ { t } \log \pi _ { t } = A _ { t }$ . Thus, we
+
+have
+
+$$
+\begin{array}{l} (1 - \gamma) \cdot \left(J (\pi^ {*}) - J (\pi_ {t})\right) = \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \left[ \left\langle \frac {\mathrm {d}}{\mathrm {d} t} \log \pi_ {t} (\cdot | s) + A ^ {\pi_ {t}} (s, \cdot) - A _ {t} (s, \cdot), \pi^ {*} (\cdot | s) - \pi_ {t} (\cdot | s) \right\rangle_ {\mathcal {A}} \right] \\ = \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \left[ \left\langle \frac {\mathrm {d}}{\mathrm {d} t} \log \pi_ {t} (\cdot | s), \pi^ {*} (\cdot | s) - \pi_ {t} (\cdot | s) \right\rangle_ {\mathcal {A}} \right] \\ + \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \left[ \left\langle Q ^ {\pi_ {t}} (s, \cdot) - Q _ {t} (s, \cdot), \pi^ {*} (\cdot | s) - \pi_ {t} (\cdot | s) \right\rangle_ {\mathcal {A}} \right]. \tag {B.1} \\ \end{array}
+$$
+
+For the first term on the right-hand side of (B.1), it holds that,
+
+$$
+\begin{array}{l} \left\langle \frac {\mathrm {d}}{\mathrm {d} t} \log \pi_ {t} (\cdot | s), \pi^ {*} (\cdot | s) - \pi_ {t} (\cdot | s) \right\rangle_ {\mathcal {A}} \\ = \left\langle \frac {\mathrm {d}}{\mathrm {d} t} \log \pi_ {t} (\cdot \mid s), \pi^ {*} (\cdot \mid s) \right\rangle_ {\mathcal {A}} - \left\langle \frac {\mathrm {d}}{\mathrm {d} t} \log \pi_ {t} (\cdot \mid s), \pi_ {t} (\cdot \mid s) \right\rangle_ {\mathcal {A}} \tag {B.2} \\ = - \frac {\mathrm {d}}{\mathrm {d} t} \operatorname {K L} \left(\pi^ {*} (\cdot | s) \| \pi_ {t} (\cdot | s)\right), \\ \end{array}
+$$
+
+where the last equality holds by noting that $\begin{array} { r } { \langle \partial _ { t } \log \pi _ { t } ( \cdot \vert s ) , \pi _ { t } ( \cdot \vert s ) \rangle _ { \mathcal { A } } = \partial _ { t } \int _ { \mathcal { A } } \pi _ { t } ( \mathrm { d } a \vert s ) = 0 } \end{array}$ . For the second term on the right-hand side of (B.1), by the Cauchy-Schwartz inequality, we have
+
+$$
+\begin{array}{l} \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \left[ \left\langle Q ^ {\pi_ {t}} (s, \cdot) - Q _ {t} (s, \cdot), \pi^ {*} (\cdot | s) \right\rangle_ {\mathcal {A}} \right] = \mathbb {E} _ {(s, a) \sim \widetilde {\phi} ^ {\pi_ {t}}} \left[ \left(Q ^ {\pi_ {t}} (s, a) - Q _ {t} (s, a)\right) \pi^ {*} (a | s) \frac {\mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}} (s)}{\widetilde {\phi} ^ {\pi_ {t}} (x)} \right] \\ \leq \left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} ^ {\pi_ {t}}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \cdot \left\| Q ^ {\pi_ {t}} - Q _ {t} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}}, \tag {B.3} \\ \end{array}
+$$
+
+$$
+\begin{array}{l} \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \Big [ \left\langle Q ^ {\pi_ {t}} (s, \cdot) - Q _ {t} (s, \cdot), \pi_ {t} (\cdot | s) \right\rangle_ {\mathcal {A}} \Big ] = \mathbb {E} _ {(x) \sim \widetilde {\phi} ^ {\pi_ {t}}} \Big [ \left(Q ^ {\pi_ {t}} (s, \cdot) - Q _ {t} (s, \cdot)\right) \pi_ {t} (a | s) \frac {\mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}} (s)}{\widetilde {\phi} ^ {\pi_ {t}} (x)} \Big ] \\ \leq \left\| \frac {\mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}} \otimes \pi_ {t}}{\widetilde {\phi} ^ {\pi_ {t}}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \cdot \left\| Q ^ {\pi_ {t}} - Q _ {t} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}}. \tag {B.4} \\ \end{array}
+$$
+
+Plugging (B.2), (B.3), and (B.4) into (B.1), we have
+
+$$
+\begin{array}{l} J \left(\pi^ {*}\right) - J \left(\pi_ {t}\right) \leq - \frac {\mathrm {d}}{\mathrm {d} t} \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} \left[ \operatorname {K L} \left(\pi^ {*} (\cdot | s) \| \pi_ {t} (\cdot | s)\right) \right] \\ + \left(\left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} ^ {\pi_ {t}}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} + \left\| \frac {\mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}} \otimes \pi_ {t}}{\widetilde {\phi} ^ {\pi_ {t}}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}}\right) \cdot \| Q _ {t} - Q ^ {\pi_ {t}} \| _ {2, \widetilde {\phi} ^ {\pi_ {t}}}. \tag {B.5} \\ \end{array}
+$$
+
+By further letting $\begin{array} { r } { \tilde { \phi } ^ { \pi _ { t } } = \frac { 1 } { 2 } \tilde { \phi } _ { 0 } + \frac { 1 } { 2 } \phi _ { 0 } \otimes \pi _ { t } } \end{array}$ , it holds for the concentrability coefficient $\left\| \frac { \widetilde { \mathcal { E } } _ { \mathcal { D } _ { 0 } } ^ { \pi ^ { * } } } { \widetilde { \phi } ^ { \pi _ { t } } } \right\| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } }$ in (B.3) that
+
+$$
+\left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} ^ {\pi_ {t}}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \leq \left\| \frac {2 \widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} _ {0}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \leq 2 \left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} _ {0}} \right\| _ {\infty}. \tag {B.6}
+$$
+
+By further letting $\begin{array} { r } { \phi _ { 0 } ( s ) = \int _ { \mathcal { A } } \widetilde { \phi } _ { 0 } ( s , \mathrm { d } a ) } \end{array}$ , it holds for the concentrability coefficient E π ∗D 0 ⊗ π t $\left\| \frac { \mathcal { E } _ { \mathcal { D } _ { 0 } } ^ { \pi ^ { * } } \otimes \pi _ { t } } { \widetilde { \phi } ^ { \pi _ { t } } } \right\| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } }$ in (B.4) that
+
+$$
+\left\| \frac {\mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}} \otimes \pi_ {t}}{\widetilde {\phi} ^ {\pi_ {t}}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \leq \left\| \frac {2 \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\phi_ {0}} \right\| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \leq 2 \left\| \frac {\int \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}} (x)}{\widetilde {\phi} _ {0} (x)} \widetilde {\phi} _ {0} (s , d a)}{\phi_ {0} (s)} \right\| _ {\infty} \leq 2 \left\| \frac {\widetilde {\mathcal {E}} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}}{\widetilde {\phi} _ {0}} \right\| _ {\infty}. \tag {B.7}
+$$
+
+Plugging (B.6) and (B.7) into (B.5) and taking integration on both sides of (B.5), we have
+
+$$
+\frac {1}{T} \int_ {0} ^ {T} (J (\pi^ {*}) - J (\pi_ {t})) \mathrm {d} t \leq \frac {1}{T} \mathbb {E} _ {s \sim \mathcal {E} _ {\mathcal {D} _ {0}} ^ {\pi^ {*}}} [ \mathrm {K L} (\pi^ {*} (\cdot | s) \| \pi_ {0} (\cdot | s)) ] + \frac {4 \kappa}{T} \cdot \int_ {0} ^ {T} \| Q _ {t} - Q ^ {\pi_ {t}} \| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} \mathrm {d} t,
+$$
+
+where $\kappa = \left. \bar { \mathcal { E } } _ { \mathcal { D } _ { 0 } } ^ { \pi ^ { * } } / \bar { \phi } _ { 0 } \right. _ { \infty }$ . Thus, we complete the proof of Theorem 4.1.
+
+# B.2 Detailed Statement of Lemma 4.4
+
+We give a detailed version of Lemma 4.4 as follows.
+
+Lemma B.1 (Regularity of Representation of $Q ^ { \pi }$ ). Suppose that Assumptions 4.2 and 4.3 hold. For any policy $\pi$ , there exists a probability measure $\rho _ { \pi } \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ for the representation of $Q ^ { \pi }$ with the following properties.
+
+(i) For function $Q ( s , a ; \rho _ { \pi } )$ defined by (3.4) with $\rho = \rho _ { \pi }$ and the action value function $Q ^ { \pi } ( s , a )$ defined by (2.2), we have $Q ( s , a ; \rho _ { \pi } ) = Q ^ { \pi } ( s , a )$ for any $( s , a ) \in S \times \mathcal { A }$ .   
+(ii) For $g$ defined in (3.6), we have $g ( \cdot ; \rho _ { \pi } ) = 0$ for any policy $\pi$   
+(iii) By letting $B _ { \beta } \geq 2 ( B _ { r } + \gamma ( 1 - \gamma ) ^ { - 1 } B _ { r } M _ { 1 , \varphi } ) $ for the neural network defined in (4.2) and $\rho _ { 0 } \sim N ( 0 , I _ { D } )$ for the initial distribution, we have $\widetilde { W } _ { 2 } ( \rho _ { \pi } , \rho _ { 0 } ) < \bar { D }$ for any policy $\pi$ , where we define $\widetilde { W } ( \cdot , \cdot ) = \alpha W ( \cdot , \cdot )$ as the scaled $W _ { 2 }$ metric. Here constant $D$ depends on the discount factor $\gamma$ and the absolute constants $L _ { 0 , \beta } , L _ { 1 , \beta } , l _ { \beta } , B _ { r } , M _ { \mu } , M _ { \psi } , M _ { 1 , \varphi } , M _ { 2 , \varphi }$ defined in Assumptions 4.2 and 4.3.   
+(iv) For any two policies $\pi _ { 1 }$ and $\pi _ { 2 }$ , it holds that,
+
+$$
+W _ {2} (\rho_ {\pi_ {1}}, \rho_ {\pi_ {2}}) \leq \alpha^ {- \frac {1}{2}} \mathcal {B} \cdot \sup _ {s \in \mathcal {S}} \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {1}}} \left[ \left\| \pi_ {1} (\cdot | s ^ {\prime}) - \pi_ {2} (\cdot | s ^ {\prime}) \right\| _ {1} \right],
+$$
+
+where $\boldsymbol { B }$ depends on the dicount factor $\gamma$ , the scaling parameter $B _ { \beta }$ in (4.2), and the absolute constants $l _ { \beta } , B _ { r } , M _ { 1 , \varphi } , \mathcal { G }$ defined in Assumptions 4.2 and 4.3.
+
+Proof. See §C.2 for a detailed proof.
+
+# B.3 Proof of Theorem 4.5
+
+Proof. For notation simplicity, we let $x = ( s , a )$ . By Property (i) of Lemma B.1, it holds that kQt − Qπt k22,φeπt $\| Q _ { t } - Q ^ { \pi _ { t } } \| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } } ^ { 2 } = \| Q _ { t } - Q ( \cdot ; \rho _ { \pi } ) \| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } } ^ { 2 }$ , where $Q _ { t } = Q ( \cdot ; \rho _ { t } )$ . Thus it prompts us to study the $W _ { 2 }$ distance between $\rho _ { t }$ and $\rho _ { \pi _ { t } }$ . By the first variation formula in Lemma E.2, it holds that
+
+$$
+\frac {\mathrm {d}}{\mathrm {d} t} \frac {W _ {2} ^ {2} \left(\rho_ {t} , \rho_ {\pi_ {t}}\right)}{2} = - \left\langle \dot {\rho} _ {t}, \dot {\tilde {\alpha}} _ {t} ^ {0} \right\rangle_ {\rho_ {t}, W _ {2}} - \left\langle \dot {\rho} _ {\pi_ {t}}, \dot {\tilde {\beta}} _ {t} ^ {0} \right\rangle_ {\rho_ {\pi_ {t}}, W _ {2}}. \tag {B.8}
+$$
+
+Here $\widetilde \alpha _ { t } ^ { [ 0 , 1 ] }$ is the geodesic connecting $\rho _ { t }$ and $\rho _ { \pi _ { t } }$ , and $\widetilde { \beta } _ { t } ^ { \lfloor 0 , 1 \rfloor }$ is its time-inverse, i.e., $\widetilde { \beta } _ { t } ^ { s } = \widetilde { \alpha } _ { t } ^ { 1 - s }$ Besides, we denote by $\widetilde { \alpha } _ { t } ^ { s } \ = \ \partial _ { s } \widetilde { \alpha } _ { t } ^ { s }$ and $\widetilde { \beta } _ { t } ^ { s } = \partial _ { s } \widetilde { \beta } _ { t } ^ { s }$ the derivation of geodesics $\widetilde { \alpha } _ { t } ^ { s }$ and $\widetilde { \beta } _ { t } ^ { s }$ with
+
+respect to $s$ , respectively. We denote by $v _ { s }$ the corresponding vector field at $\widetilde { \alpha } _ { t } ^ { s }$ , which satisfies $\partial _ { s } \widetilde { \alpha } _ { t } ^ { s } = - \operatorname { d i v } ( \widetilde { \alpha } _ { t } ^ { s } v _ { s } )$ . For the first term of (B.8), it holds that
+
+$$
+\begin{array}{l} - \left\langle \dot {\rho} _ {t}, \widetilde {\alpha} _ {t} ^ {0} \right\rangle_ {\rho_ {t}, W _ {2}} = - \eta \cdot \left\langle g (\cdot ; \rho_ {t}, \pi_ {t}), v _ {0} \right\rangle_ {\rho_ {t}} \\ = \eta \cdot \int_ {0} ^ {1} \partial_ {s} \left\langle g (\cdot ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}), v _ {s} \right\rangle_ {\widetilde {\alpha} _ {t} ^ {s}} d s - \eta \cdot \left\langle g (\cdot ; \rho_ {\pi_ {t}}, \pi_ {t}), v _ {1} \right\rangle_ {\rho_ {\pi_ {t}}} \\ = \eta \cdot \int_ {0} ^ {1} \left\langle \partial_ {s} g \left(\because \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}\right), v _ {s} \right\rangle_ {\widetilde {\alpha} _ {t} ^ {s}} \mathrm {d} s + \eta \cdot \int_ {0} ^ {1} \int g \left(\theta ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}\right) \cdot \partial_ {s} \left(v _ {s} \widetilde {\alpha} _ {t} ^ {s}\right) (\theta) \mathrm {d} \theta \mathrm {d} s, \tag {B.9} \\ \end{array}
+$$
+
+where the first equality follows from (A.2) and the third equation follows from $g ( \cdot ; \rho _ { \pi _ { t } } , \pi _ { t } ) = 0$ by Property (ii) of Lemma B.1. For the first term on the right-hand side of (B.9), we have
+
+$$
+\begin{array}{l} \eta \cdot \int_ {0} ^ {1} \left\langle \partial_ {s} g (\because \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}), v _ {s} \right\rangle_ {\widetilde {\alpha} _ {t} ^ {s}} d s \\ = - \alpha^ {- 1} \eta \cdot \int_ {0} ^ {1} \int \left\langle \mathbb {E} _ {\widetilde {\Phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} \left[ \partial_ {s} \left(Q (x; \widetilde {\alpha} _ {t} ^ {s}) - \gamma \cdot Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right)\right) \nabla \sigma (x; \theta) \right], \left(v _ {s} \widetilde {\alpha} _ {t} ^ {s}\right) (\theta) \right\rangle d \theta d s \\ = \alpha^ {- 1} \eta \cdot \int_ {0} ^ {1} \int \left\langle \mathbb {E} _ {\widetilde {\Phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} \left[ \partial_ {s} \left(Q (x; \widetilde {\alpha} _ {t} ^ {s}) - \gamma \cdot Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right)\right) \sigma (x; \theta) \right], \operatorname {d i v} \left(v _ {s} \widetilde {\alpha} _ {t} ^ {s}\right) (\theta) \right\rangle \mathrm {d} \theta \mathrm {d} s, \tag {B.10} \\ \end{array}
+$$
+
+where the first equality holds by defintion of $g$ in (3.6) and the last equality follows from Stokes’ formula. Note that we have $\mathrm { d i v } ( v _ { s } \widetilde { \alpha } _ { t } ^ { s } ) = - \partial _ { s } \widetilde { \alpha } _ { t } ^ { s }$ by the definition of vector field $v _ { s }$ . Thus, it holds for (B.10) that
+
+$$
+\begin{array}{l} \eta \cdot \int_ {0} ^ {1} \left\langle \partial_ {s} g (\because \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}), v _ {s} \right\rangle_ {\widetilde {\alpha} _ {t} ^ {s}} d s \\ = - \alpha^ {- 1} \eta \cdot \int_ {0} ^ {1} \int \left\langle \mathbb {E} _ {\widetilde {\Phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} \left[ \partial_ {s} \left(Q (x; \widetilde {\alpha} _ {t} ^ {s}) - \gamma \cdot Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right)\right) \sigma (x; \theta) \right], \partial_ {s} \widetilde {\alpha} _ {t} ^ {s} (\theta) \right\rangle d \theta d s \\ = - \alpha^ {- 2} \eta \cdot \int_ {0} ^ {1} \mathbb {E} _ {\widetilde {\Phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} \left[ \partial_ {s} \left(Q (x; \widetilde {\alpha} _ {t} ^ {s}) - \gamma \cdot Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right)\right) \partial_ {s} Q (x; \widetilde {\alpha} _ {t} ^ {s}) \right] d s, \tag {B.11} \\ \end{array}
+$$
+
+where the last equality follows from the definition of $Q$ in (3.4). We let $f ( \widetilde { D } ) = \big ( \mathbb { E } _ { x \sim \widetilde { \mathcal { E } } _ { \widetilde { D } } ^ { \pi _ { t } } } \big [ ( \partial _ { s } Q ( x ; \widetilde { \alpha } _ { t } ^ { s } ) ) ^ { 2 } \big ] \big ) ^ { 1 / 2 }$ with respect to a specific $s$ and $t$ . Recall that for the weighting distribution $\widetilde { \Phi } ^ { \pi _ { t } }$ , we set $\widetilde { \Phi } ^ { \pi _ { t } } = \widetilde { \mathcal { E } } _ { \widetilde { \phi } ^ { \pi _ { t } } } ^ { \pi _ { t } }$ Eeφeπt Hence, for the integrand of (B.11), we have
+
+$$
+\begin{array}{l} - \mathbb {E} _ {\widetilde {\Phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} \left[ \partial_ {s} \left(Q (x; \widetilde {\alpha} _ {t} ^ {s}) - \gamma \cdot Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right)\right) \partial_ {s} Q (x; \widetilde {\alpha} _ {t} ^ {s}) \right] \\ = - f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) ^ {2} + \gamma \cdot \int \partial_ {s} Q \left(x; \widetilde {\alpha} _ {t} ^ {s}\right) \partial_ {s} Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right) \widetilde {P} ^ {\pi_ {t}} \left(x ^ {\prime} \mid x\right) \widetilde {\mathcal {E}} _ {\widetilde {\phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} (x) d x ^ {\prime} d x \\ \leq - f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) ^ {2} + \gamma \cdot \sqrt {\int \left(\partial_ {s} Q \left(x ; \widetilde {\alpha} _ {t} ^ {s}\right)\right) ^ {2} \widetilde {\mathcal {E}} _ {\widetilde {\phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} (\mathrm {d} x)} \cdot \sqrt {\int \left(\partial_ {s} Q \left(x ^ {\prime} ; \widetilde {\alpha} _ {t} ^ {s}\right)\right) ^ {2} \widetilde {P} ^ {\pi_ {t}} (\mathrm {d} x ^ {\prime} \mid x) \widetilde {\mathcal {E}} _ {\widetilde {\phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} (\mathrm {d} x)}, \tag {B.12} \\ \end{array}
+$$
+
+where the equality follows from the definition of $\mathbb { E } _ { \widetilde { \Phi } ^ { \pi _ { t } } } ^ { \pi _ { t } }$ in (3.6) and the inequality folllows from the Cauchy-Schwarz inequality. We define $T ^ { \pi } : { \mathcal { P } } ( S \times { \mathcal { A } } ) \to { \mathcal { P } } ( S \times { \mathcal { A } } )$ as a mapping operator such that $\begin{array} { r } { T ^ { \pi } \tilde { \mathcal { D } } ( x ^ { \prime } ) = \int \tilde { \mathcal { D } } ( x ) \tilde { P } ^ { \pi } ( x ^ { \prime } | \mathrm { d } x ) } \end{array}$ . We rewrite (B.12) as
+
+$$
+- \mathbb {E} _ {\widetilde {\Phi} ^ {\pi_ {t}}} ^ {\pi_ {t}} \left[ \partial_ {s} \left(Q (x; \widetilde {\alpha} _ {t} ^ {s}) - \gamma \cdot Q \left(x ^ {\prime}; \widetilde {\alpha} _ {t} ^ {s}\right)\right) \partial_ {s} Q (x; \widetilde {\alpha} _ {t} ^ {s}) \right] \leq - f (\widetilde {\phi} ^ {\pi_ {t}}) ^ {2} + \gamma \cdot f (\widetilde {\phi} ^ {\pi_ {t}}) \cdot f \left(\mathcal {T} ^ {\pi_ {t}} \widetilde {\phi} ^ {\pi_ {t}}\right). \tag {B.13}
+$$
+
+By the definition of ${ \mathcal { T } } ^ { \pi _ { t } }$ and the definition of visitation measure in (2.1), it holds that $\mathcal { \widetilde { E } _ { \widetilde { \phi } ^ { \pi _ { t } } } ^ { \pi _ { t } } } \mathrm { ~ - ~ }$ γ πt $\gamma \widetilde { \mathcal { E } } _ { { \mathcal { T } } ^ { \pi _ { t } } \widetilde { \phi } ^ { \pi _ { t } } } ^ { \pi _ { t } } = ( 1 - \gamma ) \widetilde { \phi } ^ { \pi _ { t } }$ . Hence, we have $f ( \widetilde { \phi } ^ { \pi _ { t } } ) ^ { 2 } - \gamma f ^ { 2 } ( T ^ { \pi _ { t } } \widetilde { \phi } ^ { \pi _ { t } } ) = ( 1 - \gamma ) \mathbb { E } _ { \widetilde { \phi } ^ { \pi _ { t } } } \big [ \big ( \partial _ { s } Q ( x ; \widetilde { \alpha } _ { t } ^ { s } ) \big ) ^ { 2 } \big ]$ and it Tholds for (B.13) that
+
+$$
+\begin{array}{l} - f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) ^ {2} + \gamma f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) \cdot f \left(\mathcal {T} ^ {\pi_ {t}} \widetilde {\phi} ^ {\pi_ {t}}\right) = - \frac {f \left(\widetilde {\phi} ^ {\pi_ {t}}\right)}{f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) + \gamma f \left(\mathcal {T} ^ {\pi_ {t}} \widetilde {\phi} ^ {\pi_ {t}}\right)} \cdot \left(f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) ^ {2} - \gamma^ {2} f ^ {2} \left(\mathcal {T} ^ {\pi_ {t}} \widetilde {\phi} ^ {\pi_ {t}}\right)\right) \\ \leq - \frac {f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) ^ {2} - \gamma \left(f \left(\widetilde {\phi} ^ {\pi_ {t}}\right) ^ {2} - (1 - \gamma) \mathbb {E} _ {\widetilde {\phi} ^ {\pi_ {t}}} \left[ \left(Q (x ; \widetilde {\alpha} _ {t} ^ {s})\right) ^ {2} \right]\right)}{1 + \sqrt {\gamma}} \\ \leq - \left(1 - \sqrt {\gamma}\right) \cdot \mathbb {E} _ {\widetilde {\phi} ^ {\pi_ {t}}} \left[ \left(\partial_ {s} Q (x; \widetilde {\alpha} _ {t} ^ {s})\right) ^ {2} \right], \tag {B.14} \\ \end{array}
+$$
+
+where the first inequality holds by noting that $f ( \tilde { \phi } ^ { \pi _ { t } } ) \ge \sqrt { \gamma } f ( T ^ { \pi _ { t } } \tilde { \phi } ^ { \pi _ { t } } )$ and the last inequality holds by noting that $f ( \widetilde { \phi } ^ { \pi _ { t } } ) ^ { 2 } \geq ( 1 - \gamma ) \mathbb { E } _ { \widetilde { \phi } ^ { \pi _ { t } } } \big [ \big ( \partial _ { s } Q ( x ; \widetilde { \alpha } _ { t } ^ { s } ) \big ) ^ { 2 } \big ]$ . Combining (B.11), (B.13), and (B.14) together, it holds for the first term of (B.9) that
+
+$$
+\begin{array}{l} \eta \cdot \int_ {0} ^ {1} \left\langle \partial_ {s} g (\cdot ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}), v _ {s} \right\rangle_ {\widetilde {\alpha} _ {t} ^ {s}} \mathrm {d} s \leq - \alpha^ {- 2} \eta (1 - \sqrt {\gamma}) \cdot \int_ {0} ^ {1} \mathbb {E} _ {\widetilde {\phi} ^ {\pi_ {t}}} \left[ \left(\partial_ {s} Q (x; \widetilde {\alpha} _ {t} ^ {s})\right) ^ {2} \right] \mathrm {d} s \\ \leq - \alpha^ {- 2} \eta (1 - \sqrt {\gamma}) \cdot \left\| Q (x; \rho_ {\pi_ {t}}) - Q (x; \rho_ {t}) \right\| _ {2, \tilde {\phi} ^ {\pi_ {t}}} ^ {2}, \tag {B.15} \\ \end{array}
+$$
+
+where the last inequality holds by the Cauchy-Schwarz inequality. For the second term of (B.9), we have
+
+$$
+\begin{array}{l} \eta \cdot \int_ {0} ^ {1} \int g (\theta ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}) \cdot \partial_ {s} \left(v _ {s} \widetilde {\alpha} _ {t} ^ {s}\right) (\theta) \mathrm {d} \theta \mathrm {d} s = \eta \cdot \int_ {0} ^ {1} \int \left\langle \nabla g (\theta ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}), \widetilde {\alpha} _ {t} ^ {s} (\theta) \cdot v _ {s} (\theta) \otimes v _ {s} (\theta) \right\rangle \mathrm {d} \theta \mathrm {d} s \\ \leq \eta \cdot \int_ {0} ^ {1} \sup  _ {\theta} \| \nabla g (\theta ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}) \| _ {\mathrm {F}} \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right) ^ {2} \mathrm {d} s \\ = \eta \cdot \sup  _ {\theta , s} \| \nabla g \left(\theta ; \widetilde {\alpha} _ {t} ^ {s}, \pi_ {t}\right) \| _ {\mathrm {F}} \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right) ^ {2}, \tag {B.16} \\ \end{array}
+$$
+
+where the first equality holds by Eulerian representation of the geodesic in Lemma E.3 that $\partial _ { s } ( v _ { s } \cdot$ $\widetilde { \alpha } _ { t } ^ { s } ) = - \operatorname { d i v } ( \widetilde { \alpha } _ { t } ^ { s } \cdot v _ { s } \otimes v _ { s } )$ and Stokes’s fomula. Here, we denote by $\otimes$ the outer product between two vectors. The inequality of (B.16) follows from $\| v _ { s } ( \theta ) \otimes v _ { s } ( \theta ) \| _ { \mathrm { F } } = \| v _ { s } ( \theta ) \| ^ { 2 }$ and the property of the geodesic in (A.4) that $\| v _ { s } \| _ { \widetilde { \alpha } _ { t } ^ { s } , W _ { 2 } } = W _ { 2 } ( \rho _ { t } , \rho _ { \pi _ { t } } )$ .
+
+For the second term on the right-hand side of (B.8), we denote by $u _ { t }$ the corresponding vector field at $\rho _ { \pi _ { t } }$ such that $\partial _ { t } \rho _ { \pi _ { t } } = - \operatorname { d i v } ( \rho _ { \pi _ { t } } u _ { t } )$ . Then, it holds that
+
+$$
+- \left\langle \dot {\rho} _ {\pi_ {t}}, \dot {\hat {\beta}} _ {t} ^ {0} \right\rangle_ {\rho_ {\pi_ {t}}, W _ {2}} = \left\langle u _ {t}, v _ {1} \right\rangle_ {\rho_ {\pi_ {t}}} \leq \left\| \dot {\rho} _ {\pi_ {t}} \right\| _ {\rho_ {\pi_ {t}}, W _ {2}} \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right) = \left| \dot {\rho} _ {\pi_ {t}} \right| _ {W _ {2}} \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right), \tag {B.17}
+$$
+
+where the first equality follows from (A.2), the inequality follows from the Cauchy-Schwarz inequality and the facts that $\| u _ { t } \| _ { \rho _ { \pi _ { t } } } = \| \dot { \rho } _ { \pi _ { t } } \| _ { \rho _ { \pi _ { t } } , W _ { 2 } }$ by (A.2) and that $\| v _ { 1 } \| _ { \rho _ { \pi _ { t } } } = W _ { 2 } ( \rho _ { t } , \rho _ { \pi _ { t } } )$ by (A.4). The last equality of (B.17) holds by (A.6). Plugging the definition of metric derivative $| \dot { \rho } _ { t } | _ { W _ { 2 } }$ in (A.5)
+
+into (B.17), we have
+
+$$
+\begin{array}{l} - \left\langle \dot {\rho} _ {\pi_ {t}}, \dot {\tilde {\beta}} _ {t} ^ {0} \right\rangle_ {\rho_ {\pi_ {t}}, W _ {2}} \leq \lim  _ {\Delta t \rightarrow 0} \frac {W _ {2} \left(\rho_ {\pi_ {t}} , \rho_ {\pi_ {t + \Delta t}}\right)}{\left| \Delta t \right|} \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right) \\ \leq \alpha^ {- 1 / 2} \mathcal {B} \cdot \lim  _ {\Delta t \rightarrow 0} \sup  _ {s \in \mathcal {S}} \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {t}}} \left[\left\| \frac {\pi_ {t + \Delta t} (\cdot | s ^ {\prime}) - \pi_ {t} (\cdot | s ^ {\prime})}{\Delta t} \right\| _ {1} \right] \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right) \\ = \alpha^ {- 1 / 2} \mathcal {B} \cdot \sup  _ {s \in S} \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {t}}} \left[ \left\| A _ {t} \left(s ^ {\prime}, \cdot\right) \pi_ {t} (\cdot | s ^ {\prime}) \right\| _ {1} \right] \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right), \tag {B.18} \\ \end{array}
+$$
+
+where the second inequality follows from Property (iv) of Lemma B.1 and the equality follows from the MF-PPO update in (3.7). For the approximation of the advantage function $A _ { t }$ , it holds that
+
+$$
+\begin{array}{l} \sup  _ {x \in \mathcal {S} \times \mathcal {A}} \left| A _ {t} (x) \right| = \sup  _ {x \in \mathcal {S} \times \mathcal {A}} \left| Q (x; \rho_ {t}) - \int Q (s, a ^ {\prime}) \pi_ {t} (\mathrm {d} a ^ {\prime} \mid s) \right| \\ \leq 2 \sup  _ {x \in \mathcal {S} \times \mathcal {A}} | Q (x; \rho_ {t}) |. \tag {B.19} \\ \end{array}
+$$
+
+Plugging (B.19) into (B.18), we have
+
+$$
+\begin{array}{l} - \left\langle \dot {\rho} _ {\pi_ {t}}, \widetilde {\beta} _ {t} ^ {0} \right\rangle_ {\rho_ {\pi_ {t}}} \leq \alpha^ {- 1 / 2} \mathcal {B} \cdot \sup  _ {x \in \mathcal {X}} | A _ {t} (x) | \cdot \sup  _ {s \in \mathcal {S}} \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {t}}} \left[ \| \pi_ {t} (\cdot | s ^ {\prime}) \| _ {1} \right] \cdot W _ {2} (\rho_ {t}, \rho_ {\pi_ {t}}) \\ \leq 2 \alpha^ {- 1 / 2} \mathcal {B} \cdot \sup  _ {x \in \mathcal {X}} | Q (x; \rho_ {t}) | \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right). \tag {B.20} \\ \end{array}
+$$
+
+where the last inequality follows from $\| \pi _ { t } ( \cdot \vert s ^ { \prime } ) \| _ { 1 } = 1$ . By first plugging (B.15) and (B.16) into (B.9), and then plugging (B.9) and (B.20) into (B.8), we have
+
+$$
+\begin{array}{l} \frac{\mathrm{d}}{\mathrm{d}t}\frac{W_{2}^{2}(\rho_{t},\rho_{\pi_{t}})}{2}\leq -\alpha^{-2}\eta (1 - \sqrt{\gamma})\cdot \bigl\|Q_{t} - Q^{\pi_{t}}\bigr\|_{2,\widetilde{\phi}^{\pi_{t}}}^{2} + \eta \cdot \sup_{\theta ,s}\bigl\|\nabla g(\theta ;\widetilde{\alpha}_{t}^{s},\pi_{t})\bigr\|_{\mathrm{F}}\cdot W_{2}(\rho_{t},\rho_{\pi})^{2} \\ + 2 \alpha^ {- 1 / 2} \mathcal {B} \cdot \sup  _ {x \in \mathcal {X}} | Q (x; \rho_ {t}) | \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right). \tag {B.21} \\ \end{array}
+$$
+
+Plugging Lemma D.1 into (B.21), we have
+
+$$
+\begin{array}{l} \frac {\mathrm {d}}{\mathrm {d} t} \frac {W _ {2} ^ {2} \left(\rho_ {t} , \rho_ {\pi_ {t}}\right)}{2} \leq - \eta \alpha^ {- 2} (1 - \sqrt {\gamma}) \cdot \left\| Q _ {t} - Q ^ {\pi_ {t}} \right\| _ {2, \tilde {\phi} ^ {\pi_ {t}}} ^ {2} \\ + \eta \alpha^ {- 1} B _ {2} \cdot \left(2 \alpha B _ {1} \sup  _ {s \in [ 0, 1 ]} W _ {2} \left(\widetilde {\alpha} _ {t} ^ {s}, \rho_ {0}\right) + B _ {r}\right) \cdot W _ {2} \left(\rho_ {t}, \rho_ {\pi}\right) ^ {2} \\ + 2 \alpha^ {1 / 2} \mathcal {B} B _ {1} \cdot W _ {2} \left(\rho_ {t}, \rho_ {0}\right) W _ {2} \left(\rho_ {t}, \rho_ {\pi_ {t}}\right). \tag {B.22} \\ \end{array}
+$$
+
+Note that $\widetilde { \alpha } _ { t } ^ { s }$ is the geodesic connecting $\rho _ { t }$ and $\rho _ { \pi }$ . By Lemma D.2, we have
+
+$$
+\sup  _ {s \in [ 0, 1 ]} W _ {2} \left(\widetilde {\alpha} _ {t} ^ {s}, \rho_ {0}\right) \leq 2 \max  \left\{W _ {2} \left(\rho_ {\pi_ {t}}, \rho_ {0}\right), W _ {2} \left(\rho_ {t}, \rho_ {0}\right) \right\}. \tag {B.23}
+$$
+
+Plugging (B.23) into (B.22), it follows that
+
+$$
+\begin{array}{l} \frac{\mathrm{d}}{\mathrm{d}t}\frac{\widetilde{W}_{2}^{2}(\rho_{t},\rho_{\pi_{t}})}{2\eta}\leq -\left(1 - \sqrt{\gamma}\right)\cdot \left\| Q_{t} - Q^{\pi_{t}}\right\|_{2,\widetilde{\phi}^{\pi_{t}}}^{2} + 2\eta^{-1}\alpha^{1 / 2}\mathcal{B}B_{1}\cdot \widetilde{W}_{2}(\rho_{t},\rho_{0})\widetilde{W}_{2}(\rho_{t},\rho_{\pi_{t}}) \\ + \alpha^ {- 1} B _ {2} \cdot \left(4 B _ {1} \max  \left\{\widetilde {W _ {2}} \left(\rho_ {\pi_ {t}}, \rho_ {0}\right), \widetilde {W _ {2}} \left(\rho_ {t}, \rho_ {0}\right) \right\} + B _ {r}\right) \widetilde {W _ {2}} \left(\rho_ {t}, \rho_ {\pi}\right) ^ {2}, \\ \end{array}
+$$
+
+Where $\widetilde { W } _ { 2 } = \alpha ^ { - 1 } W _ { 2 }$ is the scaled $W _ { 2 }$ metric. Thus, we complete the proof of Theorem 4.5.
+
+# B.4 Proof of Theorem 4.6
+
+Proof. We remark that the restarting mechanism produces discontinuity in $\rho _ { t }$ while $\pi _ { t }$ remains continuous. Let $T _ { 0 } , T _ { 1 } , \cdots , T _ { N }$ denote the restarting points in $[ 0 , T )$ , where $T _ { 0 } ~ = ~ 0$ and $N$ is the total restarting number in $[ 0 , T )$ . Let $T _ { n } ^ { - }$ and $T _ { n } ^ { + }$ denote the moments just before and after the restarting occurring at $T _ { n }$ , respectively. According to the restarting mechanism, we have $\widetilde { W } _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) \le \lambda \bar { D }$ , $\widetilde { W } _ { 2 } ( \rho _ { T _ { n } ^ { - } } , \rho _ { 0 } ) = \lambda \bar { D }$ and $\rho _ { T _ { n } ^ { + } } = \rho _ { 0 }$ . Recall that we set $\widetilde { \Phi } ^ { \pi _ { t } } = \widetilde { \mathcal { E } } _ { \widetilde { \phi } ^ { \pi _ { t } } } ^ { \pi _ { t } }$ Eeφeπt . By (4.7) of Theorem 4.5, it holds that
+
+$$
+\begin{array}{l} (1 - \sqrt {\gamma}) \cdot \| Q _ {t} - Q ^ {\pi_ {t}} \| _ {2, \widetilde {\phi} ^ {\pi_ {t}}} ^ {2} \leq - \frac {\mathrm {d}}{\mathrm {d} t} \frac {\widetilde {W} _ {2} ^ {2} (\rho_ {t} , \rho_ {\pi_ {t}})}{2 \eta} + 2 \eta^ {- 1} \alpha^ {1 / 2} \mathcal {B} B _ {1} \lambda \bar {D} \cdot \widetilde {W} _ {2} (\rho_ {t}, \rho_ {\pi_ {t}}) \\ + \alpha^ {- 1} B _ {2} \cdot (4 B _ {1} \lambda \bar {D} + B _ {r}) \widetilde {W _ {2}} (\rho_ {t}, \rho_ {\pi}) ^ {2}. \tag {B.24} \\ \end{array}
+$$
+
+For simplicity, we let $\begin{array} { r } { S _ { 1 } = \frac { ( 1 + \lambda ) ^ { 2 } D ^ { 2 } B _ { 2 } ( 4 B _ { 1 } \lambda D + B _ { r } ) } { 1 - \sqrt { \gamma } } } \end{array}$ , $\begin{array} { r } { S _ { 2 } = \frac { 2 \bar { B } B _ { 1 } \lambda ( 1 + \lambda ) \bar { D } ^ { 2 } } { 1 - \sqrt { \gamma } } } \end{array}$ , $\begin{array} { r } { \xi = \frac { 1 } { 2 ( 1 - \sqrt { \gamma } ) } } \end{array}$ , $Q ( t ) = \parallel Q _ { t } -$ $Q ^ { \pi _ { t } } \| _ { 2 , \widetilde { \phi } ^ { \pi _ { t } } }$ , and $\tilde { W } ( t ) = \tilde { W } _ { 2 } ( \rho _ { t } , \rho _ { \pi _ { t } } )$ . By sum of the integrals of (B.24) on $[ T _ { 0 } , T _ { 1 } ] , \cdots , [ T _ { N - 1 } , T _ { N } ]$ , and $[ T _ { N } , T ]$ , we have
+
+$$
+\begin{array}{l} \frac {1}{T} \int_ {0} ^ {T} Q ^ {2} (t) \mathrm {d} t \leq \frac {1}{T} \int_ {0} ^ {T} \left(\frac {\alpha^ {- 1} S _ {1}}{(1 + \lambda) ^ {2} \bar {D} ^ {2}} \widetilde {W} (t) ^ {2} + \frac {\alpha^ {1 / 2} \eta^ {- 1} S _ {2}}{(1 + \lambda) \bar {D}} \widetilde {W} (t)\right) \mathrm {d} t \\ - \frac {\xi}{T \eta} \left(\sum_ {n = 0} ^ {N - 1} \int_ {T _ {n}} ^ {T _ {n + 1}} \frac {\mathrm {d}}{\mathrm {d} t} \widetilde {W} (t) ^ {2} \mathrm {d} t + \int_ {T _ {N}} ^ {T} \frac {\mathrm {d}}{\mathrm {d} t} \widetilde {W} (t) ^ {2} \mathrm {d} t\right). \tag {B.25} \\ \end{array}
+$$
+
+Note that we have $\begin{array} { r } { \tilde { W } ( t ) = \tilde { W } _ { 2 } ( \rho _ { t } , \rho _ { \pi _ { t } } ) \leq \tilde { W } _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) + \tilde { W } _ { 2 } ( \rho _ { \pi _ { t } } , \rho _ { 0 } ) \leq ( 1 + \lambda ) \bar { D } } \end{array}$ by the triangle inequality of $W _ { 2 }$ distance, the restarting mechanism and Property (iii) of Lemma B.1. It thus holds for (B.25) that
+
+$$
+\begin{array}{l} \frac {1}{T} \int_ {0} ^ {T} Q ^ {2} (t) \mathrm {d} t \leq \frac {1}{T} \int_ {0} ^ {T} (\alpha^ {- 1} S _ {1} + \alpha^ {1 / 2} \eta^ {- 1} S _ {2}) \mathrm {d} t \\ - \frac {\xi}{T \eta} \left(\sum_ {n = 0} ^ {N - 1} \left(\widetilde {W} ^ {2} \left(T _ {n + 1} ^ {-}\right) - \widetilde {W} ^ {2} \left(T _ {n} ^ {+}\right)\right) + \left(\widetilde {W} ^ {2} (T) - \widetilde {W} ^ {2} \left(T _ {N} ^ {+}\right)\right)\right). \tag {B.26} \\ \end{array}
+$$
+
+Note that we have $\widetilde { W } ( T _ { n + 1 } ^ { - } ) \geq \widetilde { W } _ { 2 } ( \rho _ { 0 } , \rho _ { T _ { n + 1 } ^ { - } } ) - \widetilde { W } _ { 2 } ( \rho _ { 0 } , \rho _ { \pi _ { T _ { n + 1 } ^ { - } } ^ { - } } ) \geq ( \lambda - 1 ) \bar { D } \geq \bar { D } \geq \widetilde { W } ( \rho _ { 0 } , \rho _ { \pi _ { T _ { n } ^ { + } } } ) =$ $\tilde { W } ( T _ { n } ^ { + } )$ by the triangle inequality of $W _ { 2 }$ distance, the restarting mechanism and Property (iii) of Lemma B.1. It thus holds for (B.26) that
+
+$$
+\frac {1}{T} \int_ {0} ^ {T} Q ^ {2} (t) \mathrm {d} t \leq \alpha^ {- 1} S _ {1} + \alpha^ {1 / 2} \eta^ {- 1} S _ {2} + \frac {\eta^ {- 1} \bar {D} ^ {2}}{2 T (1 - \sqrt {\gamma})}. \tag {B.27}
+$$
+
+By setting $\begin{array} { r } { \widetilde { \phi } ^ { \pi _ { t } } = \frac { 1 } { 2 } \widetilde { \phi } _ { 0 } + \frac { 1 } { 2 } \phi _ { 0 } \otimes \pi _ { t } } \end{array}$ and plugging (B.27) into (4.1) of Theorem 4.1, we have
+
+$$
+\begin{array}{l} \frac {1}{T} \int_ {0} ^ {T} \big (J (\pi^ {*}) - J (\pi_ {t}) \big) \mathrm {d} t \leq \frac {\zeta}{T} + \frac {4 \kappa}{T} \int_ {0} ^ {T} Q (t) \mathrm {d} t \\ \leq \frac {\zeta}{T} + 4 \kappa \sqrt {\frac {1}{T} \int_ {0} ^ {T} Q ^ {2} (t) \mathrm {d} t} \\ \leq \frac {\zeta}{T} + 4 \kappa \sqrt {\alpha^ {- 1} S _ {1} + \alpha^ {1 / 2} \eta^ {- 1} S _ {2} + \frac {\eta^ {- 1} \bar {D} ^ {2}}{2 T (1 - \sqrt {\gamma})}}, \tag {B.28} \\ \end{array}
+$$
+
+where $\kappa = \left\| \bar { \mathcal { E } } _ { \mathcal { D } _ { 0 } } ^ { \pi ^ { * } } / \bar { \phi } _ { 0 } \right\| _ { \infty }$ is the concentrability coefficient and $\zeta = \mathbb { E } _ { s \sim \mathcal { E } _ { \pi ^ { * } } } \bigl \lvert \mathrm { K L } \bigl ( \pi ^ { * } ( \cdot \mid s ) \bigr \rvert \bigr \rvert \pi _ { 0 } ( \cdot \mid s ) \bigr ) \bigr \rvert$ is the KL-divergence between $\pi ^ { * }$ and $\pi _ { 0 }$ . Here the second inequality follows from the Cauchy-Schwarz inequality. Therefore, we complete the proof of (4.9) in Theorem 4.6. In what follows, we aim to upper bound the total restarting number $N$ . Recall that we have $\widetilde { W } ( T _ { n } ^ { + } ) \leq \bar { D }$ and $\widetilde { W } ( T _ { n + 1 } ^ { - } ) \geq ( \lambda - 1 ) \bar { D }$ according to the restarting mechanism. Thus, it holds for (B.26) that
+
+$$
+\frac {1}{T} \int_ {0} ^ {T} Q ^ {2} (t) \mathrm {d} t \leq \alpha^ {- 1} S _ {1} + \alpha^ {1 / 2} \eta^ {- 1} S _ {2} - \frac {\xi}{T \eta} \bigl (N (\lambda - 2) \bar {D} ^ {2} - \bar {D} ^ {2} \bigr).
+$$
+
+Since $Q ^ { 2 } ( t ) \geq 0$ , it follows that
+
+$$
+\begin{array}{l} N \leq \big ((\alpha^ {- 1} S _ {1} + \alpha^ {1 / 2} \eta^ {- 1} S _ {2}) 2 T (1 - \sqrt {\gamma}) \eta + \bar {D} ^ {2} \big) \cdot \frac {\bar {D} ^ {- 2}}{\lambda - 2} \\ = (\lambda - 2) ^ {- 1} \big ((\alpha^ {- 1} \eta S _ {1} + \alpha^ {1 / 2} S _ {2}) 2 T \bar {D} ^ {- 2} (1 - \sqrt {\gamma}) + 1 \big), \\ \end{array}
+$$
+
+which upper bounds the total restarting number $N$ . Hence, we complete the proof of Theorem 4.6. □
+
+# C Proofs of Supporting Lemmas
+
+In this section, we give detailed proof of the supporting lemmas.
+
+# C.1 Generality of Transition Kernel Representation
+
+Recall that we have the following representation of the transition kernel in Assumption 4.3,
+
+$$
+P \left(s ^ {\prime} \mid s, a\right) = \int \widetilde {\sigma} \left(\left(s, a, 1\right) ^ {\top} w\right) \varphi \left(s ^ {\prime}\right) \psi \left(s ^ {\prime}; w\right) \mathrm {d} w, \tag {C.1}
+$$
+
+where $\varphi ( s ^ { \prime } ) \geq 0$ and $\widetilde { \psi } ( s ; \cdot ) \in \mathcal { P } ( w )$ . Such a representation has the same function class as
+
+$$
+\widetilde {P} \left(s ^ {\prime} \mid s, a\right) = \int \widetilde {\sigma} \left(\left(s, a, 1\right) ^ {\top} w\right) \widetilde {\psi} \left(s ^ {\prime}; w\right) \mathrm {d} w, \tag {C.2}
+$$
+
+where $\ddot { \psi }$ is a finite signed measure.
+
+Proof. For simplicity, let $\mathcal { P }$ and $\mathcal { \hat { P } }$ denote the function class represented by (C.1) and (C.2), respectively. Note that for any transition kernel $P ( s ^ { \prime } \mid s , a )$ represented by (C.1), by letting ${ \widetilde { \psi } } ( s ^ { \prime } ; w ) = $ $\varphi ( s ^ { \prime } ) \psi ( s ^ { \prime } ; w )$ , such a transition kernel $P ( s ^ { \prime } \mid s , a )$ can be equivalently represented by $\smash { \widetilde { P } ( s ^ { \prime } | s , a ) }$ in
+
+(C.2). Thus, it holds that $\mathcal { P } \subseteq \bar { \mathcal { P } }$ . Therefore, we only need to prove $\mathcal { P } \subseteq \mathcal { P }$ , which is equivalent to proving that for any $\widetilde { P } ( s ^ { \prime } | s , a ) \in \widetilde { \mathcal { P } }$ given by (C.2), the signed measure $\widetilde { \psi }$ can be nonnegative. If that is the case, by letting $\begin{array} { r } { \varphi ( s ^ { \prime } ) = \int \big ( \widetilde { \psi } _ { + } ( s ^ { \prime } ; w ) + \widetilde { \psi } _ { - } ( s ^ { \prime } ; - w ) \big ) \mathrm { d } w } \end{array}$ and $\psi ( s ^ { \prime } ; w ) = $ $\varphi ( s ^ { \prime } ) ^ { - 1 } \bigl ( \widetilde { \psi } _ { + } ( s ^ { \prime } ; w ) + \widetilde { \psi } _ { - } ( s ^ { \prime } ; - w ) \bigr )$ , we can have (C.2) equivalently represented by (C.1). Note that there always exist non-negative functions $\ddot { \psi } _ { + }$ and $\widetilde { \psi } _ { - }$ such that $\ddot { \psi } = \ddot { \psi } _ { + } - \ddot { \psi } _ { - }$ . Since $\widetilde { \sigma }$ is an odd function, it holds that
+
+$$
+\begin{array}{l} \widetilde {P} (s ^ {\prime} \mid s, a) = \int \widetilde {\sigma} (w ^ {\top} x) \widetilde {\psi} (s ^ {\prime}; w) d w \\ = \int \widetilde {\sigma} (w ^ {\top} x) \widetilde {\psi} _ {+} (s ^ {\prime}; w) d w + \int \widetilde {\sigma} (- w ^ {\top} x) \widetilde {\psi} _ {-} (s ^ {\prime}; w) d w \\ = \int \widetilde {\sigma} (w ^ {\top} x) \big (\widetilde {\psi} _ {+} (s ^ {\prime}; w) + \widetilde {\psi} _ {-} (s ^ {\prime}; - w) \big) \mathrm {d} w. \\ \end{array}
+$$
+
+Thus, by letting $\begin{array} { r } { \varphi ( s ^ { \prime } ) = \int \big ( \widetilde { \psi } _ { + } ( s ^ { \prime } ; w ) + \widetilde { \psi } _ { - } ( s ^ { \prime } ; - w ) \big ) \mathrm { d } w } \end{array}$ and $\psi ( s ^ { \prime } ; w ) = \varphi ( s ^ { \prime } ) ^ { - 1 } \bigl ( \widetilde { \psi } _ { + } ( s ^ { \prime } ; w ) + \widetilde { \psi } _ { - } ( s ^ { \prime } ; - w ) \bigr )$  , it holds that $\begin{array} { r } { P ( s ^ { \prime } \mid s , a ) = \int \widetilde { \sigma } ( w ^ { \top } x ) \varphi ( s ^ { \prime } ) \psi ( s ^ { \prime } ; \mathrm { d } w ) = P ( s ^ { \prime } \mid s , a ) } \end{array}$ , where $\psi \in { \mathcal { P } } ( \mathcal { W } )$ and $\varphi \geq 0$ . Hence, any $\widetilde { P } ( s ^ { \prime } | s , a ) \in \widetilde { \mathcal { P } }$ can be equivalently represented by (C.1) and it follows that $\mathcal { \tilde { P } } \subseteq \mathcal { P }$ . Thus, (C.1) has the same function class as (C.2) and we complete the proof. □
+
+# C.2 Proof of Detailed Version of Lemma 4.4
+
+In this section, we prove a more detailed version of Lemma 4.4, i.e., Lemma B.1.
+
+Proof. We begin by a sketch of the proof of Lemma B.1. We first construct functions $Z _ { \pi }$ and $\nu _ { \pi } ( w )$ . With the use of mollifiers, we prove that there exists a function $p _ { \pi } ( b )$ satisfying (C.6) and then formulate a construction of $\bar { \rho } _ { \pi } ( \theta )$ , which gives way to obtain $\rho _ { \pi }$ . For the proof of Property (iii), using the technique of Talagrand’s inequality and the chi-squared divergence, we establish a constant upper bound for $W _ { 2 } ( \rho _ { \pi } , \rho _ { 0 } )$ . For the proof of Property (iv), by exploiting the inequality between $W _ { 2 }$ distance and the weighted homogeneous Sobolev norm, we upper bound $W _ { 2 } ( \rho _ { \pi _ { 1 } } , \rho _ { \pi _ { 2 } } )$ up to $O ( \alpha ^ { - 1 / 2 } )$ .
+
+Proof of Property (i) of Lemma B.1. We give a proof of Property (i) by a construction of $\rho _ { \pi }$ For notational simplicity, we let $\boldsymbol { x } = ( s , a , 1 )$ . By definitions of the action value function $Q ^ { \pi }$ and the state value function $V ^ { \pi }$ in (2.2), we have
+
+$$
+\begin{array}{l} Q ^ {\pi} (s, a) = r (s, a) + \gamma \cdot \int P (s ^ {\prime} | s, a) V ^ {\pi} (s ^ {\prime}) \mathrm {d} s ^ {\prime} \\ = \int \widetilde {\sigma} (w ^ {\top} x) \left\{B _ {r} \cdot \mu (w) + \gamma \cdot \int \varphi (s ^ {\prime}) \psi (s ^ {\prime}; w) V ^ {\pi} (s ^ {\prime}) d s ^ {\prime} \right\} d w \\ = \int Z _ {\pi} \cdot \widetilde {\sigma} \left(w ^ {\top} x\right) \nu_ {\pi} (w) \mathrm {d} w, \tag {C.3} \\ \end{array}
+$$
+
+where
+
+$$
+\nu_ {\pi} (w) = Z _ {\pi} ^ {- 1} \cdot \left(B _ {r} \mu (w) + \gamma \cdot \int \varphi \left(s ^ {\prime}\right) \psi \left(s ^ {\prime}; w\right) V ^ {\pi} \left(s ^ {\prime}\right) \mathrm {d} s ^ {\prime}\right), \tag {C.4}
+$$
+
+$$
+Z _ {\pi} = B _ {r} + \gamma \cdot \int \varphi \left(s ^ {\prime}\right) V ^ {\pi} \left(s ^ {\prime}\right) \mathrm {d} s ^ {\prime}. \tag {C.5}
+$$
+
+Here, the second equality in (C.3) holds by (i) of Assumption 4.3. We construct $\rho _ { \pi }$ by $\rho _ { \pi } = \nu _ { \pi } \times p _ { \pi }$ , i.e., $\bar { \rho } _ { \pi } ( w , b ) = \nu _ { \pi } ( w ) p _ { \pi } ( b )$ , where $p _ { \pi } ( b )$ is defined to be a probability measure in $\mathcal { P } _ { 2 } ( \mathbb { R } )$ such that
+
+$$
+\int B _ {\beta} \cdot \beta (b) p _ {\pi} (\mathrm {d} b) = Z _ {\pi}. \tag {C.6}
+$$
+
+We remark that such a $p _ { \pi }$ exists and we will provide a construction later. Since we have $V ^ { \pi } \geq 0$ , $\varphi \geq 0$ , and $\psi \geq 0$ by Assumption 4.3, it turns out that $\nu _ { \pi }$ is a probability density function according to (C.4), which further suggests that $\bar { \rho } _ { \pi } \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ . Plugging (C.6) into (C.3), it holds that
+
+$$
+Q ^ {\pi} (x) = \int \sigma (x; \theta) \bar {\rho} _ {\pi} (\theta) \mathrm {d} \theta ,
+$$
+
+where the equality holds by noting that $\sigma ( x ; \theta ) = B _ { \beta } \cdot \beta ( b ) \cdot \widetilde { \sigma } ( w ^ { \mathrm { ~ l ~ } } x )$ in (4.2) and that $\rho _ { \pi } = \nu _ { \pi } \times p _ { \pi }$ . Furthermore, by letting $\rho _ { \pi } = \bar { \rho } _ { \pi } + ( 1 - \alpha ^ { - 1 } ) ( \rho _ { 0 } - \bar { \rho } _ { \pi } )$ , we have
+
+$$
+Q ^ {\pi} (x) = \alpha \int \sigma (x; \theta) (\rho_ {\pi} - (1 - \alpha^ {- 1}) \rho_ {0}) \mathrm {d} \theta = \alpha \int \sigma (x; \theta) \rho_ {\pi} \mathrm {d} \theta = Q (x; \rho_ {\pi}),
+$$
+
+where the second equality holds by noting that $\sigma$ is odd with respect to $w$ and $b$ and that $\rho _ { 0 } \sim$ $N ( 0 , I _ { D } )$ is an even function. Thus, we finish the construction of $\rho _ { \pi }$ and also complete the proof of Property (i) in Lemma B.1.
+
+A Construction for $p _ { \pi } ( b )$ . Recall that we have $p _ { \pi }$ defined in (C.6). Here, we provide a construction for $p _ { \pi }$ which has some properties that will facilitate our analysis. Ideally, we want $p _ { \pi }$ to have global support and concentrate to its mean, which motivates us to consider $p _ { \pi }$ to be Gaussian distribution with high variance. Recall that we assume that $\beta ^ { - 1 }$ is $\ell _ { \beta }$ -Lipschitz continuous on $[ - 2 / 3 , 2 / 3 ]$ in Assumption 4.2. Let $q ( b )$ be the probability density function of the standard Gaussian distribution,i.e., $q \sim N ( 0 , 1 )$ . Then, $q _ { \epsilon } ( b - z ) = \epsilon ^ { - 1 } \cdot q ( ( b - z ) / \epsilon )$ is the probability density function such that $q _ { \epsilon } \sim N ( z , \epsilon ^ { 2 } )$ . We define function $\beta _ { \epsilon }$ as follows,
+
+$$
+\beta_ {\epsilon} (z) = \int \beta (b) q _ {\epsilon} (b - z) \mathrm {d} b = (\beta * q _ {\epsilon}) (z), \tag {C.7}
+$$
+
+where $^ *$ denotes the convolution. Note that $\{ q _ { \epsilon } \} _ { \epsilon > 0 }$ can be viewed as a class of mollifiers (Friedrichs, 1944). In particular, let
+
+$$
+\bar {\epsilon} = \min  \left\{\sqrt {\frac {\pi}{2}} \cdot \frac {1}{6 L _ {0 , \beta}}, \sqrt {\frac {\pi}{2}} \cdot \frac {1}{2 \ell_ {\beta} L _ {1 , \beta}}, 1 \right\}, \tag {C.8}
+$$
+
+where $\boldsymbol { L } _ { 0 , \beta }$ and $\mathcal { L } _ { 1 , \beta }$ characterize the Lipschitz continuity and smoothness of $\beta$ respectively and $\beta ^ { - 1 }$ is $\ell _ { \beta }$ -Lipschitz continuous in $[ - 2 / 3 , 2 / 3 ]$ by Assumption 4.2. For the approximation error of
+
+mollifier $\beta _ { \epsilon }$ , it holds that
+
+$$
+\begin{array}{l} \left| \beta (z) - \beta_ {\bar {\epsilon}} (z) \right| = \left| \int (\beta (z) - \beta \left(z ^ {\prime}\right)) q _ {\bar {\epsilon}} \left(z - z ^ {\prime}\right) d z ^ {\prime} \right| \\ \leq L _ {0, \beta} \cdot \int | z - z ^ {\prime} | q _ {\bar {\epsilon}} (z - z ^ {\prime}) \mathrm {d} z ^ {\prime} \\ = L _ {0, \beta} \cdot \bar {\epsilon} \cdot \sqrt {\frac {2}{\pi}}, \\ \end{array}
+$$
+
+where the last inequality follows from $\begin{array} { r } { \int | z | q _ { \epsilon } ( z ) \mathrm { d } z = \epsilon \cdot \sqrt { 2 / \pi } } \end{array}$ . Similarly, we have $| \dot { \beta } ( z ) - \dot { \beta } _ { \bar { \epsilon } } ( z ) | \leq$ $L _ { 1 , \beta } \cdot \bar { \epsilon } \cdot \sqrt { 2 / \pi }$ . By definition of $\epsilon$ in (C.8), it further holds that
+
+$$
+\sup  _ {b \in \beta^ {- 1} ([ - 2 / 3, 2 / 3 ])} \left| \beta (b) - \beta_ {\bar {\epsilon}} (b) \right| \leq 1 / 6, \tag {C.9}
+$$
+
+$$
+\sup  _ {b \in \beta^ {- 1} ([ - 2 / 3, 2 / 3 ])} \left| \dot {\beta} (b) - \dot {\beta} _ {\bar {\epsilon}} (b) \right| \leq \frac {1}{2 \ell_ {\beta}}. \tag {C.10}
+$$
+
+Note that $\beta ( b )$ is a monotonic function with $| \dot { \beta } ( b ) | \geq 1 / \ell _ { \beta }$ in $\beta ^ { - 1 } ( [ - 2 / 3 , 2 / 3 ] )$ by Assumption 4.2. With regard to (C.10), it follows that $\beta _ { \bar { \epsilon } } ( b )$ is also monotonic in $\beta ^ { - 1 } ( [ - 2 / 3 , 2 / 3 ] )$ and that
+
+$$
+| \dot {\beta} _ {\bar {\epsilon}} (b) | \geq | \dot {\beta} (b) | - | \dot {\beta} (b) - \dot {\beta} _ {\bar {\epsilon}} (b) | \geq \frac {1}{2 \ell_ {\beta}}, \quad \forall b \in \beta^ {- 1} ([ - 2 / 3, 2 / 3 ]). \tag {C.11}
+$$
+
+Furthermore, by (C.9) and the continuity of $\beta _ { \bar { \epsilon } }$ in $\beta ^ { - 1 } ( [ - 2 / 3 , 2 / 3 ] )$ , we have
+
+$$
+[ - 1 / 2, 1 / 2 ] \subseteq \beta_ {\epsilon} (\beta^ {- 1} ([ - 2 / 3, 2 / 3 ])). \tag {C.12}
+$$
+
+The monotonicity of $\beta _ { \bar { \epsilon } } ( b )$ , (C.11), and (C.12) together show that $\beta _ { \bar { \epsilon } } ^ { - 1 }$ exists and is $2 \ell _ { \beta }$ -Lipschitz continuous in $[ - 1 / 2 , 1 / 2 ]$ . Moreover, since $\beta$ is an odd function, it holds by (C.7) that $\beta _ { \bar { \epsilon } }$ is also an odd function with $\beta _ { \bar { \epsilon } } ( 0 ) = 0$ . Hence, it holds that $\beta _ { \bar { \epsilon } } ^ { - 1 } ( [ - 1 / 2 , 1 / 2 ] ) \subseteq [ - \ell _ { \beta } , \ell _ { \beta } ]$ . Furthermore, by (C.5), it holds that
+
+$$
+\begin{array}{l} Z _ {\pi} = B _ {r} + \gamma \cdot \int \varphi (s ^ {\prime}) V ^ {\pi} (s ^ {\prime}) \mathrm {d} s ^ {\prime} \\ \leq B _ {r} + \gamma \cdot (1 - \gamma) ^ {- 1} \cdot B _ {r} \cdot \int \varphi \left(s ^ {\prime}\right) \mathrm {d} s ^ {\prime} \\ \leq B _ {r} + \gamma (1 - \gamma) ^ {- 1} B _ {r} M _ {1, \varphi}, \\ \end{array}
+$$
+
+where the first inequality follows from the fact that $V ^ { \pi } ( s ) \leq ( 1 - \gamma ) ^ { - 1 } \cdot \operatorname* { s u p } _ { s , a } r ( s , a )$ and the last inequality follows from Assumption 4.3 that $\begin{array} { r } { \int \varphi ( s ^ { \prime } ) \mathrm { d } s ^ { \prime } \leq M _ { 1 , \varphi } } \end{array}$ . By setting $B _ { \beta } ~ \geq ~ 2 ( B _ { r } +$ $\gamma ( 1 - \gamma ) ^ { - 1 } B _ { r } M _ { 1 , \varphi } )$ , it holds that $| Z _ { \pi } / B _ { \beta } | \le 1 / 2$ , which indicates that $\beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi } / B _ { \beta } )$ exists and allows $p _ { \pi } ( b ) = q _ { \bar { \epsilon } } ( b - \beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi } / B _ { \beta } ) )$ to be the probability density function such that $p _ { \pi } ( b ) \sim$ $N ( \beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi } / B _ { \beta } ) , \bar { \epsilon } ^ { 2 } )$ . For the mean value $\beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi } / B _ { \beta } )$ , recalling that $\beta _ { \bar { \epsilon } } ^ { - 1 } ( [ - 1 / 2 , 1 / 2 ] ) \subseteq [ - \ell _ { \beta } , \ell _ { \beta } ]$ , it thus holds that
+
+$$
+\left| \beta_ {\bar {\epsilon}} ^ {- 1} \left(Z _ {\pi} / B _ {\beta}\right) \right| \leq \ell_ {\beta}. \tag {C.13}
+$$
+
+Following from (C.7), we have
+
+$$
+\int \beta (b) p _ {\pi} (b) \mathrm {d} b = \int \beta (b) q _ {\bar {\epsilon}} (b - \beta_ {\bar {\epsilon}} ^ {- 1} (Z _ {\pi} / B _ {\beta})) \mathrm {d} b = \beta_ {\bar {\epsilon}} \big (\beta_ {\bar {\epsilon}} ^ {- 1} (Z _ {\pi} / B _ {\beta}) \big) = Z _ {\pi} / B _ {\beta}.
+$$
+
+Hence, our construction of $p _ { \pi }$ here is in line with the definition of $p _ { \pi }$ in (C.6). In the sequel, we consider $p _ { \pi } ( b ) = q _ { \bar { \epsilon } } \bigl ( b - \beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi } / B _ { \beta } ) \bigr )$ to hold throughout.
+
+Proof of Property (ii) of Lemma B.1. Here we show that $g ( \cdot ; \pi , \rho _ { \pi } ) = 0$ is a direct result of $Q ^ { \pi } ( x ) = Q ( x ; \rho _ { \pi } )$ in Property (i). Note that
+
+$$
+Q ^ {\pi} (x) - r (x) - \gamma \mathbb {E} _ {x ^ {\prime} \sim \widetilde {P} ^ {\pi} (\cdot | x)} Q ^ {\pi} \left(x ^ {\prime}\right) = 0 \tag {C.14}
+$$
+
+holds by the definition of the action value function $Q ^ { \pi }$ in (2.2) for any $x \in S \times A$ . Since we have $Q ^ { \pi } ( x ) = Q ( x ; \rho _ { \pi } )$ proved, by plugging (C.14) into the definition of $g$ in (3.6), where $Q ( \cdots \rho _ { \pi } )$ is substituted for $Q ^ { \pi }$ , it follows that $g ( x ; \pi , \rho _ { \pi } ) = 0$ . Thus, we complete the proof of Property (ii) of Lemma B.1.
+
+# Proof of Property (iii) of Lemma B.1.
+
+In what follows, we aim to upper bound $W ^ { 2 } ( \rho _ { \pi } , \rho _ { 0 } )$ . We summerize our aforementioned constructions as follows,
+
+$$
+Z _ {\pi} = B _ {r} + \gamma \cdot \int \varphi (s ^ {\prime}) V ^ {\pi} (s ^ {\prime}) \mathrm {d} s ^ {\prime},
+$$
+
+$$
+\nu_ {\pi} (w) = Z _ {\pi} ^ {- 1} \left(B _ {r} \mu (w) + \gamma \cdot \int \varphi \left(s ^ {\prime}\right) \psi \left(s ^ {\prime}; w\right) V ^ {\pi} \left(s ^ {\prime}\right) \mathrm {d} s ^ {\prime}\right), \tag {C.15}
+$$
+
+$$
+p _ {\pi} (b) = q _ {\bar {\epsilon}} \left(b - \beta_ {\bar {\epsilon}} ^ {- 1} \left(Z _ {\pi} / B _ {\beta}\right)\right), \tag {C.16}
+$$
+
+$$
+\bar {\rho} _ {\pi} (\theta) = p _ {\pi} (b) \nu_ {\pi} (w), \tag {C.17}
+$$
+
+$$
+\rho_ {\pi} = \bar {\rho} _ {\pi} + (1 - \alpha^ {- 1}) (\rho_ {0} - \bar {\rho} _ {\pi}). \tag {C.18}
+$$
+
+Plugging (C.16) into the definition of Chi-squared divergence, we have
+
+$$
+\chi^ {2} \left(p _ {\pi} \| \rho_ {0, b}\right) = \int \frac {p _ {\pi} ^ {2}}{\rho_ {0 , b}} \mathrm {d} b - 1 = \frac {1}{\bar {\epsilon} \sqrt {2 - \bar {\epsilon} ^ {2}}} \cdot \exp \left\{\frac {\left(\beta_ {\bar {\epsilon}} ^ {- 1} \left(Z _ {\pi} / B _ {\beta}\right)\right) ^ {2}}{2 - \bar {\epsilon} ^ {2}} \right\} - 1, \tag {C.19}
+$$
+
+Note that we have $\bar { \epsilon } = \operatorname* { m i n } \left\{ \sqrt { \pi / 2 } \cdot ( 6 L _ { 0 , \beta } ) ^ { - 1 } , \sqrt { \pi / 2 } \cdot ( 2 \ell _ { \beta } L _ { 1 , \beta } ) ^ { - 1 } , 1 \right\}$ by (C.8) and $\left| \beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi } / B _ { \beta } ) \right| \leq$ $\ell _ { \beta }$ by (C.13). Hence, we have $\chi ^ { 2 } ( p _ { \pi } \parallel \rho _ { 0 , b } )$ upper bounded. As for $\nu _ { \pi }$ in (C.15), we have
+
+$$
+\begin{array}{l} \chi^ {2} \left(\nu_ {\pi} \| \rho_ {0, w}\right) = \chi^ {2} \left(B _ {r} Z _ {\pi} ^ {- 1} \mu + \int V ^ {\pi} \left(s ^ {\prime}\right) Z _ {\pi} ^ {- 1} \varphi \left(s ^ {\prime}\right) \psi \left(s ^ {\prime}; w\right) d s ^ {\prime} \| \rho_ {0, w}\right) \\ \leq 3 \left(\chi^ {2} \left(B _ {r} Z _ {\pi} ^ {- 1} \mu \| \rho_ {0, w}\right) + \chi^ {2} \left(\int V ^ {\pi} \left(s ^ {\prime}\right) Z _ {\pi} ^ {- 1} \varphi \left(s ^ {\prime}\right) \psi \left(s ^ {\prime}; \cdot\right) d s ^ {\prime} \| \rho_ {0, w}\right) + 1\right), \tag {C.20} \\ \end{array}
+$$
+
+where the inequality holds by Property (iii) of Lemma D.3. For the first term on the right-hand side of (C.20), we have
+
+$$
+\begin{array}{l} \chi^ {2} (B _ {r} Z _ {\pi} ^ {- 1} \mu \parallel \rho_ {0, w}) = B _ {r} ^ {2} Z _ {\pi} ^ {- 2} \chi^ {2} (\mu \parallel \rho_ {0, w}) + (1 - B _ {r} Z _ {\pi} ^ {- 1}) ^ {2} \\ \leq \chi^ {2} (\mu \| \rho_ {0, w}) + 1 \\ \leq M _ {\mu} + 1, \tag {C.21} \\ \end{array}
+$$
+
+where the equality holds by Property (i) of Lemma D.3, the first inequality holds by noting that $| B _ { r } Z _ { \pi } ^ { - 1 } | \le 1$ and the last inequality follows from $\chi ^ { 2 } ( \mu \parallel \rho _ { 0 , w } ) < M _ { \mu }$ by Assumption 4.3. Hence, the first term on the right-hand side of (C.20) is upper bounded. As for the second term, by Property
+
+(iv) of Lemma D.3, we have
+
+$$
+\begin{array}{l} \chi^ {2} \left(\int V ^ {\pi} (s ^ {\prime}) Z _ {\pi} ^ {- 1} \varphi (s ^ {\prime}) \psi (s ^ {\prime}; \cdot) d s ^ {\prime} \| \rho_ {0, w}\right) \\ \leq \int \left(V ^ {\pi} (s ^ {\prime}) Z _ {\pi} ^ {- 1} \varphi (s ^ {\prime})\right) ^ {2} d s ^ {\prime} \cdot \int \chi^ {2} (\psi (s ^ {\prime}; \cdot) \| \rho_ {0, w}) d s ^ {\prime} + \left(\int V ^ {\pi} (s ^ {\prime}) Z _ {\pi} ^ {- 1} \varphi (s ^ {\prime}) d s ^ {\prime} - 1\right) ^ {2} \\ \leq (1 - \gamma) ^ {- 2} M _ {2, \varphi} \cdot M _ {\psi} + (1 - \gamma) ^ {- 2} M _ {1, \varphi} ^ {2} + 1, \tag {C.22} \\ \end{array}
+$$
+
+where the last inequality holds by noting that $| V ^ { \pi } | \leq ( 1 - \gamma ) ^ { - 1 } B _ { r }$ , $Z _ { \pi } \geq B _ { r }$ , $\| S \| \leq 1$ , and that $\chi ^ { 2 } \bigl ( \psi ( s ^ { \prime } ; \cdot ) \parallel \rho _ { 0 , w } \bigr ) < M _ { \psi }$ by Assumption 4.3. Hence, it holds that the second term of (C.20) is also upper bounded. Plugging (C.21) and (C.22) into (C.20), we can establish the upper bound for $\chi ^ { 2 } ( \nu _ { \pi } \parallel \rho _ { 0 , w } )$ . Furthermore, by Property (ii) of Lemma D.3 and noting that $\rho _ { \pi } = p _ { \pi } \times \nu _ { \pi }$ , we have $\chi ^ { 2 } ( \bar { \rho } _ { \pi } \parallel \rho _ { 0 } )$ upper bounded as well, that is,
+
+$$
+\chi^ {2} (\bar {\rho} _ {\pi} \parallel \rho_ {0}) <   \frac {1}{2} \bar {D} ^ {2},
+$$
+
+where $D$ depends on absolute constants occurring in (C.19), (C.21), and (C.22), i.e., $\ell _ { \beta }$ , $\boldsymbol { L } _ { 0 , \beta }$ , $\boldsymbol { L } _ { 1 , \beta }$ , $B _ { r }$ , $M _ { 1 , \varphi }$ , $M _ { 2 , \varphi }$ , $M _ { \mu }$ , and $M _ { \psi }$ in Assumptions 4.2 and 4.3. Since $\rho _ { 0 } \sim \mathcal { N } ( 0 , I _ { D } )$ , it holds for any $\rho _ { \pi }$ that,
+
+$$
+\begin{array}{l} \frac {1}{2} W _ {2} \left(\rho_ {\pi}, \rho_ {0}\right) ^ {2} \leq \mathrm {K L} \left(\rho_ {\pi} \| \rho_ {0}\right) \leq \int \left(\frac {\rho_ {\pi}}{\rho_ {0}} - 1\right) \frac {\rho_ {\pi}}{\rho_ {0}} \rho_ {0} (\mathrm {d} \theta) = \int \left(\frac {\rho_ {\pi}}{\rho_ {0}} - 1\right) ^ {2} \rho_ {0} (\mathrm {d} \theta) \\ = \int \left(\frac {\left(1 - \alpha^ {- 1}\right) \rho_ {0} (\theta) + \alpha^ {- 1} \bar {\rho} _ {\pi} (\theta)}{\rho_ {0} (\theta)} - 1\right) ^ {2} \rho_ {0} (\mathrm {d} \theta) = \alpha^ {- 2} \chi^ {2} \left(\bar {\rho} _ {\pi} \| \rho_ {0}\right) <   \frac {\alpha^ {- 2}}{2} \bar {D} ^ {2}, \tag {C.23} \\ \end{array}
+$$
+
+where the first inequality follows from Talagrand’s inequality in Lemma E.4. Plugging $\widetilde { W } _ { 2 } = \alpha W _ { 2 }$ into (C.23), we complete the proof of Property (iii) of Lemma B.1.
+
+# Proof of Property (iv) of Lemma B.1.
+
+Upper Bounding $W _ { 2 } ( p _ { \pi _ { 1 } } , p _ { \pi _ { 2 } } )$ . Following the property of $W _ { 2 }$ distance with respect to Gaussian distribution, we have $W _ { 2 } ( p _ { \pi _ { 1 } } , p _ { \pi _ { 2 } } ) = \left| \beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi _ { 1 } } / B _ { \beta } ) { - \beta _ { \bar { \epsilon } } ^ { - 1 } ( Z _ { \pi _ { 2 } } / B _ { \beta } ) } \right|$ . Recall that we have $| Z _ { \pi } / B _ { \beta } | \leq$ $1 / 2$ and that $\beta _ { \bar { \epsilon } } ^ { - 1 }$ is $2 \ell _ { \beta }$ -Lipschitz continuous on $[ - 1 / 2 , 1 / 2 ]$ . It then holds that
+
+$$
+W _ {2} \left(p _ {\pi_ {1}}, p _ {\pi_ {2}}\right) = \left| \beta_ {\bar {\epsilon}} ^ {- 1} \left(Z _ {\pi_ {1}} / B _ {\beta}\right) - \beta_ {\bar {\epsilon}} ^ {- 1} \left(Z _ {\pi_ {2}} / B _ {\beta}\right) \right| \leq 2 \ell_ {\beta} \cdot \left| Z _ {\pi_ {1}} - Z _ {\pi_ {2}} \right| / B _ {\beta}. \tag {C.24}
+$$
+
+Meanwhile, we have
+
+$$
+\begin{array}{l} \left| Z _ {\pi_ {1}} - Z _ {\pi_ {2}} \right| \leq \gamma \cdot \int \varphi (s ^ {\prime}) \cdot \left| V ^ {\pi_ {1}} (s ^ {\prime}) - V ^ {\pi_ {2}} (s ^ {\prime}) \right| d s ^ {\prime} \\ \leq \gamma \cdot \int \varphi (s ^ {\prime}) \mathrm {d} s ^ {\prime} \cdot \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} (s ^ {\prime}) - V ^ {\pi_ {2}} (s ^ {\prime}) \right| \\ \leq \gamma \cdot M _ {1, \varphi} \cdot \sup  _ {s ^ {\prime} \in \mathcal {S}} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|, \tag {C.25} \\ \end{array}
+$$
+
+where the last inequality holds by (ii) of Assumption 4.3. Plugging (C.25) into (C.24), it holds for $W _ { 2 } ( p _ { \pi _ { 1 } } , p _ { \pi _ { 2 } } )$ that
+
+$$
+W _ {2} \left(p _ {\pi_ {1}}, p _ {\pi_ {2}}\right) \leq \frac {2 \ell_ {\beta} \cdot \gamma \cdot M _ {1 , \varphi} \cdot \sup  _ {s ^ {\prime} \in \mathcal {S}} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|}{B _ {\beta}}. \tag {C.26}
+$$
+
+Upper Bounding $W _ { 2 } ( \nu _ { \pi _ { 1 } } , \nu _ { \pi _ { 2 } } )$ . By definition of $\nu _ { \pi }$ in (C.15), we have
+
+$$
+\nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} = \frac {B _ {r} \left(Z _ {\pi_ {2}} - Z _ {\pi_ {1}}\right)}{Z _ {\pi_ {1}} Z _ {\pi_ {2}}} \mu + \gamma \int \varphi (s ^ {\prime}) \psi (s ^ {\prime}; \cdot) \left(\frac {V ^ {\pi_ {1}}}{Z _ {\pi_ {1}}} - \frac {V ^ {\pi_ {2}}}{Z _ {\pi_ {2}}}\right) d s ^ {\prime}. \tag {C.27}
+$$
+
+For $V ^ { \pi _ { 1 } } / Z _ { \pi _ { 1 } } - V ^ { \pi _ { 2 } } / Z _ { \pi _ { 2 } }$ , it holds that
+
+$$
+\begin{array}{l} \left| \frac {V ^ {\pi_ {1}}}{Z _ {\pi_ {1}}} - \frac {V ^ {\pi_ {2}}}{Z _ {\pi_ {2}}} \right| \leq \max  \{V ^ {\pi_ {1}}, V ^ {\pi_ {2}} \} \cdot \frac {| Z _ {\pi_ {1}} - Z _ {\pi_ {2}} |}{Z _ {\pi_ {1}} Z _ {\pi_ {2}}} + \max  \{Z _ {\pi_ {1}} ^ {- 1}, Z _ {\pi_ {2}} ^ {- 1} \} | V ^ {\pi_ {1}} - V ^ {\pi_ {2}} | \\ \leq \left(B _ {r} ^ {- 1} (1 - \gamma) ^ {- 1} \gamma M _ {1, \varphi} + B _ {r} ^ {- 1}\right) \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|, \tag {C.28} \\ \end{array}
+$$
+
+where the last inequality holds by noting that
+
+$$
+\left| \frac {Z _ {\pi_ {2}} - Z _ {\pi_ {1}}}{Z _ {\pi_ {1}} Z _ {\pi_ {2}}} \right| \leq \gamma M _ {1, \varphi} B _ {r} ^ {- 2} \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|. \tag {C.29}
+$$
+
+Here the inequality in (C.29) holds by (C.25) and the fact that $Z _ { \pi } \geq B _ { r }$ . For $W _ { 2 } ( \nu _ { \pi _ { 1 } } , \nu _ { \pi _ { 2 } } )$ , by Lemma E.5, it holds that
+
+$$
+W _ {2} \left(\nu_ {\pi_ {1}}, \nu_ {\pi_ {2}}\right) \leq 2 \| \nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} \| _ {\dot {H} ^ {- 1} \left(\nu_ {\pi_ {1}}\right)}. \tag {C.30}
+$$
+
+Recall that we have $\nu _ { \pi }$ defined in (C.15) that
+
+$$
+\begin{array}{l} \nu_ {\pi} (w) = Z _ {\pi} ^ {- 1} \cdot \Bigl (B _ {r} \mu (w) + \gamma \cdot \int \varphi (s ^ {\prime}) \psi (s ^ {\prime}; w) V ^ {\pi} (s ^ {\prime}) \mathrm {d} s ^ {\prime} \Bigr), \\ Z _ {\pi} = B _ {r} + \gamma \cdot \int \varphi (s ^ {\prime}) V ^ {\pi} (s ^ {\prime}) \mathrm {d} s ^ {\prime} \\ \end{array}
+$$
+
+where $\begin{array} { r } { Z _ { \pi } ^ { - 1 } ( B _ { r } + \gamma \cdot \int \varphi ( s ^ { \prime } ) V ^ { \pi } ( s ^ { \prime } ) \mathrm { d } s ^ { \prime } ) = 1 } \end{array}$ , $B _ { r } Z _ { \pi } ^ { - 1 } \geq 0$ , and $\gamma \varphi ( s ^ { \prime } ) V ^ { \pi } ( s ^ { \prime } ) Z _ { \pi } ^ { - 1 } \geq 0$ , which indicate that $\nu _ { \pi }$ is in the convex hull of $\mu$ and $\psi ( s ^ { \prime } ; \cdot )$ . Hence, by Property (i) of Lemma D.4, it holds that
+
+$$
+2 \left\| \nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} \right\| _ {\dot {H} ^ {- 1} \left(\nu_ {\pi_ {1}}\right)} \leq 2 \max  \left\{\sup  _ {s} \| \nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} \| _ {\dot {H} ^ {- 1} \left(\psi (s; ;)\right)}, \| \nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} \| _ {\dot {H} ^ {- 1} (\mu)} \right\}. \tag {C.31}
+$$
+
+Furthermore, following from (C.27) and $\begin{array} { r } { Z _ { \pi } ^ { - 1 } ( B _ { r } + \gamma \cdot \int \varphi ( s ^ { \prime } ) V ^ { \pi } ( s ^ { \prime } ) \mathrm { d } s ^ { \prime } ) = 1 } \end{array}$ , by Property (ii) of Lemma D.4, it holds for $2 \Vert \nu _ { \pi _ { 1 } } - \nu _ { \pi _ { 2 } } \Vert _ { \dot { H } ^ { - 1 } ( \mu ) }$ that
+
+$$
+\begin{array}{l} 2\| \nu_{\pi_1} - \nu_{\pi_2}\|_{\dot{H}^{-1}(\mu)}\leq \max \{\sup_{s^{\prime}\in \mathcal{S}}\| \mu -\psi (s^{\prime};\cdot)\|_{\dot{H}^{-1}(\mu)},\sup_{(s^{\prime},s^{\prime \prime})\in \mathcal{S}\times \mathcal{S}}\| \psi (s^{\prime};\cdot) - \psi (s^{\prime \prime};\cdot)\|_{\dot{H}^{-1}(\mu)}\} \\ \cdot \left(\left| \frac {B _ {r} \left(Z _ {\pi_ {2}} - Z _ {\pi_ {1}}\right)}{Z _ {\pi_ {1}} Z _ {\pi_ {2}}} \right| + \gamma \int \varphi (s ^ {\prime}) \left| \frac {V ^ {\pi_ {1}}}{Z _ {\pi_ {1}}} - \frac {V ^ {\pi_ {2}}}{Z _ {\pi_ {2}}} \right| d s ^ {\prime}\right). \tag {C.32} \\ \end{array}
+$$
+
+Plugging (iii) of Assumption 4.3, (C.28), and (C.29) into (C.32), we have
+
+$$
+\begin{array}{l} 2 \| \nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} \| _ {\dot {H} ^ {- 1} (\mu)} \leq \mathcal {G} \cdot \left(\gamma M _ {1, \varphi} B _ {r} ^ {- 1} + \gamma M _ {1, \varphi} \left(B _ {r} ^ {- 1} (1 - \gamma) ^ {- 1} \gamma M _ {1, \varphi} + B _ {r} ^ {- 1}\right)\right) \\ \cdot \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|. \tag {C.33} \\ \end{array}
+$$
+
+By simply substituting $\left\| \cdot \right\| _ { \dot { H } ^ { - 1 } ( \psi ( s ; ) ) }$ for $\lVert \cdot \rVert _ { \dot { H } ^ { - 1 } ( \nu ) }$ in both (C.32) and (C.33), it also holds for $2 \lVert \nu _ { \pi _ { 1 } } -$ $\nu _ { \pi _ { 2 } } \| _ { \dot { H } ^ { - 1 } ( \psi ( s ; \cdot ) ) }$ that
+
+$$
+\begin{array}{l} 2 \| \nu_ {\pi_ {1}} - \nu_ {\pi_ {2}} \| _ {\dot {H} ^ {- 1} (\psi (s; \cdot))} \leq \mathcal {G} \cdot \left(\gamma M _ {1, \varphi} B _ {r} ^ {- 1} + \gamma M _ {1, \varphi} \bigl (B _ {r} ^ {- 1} (1 - \gamma) ^ {- 1} \gamma M _ {1, \varphi} + B _ {r} ^ {- 1} \bigr)\right) \\ \cdot \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|. \tag {C.34} \\ \end{array}
+$$
+
+Combining (C.30), (C.31), (C.33), and (C.34), we have
+
+$$
+\begin{array}{l} W _ {2} \left(\nu_ {\pi_ {1}}, \nu_ {\pi_ {2}}\right) \leq \mathcal {G} \cdot \left(\gamma M _ {1, \varphi} B _ {r} ^ {- 1} + \gamma M _ {1, \varphi} \left(B _ {r} ^ {- 1} (1 - \gamma) ^ {- 1} \gamma M _ {1, \varphi} + B _ {r} ^ {- 1}\right)\right) \\ \cdot \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|. \tag {C.35} \\ \end{array}
+$$
+
+Upper Bounding $W _ { 2 } ( \rho _ { \pi _ { 1 } } , \rho _ { \pi _ { 2 } } )$ . Note that we have $\rho _ { \pi } = \nu _ { \pi } \times p _ { \pi }$ in (C.17). By Lemma D.5, we have
+
+$$
+W _ {2} \left(\bar {\rho} _ {\pi_ {1}}, \bar {\rho} _ {\pi_ {2}}\right) \leq \sqrt {W _ {2} ^ {2} \left(\nu_ {\pi_ {1}} , \nu_ {\pi_ {2}}\right) + W _ {2} ^ {2} \left(p _ {\pi_ {1}} , p _ {\pi_ {2}}\right)} \leq \mathcal {B} ^ {\prime} \sup  _ {s ^ {\prime} \in S} \left| V ^ {\pi_ {1}} \left(s ^ {\prime}\right) - V ^ {\pi_ {2}} \left(s ^ {\prime}\right) \right|, \tag {C.36}
+$$
+
+where $B ^ { \prime }$ depends on the discount factor $\gamma$ and absolute constants $\ell _ { \beta } , B _ { \beta } , B _ { r } , M _ { 1 , \varphi } , \mathcal { G }$ in Assumption 4.2 and 4.3 according to (C.26) and (C.35). By performance difference lemma (Kakade and Langford, 2002), we have
+
+$$
+\begin{array}{l} \left| V ^ {\pi_ {1}} (s) - V ^ {\pi_ {2}} (s) \right| = (1 - \gamma) ^ {- 1} \cdot \left| \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {1}}} \left[ \left\langle A ^ {\pi_ {2}} \left(s ^ {\prime}, \cdot\right), \pi_ {1} (\cdot \mid s ^ {\prime}) - \pi_ {2} (\cdot \mid s ^ {\prime}) \right\rangle_ {\mathcal {A}} \right] \right| \\ = (1 - \gamma) ^ {- 1} \cdot \left| \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {1}}} \left[ \left\langle Q ^ {\pi_ {2}} \left(s ^ {\prime}, \cdot\right), \pi_ {1} (\cdot \mid s ^ {\prime}) - \pi_ {2} (\cdot \mid s ^ {\prime}) \right\rangle_ {\mathcal {A}} \right] \right| \\ \leq (1 - \gamma) ^ {- 2} \cdot B _ {r} \cdot \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {1}}} \left[ \left\| \pi_ {1} (\cdot | s ^ {\prime}) - \pi_ {2} (\cdot | s ^ {\prime}) \right\| _ {1} \right]. \tag {C.37} \\ \end{array}
+$$
+
+Here the inequality follows from $| Q ^ { \pi } ( s , a ) | \leq ( 1 - \gamma ) ^ { - 1 } \cdot B _ { r }$ . We let $\mathcal { B } = B ^ { \prime } B _ { r } ( 1 - \gamma ) ^ { - 2 }$ . Plugging (C.37) into (C.36), we have
+
+$$
+W _ {2} \left(\bar {\rho} _ {\pi_ {1}}, \bar {\rho} _ {\pi_ {2}}\right) \leq \mathcal {B} \cdot \sup  _ {s \in \mathcal {S}} \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {1}}} \left[ \left\| \pi_ {1} \left(\cdot \mid s ^ {\prime}\right) - \pi_ {2} \left(\cdot \mid s ^ {\prime}\right) \right\| _ {1} \right].
+$$
+
+Recall that we have $\rho _ { \pi } = \bar { \rho } _ { \pi } + ( 1 - \alpha ^ { - 1 } ) ( \rho _ { 0 } - \bar { \rho } _ { \pi } )$ in (C.18). Then, by Lemma D.6, it holds that
+
+$$
+W _ {2} \left(\rho_ {\pi_ {1}}, \rho_ {\pi_ {2}}\right) \leq \alpha^ {- \frac {1}{2}} W _ {2} \left(\bar {\rho} _ {\pi_ {1}}, \bar {\rho} _ {\pi_ {2}}\right) \leq \alpha^ {- \frac {1}{2}} \mathcal {B} \cdot \sup  _ {s \in \mathcal {S}} \mathbb {E} _ {s ^ {\prime} \sim \mathcal {E} _ {s} ^ {\pi_ {1}}} \left[ \left\| \pi_ {1} (\cdot | s ^ {\prime}) - \pi_ {2} (\cdot | s ^ {\prime}) \right\| _ {1} \right],
+$$
+
+which completes the proof of Lemma B.1.
+
+# D Technical Results
+
+In this section, we state and prove some technical results used in the proof of main theorems and lemmas.
+
+Lemma D.1. Under Assumptions 4.3 and 4.2, it holds for any $\rho \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ that
+
+$$
+\sup  _ {x \in \mathcal {X}} \left| Q (x; \rho) \right| \leq \alpha \cdot B _ {1} \cdot W _ {2} (\rho , \rho_ {0}), \tag {D.1}
+$$
+
+$$
+\sup  _ {\theta \in \mathbb {R} ^ {D}} \left\| \nabla_ {\theta} g (\theta ; \rho) \right\| _ {\mathrm {F}} \leq \alpha^ {- 1} \cdot B _ {2} \cdot \left(2 \alpha \cdot B _ {1} \cdot W _ {2} (\rho , \rho_ {0}) + B _ {r}\right). \tag {D.2}
+$$
+
+Proof. Following from Assumptions 4.3 and 4.2, we have that $\| \nabla _ { \theta } \sigma ( x ; \theta ) \| \le B _ { 1 }$ for any $x \in \mathcal { X }$ and $\theta \in \mathbb { R } ^ { D }$ , which implies that $\mathrm { L i p } ( \sigma ( x ; \cdot ) / B _ { 1 } ) \le 1$ for any $x \in \mathcal { X }$ . Note that $Q ( x ; \rho _ { 0 } ) = 0$ for any $x \in \mathcal { X }$ . Thus, by (A.7) and the inequality between $W _ { 1 }$ distance and $W _ { 2 }$ distance (Villani, 2003),
+
+we have for any $\rho \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ and $x \in \mathcal { X }$ that
+
+$$
+\left| Q (x; \rho) \right| = \alpha \cdot \left| \int \sigma (x; \theta) \cdot \mathrm {d} (\rho - \rho_ {0}) (\theta) \right| \leq \alpha \cdot B _ {1} \cdot W _ {1} (\rho , \rho_ {0}) \leq \alpha \cdot B _ {1} \cdot W _ {2} (\rho , \rho_ {0}). \tag {D.3}
+$$
+
+which completes the proof of (D.1) in Lemma D.1. Following from the definition of $g$ in (3.6), we have for any $x \in \mathcal { X }$ and $\rho \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ that
+
+$$
+\begin{array}{l} \left\| \nabla_ {\theta} g (\theta ; \rho) \right\| _ {\mathrm {F}} \leq \alpha^ {- 1} \cdot \mathbb {E} _ {\widetilde {\mathcal {D}}} \Big [ \big | Q (x; \rho) - r - \gamma \cdot Q (x ^ {\prime}; \rho) \big | \cdot \big \| \nabla_ {\theta \theta} ^ {2} \sigma (x; \theta) \big \| _ {\mathrm {F}} \Big ] \\ \leq \alpha^ {- 1} \cdot B _ {2} \cdot \big (2 \alpha \cdot B _ {1} \cdot W _ {2} (\rho , \rho_ {0}) + B _ {r} \big). \\ \end{array}
+$$
+
+Here the last inequality follows from (D.3) and the fact that $\| \nabla _ { \theta \theta } ^ { 2 } \sigma ( x ; \theta ) \| _ { \mathrm { F } } \leq B _ { 2 }$ for any $x \in \mathcal { X }$ and $\rho \in \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ , which follows from Assumptions 4.3 and 4.2. Thus, we complete the proof of Lemma D.1. □
+
+Lemma D.2. For $\rho _ { 0 } , \rho _ { t } , \rho _ { \pi _ { t } } \in \mathcal P _ { 2 } ( \mathbb { R } ^ { D } )$ and the geodesic $\alpha _ { t } ^ { \lfloor 0 , 1 \rfloor }$ connecting $\rho _ { t }$ and $\rho _ { \pi _ { t } }$ , we have
+
+$$
+\sup  _ {s \in [ 0, 1 ]} W _ {2} \left(\alpha_ {t} ^ {s}, \rho_ {0}\right) \leq 2 \max  \left\{W _ {2} \left(\rho_ {\pi_ {t}}, \rho_ {0}\right), W _ {2} \left(\rho_ {t}, \rho_ {0}\right) \right\}. \tag {D.4}
+$$
+
+Proof. We give a proof by contradiction. Note that $\alpha _ { t } ^ { s }$ is the geodesic connecting $\rho _ { \pi _ { t } }$ and $\rho _ { t }$ . Assume there exists $t$ such that
+
+$$
+\sup  _ {s \in [ 0, 1 ]} W _ {2} \left(\alpha_ {t} ^ {s}, \rho_ {0}\right) > 2 \max  \left\{W _ {2} \left(\rho_ {\pi_ {t}}, \rho_ {0}\right), W _ {2} \left(\rho_ {t}, \rho_ {0}\right) \right\}.
+$$
+
+Then, according to the triangle inequality of $W _ { 2 }$ metric (Villani, 2008), we have
+
+$$
+W _ {2} \left(\rho_ {t}, \alpha_ {t} ^ {s}\right) \geq \left| W _ {2} \left(\alpha_ {t} ^ {s}, \rho_ {0}\right) - W _ {2} \left(\rho_ {t}, \rho_ {0}\right) \right| > \left| 2 W _ {2} \left(\rho_ {t}, \rho_ {0}\right) - W _ {2} \left(\rho_ {t}, \rho_ {0}\right) \right| = W _ {2} \left(\rho_ {t}, \rho_ {0}\right),
+$$
+
+and $W _ { 2 } ( \rho _ { \pi _ { t } } , \alpha _ { t } ^ { s } ) > W _ { 2 } ( \rho _ { \pi _ { t } } , \rho _ { 0 } )$ for the same sake, which conflicts with the definition of geodesic that $W _ { 2 } ( \rho _ { t } , \alpha _ { t } ^ { s } ) + W _ { 2 } ( \alpha _ { t } ^ { s } , \rho _ { \pi _ { t } } ) = W _ { 2 } ( \rho _ { t } , \rho _ { \pi _ { t } } ) \leq W _ { 2 } ( \rho _ { t } , \rho _ { 0 } ) + W _ { 2 } ( \rho _ { \pi _ { t } } , \rho _ { 0 } )$ . Hence, such $t$ does not exist and (D.4) holds. Thus we complete the proof of Lemma D.2. □
+
+Lemma D.3. The Chi-squared divergence has the following properties.
+
+(i) For any probability measure $g \in { \mathcal { P } } ( \Theta )$ , function $f : \Theta \to \mathbb { R }$ , and $\alpha \in \mathbb { R }$ , we have
+
+$$
+\chi^ {2} (\alpha f \| g) = \alpha^ {2} \chi^ {2} (f \| g) + (1 - \alpha) ^ {2}.
+$$
+
+(ii) For any probability measures $g _ { 1 } \in \mathcal { P } ( \Theta _ { 1 } )$ and $g _ { 2 } ~ \in ~ \mathcal { P } ( \Theta _ { 2 } )$ , functions $f _ { 1 } : \Theta _ { 1 } \to \mathbb { R }$ and $f _ { 2 } : \Theta _ { 2 } \to \mathbb { R }$ , we have
+
+$$
+\chi^ {2} (f _ {1} \times f _ {2} \| g _ {1} \times g _ {2}) = \chi^ {2} (f _ {1} \| g _ {1}) \cdot \chi^ {2} (f _ {2} \| g _ {2}) + \chi^ {2} (f _ {1} \| g _ {1}) + \chi^ {2} (f _ {2} \| g _ {2}),
+$$
+
+where $f _ { 1 } \times f _ { 2 }$ is the product of $f _ { 1 }$ and $f _ { 2 }$ , and $g _ { 1 } \times g _ { 2 }$ is the product measure of $g _ { 1 }$ and $g _ { 2 }$ i.e., $( f _ { 1 } \times f _ { 2 } ) ( \theta _ { 1 } \times \theta _ { 2 } ) = f _ { 1 } ( \theta _ { 1 } ) f _ { 2 } ( \theta _ { 2 } )$ and $( g _ { 1 } \times g _ { 2 } ) ( \theta _ { 1 } \times \theta _ { 2 } ) = g _ { 1 } ( \theta _ { 1 } ) g _ { 2 } ( \theta _ { 2 } )$ , respectively.
+
+(iii) For any probability measure $g \in { \mathcal { P } } ( \Theta )$ , functions $f _ { 1 } : \Theta \to \mathbb { R }$ and $f _ { 2 } : \Theta \to \mathbb { R }$ , we have
+
+$$
+\chi^ {2} \left(f _ {1} + f _ {2} \| g\right) \leq 3 \left(\chi^ {2} \left(f _ {1} \| g\right) + \chi^ {2} \left(f _ {2} \| g\right) + 1\right).
+$$
+
+(iv) For any probability measure $g \in { \mathcal { P } } ( \Theta )$ , function $f : \mathcal { X } \times \Theta  \mathbb { R }$ and $\alpha : \mathcal { X }  \mathbb { R }$ , we have
+
+$$
+\chi^ {2} \left(\int \alpha (x) f (d, \cdot) d x \| g\right) \leq \int \alpha (x) ^ {2} \mathrm {d} x \cdot \int \chi^ {2} (f (x, \cdot) \| g) \mathrm {d} x + \left(\int \alpha (x) \mathrm {d} x - 1\right) ^ {2}.
+$$
+
+Proof. Proof of Property (i) of Lemma D.3. By definition of the Chi-squared divergence, we have
+
+$$
+\begin{array}{l} \chi^ {2} (\alpha f \| g) = \int \left(\frac {\alpha f}{g} - 1\right) ^ {2} \mathrm {d} g \\ = \int \left(\alpha \left(\frac {f}{g} - 1\right) + \alpha - 1\right) ^ {2} \mathrm {d} g \\ = \alpha^ {2} \chi^ {2} (f \| g) + (\alpha - 1) ^ {2}. \\ \end{array}
+$$
+
+Thus, we complete the proof of Property (i) of Lemma D.3.
+
+Proof of Property (ii) of Lemma D.3. Let $\tilde { f } _ { 1 } = f _ { 1 } / g _ { 1 } - 1$ and $\widetilde { f } _ { 2 } = f _ { 2 } / g _ { 2 } - 1$ . It then holds that
+
+$$
+\chi^ {2} \left(f _ {1} \times f _ {2} \| g _ {1} \times g _ {2}\right) = \int \left(\frac {f _ {1} \times f _ {2}}{g _ {1} \times g _ {2}} - 1\right) ^ {2} \mathrm {d} \left(g _ {1} \times g _ {2}\right) = \int \left(\widetilde {f _ {1}} \times \widetilde {f _ {2}} + \widetilde {f _ {1}} + \widetilde {f _ {2}}\right) ^ {2} \mathrm {d} \left(g _ {1} \times g _ {2}\right).
+$$
+
+By further noting that $\int \tilde { f } _ { 1 } \mathrm { d } g _ { 1 } = 0$ , $\int \tilde { f } _ { 2 } \mathrm { d } g _ { 2 } = 0$ , $\begin{array} { r } { \int \bar { f } _ { 1 } ^ { 2 } \mathrm { d } g _ { 1 } = \chi ^ { 2 } ( f _ { 1 } \| g _ { 1 } ) } \end{array}$ , and $\begin{array} { r } { \int \tilde { f } _ { 2 } ^ { 2 } \mathrm { d } g _ { 2 } = \chi ^ { 2 } ( f _ { 2 } \| g _ { 2 } ) } \end{array}$ , we have
+
+$$
+\begin{array}{l} \chi^ {2} \left(f _ {1} \times f _ {2} \| g _ {1} \times g _ {2}\right) \\ = \int \left(\widetilde {f} _ {1} ^ {2} \times \widetilde {f} _ {2} ^ {2} + \widetilde {f} _ {1} ^ {2} + \widetilde {f} _ {2} ^ {2} + 2 (\widetilde {f} _ {1}) ^ {2} \times \widetilde {f} _ {2} + 2 (\widetilde {f} _ {2}) ^ {2} \times \widetilde {f} _ {1} + 2 \widetilde {f} _ {1} \times \widetilde {f} _ {2}\right) d (g _ {1} \times g _ {2}) \\ = \chi^ {2} (f _ {1} \| g _ {1}) \cdot \chi^ {2} (f _ {2} \| g _ {2}) + \chi^ {2} (f _ {1} \| g _ {1}) + \chi^ {2} (f _ {2} \| g _ {2}). \\ \end{array}
+$$
+
+Thus, we complete the proof of Property (ii) of Lemma D.3.
+
+Proof of Property (iii) of Lemma D.3. Let $\widetilde { f } _ { 1 } = f _ { 1 } / g _ { 1 } - 1$ and $\widetilde { f } _ { 2 } = f _ { 2 } / g _ { 2 } - 1$ . It then holds that
+
+$$
+\chi^ {2} \left(f _ {1} + f _ {2} \| g\right) = \int \left(\frac {f _ {1} + f _ {2}}{g} - 1\right) ^ {2} \mathrm {d} g = \int \left(\widetilde {f} _ {1} + \widetilde {f} _ {2} + 1\right) ^ {2} \mathrm {d} g.
+$$
+
+By further noting that $\begin{array} { r } { \int \bar { f } _ { 1 } ^ { 2 } \mathrm { d } g _ { 1 } = \chi ^ { 2 } ( f _ { 1 } \| g _ { 1 } ) } \end{array}$ and $\begin{array} { r } { \int \bar { f } _ { 2 } ^ { 2 } \mathrm { d } g _ { 2 } = \chi ^ { 2 } ( f _ { 2 } \| g _ { 2 } ) } \end{array}$ , we have
+
+$$
+\begin{array}{l} \chi^ {2} \left(f _ {1} + f _ {2} \| g\right) \leq 3 \int \left(\left(\widetilde {f} _ {1}\right) ^ {2} + \left(\widetilde {f} _ {2}\right) ^ {2} + 1\right) \mathrm {d} g \\ = 3 \left(\chi^ {2} \left(f _ {1} \| g\right) + \chi^ {2} \left(f _ {2} \| g\right) + 1\right), \\ \end{array}
+$$
+
+where the inequality follows from the Cauchy-Schwarz inequality. Thus, we complete the proof of Property (iii) of Lemma D.3.
+
+Proof of Property (iv) of Lemma D.3. Let $\bar { f } ( x , \cdot ) = f ( x , \cdot ) / g ( \cdot ) - 1$ . It then holds that
+
+$$
+\begin{array}{l} \chi^ {2} \left(\int \alpha (x) f (x, \cdot) \mathrm {d} x \| g\right) = \int \left(\int \alpha (x) \widetilde {f} (x, \theta) \mathrm {d} x\right) ^ {2} g (\mathrm {d} \theta) + \left(\int \alpha (x) \mathrm {d} x - 1\right) ^ {2} \\ \leq \int \left(\int \alpha (x) ^ {2} d x \cdot \int \widetilde {f} (x, \theta) ^ {2} d x\right) g (d \theta) + \left(\int \alpha (x) d x - 1\right) ^ {2} \\ = \int \alpha (x) ^ {2} \mathrm {d} x \cdot \int \chi^ {2} (f (x, \cdot) \| g) \mathrm {d} x + \left(\int \alpha (x) \mathrm {d} x - 1\right) ^ {2}, \\ \end{array}
+$$
+
+where the first equality holds by noting that $\begin{array} { r } { \int \tilde { f } ( x , \cdot ) \mathrm { d } g = 0 } \end{array}$ and the inequality follows from the Cauchy-Schwarz inequality. Thus, we complete the proof of Property (iv) of Lemma D.3.
+
+Lemma D.4. For weighted homogeneous Sobolev norm defined by
+
+$$
+\left\| \nu_ {1} - \nu_ {2} \right\| _ {\dot {H} ^ {- 1} (\mu)} = \sup  \left\{\left| \langle f, \nu_ {1} - \nu_ {2} \rangle \right| \mid \| f \| _ {\dot {H} ^ {1} (\mu)} \leq 1 \right\}.
+$$
+
+we have the following properties.
+
+(i) For a group of probability measures $\mu _ { x } : \mathcal { X } \to \mathcal { P } _ { 2 } ( \Theta )$ and $\nu _ { 1 } , \nu _ { 2 } \in \mathcal { P } _ { 2 } ( \Theta )$ , if $\mu$ is in the convex hull of $\mu _ { x }$ , i.e., there exists $\alpha _ { x } \geq 0$ such that both $\textstyle \int \alpha _ { x } \mathrm { d } x = 1$ and $\begin{array} { r } { \mu = \int \alpha _ { x } \mu _ { x } \mathrm { d } x } \end{array}$ hold, it then holds that
+
+$$
+\left\| \nu_ {1} - \nu_ {2} \right\| _ {\dot {H} ^ {- 1} (\mu)} \leq \sup  _ {x \in \mathcal {X}} \| \nu_ {1} - \nu_ {2} \| _ {\dot {H} ^ {- 1} (\mu_ {x})}.
+$$
+
+(ii) Assume that we have measures $\mu \in \mathscr { P } _ { 2 } ( \Theta )$ and $\nu _ { x } : \mathcal { X } \to \mathcal { P } _ { 2 } ( \Theta )$ . Let $\beta _ { 1 } , \beta _ { 2 } : \mathcal { X }  \mathbb { R }$ be two functions on $\mathcal { X }$ such that $\begin{array} { r } { \int \beta _ { 1 } ( x ) \mathrm { d } x = \int \beta _ { 2 } ( x ) \mathrm { d } x } \end{array}$ . Then, by letting $\begin{array} { r } { \nu _ { 1 } = \int \nu _ { x } \beta _ { 1 } ( x ) \mathrm { d } x } \end{array}$ and $\nu _ { 2 } = \textstyle \int \nu _ { x } \beta _ { 2 } ( x ) \mathrm { d } x$ , we have
+
+$$
+\| \nu_ {1} - \nu_ {2} \| _ {\dot {H} ^ {- 1} (\mu)} \leq \frac {1}{2} \sup  _ {(x ^ {\prime}, x ^ {\prime \prime}) \in \mathcal {X} \times \mathcal {X}} \| \nu_ {x ^ {\prime}} - \nu_ {x ^ {\prime \prime}} \| _ {\dot {H} ^ {- 1} (\mu)} \cdot \int | \beta_ {1} (x) - \beta_ {2} (x) | d x.
+$$
+
+Proof. Proof of Property (i) of Lemma D.4. By definition of the weighted homogeneous Sobolev norm, we have
+
+$$
+\begin{array}{l} \left\| \nu_ {1} - \nu_ {2} \right\| _ {\dot {H} ^ {- 1} (\mu)} = \sup  _ {f} \left\{\left| \langle f, \nu_ {1} - \nu_ {2} \rangle \right| \left| \int | \nabla f | ^ {2} \alpha_ {x} d \mu_ {x} d x \leq 1 \right. \right\} \\ = \sup  _ {f, \lambda_ {x} \geq 0} \left\{\left| \langle f, \nu_ {1} - \nu_ {2} \rangle \right| \left| \int | \nabla f | ^ {2} d \mu_ {x} \leq \lambda_ {x}, \forall x; \int \alpha_ {x} \lambda_ {x} d x = 1 \right. \right\} (D.5) \\ \leq \sup  _ {\int \lambda_ {x} \alpha_ {x} \mathrm {d} x = 1, \atop \lambda_ {x} \geq 0} \inf  _ {x} \sup  _ {f _ {x}} \left\{\left| \langle f _ {x}, \nu_ {1} - \nu_ {2} \rangle \right| \Bigg | \int | \nabla f _ {x} | ^ {2} \mathrm {d} \mu_ {x} \leq \lambda_ {x} \right\}, (D.6) \\ \end{array}
+$$
+
+where the first equality holds by noting that $\begin{array} { r } { \mu = \int \alpha _ { x } \mu _ { x } \mathrm { d } x } \end{array}$ . To illustrate the last equality, we denote by $\mathcal { F }$ and ${ \mathcal { F } } _ { x }$ the allowed function class for $f$ in (D.5) and $f _ { x }$ in (D.6) to choose from, respectively. Note that we have $\mathcal { F } \subseteq \mathcal { F } _ { x }$ for any $x$ , which is because the constraints for each $f _ { x }$ in (D.6) are relaxation of the constraints for $f$ in (D.5). And so, the supremum taken over $\mathcal { F }$ is no larger than the supremum over ${ \mathcal { F } } _ { x }$ for any $x$ . Therefore, the supremum over $\mathcal { F }$ is no larger than
+
+the the smallest supremum over ${ \mathcal { F } } _ { x }$ . Thus, (D.6) holds. Furthermore, we have
+
+$$
+\begin{array}{l} \| \nu_ {1} - \nu_ {2} \| _ {\dot {H} ^ {- 1} (\mu)} \leq \sup  _ {\substack {\int \lambda_ {x} \alpha_ {x} \mathrm {d} x = 1, \\ \lambda_ {x} \geq 0}} \inf  _ {x} \sup  _ {f _ {x}} \left\{\left| \langle f _ {x}, \nu_ {1} - \nu_ {2} \rangle \right| \left| \int | \nabla f _ {x} | ^ {2} \mathrm {d} \mu_ {x} \leq \lambda_ {x} \right. \right\} (D.7) \\ = \sup  _ {\substack {\int \lambda_ {x} \alpha_ {x} \mathrm {d} x = 1, \\ \lambda_ {x} \geq 0}} \inf  _ {x} \left\{\sqrt {\lambda_ {x}} \| \nu_ {1} - \nu_ {2} \| _ {\dot {H} ^ {- 1} (\mu_ {x})} \right\} (D.8) \\ \leq \sup_{\substack{\int \lambda_{x}\alpha_{x}\mathrm{d}x = 1,\\ \lambda_{x}\geq 0}}\inf_{x}\left\{\sqrt{\lambda_{x}}\right\} \cdot \sup_{x}\| \nu_{1} - \nu_{2}\|_{\dot{H}^{-1}(\mu_{x})}, \\ \end{array}
+$$
+
+where the first equality holds by noting that (D.8) is a rescaling of (D.7) with respect to $\lambda _ { x }$ in the constraints of (D.7). Here, we let
+
+$$
+y = \sup_{\substack{\int \lambda_{x}\alpha_{x}\mathrm{d}x = 1,\\ \lambda_{x}\geq 0}}\inf_{x}\left\{\sqrt{\lambda_{x}}\right\} .
+$$
+
+Then, it holds that $y \le 1$ . Otherwise, there must exists $\lambda _ { x }$ such that $\begin{array} { r } { \int \lambda _ { x } \alpha _ { x } \mathrm { d } x = 1 } \end{array}$ and that $\lambda _ { x } > 1$ holds for any $x \in \mathcal { X }$ , which contradicts with our conditions that $\textstyle \int \alpha _ { x } \mathrm { d } x = 1$ and $\alpha _ { x } \geq 0$ . Therefore, it further holds that
+
+$$
+\left\| \nu_ {1} - \nu_ {2} \right\| _ {\dot {H} ^ {- 1} (\mu)} \leq y \cdot \sup  _ {x} \| \nu_ {1} - \nu_ {2} \| _ {\dot {H} ^ {- 1} (\mu_ {x})} \leq \sup  _ {x} \| \nu_ {1} - \nu_ {2} \| _ {\dot {H} ^ {- 1} (\mu_ {x})}.
+$$
+
+Thus, we complete the proof of Property (i) of Lemma D.4.
+
+Proof of Property (ii) of Lemma D.4. Let $\alpha = \beta _ { 1 } - \beta _ { 2 }$ . Then, we have $\textstyle \int \alpha ( x ) \mathrm { d } x \ = \ 0$ Let $\alpha ^ { + } = \operatorname* { m a x } \{ 0 , \alpha \}$ and $\alpha ^ { - } = - \operatorname* { m i n } \{ 0 , \alpha \}$ . Then, we have $\alpha ^ { + } - \alpha ^ { - } = \alpha = \beta _ { 1 } - \beta _ { 2 }$ and that $\alpha ^ { + } + \alpha ^ { - } = | \alpha | = | \beta _ { 1 } - \beta _ { 2 } |$ . Since $\textstyle \int \alpha = 0$ , it holds that $\begin{array} { r } { \int \alpha ^ { + } ( x ) \mathrm { d } x = \int \alpha ^ { - } ( x ) \mathrm { d } x = A } \end{array}$ , where $A \geq 0$ We further let $\lambda ( x , x ^ { \prime } ) = A ^ { - 1 } \alpha ^ { + } ( x ) \alpha ^ { - } ( x ^ { \prime } )$ . Then, it holds that $\textstyle \alpha ^ { + } ( x ) = \int \lambda ( x , x ^ { \prime } ) \mathrm { d } x ^ { \prime }$ and that $\textstyle \alpha ^ { - } ( x ^ { \prime } ) = \int \lambda ( x , x ^ { \prime } ) \mathrm { d } x$ . Therefore, we have
+
+$$
+\left\| \nu_ {1} - \nu_ {2} \right\| _ {\dot {H} ^ {- 1} (\mu)} = \left\| \int_ {\mathcal {X}} \left(\alpha^ {+} - \alpha^ {-}\right) \nu_ {x} d x \right\| _ {\dot {H} ^ {- 1} (\mu)} = \left\| \int_ {\mathcal {X} \times \mathcal {X}} \lambda \left(x, x ^ {\prime}\right) \left(\nu_ {x} - \nu_ {x ^ {\prime}}\right) d x d x ^ {\prime} \right\| _ {\dot {H} ^ {- 1} (\mu)}.
+$$
+
+By defintion of the weighted homogeneous Sobolev norm, it further holds that
+
+$$
+\begin{array}{l} \left\| \int_ {\mathcal {X} \times \mathcal {X}} \lambda \left(x, x ^ {\prime}\right) \left(\nu_ {x} - \nu_ {x ^ {\prime}}\right) \mathrm {d} x \mathrm {d} x ^ {\prime} \right\| _ {\dot {H} ^ {- 1} (\mu)} \\ = \sup  _ {f} \left\{\left| \left\langle \int \lambda \left(x, x ^ {\prime}\right) \left(\nu_ {x} - \nu_ {x ^ {\prime}}\right) \mathrm {d} x \mathrm {d} x ^ {\prime}, f \right\rangle \right| \right| \int | \nabla f | ^ {2} \leq 1 \Bigg \}. \tag {D.9} \\ \end{array}
+$$
+
+We assume the supremum in (D.9) is reached at $f ^ { * }$ . Then, we have $\int | \nabla f ^ { * } | ^ { 2 } \mathrm { d } \mu \leq 1$ and that
+
+$$
+\begin{array}{l} \left\| \int_ {\mathcal {X} \times \mathcal {X}} \lambda \left(x, x ^ {\prime}\right) \left(\nu_ {x} - \nu_ {x ^ {\prime}}\right) \mathrm {d} x \mathrm {d} x ^ {\prime} \right\| _ {\dot {H} ^ {- 1} (\mu)} = \left| \left\langle \int \lambda \left(x, x ^ {\prime}\right) \left(\nu_ {x} - \nu_ {x ^ {\prime}}\right) \mathrm {d} x \mathrm {d} x ^ {\prime}, f ^ {*} \right\rangle \right| \\ \leq \sup  _ {(x, x ^ {\prime}) \in \mathcal {X} \times \mathcal {X}} \left| \left\langle \nu_ {x} - \nu_ {x ^ {\prime}}, f ^ {*} \right\rangle \right| \cdot \int \lambda (x, x ^ {\prime}) d x d x ^ {\prime} \\ \leq \frac {1}{2} \sup  _ {(x, x ^ {\prime}) \in \mathcal {X} \times \mathcal {X}} \| \nu_ {x} - \nu_ {x ^ {\prime}} \| _ {\dot {H} ^ {- 1} (\mu)} \cdot \int | \beta_ {1} - \beta_ {2} | \mathrm {d} x, \\ \end{array}
+$$
+
+where the last inequality holds by noting that $\begin{array} { r } { \int \lambda ( x , x ^ { \prime } ) \mathrm { d } x \mathrm { d } x ^ { \prime } = A = 1 / 2 \cdot \int | \alpha | \mathrm { d } x = 1 / 2 \cdot \int | \beta _ { 1 } - \beta _ { 2 } | \mathrm { d } x . } \end{array}$
+
+Thus, we complete the proof of Property (ii) of Lemma D.4.
+
+Lemma D.5. For probability measures $\nu _ { 1 } , \nu _ { 2 } \in \mathcal { P } _ { 2 } ( \Theta _ { 1 } )$ and $p _ { 1 } , p _ { 2 } \in \mathcal { P } _ { 2 } ( \Theta _ { 2 } )$ , it holds that
+
+$$
+W _ {2} ^ {2} \left(\nu_ {1} \times p _ {1}, \nu_ {2} \times p _ {2}\right) \leq W _ {2} ^ {2} \left(\nu_ {1}, \nu_ {2}\right) + W _ {2} ^ {2} \left(p _ {1}, p _ {2}\right).
+$$
+
+Proof. By the property of optimal transport (Ambrosio et al., 2008), there exists mapping $T _ { \nu }$ and $T _ { p }$ such that
+
+$$
+W _ {2} ^ {2} (\nu_ {1}, \nu_ {2}) = \int \| \theta_ {1} - T _ {\nu} (\theta_ {1}) \| \nu_ {1} (\mathrm {d} \theta_ {1}),
+$$
+
+$$
+W _ {2} ^ {2} (p _ {1}, p _ {2}) = \int \| \theta_ {1} - T _ {p} (\theta_ {1}) \| p _ {1} (\mathrm {d} \theta_ {1}),
+$$
+
+and that $( T _ { \nu } ) _ { \sharp } \nu _ { 1 } = \nu _ { 2 }$ and $( T _ { p } ) _ { \sharp } p _ { 1 } = p _ { 2 }$ . Note that we have $( T _ { \nu } \times T _ { p } ) _ { \sharp } ( \nu _ { 1 } \times p _ { 1 } ) = \nu _ { 2 } \times p _ { 2 }$ . Thus, by definition of $W _ { 2 }$ distance, it holds that
+
+$$
+\begin{array}{l} W _ {2} ^ {2} \left(\nu_ {1} \times p _ {1}, \nu_ {2} \times p _ {2}\right) \leq \int \left\| \left(\theta_ {1}, \theta_ {2}\right) - \left(T _ {\nu} \left(\theta_ {1}\right), T _ {p} \left(\theta_ {1}\right)\right) \right\| ^ {2} \nu_ {1} (\mathrm {d} \theta_ {1}) p _ {1} (\mathrm {d} \theta_ {2}) \\ = \int \left(\left\| \theta_ {1} - T _ {\nu} (\theta_ {1}) \right\| ^ {2} + \left\| \theta_ {2} - T _ {p} (\theta_ {2}) \right\| ^ {2}\right) \nu_ {1} (\mathrm {d} \theta_ {1}) p _ {1} (\mathrm {d} \theta_ {2}) \\ = W _ {2} ^ {2} \left(\nu_ {1}, \nu_ {2}\right) + W _ {2} ^ {2} \left(p _ {1}, p _ {2}\right). \\ \end{array}
+$$
+
+Thus, we complete the proof of Lemma D.5.
+
+Lemma D.6. For probability density function $\rho , \rho _ { 1 } , \rho _ { 2 } \in \mathcal { P } _ { 2 } ( \Theta )$ , let $\widetilde { \rho } _ { 1 } = \alpha ^ { - 1 } \rho _ { 1 } + ( 1 - \alpha ^ { - 1 } ) \rho$ and $\widetilde { \rho } _ { 2 } = \alpha ^ { - 1 } \rho _ { 2 } + ( 1 - \alpha ^ { - 1 } ) \rho$ . Then, We have
+
+$$
+W _ {2} (\widetilde {\rho_ {1}}, \widetilde {\rho_ {2}}) \leq \alpha^ {- 1 / 2} W _ {2} (\rho_ {1}, \rho_ {2}).
+$$
+
+Proof. Recall the definition of Wasserstain-2 distance that
+
+$$
+W _ {2} (\rho_ {1}, \rho_ {2}) = \left(\inf  _ {\gamma \in \Gamma (\rho_ {1}, \rho_ {2})} \int \| x - y \| ^ {2} \mathrm {d} \gamma (x, y)\right) ^ {1 / 2},
+$$
+
+where $\Gamma ( \rho _ { 1 } , \rho _ { 2 } )$ is the set of all couplings of $\rho _ { 1 }$ and $\rho _ { 2 }$ . We assume that the infimum is reached by $\gamma ^ { \ast } ( x , y ) \in \Gamma ( \rho _ { 1 } , \rho _ { 2 } )$ , i.e.,
+
+$$
+W _ {2} (\rho_ {1}, \rho_ {2}) = \left(\int \| x - y \| ^ {2} \mathrm {d} \gamma^ {*} (x, y)\right) ^ {1 / 2}.
+$$
+
+We denote by $\gamma ^ { \prime } ( x , y )$ the distribution such that
+
+$$
+\gamma^ {\prime} (x, y) = \alpha^ {- 1} \gamma^ {*} (x, y) + (1 - \alpha^ {- 1}) \rho (x) \delta (x - y),
+$$
+
+where $\delta ( x , y )$ is dirac delta function and it holds that $\gamma ^ { \prime } ( x , y ) \in \Gamma ( \widetilde { \rho } _ { 1 } , \widetilde { \rho } _ { 2 } )$ . Hence, it follows that
+
+$$
+\begin{array}{l} W _ {2} \left(\widetilde {\rho} _ {1}, \widetilde {\rho} _ {2}\right) \leq \left(\int \| x - y \| ^ {2} \mathrm {d} \gamma^ {\prime} (x, y)\right) ^ {1 / 2} \\ = \left(\int \| x - y \| ^ {2} \left(\alpha^ {- 1} \gamma^ {*} (x, y) + (1 - \alpha^ {- 1}) \rho (x) \delta (x - y)\right) d (x, y)\right) ^ {1 / 2} \\ = \alpha^ {- 1 / 2} W _ {2} (\rho_ {1}, \rho_ {2}). \\ \end{array}
+$$
+
+Thus, we complete the proof of Lemma D.6.
+
+![](images/7b8543a3c52cb294673dfce0bb47dc7a2d4244b48be9d12a7c902a78d70d39ab.jpg)
+
+# E Auxiliary Lemmas
+
+We use the definition of absolutely continuous curves in $\mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ in Ambrosio et al. (2008).
+
+Definition E.1 (Absolutely Continuous Curve). Let $\beta : [ a , b ] \to \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ be a curve. Then, we say $\beta$ is an absolutely continuous curve if there exists a square-integrable function $f : \lfloor a , b \rfloor  \mathbb { R }$ such that
+
+$$
+W _ {2} (\beta_ {s}, \beta_ {t}) \leq \int_ {s} ^ {t} f (\tau) \mathrm {d} \tau
+$$
+
+for any $a \leq s < t \leq b$ .
+
+Then, we have the following first variation formula.
+
+Lemma E.2 (First Variation Formula, Theorem 8.4.7 in Ambrosio et al. (2008)). Given $\nu \in$ $\mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ and an absolutely continuous curve $\mu : [ 0 , T ] \to { \mathcal { P } } _ { 2 } ( \mathbb { R } ^ { D } )$ , let $\beta : [ 0 , 1 ] \to \mathcal { P } _ { 2 } ( \mathbb { R } ^ { D } )$ be the geodesic connecting $\mu _ { t }$ and $\nu$ . It holds that
+
+$$
+\frac {\mathrm {d}}{\mathrm {d} t} \frac {W _ {2} (\mu_ {t} , \nu) ^ {2}}{2} = - \langle \dot {\mu} _ {t}, \dot {\beta} _ {0} \rangle_ {\mu_ {t}, W _ {2}},
+$$
+
+where $\dot { \mu } _ { t } = \dot { \sigma } _ { t } \mu _ { t }$ , $\dot { \beta } _ { 0 } = \partial _ { s } \beta _ { s } \mid _ { s = 0 }$ , and the inner product is defined in (A.2).
+
+Lemma E.3 (Eulerian Representation of Geodesics, Proposition 5.38 in Villani (2003)). Let $\beta :$ $[ 0 , 1 ] \to { \mathcal { P } } _ { 2 } ( \mathbb { R } ^ { D } )$ be a geodesic and $v$ be the corresponding vector field such that $\partial _ { t } \beta _ { t } = - \operatorname { d i v } ( \beta _ { t } \cdot v _ { t } )$ . It holds that
+
+$$
+\frac {\mathrm {d}}{\mathrm {d} t} \left(\beta_ {t} \cdot v _ {t}\right) = - \operatorname {d i v} \left(\beta_ {t} \cdot v _ {t} \otimes v _ {t}\right),
+$$
+
+where $\otimes$ is the outer product between two vectors.
+
+Lemma E.4 (Talagrand’s Inequality, Corollary 2.1 in Otto and Villani (2000)). Let $\nu$ be $N ( 0 , \kappa \cdot$ $I _ { D }$ ). It holds for any $\mu \in \mathcal P _ { 2 } ( \mathbb { R } ^ { D } )$ that
+
+$$
+W _ {2} (\mu , \nu) ^ {2} \leq 2 D _ {\mathrm {K L}} (\mu \| \nu) / \kappa .
+$$
+
+Lemma E.5 (Theorem 1 in Peyre (2011)). Let $\mu , \nu$ be two probability measures in $\mathcal { P } _ { 2 } ( \theta )$ . Then, it holds that
+
+$$
+W _ {2} (\mu , \nu) \leq 2 \| \mu - \nu \| _ {\dot {H} ^ {- 1} (\nu)}.
+$$
+
+# F Conclusions and Limitations
+
+In this work, we study the time envolution of a two-timescale AC represented by a two-layer neural network in the mean-field limit. Specifically, the actor updates its policy via proximal policy optimization, which is closely related to the replicator dynamics, while the critic updates by temporal-difference learning, which is captured by a semigradient flow in the Wasserstein space. By
+
+introducing a restarting mechanism, we establish the convergence and optimality of AC with twolayer overparameterized neural network. However, the study has potential limitations. In this work we only study the continuous-time limiting regime, which is an idealized setting with infinitesimal learning rates, and establish finite-time convergence and optimality guarantees. Finite-time results for the more realistic discrete-time setting is left for future research.
